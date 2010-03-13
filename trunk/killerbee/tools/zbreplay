@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+import sys
+import time
+import signal
+from killerbee import *
+
+def usage():
+    print >>sys.stderr, """
+zbreplay: replay ZigBee/802.15.4 network traffic from libpcap or Daintree files
+jwright@willhackforsushi.com
+
+Usage: zbreplay [-rRfiDch] [-f channel] [-r pcapfile] [-R daintreefile] 
+         [-i devnumstring] [-s delay/float] [-c countpackets]
+    """
+
+def show_dev():
+    kb = KillerBee()
+    print "Dev\tProduct String\tSerial Number"
+    for dev in kb.dev_list():
+        print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
+
+def interrupt(signum, frame):
+    global packetcount
+    global kb
+    global cap
+    kb.close()
+    if cap:
+        cap.close()
+    print "%d packets transmitted" % packetcount
+    sys.exit(0)
+
+# Returns True if the packet is an ACK
+def packet_ack(packet):
+    MAC_FC_FTYPE_MASK = 0x0007
+    MAC_FC_FTYPE_ACK = 2
+
+    fc = struct.unpack("H", packet[0:2])[0]
+    
+    if (fc & MAC_FC_FTYPE_MASK) == MAC_FC_FTYPE_ACK:
+        return True
+
+    return False
+
+# Pcap or Daintree reader object
+cap = None
+
+# Command-line arguments
+arg_channel = None
+arg_pcapfile = None
+arg_dsnafile = None
+arg_devstring = None
+arg_count = -1
+arg_sleep = 1
+
+# Global
+packetcount = 0
+
+while len(sys.argv) > 1:
+    op = sys.argv.pop(1)
+    if op == '-f':
+        arg_channel = int(sys.argv.pop(1))
+    if op == '-r':
+        arg_pcapfile = sys.argv.pop(1)
+    if op == '-R':
+        arg_dsnafile = sys.argv.pop(1)
+    if op == '-i':
+        arg_devstring = sys.argv.pop(1)
+    if op == '-h':
+        usage()
+        sys.exit(0)
+    if op == '-D':
+        show_dev()
+        sys.exit(0)
+    if op == '-c':
+        arg_count = int(sys.argv.pop(1))
+    if op == '-s':
+        arg_sleep = float(sys.argv.pop(1))
+ 
+if arg_channel == None:
+    print >>sys.stderr, "ERROR: Must specify a channel with -f"
+    usage()
+    sys.exit(1)
+
+if arg_pcapfile == None and arg_dsnafile == None:
+    print >>sys.stderr, "ERROR: Must specify a file with frames to replay using -r (libpcap) or -R (Daintree SNA)"
+    usage()
+    sys.exit(1)
+
+if (arg_pcapfile != None):
+    savefile = arg_pcapfile
+    cap = PcapReader(arg_pcapfile)
+elif (arg_dsnafile != None):
+    savefile = arg_dsnafile
+    cap = DainTreeReader(arg_dsnafile)
+
+kb = KillerBee(device=arg_devstring)
+signal.signal(signal.SIGINT, interrupt)
+
+kb.set_channel(arg_channel)
+
+print "zbreplay: retransmitting frames from \'%s\' on interface \'%s\' with a delay of %f seconds." % (savefile, kb.get_dev_info()[0], arg_sleep)
+
+while arg_count != packetcount:
+    try:
+        packet = cap.pnext()[1]
+        if not packet_ack(packet):
+            packetcount+=1
+            kb.inject(packet)
+            time.sleep(arg_sleep)
+    except TypeError:       # raised when pnext returns Null (end of capture)
+        break
+
+kb.close()
+cap.close()
+
+print "%d packets transmitted" % packetcount
