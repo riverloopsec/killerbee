@@ -1,0 +1,1075 @@
+#!/usr/bin/env python
+import pygtk
+pygtk.require('2.0')
+
+import sys
+import gobject
+import pango
+import gtk
+import math
+import time
+import random
+import os
+from threading import Thread, Event
+from gtk import gdk
+import cairo
+import struct
+import socket
+import select
+import datetime
+import time
+import usb
+import traceback
+from killerbee import *
+
+from types import *
+
+if gtk.pygtk_version < (2,3,93):
+    print "PyGtk 2.3.93 or later required"
+    raise SystemExit
+
+try:
+    import cairo
+except ImportError:
+    pass
+
+class PySpeedoWidget(gtk.Widget):
+    __gsignals__ = { 'realize': 'override',
+                     'expose-event' : 'override',
+                     'size-allocate': 'override',
+                     'size-request': 'override',}
+
+    def __init__(self):
+        gtk.Widget.__init__(self)
+        self.draw_gc = None
+
+        self.siglabel = self.create_pango_layout("Signal Level")
+        self.sigfont = "sans serif"
+
+        self.timer = gobject.timeout_add (750, self.progress_timeout, self)
+
+        self.min = 0
+        self.max = 0
+        self.pointer = 0
+
+        self.drawbg = 0
+
+    def progress_timeout(self, object):
+        x, y, w, h = object.allocation
+        object.window.invalidate_rect((0,0,w,h),False)
+        return True
+
+    def set_bounds(self, minb, maxb):
+        self.min = minb
+        self.max = maxb
+
+    def set_pointer(self, ptr):
+        if ptr > self.max:
+            ptr = self.max
+        elif ptr < self.min:
+            ptr = self.min
+        self.pointer = ptr
+
+    def set_label(self, label, font = "sans serif"):
+        self.siglabel = self.create_pango_layout(label)
+        self.sigfont = font
+
+    def set_drawbg(self, drawbg):
+        self.drawbg = drawbg
+
+    def set_markpoints(self, values, colors):
+        self.arccolors = colors
+        self.arcvalues = values
+
+        self.arcvpango = []
+
+        self.arcvmax = 0
+
+    def get_pointer(self):
+        return self.pointer
+                                           
+    def do_realize(self):
+        self.set_flags(self.flags() | gtk.REALIZED)
+        self.window = gdk.Window(self.get_parent_window(),
+                                 width=self.allocation.width,
+                                 height=self.allocation.height,
+                                 window_type=gdk.WINDOW_CHILD,
+                                 wclass=gdk.INPUT_OUTPUT,
+                                 event_mask=self.get_events() | gdk.EXPOSURE_MASK)
+        if not hasattr(self.window, "cairo_create"):
+            self.draw_gc = gdk.GC(self.window,
+                                  line_width=5,
+                                  line_style=gdk.SOLID,
+                                  join_style=gdk.JOIN_ROUND)
+
+        self.window.set_user_data(self)
+        self.style.attach(self.window)
+        self.style.set_background(self.window, gtk.STATE_NORMAL)
+        self.window.move_resize(*self.allocation)
+
+    def do_size_request(self, requisition):
+        requisition.width = 400
+        requisition.height = 300
+
+    def do_size_allocate(self, allocation):
+        self.allocation = allocation
+        if self.flags() & gtk.REALIZED:
+            self.window.move_resize(*allocation)
+
+        # Update the font description
+        pxsize = min(allocation.width, allocation.height) / 10
+        self.siglabel.set_font_description(pango.FontDescription("%s %dpx" % (self.sigfont, pxsize)))
+
+        # Update the arc text size
+        self.arcvpango = []
+        pxsize = min(allocation.width, allocation.height) / 15
+        for v in self.arcvalues:
+            layout = self.create_pango_layout("%d" % v)
+            layout.set_font_description(pango.FontDescription("%s %dpx" % (self.sigfont, pxsize)))
+            self.arcvpango.append(layout)
+
+            fontw, fonth = layout.get_pixel_size()
+            if max(fontw, fonth) > self.arcvmax:
+                self.arcvmax = max(fontw, fonth)
+
+        self.arcvmax = self.arcvmax * 0.85
+
+    def _expose_gdk(self, event):
+        # pango_size = font_size_pix * PANGO_SCALE * 72 / fontconfig_dpi; 
+        x, y, w, h = self.allocation
+        self.layout = self.create_pango_layout('no cairo')
+        fontw, fonth = self.layout.get_pixel_size()
+        self.style.paint_layout(self.window, self.state, False,
+                                event.area, self, "label",
+                                (w - fontw) / 2, (h - fonth) / 2,
+                                self.layout)
+
+    def _expose_cairo(self, event, cr):
+        x, y, w, h = self.allocation
+
+        arcwidth = (min(w, h) / 10)
+        r = (min(w, h) * 0.70) - (arcwidth * 1.5)
+
+        cr.set_line_width(arcwidth)
+
+        hofft = arcwidth * 2
+
+        slices = len(self.arccolors)
+
+        # Background
+        if self.drawbg:
+            pat = cairo.LinearGradient(0, h, w, h)
+            pat.add_color_stop_rgba(0, 1.0, 0xfd / 255.0, 0x3e / 255.0, 1.0)
+            pat.add_color_stop_rgba(0.33, 1.0, 0xfd / 255.0, 0xa4 / 255.0, 1.0)
+            pat.add_color_stop_rgba(0.66, 1.0, 0xfd / 255.0, 0xa4 / 255.0, 1.0)
+            pat.add_color_stop_rgba(1, 1.0, 0xfd / 255.0, 0x3e / 255.0, 1.0)
+            cr.rectangle(0, 0, w, h)
+            cr.set_source(pat)
+            cr.fill()
+
+        # dropshadow
+        cr.set_source_rgba(0, 0, 0, 0.2)
+        cr.arc(w/2, h - hofft, r - 8, math.pi, 2 * math.pi)
+        cr.stroke()
+
+        # Draw the colored arcs
+        for l in range(0, len(self.arccolors)):
+            arc_sperc = float(self.arcvalues[l] - self.min) / float(self.max - self.min)
+            arc_start = (math.pi * arc_sperc) - (math.pi)
+            arc_eperc = float(self.arcvalues[l + 1] - self.min) / float(self.max - self.min)
+            arc_end = (math.pi * arc_eperc) - (math.pi)
+
+            (ar, ag, ab) = self.arccolors[l]
+            cr.set_source_rgb(ar, ag, ab)
+
+            cr.arc(w/2, h - hofft, r, arc_start, arc_end)
+            cr.stroke()
+
+        # Draw the outlines
+        cr.set_source_rgb(0, 0.0, 0.0)
+
+        # Inner and outer arcs
+        cr.set_line_width(2)
+        cr.arc(w/2, h - hofft, r - (arcwidth / 2), math.pi, 2 * math.pi)
+        cr.stroke()
+        cr.set_line_width(4)
+        cr.arc(w/2, h - hofft, r + (arcwidth / 2), math.pi, 2 * math.pi)
+        cr.stroke()
+
+        # Draw the radial lines and text
+        cr.set_line_width(2)
+        for l in range(0, len(self.arcvalues)):
+            arc_sperc = float(self.arcvalues[l] - self.min) / float(self.max - self.min)
+            larc = (math.pi * arc_sperc)
+
+            x1 = w/2 + (r - (arcwidth / 2)) * math.cos(larc - math.pi)
+            y1 = h - hofft + (r - (arcwidth / 2)) * math.sin(larc - math.pi)
+
+            x2 = w/2 + (r + (arcwidth / 2)) * math.cos(larc - math.pi)
+            y2 = h - hofft + (r + (arcwidth / 2)) * math.sin(larc - math.pi)
+
+            cr.move_to(x1, y1)
+            cr.line_to(x2, y2)
+            cr.stroke()
+
+            tr = r - (arcwidth / 2) - (self.arcvmax) - 4
+
+            xt = w/2 + (tr * math.cos(larc - math.pi))
+            yt = h - hofft + (tr * math.sin(larc - math.pi))
+        
+            fontw, fonth = self.arcvpango[l].get_pixel_size()
+            cr.move_to(xt - (fontw / 2), yt - (fonth/2))
+            cr.update_layout(self.arcvpango[l])
+            cr.show_layout(self.arcvpango[l])
+
+        # Draw the arrow
+        if (self.min != 0 and self.max != 0):
+            ptr_perc = float(self.pointer - self.min) / float(self.max - self.min)
+
+            # Scale the percentage to between -pi/2 and pi/2
+            ptr_arc = (math.pi * ptr_perc) - (math.pi * 0.5)
+            #ptr_arc = 0.25 * math.pi
+
+            cr.save()
+
+            offt = -4
+            if ptr_arc >= 0:
+                offt = 4
+
+            cr.translate(w/2, h - hofft)
+            cr.rotate(ptr_arc)
+            cr.translate((w/2 * -1) + offt, (h/2 * -1) + offt)
+
+            cr.set_line_width(1)
+            cr.move_to(w/2, h/2 + (arcwidth * 0.75))
+            cr.line_to(w/2 - (arcwidth / 2), h/2)
+            cr.line_to(w/2, (h/2) - r)
+            cr.line_to(w/2 + (arcwidth / 2), h/2)
+            cr.line_to(w/2, h/2 + (arcwidth * 0.75))
+
+            cr.set_source_rgba(0, 0, 0, 0.2)
+            cr.fill()
+
+            cr.translate(offt * -1, offt * -1)
+            cr.move_to(w/2, h/2 + (arcwidth * 0.75))
+            cr.line_to(w/2 - (arcwidth / 2), h/2)
+            cr.line_to(w/2, (h/2) - r)
+            cr.line_to(w/2 + (arcwidth / 2), h/2)
+            cr.line_to(w/2, h/2 + (arcwidth * 0.75))
+            cr.set_source_rgb(0.1, 0.1, 0.1) 
+            cr.fill()
+
+            cr.set_source_rgb(0.9, 0.9, 0.9)
+            cr.arc(w/2, h/2, arcwidth / 15, 0, 2 * math.pi)
+            cr.fill()
+
+            cr.restore()
+
+        # Draw the main label, fix if our best-guess ends up over
+        fontw, fonth = self.siglabel.get_pixel_size()
+        fy = h + fonth - hofft + (arcwidth / 2)
+        if fy + fonth > h:
+            fy = h - fonth
+        cr.move_to((w/2) - (fontw / 2), fy)
+        cr.update_layout(self.siglabel)
+        cr.show_layout(self.siglabel)
+
+    def do_expose_event(self, event):
+        self.chain(event)
+        try:
+            cr = self.window.cairo_create()
+        except AttributeError:
+            return self._expose_gdk(event)
+        return self._expose_cairo(event, cr)
+
+class PyGrapherWidget(gtk.Widget):
+    __gsignals__ = { 'realize': 'override',
+                     'expose-event' : 'override',
+                     'size-allocate': 'override',
+                     'size-request': 'override',}
+
+    def __init__(self):
+        gtk.Widget.__init__(self)
+        self.draw_gc = None
+
+        self.linecolor = None
+        self.linethickness = None
+
+        self.drawbg = 0
+        self.bgcolor = None
+
+        self.font = "sans serif"
+
+        self.maxsamples = 50
+        
+        self.linecolor = (1, 0, 0)
+        
+        self.samples = []
+
+        self.minval = None
+        self.maxval = None
+
+        self.linescale = 10
+
+    def set_drawbg(self, drawbg, bgcolor = None):
+        self.drawbg = drawbg
+        self.bgcolor = bgcolor
+
+    def set_font(self, font):
+        self.font = font
+
+    def set_maxsamples(self, maxsamples):
+        self.samples = []
+        self.maxsamples = maxsamples
+
+        for i in range(0, maxsamples):
+            self.samples.append(None)
+
+        self.minval = None
+        self.maxval = None
+
+    def set_initrange(self, minval, maxval):
+        self.minval = minval
+        self.maxval = maxval
+
+    def set_linescale(self, scale):
+        self.linescale = scale
+
+    def add_sample(self, sample):
+        self.samples.append(sample)
+        self.samples = self.samples[(self.maxsamples * -1):]
+
+        if self.minval == None:
+            self.minval = sample
+        if self.maxval == None:
+            self.maxval = sample
+
+        self.minval = int(min(self.minval, sample))
+        self.maxval = int(max(self.maxval, sample))
+
+        if self.window != None:
+            x, y, w, h = self.allocation
+            self.window.invalidate_rect((0,0,w,h), False)
+
+    def reset(self):
+        self.samples = []
+        self.minval = None
+        self.maxval = None
+
+    def set_line(self, linecolor, linethickness):
+        self.linecolor = linecolor
+        self.linethickness = linethickness
+                                           
+    def do_realize(self):
+        self.set_flags(self.flags() | gtk.REALIZED)
+        self.window = gdk.Window(self.get_parent_window(),
+                                 width=self.allocation.width,
+                                 height=self.allocation.height,
+                                 window_type=gdk.WINDOW_CHILD,
+                                 wclass=gdk.INPUT_OUTPUT,
+                                 event_mask=self.get_events() | gdk.EXPOSURE_MASK)
+        if not hasattr(self.window, "cairo_create"):
+            self.draw_gc = gdk.GC(self.window,
+                                  line_width=5,
+                                  line_style=gdk.SOLID,
+                                  join_style=gdk.JOIN_ROUND)
+
+        self.window.set_user_data(self)
+        self.style.attach(self.window)
+        self.style.set_background(self.window, gtk.STATE_NORMAL)
+        self.window.move_resize(*self.allocation)
+
+    def do_size_request(self, requisition):
+        requisition.width = 100
+        requisition.height = 200
+
+    def do_size_allocate(self, allocation):
+        self.allocation = allocation
+        if self.flags() & gtk.REALIZED:
+            self.window.move_resize(*allocation)
+
+    def _expose_gdk(self, event):
+        x, y, w, h = self.allocation
+        self.layout = self.create_pango_layout('no cairo')
+        fontw, fonth = self.layout.get_pixel_size()
+        self.style.paint_layout(self.window, self.state, False,
+                                event.area, self, "label",
+                                (w - fontw) / 2, (h - fonth) / 2,
+                                self.layout)
+
+    def _expose_cairo(self, event, cr):
+        x, y, w, h = self.allocation
+
+        # To leave room for the ltext top and bottom
+        graphh = h - 15
+        graphy = 5
+        # derived after the labels
+        graphw = 0
+        graphx = 0
+
+        if self.drawbg:
+            cr.save()
+            cr.set_source_rgb(self.bgcolor[0], self.bgcolor[1], self.bgcolor[2])
+            cr.rectangle(0, 0, w, h)
+            cr.fill()
+            cr.restore()
+
+        if self.minval == None or self.maxval == None:
+            return
+
+        # Background - figure out the steps and labels
+        start_val = 0
+        for x in range(self.minval, self.minval - self.linescale, -1):
+            if (x % self.linescale) == 0:
+                start_val = x
+                break
+
+        num_rows = 0
+
+        # Calculate the number of rows, the text, and the size of the text elements
+        # so we can figure out how much space we need on the top and bottom
+        # of the bounding box
+        last_val = start_val
+        while (last_val < self.maxval):
+            num_rows = num_rows + 1
+            last_val = last_val + self.linescale
+
+        num_rows = max(1, num_rows)
+
+        labelhpix = (graphh / 1.1) / num_rows
+        rowpix = (graphh / float(num_rows))
+
+        row_labels = []
+
+        lmaxw = 0
+        for i in range(num_rows + 1):
+            layout = self.create_pango_layout("%d" % (start_val + (i * self.linescale)))
+            layout.set_font_description(pango.FontDescription("%s %dpx" % (self.font, labelhpix)))
+            row_labels.append(layout)
+            fw, fh = layout.get_pixel_size()
+            lmaxw = max(lmaxw, fw)
+
+        # Fill in the width
+        graphx = lmaxw + 3
+        graphw = w - graphx - 2
+
+        cr.save()
+        cr.set_line_width(1.5)
+        cr.set_source_rgb(1, 1, 1)
+        cr.rectangle(graphx, graphy, graphw, graphh)
+        cr.fill()
+        cr.set_source_rgb(0, 0, 0)
+        cr.rectangle(graphx, graphy, graphw, graphh)
+        cr.stroke()
+        cr.restore()
+
+        for i in range(len(row_labels)):
+            cr.save()
+
+            fontw, fonth = row_labels[i].get_pixel_size()
+
+            yline = (graphh + graphy) - ((i) * rowpix) + 0.5
+
+            cr.move_to(1, yline - (fonth / 2))
+            cr.update_layout(row_labels[i])
+            cr.show_layout(row_labels[i])
+
+            cr.set_line_width(1)
+            cr.set_source_rgb(0, 0, 0)
+            cr.move_to(graphx - 2, yline)
+            cr.line_to(graphx, yline)
+            cr.stroke()
+    
+            cr.move_to(graphx, yline)
+            cr.line_to(graphx + graphw, yline)
+            cr.stroke()
+
+            cr.restore()
+
+        # Do an inefficient multi-draw line because we don't complete it back to 0
+        cr.save()
+        cr.set_line_width(0.5)
+        cr.set_source_rgb(self.linecolor[0], self.linecolor[1], self.linecolor[2])
+        for i in range(len(self.samples) - 1):
+            if self.samples[i] == None or self.samples[i+1] == None:
+                continue
+
+            px1 = (graphw / float(self.maxsamples)) * i
+            px2 = (graphw / float(self.maxsamples)) * (i + 1)
+
+            py1 = graphh * (float(abs(self.samples[i]) + start_val) / float(abs(last_val) + start_val))
+            py2 = graphh * (float(abs(self.samples[i+1]) + start_val) / float(abs(last_val) + start_val))
+
+            cr.move_to(graphx + px1, (graphy + graphh) - py1)
+            cr.line_to(graphx + px2, (graphy + graphh) - py2)
+            cr.stroke()
+
+        cr.restore()
+
+    def do_expose_event(self, event):
+        self.chain(event)
+        try:
+            cr = self.window.cairo_create()
+        except AttributeError:
+            return self._expose_gdk(event)
+        return self._expose_cairo(event, cr)
+
+
+def update_timeout(object):
+    object.complete_update()
+    return True
+
+class ZBFindUI:
+    def __init__(self):
+        global actiongroup
+
+        self.discoverymode = 0
+        self.target = None
+
+        # Set an update timer for pushing data to the UI
+        self.timer = gobject.timeout_add(1000, update_timeout, self)
+
+        # Minimum value we'll see (used as "no update" event on graphs too)
+        self.mingraphval = -80
+        self.minspeedval = -100
+
+        try:
+            self.win = gtk.Window()
+            self.win.set_title('ZBFind')
+            self.win.connect('delete-event', gtk.main_quit)
+
+            # Overall vbox holds the menu and other panels
+            bigvbox = gtk.VBox(homogeneous = False, spacing = 1)
+            bigvbox.set_border_width(1)
+    
+            self.win.add(bigvbox)
+    
+            # Menus
+            self.menu_ui = '''
+                <ui>
+                <menubar name="MenuBar">
+                  <menu action="File">
+                    <menuitem action="Quit"/>
+                  </menu>
+                  <menu action="Mode">
+                    <menuitem action="PassiveDiscovery"/>
+                    <menuitem action="ActiveDiscovery"/>
+                  </menu>
+                </menubar>
+                </ui>
+            '''
+    
+            uimanager = gtk.UIManager()
+            accelgroup = uimanager.get_accel_group()
+            self.win.add_accel_group(accelgroup)
+    
+            actiongroup = gtk.ActionGroup('zbfind')
+            self.actiongroup = actiongroup
+    
+            actiongroup.add_actions([('Quit', gtk.STOCK_QUIT, '_Quit', None,
+                                      'Quit zbfind', gtk.main_quit),
+                                     ('File', None, '_File'),
+                                     ('Mode', None, '_Mode')])
+            actiongroup.get_action('Quit').set_property('short-label', '_Quit')
+    
+            actiongroup.add_radio_actions([('PassiveDiscovery', None, '_Passive Discovery',
+                                            '<Control>p','Passive Discovery', 0),
+                                           ('ActiveDiscovery', None, '_Active Discovery',
+                                            '<Control>a','Active Discovery', 1),
+                                          ], 0, self.modediscovery_cb)
+    
+            uimanager.insert_action_group(actiongroup, 0)
+    
+            uimanager.add_ui_from_string(self.menu_ui)
+    
+            menubar = uimanager.get_widget('/MenuBar')
+    
+            # VPane box holds the device list and the graphics
+            pvbox = gtk.VPaned()
+            self.vpane_button_state = 0
+            self.vpane_size = -1
+            pvbox.connect('button-press-event', self.vpane_buttonpress)
+            pvbox.connect('button-release-event', self.vpane_buttonrelease)
+            pvbox.connect('motion-notify-event', self.vpane_motion)
+    
+            bigvbox.pack_start(menubar, expand = False, fill = False, padding = 0)
+            bigvbox.pack_end(pvbox, expand = True, fill = True, padding = 0)
+    
+            # Make the speedo and graph widgets
+            self.speedo = PySpeedoWidget()
+            self.speedo.set_drawbg(0)
+            self.speedo.set_bounds(self.minspeedval, -10)
+            self.speedo.set_pointer(-100)
+            self.speedo.set_markpoints(
+                [-100, -90, -80, -70, -60, -50, -40, -30, -20, -10],
+                [ (1, 0, 0), (1, 0, 0), (1, 0, 0),
+                  (1, 1, 0), (1, 1, 0), (1, 1, 0),
+                  (0, 1, 0), (0, 1, 0), (0, 1, 0) ] )
+    
+            self.graph = PyGrapherWidget()
+            self.graph.set_drawbg(0)
+            self.graph.set_maxsamples(200)
+            self.graph.set_initrange(self.mingraphval, -40)
+    
+            # Pack the speedo and graph into their own vbox
+            graphvbox = gtk.VBox(homogeneous = False, spacing = 0)
+    
+            graphvbox.pack_start(self.speedo, expand = True, fill = True, padding = 0)
+            graphvbox.pack_end(self.graph, expand = True, fill = True, padding = 0)
+    
+            # Build the devlist tree store
+            self.devliststore = gtk.ListStore(str, str, str, str, int, int)
+            self.devlistview = gtk.TreeView(model = self.devliststore)
+    
+            # Build the cell renderers
+            cell = gtk.CellRendererText()
+            pacolumn = gtk.TreeViewColumn('Dest PAN', cell)
+            pacolumn.set_cell_data_func(cell, self.table_pacolumn)
+            self.devlistview.append_column(pacolumn)
+            
+            cell = gtk.CellRendererText()
+            dacolumn = gtk.TreeViewColumn('Dest Addr', cell)
+            dacolumn.set_cell_data_func(cell, self.table_dacolumn)
+            self.devlistview.append_column(dacolumn)
+            
+            cell = gtk.CellRendererText()
+            sacolumn = gtk.TreeViewColumn('Src Addr', cell)
+            sacolumn.set_cell_data_func(cell, self.table_sacolumn)
+            self.devlistview.append_column(sacolumn)
+            
+            cell = gtk.CellRendererText()
+            dscolumn = gtk.TreeViewColumn('Distance', cell)
+            dscolumn.set_cell_data_func(cell, self.table_dscolumn)
+            dscolumn.set_sort_column_id(3)
+            self.devlistview.append_column(dscolumn)
+            
+            cell = gtk.CellRendererText()
+            smcolumn = gtk.TreeViewColumn('Samples', cell)
+            smcolumn.set_cell_data_func(cell, self.table_smcolumn)
+            smcolumn.set_sort_column_id(4)
+            self.devlistview.append_column(smcolumn)
+            
+            cell = gtk.CellRendererText()
+            sgcolumn = gtk.TreeViewColumn('Signal', cell)
+            sgcolumn.set_cell_data_func(cell, self.table_sgcolumn)
+            sgcolumn.set_sort_column_id(5)
+            self.devlistview.append_column(sgcolumn)
+            
+            self.devlistview.add_events(gtk.gdk.BUTTON_PRESS_MASK)
+            self.devlistview.connect('cursor-changed', self.devlistselect)
+    
+            # Put it in a scrolling pane
+            scrollwin = gtk.ScrolledWindow()
+            scrollwin.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
+            scrollwin.add_with_viewport(self.devlistview)
+            
+            scrollwin.set_size_request(-1, 250)
+    
+            # Pack the device list into the upper half of the pane
+            pvbox.pack1(scrollwin, resize = True, shrink = True)
+    
+            # Make the details store, tree, and window
+            self.detailstore = gtk.TreeStore(str)
+            self.detailview = gtk.TreeView(self.detailstore)
+            self.detailcolumn = gtk.TreeViewColumn()
+            self.detailcolumn.set_title("Device Details")
+            self.detailview.append_column(self.detailcolumn)
+            cell = gtk.CellRendererText()
+            self.detailcolumn.pack_start(cell, True)
+            self.detailcolumn.add_attribute(cell, 'text', 0)
+    
+            scrollwin = gtk.ScrolledWindow()
+            scrollwin.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
+            scrollwin.add_with_viewport(self.detailview)
+            scrollwin.set_size_request(500, -1)
+    
+            # Pack the lower half of the window in a hbox
+            hbox = gtk.HBox(homogeneous = False, spacing = 0)
+            hbox.pack_start(graphvbox, expand = True, fill = True, padding = 0)
+            hbox.pack_end(scrollwin, expand = True, fill = True, padding = 0)
+    
+            # Pack the lower half into the adjustable vbox
+            pvbox.pack2(hbox, resize = True, shrink = True)
+    
+            self.win.set_gravity(gtk.gdk.GRAVITY_SOUTH_WEST)
+            self.win.move(0, 0)
+            self.win.set_geometry_hints(min_width = 800, min_height = 460, max_width = 800, max_height = 480)
+            self.win.show_all()
+    
+            self.dev_id = 0
+    
+            self.details = { }
+    
+            self.updatelist = [ ]
+
+        except Exception, e:
+            traceback.print_exc()
+            sys.stderr.write("Could not open the window.  Check $DISPLAY.\n")
+            sys.exit(-1)
+
+    def vpane_buttonpress(self, widget, data = None):
+        self.vpane_button_state = 1
+
+    def vpane_buttonrelease(self, widget, data = None):
+        if self.vpane_button_state == 1:
+            if self.vpane_size == -1:
+                self.vpane_size = widget.get_position()
+                x, y, w, h = widget.get_allocation()
+                widget.set_position(h)
+            else:
+                widget.set_position(self.vpane_size)
+                self.vpane_size = -1
+    
+    def vpane_motion(self, widget, data = None):
+        self.vpane_button_state = 2
+
+    def complete_update(self):
+        gtk.gdk.threads_enter()
+
+        update_target = 0
+
+        for udev in self.updatelist:
+            if udev[0] + udev[2] == self.target:
+                self.speedo.set_pointer(udev[5])
+                self.graph.add_sample(udev[5])
+                update_target = 1
+
+            match = False
+            for dev in self.devliststore:
+                if dev[0] == udev[0]:
+                    dev[3] = udev[3]
+                    dev[4] = dev[4] + udev[4]
+                    dev[5] = udev[5]
+                    match = True
+                    break
+        
+            if match == False:
+                self.devliststore.append(udev[0:6])
+        
+            self.details[udev[0]] = udev[6]
+
+        self.updatelist = [ ]
+
+        # Update the graph and speedo if the selected device has
+        # gone inactive
+        if not self.target == None and not update_target:
+            self.speedo.set_pointer(self.speedo.get_pointer())
+            self.graph.add_sample(self.speedo.get_pointer())
+
+        gtk.gdk.threads_leave()
+
+    def modediscovery_cb(self, action, current):
+        self.discoverymode = action.get_current_value()
+
+    def update_row(self, addr, name, devclass, distance, rssi, details):
+        # Queue an update in the update list, the timer will apply it to the
+        # dev list later
+        match = False
+        for dev in self.updatelist:
+            if dev[0] == addr:
+                dev[3] = distance
+                dev[4] = 1 + dev[4]
+                dev[5] = rssi
+                dev[6] = details
+                match = True
+                break
+
+        if match == False:
+            self.updatelist.append([addr, name, devclass, distance, 1, rssi, details])
+
+    def devlistselect(self, widget):
+        #get data from highlighted selection
+        treeselection = self.devlistview.get_selection()
+        (model, iter) = treeselection.get_selected()
+    
+        if iter:
+            self.dpan = self.devliststore.get_value(iter, 0)
+            self.src = self.devliststore.get_value(iter, 2)
+            self.target = self.dpan + self.src
+
+            # Switch the details over
+            self.detailstore.clear()
+            self.detailcolumn.set_title("Device Details - DPAN: %s, SRC: %s" % (self.dpan, self.src))
+            self.populate_details(self.details[self.dpan])
+
+    def populate_details(self, tree, iter = None):
+        if tree == None:
+            return
+
+        i = iter
+        for x in tree:
+            if len(x) <= 1 or not isinstance(x, ListType):
+                i = self.detailstore.append(iter, [x])
+            else:
+                self.populate_details(x, i)
+
+        return i
+
+    # Dst PAN Address
+    def table_pacolumn(self, column, cell, model, iter):
+        cell.set_property('text', model.get_value(iter, 0))
+        return
+    
+    # Dst Address
+    def table_dacolumn(self, column, cell, model, iter):
+        cell.set_property('text', model.get_value(iter, 1))
+        return
+    
+    # Src Address
+    def table_sacolumn(self, column, cell, model, iter):
+        cell.set_property('text', model.get_value(iter, 2))
+        return
+    
+    # Distance
+    def table_dscolumn(self, column, cell, model, iter):
+        cell.set_property('text', model.get_value(iter, 3))
+        return
+    
+    # Age
+    def table_smcolumn(self, column, cell, model, iter):
+        cell.set_property('text', "%d" % model.get_value(iter, 4))
+        return
+    
+    # Signal
+    def table_sgcolumn(self, column, cell, model, iter):
+        cell.set_property('text', "%d" % model.get_value(iter, 5))
+        return
+
+    def show_error_dlg(self, error_string, exit = 0):
+        gtk.gdk.threads_enter()
+        error_dlg = gtk.MessageDialog(type = gtk.MESSAGE_ERROR, message_format = error_string, buttons = gtk.BUTTONS_OK)
+        error_dlg.run()
+        error_dlg.destroy()
+        if exit:
+            gtk.main_quit()
+        gtk.gdk.threads_leave()
+
+
+
+
+class ZBPoller(Thread):
+    def __init__(self, ui):
+        Thread.__init__(self)
+        self.ui = ui
+        self.seq = 0
+        self.devlist = []
+        self.startinjtime = 0
+
+        self.stopthread = Event()
+        self.ZB_MACFC_FRAMETYPES = ["Beacon", "Data", "ACK", "MAC-Command"] 
+
+    def zb_distance(self, rssi):
+        propconst = 3 # Propagation Constant, 2-4
+        refrssi = -58 # Measured RSSI 1M from transmitter
+        return "%d'" % (pow(10,(refrssi-rssi)/float((10*propconst))) * 3.28)
+
+    def sendbeacon(self):
+
+        beacon = "\x03\x08\x00\xff\xff\xff\xff\x07"
+        # Immutable strings - split beacon around sequence number field
+        beaconp1 = beacon[0:2]
+        beaconp2 = beacon[3:]
+        
+        beaconinj = ''.join([beaconp1, "%c"%self.seq, beaconp2])
+        try:
+            self.kb.inject(beaconinj)
+        except Exception, e:
+            print "ERROR: Unable to inject packet"
+            print e
+
+        if self.seq > 255:
+            self.seq = 0
+
+    def run(self):
+        d154 = Dot154PacketParser()
+
+        try:
+            if (sys.argv[1] != None):
+                channel = int(sys.argv[1])
+        except:
+                channel = 26
+        
+        try:
+            self.kb = KillerBee()
+            self.kb.set_channel(channel)
+            self.kb.sniffer_on()
+        except:
+            sys.stderr.write("Error initializing KillerBee Sniffer")
+            return
+        
+        while not self.stopthread.isSet():
+            # Used to populate details for the device
+            details = []
+            idev = None
+            match = False
+
+            # If we are in active discovery mode, send a beacon request frame to elicit responses
+            if self.ui.discoverymode == 1 and time.time() >self.startinjtime+5:
+                self.kb.sniffer_off()
+                self.sendbeacon()
+                self.startinjtime = time.time()
+                self.kb.sniffer_on()
+
+            packetlist = self.kb.pnext()
+
+            # Ignore empty return, timeout with no frame
+            if not packetlist:
+                continue
+
+            # Ignore bad FCS
+            if packetlist[1] == False:
+                continue
+
+            # Convert to dBm per AT86RF230 data sheet, figure 5.5:  y=mx+b, b=-91,m=3
+            rssi = (3*packetlist[2])-91
+            packet = d154.pktchop(packetlist[0])
+
+            # Decode Frame Control field
+            fc = struct.unpack("<H", packet[0])[0]
+            fc_frametype = (fc & DOT154_FCF_TYPE_MASK)
+            fc_secenabled = (fc & DOT154_FCF_SEC_EN)
+
+            # Skip ACK frames
+            if fc_frametype == DOT154_FCF_TYPE_ACK:
+                continue
+
+            # Skip beacon requests
+            if fc_frametype == DOT154_FCF_TYPE_MACCMD and packet[2] == "\xff\xff" and packet[3] == "\xff\xff":
+                continue
+
+            # devid is a UID for the device Source Address and SPAN combination, concatenated
+            # If this is a beacon frame, we use the sa and spanid.  If this is anything else (excluding ACK),
+            # we use the sa and dpanid.  The dpanid of other frames should match the spanid of beacon frames.
+            if fc_frametype == DOT154_FCF_TYPE_BEACON: 
+                devid = "%02x%02x%02x%02x" % (ord(packet[4][0]), ord(packet[4][1]),
+                        ord(packet[5][0]), ord(packet[5][1]))
+                dstpan = "0x%02x%02x" % (ord(packet[4][0]), ord(packet[4][1]))
+
+            else:
+                devid = "%02x%02x%02x%02x" % (ord(packet[2][0]), ord(packet[2][1]),
+                        ord(packet[5][0]), ord(packet[5][1]))
+                dstpan = ""
+                if packet[2] != "":
+                    dstpan = "0x%02x%02x" % (ord(packet[2][0]), ord(packet[2][1]))
+
+            dst = ""
+            if packet[3] != "":
+                dst = "0x%02x%02x" % (ord(packet[3][0]), ord(packet[3][1]))
+
+            src = ""
+            if packet[5] != "":
+                src = "0x%02x%02x" % (ord(packet[5][0]), ord(packet[5][1]))
+
+            seq = ""
+            if packet[2] != "":
+                seq = "0x%02x" % (ord(packet[1]))
+
+            for dev in self.devlist:
+                if dev[0] == devid:
+                    match = True
+                    idev = dev
+                    details = idev[1]
+                    # Update last seen detail
+                    details[0][1] = "Last seen: " + str(datetime.datetime.now())
+                    if (fc_secenabled != 0):
+                        details[0][2] = "Security: Enabled"
+                    details[0][3] = "Last Seq Num: " + seq
+                    # Observed frame types
+                    if (details[0][4].find(self.ZB_MACFC_FRAMETYPES[fc_frametype]) == -1):
+                        details[0][4] + " " + self.ZB_MACFC_FRAMETYPES[fc_frametype]
+                    # We only add these details once and do not update
+                    if fc_frametype == DOT154_FCF_TYPE_BEACON and details[0][5] == "": 
+                        details[0][5] = self.stackverstr(packet)
+                        details[0][6] = self.stackprofilestr(packet)
+                        details[0][7] = self.extpanidstr(packet)
+                    break
+    
+            if match == False:
+                # Add this entry to the list
+                nowstr = str(datetime.datetime.now())
+                details = [["First seen: " + nowstr]]
+                details[0].append("Last Seen: " + nowstr)
+                if (fc_secenabled != 0):
+                    details[0].append("Security: Enabled")
+                else:
+                    details[0].append("Security: Not In Use")
+                details[0].append("Last Seq Num: " + seq)
+                details[0].append("Frame Types: " + self.ZB_MACFC_FRAMETYPES[fc_frametype])
+                if fc_frametype == DOT154_FCF_TYPE_BEACON: 
+                    details[0].append(self.stackverstr(packet))
+                    details[0].append(self.stackprofilestr(packet))
+                    details[0].append(self.extpanidstr(packet))
+                else:
+                    for i in range(0,3):
+                        details[0].append("")
+
+                # Add other details here
+                idev = [devid]
+
+            idev.append(details)
+            self.devlist.append(idev)
+            
+            self.ui.update_row(dstpan, dst, src, self.zb_distance(rssi), rssi, details)
+            continue
+
+    def stackverstr(self, packet):
+        stackprofilever = packet[6][4]
+        stackver_map = {0:"ZigBee Prototype",
+                        1:"ZigBee 2004",
+                        2:"ZigBee 2006/2007"}
+        stackver = (ord(stackprofilever) & 0xf0) >>4
+
+        try:
+            stackverstr = stackver_map[stackver]
+        except KeyError:
+            stackverstr = "Unknown (%d)"%stackver
+
+        return stackverstr
+
+    def stackprofilestr(self, packet):
+        stackprofilever = packet[6][4]
+        stackprofile_map = {0:"Network Specific",
+                            1:"ZigBee Standard",
+                            2:"ZigBee Enterprise"}
+        stackprofile = ord(stackprofilever) & 0x0f
+
+        try:
+            stackprofilestr = stackprofile_map[stackprofile]
+        except KeyError:
+            stackprofilestr = "Unknown (%d)"%stackprofile
+
+        return stackprofilestr
+
+    def extpanidstr(self, packet):
+        extpanidstr = ""
+        extpanid = packet[6][6][::-1]
+
+        for ind in range(0,7):
+            extpanidstr += "%02x:"%ord(extpanid[ind])
+        extpanidstr += "%02X"%ord(extpanid[-1])
+        return "Ext PAN ID: %s"%extpanidstr
+
+    def stop(self):
+        try:
+            sys.exit(0)
+        except Exception, e:
+            traceback.print_exc()
+            sys.exit(1)
+
+if __name__ == "__main__":
+    try:
+
+        gtk.gdk.threads_init()
+    
+        ui = ZBFindUI()
+        zbpoll = ZBPoller(ui)
+        zbpoll.start()
+    
+        gtk.main()
+   
+        zbpoll.stop()
+        zbpoll.join()
+
+    except Exception,e:
+        traceback.print_exc()
+
