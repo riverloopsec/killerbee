@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+import sys
+import os
+from killerbee import *
+
+def usage():
+    print >>sys.stderr, """
+zbfixupz - Remove the trailing byte in libpcap packet captures to fix an earlier zbdump bug.  You only need to use this script if you have an older libpcap packet capture from zbdump that is giving you FCS errors.  Thanks to Tyler N. for the help in resolving this.                       jwright@willhackforsushi.com
+
+Usage: zbconvert [-n] [-i input] [-o output] [-c count]
+    """
+
+
+# Global
+arg_count = -1
+arg_noclobber = False
+arg_infile = None
+arg_outfile = None
+
+while len(sys.argv) > 1:
+    op = sys.argv.pop(1)
+    if op == '-i':
+        arg_infile = sys.argv.pop(1)
+    if op == '-o':
+        arg_outfile = sys.argv.pop(1)
+    if op == '-h':
+        usage()
+        sys.exit(0)
+    if op == '-n':
+        arg_noclobber = True
+    if op == '-c':
+        arg_count = int(sys.argv.pop(1))
+ 
+
+if arg_infile == None or arg_outfile == None:
+    print >>sys.stderr, "ERROR: Must specify an input file (-i) and an output file (-o)."
+    usage()
+    sys.exit(1)
+
+if arg_noclobber:
+    if os.path.exists(arg_outfile):
+        print >>sys.stderr, "ERROR: Output file \"%s\" already exists." % arg_outfile
+        sys.exit(1)
+
+if not os.path.exists(arg_infile):
+    print >>sys.stderr, "ERROR: Input file \"%s\" does not exist." % arg_infile
+    sys.exit(1)
+
+
+# Check if the input file is libpcap; if not, assume SNA.
+incap = PcapReader(arg_infile)
+outcap = PcapDumper(DLT_IEEE802_15_4, arg_outfile)
+
+
+packetcount = 0
+while arg_count != packetcount:
+    packet = incap.pnext()
+    if packet[1] == None:
+        # End of capture
+        break
+
+    #print hexdump(packet[1])
+    if packet != None and packet[1]:
+        packetcount+=1
+        outcap.pcap_dump(packet[1][0:-1])
+
+incap.close()
+outcap.close()
+print "Converted %d packets." % packetcount
