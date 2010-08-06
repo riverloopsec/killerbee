@@ -97,7 +97,7 @@ while arg_count != packetcount:
         if pd:
             # Adding a "\x00" causes FCS's to be bad, thanks Tyler!
             #packet[0] = packet[0][:-1] + "\x00"
-            pd.pcap_dump(packet[0])
+            pd.pcap_dump(packet[0][:-1])
         if dt:
             dt.pwrite(packet[0])
 
