@@ -904,7 +904,7 @@ class ZBPoller(Thread):
             match = False
 
             # If we are in active discovery mode, send a beacon request frame to elicit responses
-            if self.ui.discoverymode == 1 and time.time() >self.startinjtime+5:
+            if self.ui.discoverymode == 1 and time.time() >self.startinjtime+1:
                 self.kb.sniffer_off()
                 self.sendbeacon()
                 self.startinjtime = time.time()
@@ -931,6 +931,10 @@ class ZBPoller(Thread):
 
             # Skip ACK frames
             if fc_frametype == DOT154_FCF_TYPE_ACK:
+                continue
+
+            # Skip QuahogCon badge (not 802.15.4) frames
+            if len(packet) == 19:
                 continue
 
             # Skip beacon requests
