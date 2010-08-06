@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+# This program is for debugging purposes only
+import sys
+from killerbee import *
+
+def test_functions():
+    kb = KillerBee()
+    # Enter the bootloader
+    #kb.enter_bootloader()
+    kb.close()
+    # RZUSBSTICK reboots, so we need to make a new connection
+    kb = KillerBee()
+    
+    # Get the bootloader version
+    #print kb.get_bootloader_version()
+
+    # Get AT90USB1287 signature
+    #print kb.get_signature()
+
+    # Get identifier string
+    print kb.sign_on()
+
+    # Read the fuses
+    #fuses = kb.read_fuses()
+    #for fuse in fuses:
+    #    print fuse,':',bin(fuses[fuse]),hex(fuses[fuse])
+    
+    # Read the lockbits
+    print 'lockbits:',bin( kb.read_lockbits() )
+
+    # Read some EEPROM addresses
+    eeprom_addresses = [0x0000]
+    for address in eeprom_addresses:
+    	print hex(address),':',hex( kb.read_eeprom(address) )
+
+    # Program EEPROM
+    #kb.program_eeprom(0x00, 0xaa)
+    #kb.program_eeprom(0xfe, 0xcc)
+
+    #kb.erase_flash()
+    kb.erase_eeprom()
+
+    #kb.write_lockbits(0b11111111)
+
+    # Read some flash addresses
+    flash_addresses = [0x00000000, 0x00000001, 0x00000010,
+                       0x000057F0, 0x000058B0, 0x000050B0]
+    for address in flash_addresses:
+        print hex(address),':',hex( kb.read_flash(address) )
+    
+    # Leave bootloader and start application
+    #kb.leave_bootloader()
+    
+    # Reset RZUSBSTICK
+    #kb.reset()
+
+if __name__ == '__main__':
+    test_functions()
+
