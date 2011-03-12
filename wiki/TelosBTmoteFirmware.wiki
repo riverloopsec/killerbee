@@ -4,8 +4,9 @@
 = Introduction =
 The firmware used is from the GoodFET project, compiled for the telosb platform and with ccspi radio functionality included.
 
-= Loading Precompiled (KillerBee repository) Firmware Image =
+= Loading Precompiled (!KillerBee repository) Firmware Image =
 This method is *highly suggested* to avoid dependency requirements. _Note, however, that this firmware may become out-of-date and require updates._
+
 *TODO*
 
 = Compiling Firmware Image =
@@ -14,14 +15,21 @@ This method is *highly suggested* to avoid dependency requirements. _Note, howev
  * Compiling the firmware yourself requires the GoodFET SVN project and the msp430-gcc compiler to be installed on your system. It is tested with msp430-gcc-4.4.5.
 
 _Within goodfet/trunk/firmware, run:_
+
 export platform=telosb
+
 export mcu=msp430x1611
+
 export config='monitor ccspi spi'
+
 make clean install
+
 _If this fails on goodfet.bsl command not found, simply run:_
  * ../client/goodfet.bsl --speed=38400 -e -p goodfet.hex
 
 = Verify Firmware Success =
 _Within goodfet/trunk/client, run:_
+
 goodfet.ccspi info
+
 goodfet.spiflash info
