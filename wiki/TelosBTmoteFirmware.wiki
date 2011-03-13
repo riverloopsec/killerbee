@@ -7,7 +7,8 @@ The firmware used is from the GoodFET project, compiled for the telosb platform 
 = Loading Precompiled (!KillerBee repository) Firmware Image =
 This method is *highly suggested* to avoid dependency requirements. _Note, however, that this firmware may become out-of-date and require updates._
 
-*TODO*
+_Within killerbee/firmware, run:_
+ * ./goodfet.bsl --telosb -e -p gf-telosb-001.hex
 
 = Compiling Firmware Image =
 *Note:*
@@ -24,7 +25,7 @@ export config='monitor ccspi spi'
 
 make clean install
 
-_If this fails on goodfet.bsl command not found, simply run:_
+_If make fails on goodfet.bsl command not found, simply run:_
  * ../client/goodfet.bsl --speed=38400 -e -p goodfet.hex
 
 = Verify Firmware Success =
