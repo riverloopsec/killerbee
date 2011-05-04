@@ -1,0 +1,25 @@
+#summary KillerBee zbid Tool for identifying radio interfaces.
+
+= Introduction =
+tools/zbid is a simple script that uses the killerbee.kbutils to enumerate the attached radio interfaces.
+
+= Usage =
+
+{{{
+sudo zbid
+}}}
+
+_Note: the command may take a while to run if numerous serial devices are attached._
+
+= Output =
+
+Example output for a computer with each type of currently supported device attached.
+
+{{{
+$ sudo zbid
+Dev	Product String	Serial Number
+005:006	KILLERB001	A50400A01C25
+/dev/ttyUSB1	Dartmouth Freakduino	
+/dev/ttyUSB0	GoodFET TelosB/Tmote	
+Found 3 devices.
+}}}
