@@ -26,18 +26,19 @@ def display_details(routerdata):
                         1:"ZigBee 2004",
                         2:"ZigBee 2006/2007"}
         spanid, source, extpanid, stackprofilever, channel = routerdata
-
         stackprofile = ord(stackprofilever) & 0x0f
         stackver = (ord(stackprofilever) & 0xf0) >>4
 
         print "New Network: PANID 0x%02X%02X  Source 0x%02X%02X"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1]))
 
-        sys.stdout.write("\tExt PANID: ")
-        extpanidstr=""
-        for ind in range(0,7):
-            extpanidstr += "%02x:"%ord(extpanid[ind])
-        extpanidstr += "%02X"%ord(extpanid[-1])
-        print extpanidstr
+        try:
+            extpanidstr=""
+            for ind in range(0,7):
+                extpanidstr += "%02x:"%ord(extpanid[ind])
+            extpanidstr += "%02X"%ord(extpanid[-1])
+            sys.stdout.write("\tExt PANID: ", extpanidstr)
+        except IndexError:
+            sys.stdout.write("\tExt PANID: Unknown")
 
         try:
             print "\tStack Profile: %s"%stackprofile_map[stackprofile]

@@ -2,10 +2,11 @@
 from killerbee import *
 
 def show_dev():
-    kb = KillerBee()
+    kbdev_info = kb_dev_list()
     print "Dev\tProduct String\tSerial Number"
-    for dev in kb.dev_list():
+    for dev in kbdev_info:
         print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
+    print "Found %d devices." % len(kbdev_info)
 
 if __name__ == '__main__':
     show_dev()
