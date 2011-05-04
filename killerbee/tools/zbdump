@@ -13,9 +13,8 @@ Usage: zbdump [-fiwDch] [-f channel] [-w pcapfile] [-W daintreefile]
     """
 
 def show_dev():
-    kb = KillerBee()
     print "Dev\tProduct String\tSerial Number"
-    for dev in kb.dev_list():
+    for dev in kb_dev_list():
         print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
 
 def interrupt(signum, frame):
@@ -91,13 +90,11 @@ print "zbdump: listening on \'%s\', link-type DLT_IEEE802_15_4, capture size 127
 
 while arg_count != packetcount:
     packet = kb.pnext()
-    # packet[1] is True if CRC is correct
-    if packet != None and packet[1]:
+    # packet[1] is True if CRC is correct, check removed to have promiscous capture regardless of CRC
+    if packet != None: # and packet[1]:
         packetcount+=1
         if pd:
-            # Adding a "\x00" causes FCS's to be bad, thanks Tyler!
-            #packet[0] = packet[0][:-1] + "\x00"
-            pd.pcap_dump(packet[0][:-1])
+            pd.pcap_dump(packet[0])
         if dt:
             dt.pwrite(packet[0])
 

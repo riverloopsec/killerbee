@@ -4,6 +4,10 @@ networks.
 Copyright 2009, Joshua Wright <jwright@willhackforsushi.com>
 All Right Reserved.
 
+Updates Copyright 2010, Ryan Speers <rmspeers@gmail.com>
+                        Ricky Melgares <rmelgares@dartmouth.edu>
+All Rights Reserved.
+
 Distributed under a BSD license, see LICENSE for details.
 
 
@@ -61,7 +65,13 @@ tools     - ZigBee and IEEE 802.15.4 attack tools developed using this
 
 REQUIRED HARDWARE
 
-The KillerBee framework is currently based on the Atmel RZ RAVEN USB Stick
+The KillerBee framework is being expanded to support multiple devices.
+Currently there is support for the Atmel RZ RAVEN USB Stick, the MoteIV Tmote
+Sky, and the TelosB mote. Support for Freaklab's Freakduino with added hardware
+and the Dartmouth arduino sketch as well as for the Zena Packet Analyzer board
+are in development.
+
+For the Atmel RZ RAVEN USB Stick:
 (http://www.atmel.com/dyn/products/tools_card.asp?tool_id=4396).  This hardware 
 is convenient as the base firmware is open source with a freely-available IDE.
 The KillerBee firmware for the RZ RAVEN included in the firmware/ directory is
@@ -70,7 +80,6 @@ attack functionality.
 
 The RZ RAVEN USB Stick is available from common electronics resellers for
 approximately $40/USD:
-
 Mouser: http://bit.ly/vZ2pt
 Digi-Key: http://bit.ly/3T8MaK
 
@@ -101,8 +110,8 @@ firmware included in KillerBee should applied to the Flash memory of the RZ USB
 Stick.  See http://bit.ly/3ttLTc for an additional example, or contact the
 author for additional information.
 
-If you are able to catch me at a conference, bring me your RZ RAVEN USB Stick
-and I'll happily flash it for you.
+If you are able to catch Josh at a conference, bring him your RZ RAVEN USB Stick
+and he'll happily flash it for you.
 
 
 TOOLS
@@ -186,7 +195,7 @@ mechanism for generating and transmitting malformed ZigBee data to a target.
 QUESTIONS/COMMENTS/CONCERNS
 
 Please drop me a note: jwright@willhackforsushi.com
-
+Bug fixes, updates, etc: ryan@rmspeers.com
 
 THANKS
 
@@ -198,3 +207,4 @@ Nick DePetrillo
 Ed Skoudis
 Matt Carpenter
 Travis Goodspeed
+Sergey Bratus (research support at Dartmouth)
