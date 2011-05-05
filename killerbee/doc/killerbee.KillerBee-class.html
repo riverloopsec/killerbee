@@ -30,7 +30,12 @@
       <th>&nbsp;&nbsp;&nbsp;<a
         href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
 
-      <th class="navbar" width="100%"></th>
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
   </tr>
 </table>
 <table width="100%" cellpadding="0" cellspacing="0">
@@ -80,10 +85,31 @@
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">device</span>=<span class="summary-sig-default">None</span>)</span><br />
+        <span class="summary-sig-arg">device</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">datasource</span>=<span class="summary-sig-default">None</span>)</span><br />
       Instantiates the KillerBee class.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">Boolean</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#__device_is" class="summary-sig-name" onclick="show_private();">__device_is</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">vendorId</span>,
+        <span class="summary-sig-arg">productId</span>)</span><br />
+      Compares KillerBee class' device data to a known USB vendorId and 
+      productId</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__device_is">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -97,11 +123,89 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="__search_bus"></a><span class="summary-sig-name">__search_bus</span>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">bus</span>,
-        <span class="summary-sig-arg">device</span>)</span></td>
+          <td><span class="summary-sig"><a name="__search_usb"></a><span class="summary-sig-name">__search_usb</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">device</span>,
+        <span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Deprecated in class, use kbutils.search_usb(device, vendor, product) 
+      instead of class version.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__search_bus">source&nbsp;code</a></span>
+            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__search_usb">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__search_usb_bus"></a><span class="summary-sig-name">__search_usb_bus</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">bus</span>,
+        <span class="summary-sig-arg">device</span>,
+        <span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Deprecated in class, use kbutils.search_usb_bus(bus, device, vendor, 
+      product) instead of class version.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__search_usb_bus">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="dev_list"></a><span class="summary-sig-name">dev_list</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Deprecated in class, use kbutils.devlist() instead.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.dev_list">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">List</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#get_dev_info" class="summary-sig-name">get_dev_info</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Returns device information in a list identifying the device.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.get_dev_info">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">None</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#close" class="summary-sig-name">close</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Closes the device out.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.close">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -145,114 +249,6 @@
       
     </td>
   </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">None</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#__set_rz_capabilities" class="summary-sig-name" onclick="show_private();">__set_rz_capabilities</a>(<span class="summary-sig-arg">self</span>)</span><br />
-      Sets the capability information for RZUSB devices.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__set_rz_capabilities">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#__usb_write" class="summary-sig-name" onclick="show_private();">__usb_write</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">endpoint</span>,
-        <span class="summary-sig-arg">data</span>)</span><br />
-      Write data to the USB device opened as self.handle.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__usb_write">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">String</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#__usb_read" class="summary-sig-name" onclick="show_private();">__usb_read</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">endpoint</span>,
-        <span class="summary-sig-arg">timeout</span>=<span class="summary-sig-default">100</span>)</span><br />
-      Reads data from the USB device on the specified endpoint.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__usb_read">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">None</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#_set_mode" class="summary-sig-name" onclick="show_private();">_set_mode</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">mode</span>)</span><br />
-      Change the operating mode of the USB device to one of the 
-      RZ_CMD_MODE_* values.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee._set_mode">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a name="_open_stream"></a><span class="summary-sig-name">_open_stream</span>(<span class="summary-sig-arg">self</span>)</span><br />
-      Opens a data stream for receiving packets.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee._open_stream">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a name="_close_stream"></a><span class="summary-sig-name">_close_stream</span>(<span class="summary-sig-arg">self</span>)</span><br />
-      Closes a data stream.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee._close_stream">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">None</span>
@@ -282,42 +278,6 @@
       Turns the sniffer off, freeing the hardware for other functions.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.sniffer_off">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">None</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#jammer_on" class="summary-sig-name">jammer_on</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">channel</span>=<span class="summary-sig-default">None</span>)</span><br />
-      Not yet implemented.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.jammer_on">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">None</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#jammer_off" class="summary-sig-name">jammer_off</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">channel</span>=<span class="summary-sig-default">None</span>)</span><br />
-      Not yet implemented.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.jammer_off">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -382,96 +342,6 @@
       
     </td>
   </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">None</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#ping" class="summary-sig-name">ping</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">da</span>,
-        <span class="summary-sig-arg">panid</span>,
-        <span class="summary-sig-arg">sa</span>,
-        <span class="summary-sig-arg">channel</span>=<span class="summary-sig-default">None</span>)</span><br />
-      Not yet implemented.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.ping">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a name="__handle_open"></a><span class="summary-sig-name">__handle_open</span>(<span class="summary-sig-arg">self</span>)</span><br />
-      Opens the device identified as self.dev, populating self.handle</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__handle_open">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">None</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#close" class="summary-sig-name">close</a>(<span class="summary-sig-arg">self</span>)</span><br />
-      Closes the device handle.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.close">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">List</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#get_dev_info" class="summary-sig-name">get_dev_info</a>(<span class="summary-sig-arg">self</span>)</span><br />
-      Returns device information in a list identifying the device 
-      identifier, product string and serial number in a list of strings.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.get_dev_info">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">List</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#dev_list" class="summary-sig-name">dev_list</a>(<span class="summary-sig-arg">self</span>)</span><br />
-      Return device information for all present devices.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.dev_list">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
 </table>
 <!-- ==================== METHOD DETAILS ==================== -->
 <a name="section-MethodDetails"></a>
@@ -499,7 +369,8 @@
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">device</span>=<span class="sig-default">None</span>)</span>
+        <span class="sig-arg">device</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">datasource</span>=<span class="sig-default">None</span>)</span>
     <br /><em class="fname">(Constructor)</em>
   </h3>
   </td><td align="right" valign="top"
@@ -511,8 +382,83 @@
   <dl class="fields">
     <dt>Parameters:</dt>
     <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>device</code></strong> (String) - USB device identifier</li>
+        <li><strong class="pname"><code>device</code></strong> (String) - USB or serial device identifier</li>
+        <li><strong class="pname"><code>datasource</code></strong> (String) - A known datasource type that is used by dblog to record how the 
+          data was captured.</li>
     </ul></dd>
+    <dt>Returns: None</dt>
+        <dd>None</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="__device_is"></a>
+<div class="private">
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__device_is</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">vendorId</span>,
+        <span class="sig-arg">productId</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__device_is">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Compares KillerBee class' device data to a known USB vendorId and 
+  productId</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>vendorId</code></strong> ()</li>
+        <li><strong class="pname"><code>productId</code></strong> ()</li>
+    </ul></dd>
+    <dt>Returns: Boolean</dt>
+        <dd>True if KillerBee class has device matching the vendor and 
+          product IDs provided.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_dev_info"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_dev_info</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.get_dev_info">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns device information in a list identifying the device. 
+  Implemented by the loaded driver.</p>
+  <dl class="fields">
+    <dt>Returns: List</dt>
+        <dd>List of 3 strings identifying device.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="close"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">close</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.close">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Closes the device out.</p>
+  <dl class="fields">
     <dt>Returns: None</dt>
         <dd>None</dd>
   </dl>
@@ -558,109 +504,6 @@
   <dl class="fields">
     <dt>Returns: List</dt>
         <dd>Capability information for the opened device.</dd>
-  </dl>
-</td></tr></table>
-</div>
-<a name="__set_rz_capabilities"></a>
-<div class="private">
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__set_rz_capabilities</span>(<span class="sig-arg">self</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__set_rz_capabilities">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Sets the capability information for RZUSB devices.  This should not be
-  called outside of the class.</p>
-  <dl class="fields">
-    <dt>Returns: None</dt>
-        <dd>None</dd>
-  </dl>
-</td></tr></table>
-</div>
-<a name="__usb_write"></a>
-<div class="private">
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__usb_write</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">endpoint</span>,
-        <span class="sig-arg">data</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__usb_write">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Write data to the USB device opened as self.handle.</p>
-  <dl class="fields">
-    <dt>Parameters:</dt>
-    <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>endpoint</code></strong> (Integer) - The USB endpoint to write to</li>
-        <li><strong class="pname"><code>data</code></strong> (Mixed) - The data to send to the USB endpoint</li>
-    </ul></dd>
-  </dl>
-</td></tr></table>
-</div>
-<a name="__usb_read"></a>
-<div class="private">
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__usb_read</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">endpoint</span>,
-        <span class="sig-arg">timeout</span>=<span class="sig-default">100</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__usb_read">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Reads data from the USB device on the specified endpoint.</p>
-  <dl class="fields">
-    <dt>Parameters:</dt>
-    <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>endpoint</code></strong> (Integer) - The USB endpoint to read from</li>
-        <li><strong class="pname"><code>timeout</code></strong> (Integer) - Timeout in usec for read operation before return</li>
-    </ul></dd>
-    <dt>Returns: String</dt>
-        <dd>Data returned from USB device</dd>
-  </dl>
-</td></tr></table>
-</div>
-<a name="_set_mode"></a>
-<div class="private">
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">_set_mode</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">mode</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee._set_mode">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Change the operating mode of the USB device to one of the 
-  RZ_CMD_MODE_* values.  Currently, RZ_CMD_MODE_AC (Air Capture) is the 
-  only mode that is used other than RZ_CMD_MODE_NONE.</p>
-  <dl class="fields">
-    <dt>Parameters:</dt>
-    <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>mode</code></strong> (Integer) - Operating mode for the USB stick</li>
-    </ul></dd>
-    <dt>Returns: None</dt>
   </dl>
 </td></tr></table>
 </div>
@@ -710,53 +553,6 @@
   close().</p>
   <dl class="fields">
     <dt>Returns: None</dt>
-  </dl>
-</td></tr></table>
-</div>
-<a name="jammer_on"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">jammer_on</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">channel</span>=<span class="sig-default">None</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.jammer_on">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Not yet implemented.  Stay tuned.</p>
-  <dl class="fields">
-    <dt>Parameters:</dt>
-    <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>channel</code></strong> (Integer) - Sets the channel, optional</li>
-    </ul></dd>
-    <dt>Returns: None</dt>
-  </dl>
-</td></tr></table>
-</div>
-<a name="jammer_off"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">jammer_off</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">channel</span>=<span class="sig-default">None</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.jammer_off">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Not yet implemented.  Stay tuned.</p>
-  <dl class="fields">
-    <dt>Returns: None</dt>
-        <dd>None</dd>
   </dl>
 </td></tr></table>
 </div>
@@ -845,96 +641,6 @@
   </dl>
 </td></tr></table>
 </div>
-<a name="ping"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">ping</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">da</span>,
-        <span class="sig-arg">panid</span>,
-        <span class="sig-arg">sa</span>,
-        <span class="sig-arg">channel</span>=<span class="sig-default">None</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.ping">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Not yet implemented.</p>
-  <dl class="fields">
-    <dt>Returns: None</dt>
-        <dd>None</dd>
-  </dl>
-</td></tr></table>
-</div>
-<a name="close"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">close</span>(<span class="sig-arg">self</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.close">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Closes the device handle.  To be re-used, class should be 
-  re-instantiated.</p>
-  <dl class="fields">
-    <dt>Returns: None</dt>
-        <dd>None</dd>
-  </dl>
-</td></tr></table>
-</div>
-<a name="get_dev_info"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_dev_info</span>(<span class="sig-arg">self</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.get_dev_info">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Returns device information in a list identifying the device 
-  identifier, product string and serial number in a list of strings.</p>
-  <dl class="fields">
-    <dt>Returns: List</dt>
-        <dd>List of strings identifying device.</dd>
-  </dl>
-</td></tr></table>
-</div>
-<a name="dev_list"></a>
-<div>
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">dev_list</span>(<span class="sig-arg">self</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.dev_list">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Return device information for all present devices.</p>
-  <dl class="fields">
-    <dt>Returns: List</dt>
-        <dd>List of device information present.</dd>
-  </dl>
-</td></tr></table>
-</div>
 <br />
 <!-- ==================== NAVIGATION BAR ==================== -->
 <table class="navbar" border="0" width="100%" cellpadding="0"
@@ -956,13 +662,18 @@
       <th>&nbsp;&nbsp;&nbsp;<a
         href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
 
-      <th class="navbar" width="100%"></th>
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
   </tr>
 </table>
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Oct 15 10:59:19 2009
+    Generated by Epydoc 3.0.1 on Thu May  5 12:03:12 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

@@ -30,7 +30,12 @@
       <th>&nbsp;&nbsp;&nbsp;<a
         href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
 
-      <th class="navbar" width="100%"></th>
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
   </tr>
 </table>
 <table width="100%" cellpadding="0" cellspacing="0">
@@ -56,6 +61,33 @@
 </table>
 <!-- ==================== MODULE DESCRIPTION ==================== -->
 <h1 class="epydoc">Module kbutils</h1><p class="nomargin-top"><span class="codelink"><a href="killerbee.kbutils-pysrc.html">source&nbsp;code</a></span></p>
+<!-- ==================== CLASSES ==================== -->
+<a name="section-Classes"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Classes"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="killerbee.kbutils.KBCapabilities-class.html" class="summary-name">KBCapabilities</a><br />
+      Class to store and report on the capabilities of a specific 
+        KillerBee device.
+    </td>
+  </tr>
+</table>
 <!-- ==================== FUNCTIONS ==================== -->
 <a name="section-Functions"></a>
 <table class="summary" border="1" cellpadding="3"
@@ -73,6 +105,98 @@
     </table>
   </td>
 </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">List</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#devlist" class="summary-sig-name">devlist</a>(<span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Return device information for all present devices, filtering if 
+      requested by vendor and/or product IDs on USB devices.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">Boolean</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#isgoodfetccspi" class="summary-sig-name">isgoodfetccspi</a>(<span class="summary-sig-arg">serialdev</span>)</span><br />
+      Determine if a given serial device is a TelosB/Tmote Sky GOODFET 
+      (with CCSPI application).</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#isgoodfetccspi">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">Boolean</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#isfreakduino" class="summary-sig-name">isfreakduino</a>(<span class="summary-sig-arg">serialdev</span>)</span><br />
+      Determine if a given serial device is a Freakduino attached with the 
+      right sketch loaded.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#isfreakduino">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="search_usb"></a><span class="summary-sig-name">search_usb</span>(<span class="summary-sig-arg">device</span>,
+        <span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#search_usb">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="search_usb_bus"></a><span class="summary-sig-name">search_usb_bus</span>(<span class="summary-sig-arg">bus</span>,
+        <span class="summary-sig-arg">device</span>,
+        <span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#search_usb_bus">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">String</span>
@@ -126,6 +250,22 @@
       
     </td>
   </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="makeFCS"></a><span class="summary-sig-name">makeFCS</span>(<span class="summary-sig-arg">data</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#makeFCS">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
 </table>
 <!-- ==================== VARIABLES ==================== -->
 <a name="section-Variables"></a>
@@ -144,6 +284,48 @@
     </table>
   </td>
 </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="RZ_USB_VEND_ID"></a><span class="summary-name">RZ_USB_VEND_ID</span> = <code title="1003">1003</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="RZ_USB_PROD_ID"></a><span class="summary-name">RZ_USB_PROD_ID</span> = <code title="8458">8458</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ZN_USB_VEND_ID"></a><span class="summary-name">ZN_USB_VEND_ID</span> = <code title="1240">1240</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ZN_USB_PROD_ID"></a><span class="summary-name">ZN_USB_PROD_ID</span> = <code title="14">14</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="usbVendorList"></a><span class="summary-name">usbVendorList</span> = <code title="[1003, 1240]"><code class="variable-group">[</code>1003<code class="variable-op">, </code>1240<code class="variable-group">]</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="usbProductList"></a><span class="summary-name">usbProductList</span> = <code title="[8458, 14]"><code class="variable-group">[</code>8458<code class="variable-op">, </code>14<code class="variable-group">]</code></code>
+    </td>
+  </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
@@ -170,6 +352,81 @@
   </td>
 </tr>
 </table>
+<a name="devlist"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">devlist</span>(<span class="sig-arg">vendor</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">product</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return device information for all present devices, filtering if 
+  requested by vendor and/or product IDs on USB devices.</p>
+  <dl class="fields">
+    <dt>Returns: List</dt>
+        <dd>List of device information present. For USB devices, get 
+          [busdir:devfilename, productString, serialNumber] For serial 
+          devices, get [serialFileName, deviceDescription, &quot;&quot;]</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="isgoodfetccspi"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">isgoodfetccspi</span>(<span class="sig-arg">serialdev</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#isgoodfetccspi">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Determine if a given serial device is a TelosB/Tmote Sky GOODFET (with
+  CCSPI application).</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>serialdev</code></strong> (String) - Path to a serial device, ex /dev/ttyUSB0.</li>
+    </ul></dd>
+    <dt>Returns: Boolean</dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="isfreakduino"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">isfreakduino</span>(<span class="sig-arg">serialdev</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#isfreakduino">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Determine if a given serial device is a Freakduino attached with the 
+  right sketch loaded.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>serialdev</code></strong> (String) - Path to a serial device, ex /dev/ttyUSB0.</li>
+    </ul></dd>
+    <dt>Returns: Boolean</dt>
+  </dl>
+</td></tr></table>
+</div>
 <a name="hexdump"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -269,13 +526,18 @@
       <th>&nbsp;&nbsp;&nbsp;<a
         href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
 
-      <th class="navbar" width="100%"></th>
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
   </tr>
 </table>
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Oct 15 10:59:19 2009
+    Generated by Epydoc 3.0.1 on Thu May  5 12:03:11 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

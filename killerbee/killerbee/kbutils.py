@@ -1,5 +1,6 @@
 import usb, serial
 import os, glob
+import time
 import random
 from struct import pack
 
@@ -40,12 +41,15 @@ class KBCapabilities:
     def require(self, capab):
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
-            
-def devfind(vendor=None, product=None):
+
+def devlist(vendor=None, product=None):
     '''
-    Return device information for all present devices.
+    Return device information for all present devices, 
+    filtering if requested by vendor and/or product IDs on USB devices.
     @rtype: List
     @return: List of device information present.
+                For USB devices, get [busdir:devfilename, productString, serialNumber]
+                For serial devices, get [serialFileName, deviceDescription, ""]
     '''
     global usbVendorList, usbProductList
     devlist = []
@@ -62,30 +66,67 @@ def devfind(vendor=None, product=None):
     seriallist = glob.glob("/dev/ttyUSB*") #TODO make cross platform globing/winnt
     #print "Serial List:", seriallist
     for serialdev in seriallist:
-        if (isgoodfet(serialdev)):
-            devlist.append([serialdev, "telosb/tmote", ""])
+        if (isgoodfetccspi(serialdev)):
+            devlist.append([serialdev, "GoodFET TelosB/Tmote", ""])
         elif (isfreakduino(serialdev)):
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
     return devlist
     
-def isgoodfet(serialdev):
+def isgoodfetccspi(serialdev):
+    '''
+    Determine if a given serial device is a TelosB/Tmote Sky GOODFET (with CCSPI application).
+    @type serialdev: String
+    @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
+    @rtype: Boolean
+    '''
     from GoodFETCCSPI import GoodFETCCSPI
-    #TODO make so doesn't need local copies of GoodFET[CCSPI] code files
     os.environ["platform"] = "telosb" #set enviroment variable for GoodFET code to use
     gf = GoodFETCCSPI()
     gf.serInit(port=serialdev, attemptlimit=2)
-    return (gf.connected == 1)
+    status = (gf.connected == 1)
+    gf.serClose()
+    return status
     
 def isfreakduino(serialdev):
+    '''
+    Determine if a given serial device is a Freakduino attached with the right sketch loaded.
+    @type serialdev: String
+    @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
+    @rtype: Boolean
+    '''
     s = serial.Serial(port=serialdev, baudrate=57600, timeout=1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
     time.sleep(1.5)
     s.write('SC!V\r')
     time.sleep(1.5)
+    #If you get "TypeError: readline() takes no keyword arguments"
+    # this results from a version issue in pySerial.
+    # readline should take an eol argument, per:
+    # http://pyserial.sourceforge.net/pyserial_api.html#serial.FileLike.readline
     s.readline(eol='&')
     if s.read(3) == 'C!V': version = s.read()
     else: version = None
     s.close()
     return (version is not None)
+
+def search_usb(device, vendor=None, product=None):
+    busses = usb.busses()
+    for bus in busses:
+        dev = search_usb_bus(bus, device)
+        if dev != None:
+            return (bus, dev)
+    return (None, None)
+
+def search_usb_bus(bus, device, vendor=None, product=None):
+    global vendorList, productList
+    devices = bus.devices
+    for dev in devices:
+        if ((vendor==None and dev.idVendor in usbVendorList) or dev.idVendor==vendor) \
+           and ((product==None and dev.idProduct in usbProductList) or dev.idProduct==product):
+            if device == None or (device == (''.join([bus.dirname, ":", dev.filename]))):
+                #Populate the capability information for this device later, when driver is initialized
+                #print "Choose device", bus.dirname, dev.filename, "to initialize KillerBee instance on."
+                return dev
+    return None
 
 def hexdump(src, length=16):
     '''
