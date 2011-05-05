@@ -29,30 +29,6 @@ def getKillerBee(channel):
 	except Exception, e:
 		raise Exception('Error: Failed to set channel to %d' % channel, e)
 	return kb
-	
-def devfind():
-    return kbutils.devfind()
-
-# Functions relating to locating/identifying devices
-def kb_search_usb(device, vendor=None, product=None):
-    busses = usb.busses()
-    for bus in busses:
-        dev = kb_search_usb_bus(bus, device)
-        if dev != None:
-            return (bus, dev)
-    return (None, None)
-
-def kb_search_usb_bus(bus, device, vendor=None, product=None):
-    global vendorList, productList
-    devices = bus.devices
-    for dev in devices:
-        if ((vendor==None and dev.idVendor in usbVendorList) or dev.idVendor==vendor) \
-           and ((product==None and dev.idProduct in usbProductList) or dev.idProduct==product):
-            if device == None or (device == (''.join([bus.dirname, ":", dev.filename]))):
-                #Populate the capability information for this device later, when driver is initialized
-                #print "Choose device", bus.dirname, dev.filename, "to initialize KillerBee instance on."
-                return dev
-    return None
 
 def kb_dev_list(vendor=None, product=None):
     '''
@@ -62,53 +38,7 @@ def kb_dev_list(vendor=None, product=None):
                 For USB devices, get [busdir:devfilename, productString, serialNumber]
                 For serial devices, get [serialFileName, deviceDescription, ""]
     '''
-    global usbVendorList, usbProductList
-    devlist = []
-    busses = usb.busses()
-    for bus in busses:
-        devices = bus.devices
-        for dev in devices:
-            if ((vendor==None and dev.idVendor in usbVendorList) or dev.idVendor==vendor) \
-               and ((product==None and dev.idProduct in usbProductList) or dev.idProduct==product):
-                devlist.append([''.join([bus.dirname + ":" + dev.filename]), \
-                                  dev.open().getString(dev.iProduct, 50),    \
-                                  dev.open().getString(dev.iSerialNumber, 12)])
-
-    seriallist = glob.glob("/dev/ttyUSB*") #TODO make cross platform globing/winnt
-    #print "Serial List:", seriallist
-    for serialdev in seriallist:
-        if (kb_dev_serial_is_goodfetccspi(serialdev)):
-            devlist.append([serialdev, "GoodFET telosb/tmote", ""])
-        elif (kb_dev_serial_is_freakduino(serialdev)):
-            devlist.append([serialdev, "Dartmouth Freakduino", ""])
-    return devlist
-
-def kb_dev_serial_is_goodfetccspi(serialdev):
-    '''Given a path to a serial device (ex /dev/ttyUSB0), determine if it is a TelosB/Tmote GoodFET attached.'''
-    from GoodFETCCSPI import GoodFETCCSPI
-    os.environ["platform"] = "telosb" #set enviroment variable for GoodFET code to use
-    gf = GoodFETCCSPI()
-    gf.serInit(port=serialdev, attemptlimit=2)
-    status = (gf.connected == 1)
-    gf.serClose()
-    return status
-
-def kb_dev_serial_is_freakduino(serialdev):
-    '''Given a path to a serial device (ex /dev/ttyUSB0), determine if it is a Freakduino attached with the right sketch loaded.'''
-    s = serial.Serial(port=serialdev, baudrate=57600, timeout=1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
-    time.sleep(1.5)
-    s.write('SC!V\r')
-    time.sleep(1.5)
-    #If you get "TypeError: readline() takes no keyword arguments"
-    # this results from a version issue in pySerial.
-    # readline should take an eol argument, per:
-    # http://pyserial.sourceforge.net/pyserial_api.html#serial.FileLike.readline
-    s.readline(eol='&')
-    if s.read(3) == 'C!V': version = s.read()
-    else: version = None
-    s.close()
-    return (version is not None)
-
+    return kbutils.devlist()
 
 # KillerBee Class
 class KillerBee:
@@ -118,6 +48,9 @@ class KillerBee:
 
         @type device:   String
         @param device:  USB or serial device identifier
+        @type datasource: String
+        @param datasource: A known datasource type that is used
+                           by dblog to record how the data was captured.
         @return: None
         @rtype: None
         '''
@@ -128,10 +61,10 @@ class KillerBee:
 
         # Figure out a device is one is not set
         if (device is None):
-            (self.__bus, self.dev) = kb_search_usb(None)
+            (self.__bus, self.dev) = kbutils.search_usb(None)
         # Recognize if device is provided in the USB format (like a 012:456 string):
         elif (len(device)>=4 and device[3] == ":"):
-            (self.__bus, self.dev) = kb_search_usb(device)
+            (self.__bus, self.dev) = kbutils.search_usb(device)
             if self.dev == None:
                 raise Exception("Did not find a USB device matching %s." % device)
                 
@@ -155,16 +88,18 @@ class KillerBee:
         if (self.driver is None):
             # If no device was specified
             if (device is None):
+                #TODO use different globs for other platforms with different file handles
                 glob_list = glob.glob("/dev/ttyUSB*")
                 if len(glob_list) > 0:
-                    device = glob_list[0] #TODO verify this device is one meant for KillerBee
+                    #TODO be able to check other devices if this one is not correct
+                    device = glob_list[0]
             # Recognize if device specified by serial string:
             if (device is not None and device[:5] == "/dev/"):
-                self.dev = device #TODO validate device string is for a real port?
-                if kb_dev_serial_is_freakduino(self.dev):
+                self.dev = device
+                if kbutils.isfreakduino(self.dev):
                     from dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
-                elif kb_dev_serial_is_goodfetccspi(self.dev):
+                elif kbutils.isgoodfetccspi(self.dev):
                     from dev_telosb import TELOSB
                     self.driver = TELOSB(self.dev)
                 else:
@@ -178,34 +113,48 @@ class KillerBee:
             import dblog
             self.dblog = dblog.DBLogger(datasource)
 
-    # Functions relating to locating/identifying devices
     def __device_is(self, vendorId, productId):
+        '''
+        Compares KillerBee class' device data to a known USB vendorId and productId
+        @type vendorId: 
+        @type productId: 
+        @rtype: Boolean
+        @return: True if KillerBee class has device matching the vendor and product IDs provided.
+        '''
         if self.dev.idVendor == vendorId and self.dev.idProduct == productId: return True
         else: return False
 
     #Deprecated in class
     def __search_usb(self, device, vendor=None, product=None):
-        raise DeprecationWarning("Use kb_search_usb(device, vendor, product) instead of class version.")
-        #return kb_search_usb(device, vendor, product)
+        '''
+        Deprecated in class, use kbutils.search_usb(device, vendor, product) instead of class version.
+        '''
+        raise DeprecationWarning("Use kbutils.search_usb(device, vendor, product) instead of class version.")
+        #return kbutils.search_usb(device, vendor, product)
 
     #Deprecated in class
     def __search_usb_bus(self, bus, device, vendor=None, product=None):
-        raise DeprecationWarning("Use kb_search_usb_bus(bus, device, vendor, product) instead of class version.")
-        #return kb_search_usb_bus(bus, device, vendor, product)
+        '''
+        Deprecated in class, use kbutils.search_usb_bus(bus, device, vendor, product) instead of class version.
+        '''
+        raise DeprecationWarning("Use kbutils.search_usb_bus(bus, device, vendor, product) instead of class version.")
+        #return kbutils.search_usb_bus(bus, device, vendor, product)
 
-    #Implemented by driver
+    #Deprecated in class
+    def dev_list(self, vendor=None, product=None):
+        '''
+        Deprecated in class, use kbutils.devlist() instead.
+        '''
+        raise DeprecationWarning("Use kb_dev_list(vendor, product) instead of class version.")
+        #return kb_dev_list(vendor, product)
+
     def get_dev_info(self):
         '''
-        Returns device information in a list identifying the device.
+        Returns device information in a list identifying the device. Implemented by the loaded driver.
         @rtype: List
         @return: List of 3 strings identifying device.
         '''
         return self.driver.get_dev_info()
-
-    #Deprecated in class
-    def dev_list(self, vendor=None, product=None):
-        raise DeprecationWarning("Use kb_dev_list(vendor, product) instead of class version.")
-        #return kb_dev_list(vendor, product)
 
     def close(self):
         '''

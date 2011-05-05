@@ -12,8 +12,8 @@ class TELOSB:
     def __init__(self, dev):
         '''
         Instantiates the KillerBee class for our TelosB/TmoteSky running GoodFET firmware.
-        @type device:   String
-        @param device:  serial device identifier (ex /dev/ttyUSB0)
+        @type dev:   String
+        @param dev:  Serial device identifier (ex /dev/ttyUSB0)
         @return: None
         @rtype: None
         '''

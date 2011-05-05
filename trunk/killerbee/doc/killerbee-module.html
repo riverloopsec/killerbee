@@ -30,7 +30,12 @@
       <th>&nbsp;&nbsp;&nbsp;<a
         href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
 
-      <th class="navbar" width="100%"></th>
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
   </tr>
 </table>
 <table width="100%" cellpadding="0" cellspacing="0">
@@ -74,7 +79,14 @@
 </tr>
   <tr><td class="summary">
   <ul class="nomargin">
+    <li> <strong class="uidlink"><a href="killerbee.GoodFET-module.html">killerbee.GoodFET</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="killerbee.GoodFETCCSPI-module.html">killerbee.GoodFETCCSPI</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="killerbee.config-module.html">killerbee.config</a></strong>    </li>
     <li> <strong class="uidlink"><a href="killerbee.daintree-module.html">killerbee.daintree</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="killerbee.dblog-module.html">killerbee.dblog</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="killerbee.dev_freakduino-module.html">killerbee.dev_freakduino</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="killerbee.dev_rzusbstick-module.html">killerbee.dev_rzusbstick</a></strong>    </li>
+    <li> <strong class="uidlink"><a href="killerbee.dev_telosb-module.html">killerbee.dev_telosb</a></strong>    </li>
     <li> <strong class="uidlink"><a href="killerbee.dot154decode-module.html">killerbee.dot154decode</a></strong>    </li>
     <li> <strong class="uidlink"><a href="killerbee.kbutils-module.html">killerbee.kbutils</a></strong>    </li>
     <li> <strong class="uidlink"><a href="killerbee.pcapdlt-module.html">killerbee.pcapdlt</a></strong>    </li>
@@ -109,6 +121,59 @@
     </td>
   </tr>
 </table>
+<!-- ==================== FUNCTIONS ==================== -->
+<a name="section-Functions"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Functions</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Functions"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="getKillerBee"></a><span class="summary-sig-name">getKillerBee</span>(<span class="summary-sig-arg">channel</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee-pysrc.html#getKillerBee">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">List</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee-module.html#kb_dev_list" class="summary-sig-name">kb_dev_list</a>(<span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Return device information for all present devices, filtering if 
+      requested by vendor and/or product IDs on USB devices.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee-pysrc.html#kb_dev_list">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
 <!-- ==================== VARIABLES ==================== -->
 <a name="section-Variables"></a>
 <table class="summary" border="1" cellpadding="3"
@@ -130,376 +195,42 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="RZ_CMD_SET_MODE"></a><span class="summary-name">RZ_CMD_SET_MODE</span> = <code title="7">7</code><br />
-      RZUSB opcode to specify operating mode
+        <a name="RZ_USB_VEND_ID"></a><span class="summary-name">RZ_USB_VEND_ID</span> = <code title="1003">1003</code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="RZ_CMD_SET_CHANNEL"></a><span class="summary-name">RZ_CMD_SET_CHANNEL</span> = <code title="8">8</code><br />
-      RZUSB opcode to specify the channel
+        <a name="RZ_USB_PROD_ID"></a><span class="summary-name">RZ_USB_PROD_ID</span> = <code title="8458">8458</code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="RZ_CMD_OPEN_STREAM"></a><span class="summary-name">RZ_CMD_OPEN_STREAM</span> = <code title="9">9</code><br />
-      RZUSB opcode to open a stream for packet injection
+        <a name="ZN_USB_VEND_ID"></a><span class="summary-name">ZN_USB_VEND_ID</span> = <code title="1240">1240</code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="RZ_CMD_CLOSE_STREAM"></a><span class="summary-name">RZ_CMD_CLOSE_STREAM</span> = <code title="10">10</code><br />
-      RZUSB opcode to close a stream for packet injection
+        <a name="ZN_USB_PROD_ID"></a><span class="summary-name">ZN_USB_PROD_ID</span> = <code title="14">14</code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="RZ_CMD_INJECT_FRAME"></a><span class="summary-name">RZ_CMD_INJECT_FRAME</span> = <code title="13">13</code><br />
-      RZUSB opcode to specify a frame to inject
+        <a name="usbVendorList"></a><span class="summary-name">usbVendorList</span> = <code title="[1003, 1240]"><code class="variable-group">[</code>1003<code class="variable-op">, </code>1240<code class="variable-group">]</code></code>
     </td>
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
-        <a name="RZ_CMD_JAMMER_ON"></a><span class="summary-name">RZ_CMD_JAMMER_ON</span> = <code title="14">14</code><br />
-      RZUSB opcode to turn the jammer function on
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_CMD_JAMMER_OFF"></a><span class="summary-name">RZ_CMD_JAMMER_OFF</span> = <code title="15">15</code><br />
-      RZUSB opcode to turn the jammer function off
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_CMD_MODE_AC"></a><span class="summary-name">RZ_CMD_MODE_AC</span> = <code title="0">0</code><br />
-      RZUSB mode for aircapture (inject + sniff)
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_CMD_MODE_NONE"></a><span class="summary-name">RZ_CMD_MODE_NONE</span> = <code title="4">4</code><br />
-      RZUSB no mode specified
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_LOCAL_TIMEOUT"></a><span class="summary-name">RZ_RESP_LOCAL_TIMEOUT</span> = <code title="0">0</code><br />
-      RZUSB Response: Local Timeout Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_SUCCESS"></a><span class="summary-name">RZ_RESP_SUCCESS</span> = <code title="128">128</code><br />
-      RZUSB Response: Success
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_SYNTACTICAL_ERROR"></a><span class="summary-name">RZ_RESP_SYNTACTICAL_ERROR</span> = <code title="129">129</code><br />
-      RZUSB Response: Syntactical Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_SEMANTICAL_ERROR"></a><span class="summary-name">RZ_RESP_SEMANTICAL_ERROR</span> = <code title="130">130</code><br />
-      RZUSB Response: Semantical Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_HW_TIMEOUT"></a><span class="summary-name">RZ_RESP_HW_TIMEOUT</span> = <code title="131">131</code><br />
-      RZUSB Response: Hardware Timeout
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_SIGN_ON"></a><span class="summary-name">RZ_RESP_SIGN_ON</span> = <code title="132">132</code><br />
-      RZUSB Response: Sign On
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_GET_PARAMETER"></a><span class="summary-name">RZ_RESP_GET_PARAMETER</span> = <code title="133">133</code><br />
-      RZUSB Response: Get Parameter
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_TRX_READ_REGISTER"></a><span class="summary-name">RZ_RESP_TRX_READ_REGISTER</span> = <code title="134">134</code><br />
-      RZUSB Response: Transceiver Read Register Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_TRX_READ_FRAME"></a><span class="summary-name">RZ_RESP_TRX_READ_FRAME</span> = <code title="135">135</code><br />
-      RZUSB Response: Transceiver Read Frame Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_TRX_READ_SRAM"></a><span class="summary-name">RZ_RESP_TRX_READ_SRAM</span> = <code title="136">136</code><br />
-      RZUSB Response: Transceiver Read SRAM Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_TRX_GET_PIN"></a><span class="summary-name">RZ_RESP_TRX_GET_PIN</span> = <code title="137">137</code><br />
-      RZUSB Response: Transceiver Get PIN Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_TRX_BUSY"></a><span class="summary-name">RZ_RESP_TRX_BUSY</span> = <code title="138">138</code><br />
-      RZUSB Response: Transceiver Busy Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_PRITMITIVE_FAILED"></a><span class="summary-name">RZ_RESP_PRITMITIVE_FAILED</span> = <code title="139">139</code><br />
-      RZUSB Response: Primitive Failed Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_PRITMITIVE_UNKNOWN"></a><span class="summary-name">RZ_RESP_PRITMITIVE_UNKNOWN</span> = <code title="140">140</code><br />
-      RZUSB Response: Primitive Unknown Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_COMMAND_UNKNOWN"></a><span class="summary-name">RZ_RESP_COMMAND_UNKNOWN</span> = <code title="141">141</code><br />
-      RZUSB Response: Command Unknown Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_BUSY_SCANING"></a><span class="summary-name">RZ_RESP_BUSY_SCANING</span> = <code title="142">142</code><br />
-      RZUSB Response: Busy Scanning Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_BUSY_CAPTURING"></a><span class="summary-name">RZ_RESP_BUSY_CAPTURING</span> = <code title="143">143</code><br />
-      RZUSB Response: Busy Capturing Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_OUT_OF_MEMORY"></a><span class="summary-name">RZ_RESP_OUT_OF_MEMORY</span> = <code title="144">144</code><br />
-      RZUSB Response: Out of Memory Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_BUSY_JAMMING"></a><span class="summary-name">RZ_RESP_BUSY_JAMMING</span> = <code title="145">145</code><br />
-      RZUSB Response: Busy Jamming Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_NOT_INITIALIZED"></a><span class="summary-name">RZ_RESP_NOT_INITIALIZED</span> = <code title="146">146</code><br />
-      RZUSB Response: Not Initialized Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_NOT_IMPLEMENTED"></a><span class="summary-name">RZ_RESP_NOT_IMPLEMENTED</span> = <code title="147">147</code><br />
-      RZUSB Response: Opcode Not Implemented Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_PRIMITIVE_FAILED"></a><span class="summary-name">RZ_RESP_PRIMITIVE_FAILED</span> = <code title="148">148</code><br />
-      RZUSB Response: Primitive Failed Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_VRT_KERNEL_ERROR"></a><span class="summary-name">RZ_RESP_VRT_KERNEL_ERROR</span> = <code title="149">149</code><br />
-      RZUSB Response: Could not execute due to vrt_kernel_error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_RESP_BOOT_PARAM"></a><span class="summary-name">RZ_RESP_BOOT_PARAM</span> = <code title="150">150</code><br />
-      RZUSB Response: Boot Param Error
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_EVENT_STREAM_AC_DATA"></a><span class="summary-name">RZ_EVENT_STREAM_AC_DATA</span> = <code title="80">80</code><br />
-      RZUSB Event Opcode: AirCapture Data
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a href="killerbee-module.html#RESPONSE_MAP" class="summary-name">RESPONSE_MAP</a> = <code title="{0: 'Local Timeout Error',
- 128: 'Success',
- 129: 'Syntactical Error',
- 130: 'Semantical Error',
- 131: 'Hardware Timeout',
- 132: 'Sign On',
- 133: 'Get Parameter',
- 134: 'Transceiver Read Register',
-..."><code class="variable-group">{</code>0<code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Local Timeout Error</code><code class="variable-quote">'</code><code class="variable-op">, </code>128<code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Success</code><code class="variable-quote">'</code><code class="variable-op">, </code>129<code class="variable-op">:</code><code class="variable-ellipsis">...</code></code><br />
-      Dictionary of RZUSB error to strings
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_USB_VEND_ID"></a><span class="summary-name">RZ_USB_VEND_ID</span> = <code title="1003">1003</code><br />
-      RZUSB USB VID
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_USB_PROD_ID"></a><span class="summary-name">RZ_USB_PROD_ID</span> = <code title="8458">8458</code><br />
-      RZUSB USB PID
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_USB_COMMAND_EP"></a><span class="summary-name">RZ_USB_COMMAND_EP</span> = <code title="2">2</code><br />
-      RZUSB USB Command Endpoint Identifier
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_USB_RESPONSE_EP"></a><span class="summary-name">RZ_USB_RESPONSE_EP</span> = <code title="132">132</code><br />
-      RZUSB USB Response Endpoint Identifier
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="RZ_USB_PACKET_EP"></a><span class="summary-name">RZ_USB_PACKET_EP</span> = <code title="129">129</code><br />
-      RZUSB USB Packet Endpoint Identifier
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="KB_CAPAB_NONE"></a><span class="summary-name">KB_CAPAB_NONE</span> = <code title="0">0</code><br />
-      Capabilities Flag: No Capabilities
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="KB_CAPAB_SNIFF"></a><span class="summary-name">KB_CAPAB_SNIFF</span> = <code title="1">1</code><br />
-      Capabilities Flag: Can Sniff
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="KB_CAPAB_SETCHAN"></a><span class="summary-name">KB_CAPAB_SETCHAN</span> = <code title="2">2</code><br />
-      Capabilities Flag: Can Set the Channel
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="KB_CAPAB_INJECT"></a><span class="summary-name">KB_CAPAB_INJECT</span> = <code title="3">3</code><br />
-      Capabilities Flag: Can Inject Frames
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="KB_CAPAB_PHYJAM"></a><span class="summary-name">KB_CAPAB_PHYJAM</span> = <code title="4">4</code><br />
-      Capabilities Flag: Can Jam PHY Layer
-    </td>
-  </tr>
-<tr>
-    <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">&nbsp;</span>
-    </td><td class="summary">
-        <a name="KB_CAPAB_SELFACK"></a><span class="summary-name">KB_CAPAB_SELFACK</span> = <code title="5">5</code><br />
-      Capabilities Flag: Can ACK Frames Automatically
+        <a name="usbProductList"></a><span class="summary-name">usbProductList</span> = <code title="[8458, 14]"><code class="variable-group">[</code>8458<code class="variable-op">, </code>14<code class="variable-group">]</code></code>
     </td>
   </tr>
 <tr>
@@ -510,17 +241,17 @@
     </td>
   </tr>
 </table>
-<!-- ==================== VARIABLES DETAILS ==================== -->
-<a name="section-VariablesDetails"></a>
+<!-- ==================== FUNCTION DETAILS ==================== -->
+<a name="section-FunctionDetails"></a>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr bgcolor="#70b0f0" class="table-header">
   <td colspan="2" class="table-header">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr valign="top">
-        <td align="left"><span class="table-header">Variables Details</span></td>
+        <td align="left"><span class="table-header">Function Details</span></td>
         <td align="right" valign="top"
-         ><span class="options">[<a href="#section-VariablesDetails"
+         ><span class="options">[<a href="#section-FunctionDetails"
          class="privatelink" onclick="toggle_private();"
          >hide private</a>]</span></td>
       </tr>
@@ -528,29 +259,28 @@
   </td>
 </tr>
 </table>
-<a name="RESPONSE_MAP"></a>
+<a name="kb_dev_list"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
        cellspacing="0" width="100%" bgcolor="white">
 <tr><td>
-  <h3 class="epydoc">RESPONSE_MAP</h3>
-  <p>Dictionary of RZUSB error to strings</p>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">kb_dev_list</span>(<span class="sig-arg">vendor</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">product</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee-pysrc.html#kb_dev_list">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Return device information for all present devices, filtering if 
+  requested by vendor and/or product IDs on USB devices.</p>
   <dl class="fields">
-  </dl>
-  <dl class="fields">
-    <dt>Value:</dt>
-      <dd><table><tr><td><pre class="variable">
-<code class="variable-group">{</code>0<code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Local Timeout Error</code><code class="variable-quote">'</code><code class="variable-op">,</code>
- 128<code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Success</code><code class="variable-quote">'</code><code class="variable-op">,</code>
- 129<code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Syntactical Error</code><code class="variable-quote">'</code><code class="variable-op">,</code>
- 130<code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Semantical Error</code><code class="variable-quote">'</code><code class="variable-op">,</code>
- 131<code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Hardware Timeout</code><code class="variable-quote">'</code><code class="variable-op">,</code>
- 132<code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Sign On</code><code class="variable-quote">'</code><code class="variable-op">,</code>
- 133<code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Get Parameter</code><code class="variable-quote">'</code><code class="variable-op">,</code>
- 134<code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Transceiver Read Register</code><code class="variable-quote">'</code><code class="variable-op">,</code>
-<code class="variable-ellipsis">...</code>
-</pre></td></tr></table>
-</dd>
+    <dt>Returns: List</dt>
+        <dd>List of device information present. For USB devices, get 
+          [busdir:devfilename, productString, serialNumber] For serial 
+          devices, get [serialFileName, deviceDescription, &quot;&quot;]</dd>
   </dl>
 </td></tr></table>
 </div>
@@ -575,13 +305,18 @@
       <th>&nbsp;&nbsp;&nbsp;<a
         href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
 
-      <th class="navbar" width="100%"></th>
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
   </tr>
 </table>
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu Oct 15 10:59:19 2009
+    Generated by Epydoc 3.0.1 on Thu May  5 12:03:11 2011
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

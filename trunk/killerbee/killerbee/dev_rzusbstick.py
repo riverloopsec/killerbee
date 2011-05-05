@@ -99,8 +99,10 @@ class RZUSBSTICK:
         '''
         Instantiates the KillerBee class for the RZUSBSTICK hardware.
 
-        @type device:   String
-        @param device:  USB device identifier
+        @type dev:   String
+        @param dev:  USB device identifier
+        @type bus:   String
+        @param bus:  Identifies the USB bus the device is on
         @return: None
         @rtype: None
         '''

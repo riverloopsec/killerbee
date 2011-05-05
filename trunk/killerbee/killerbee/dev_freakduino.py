@@ -78,7 +78,7 @@ class FREAKDUINO:
         '''
         Sends a command over the self.conn serial connection.
         Ex: If provided cmdstr = "C!N" it will send "SC!N", telling the device to turn on sniffing ("N"),
-            and it expects to receive a confirmation back "&C!N" to confirm success.
+        and it expects to receive a confirmation back "&C!N" to confirm success.
         '''
         print "Flushing out of buffer:", self.handle.inWaiting()
         self.handle.flushInput()
