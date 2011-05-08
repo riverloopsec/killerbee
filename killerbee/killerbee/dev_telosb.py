@@ -3,8 +3,6 @@ import time
 import struct
 import time
 from datetime import datetime, date, timedelta
-#from datetime import datetime, date 
-#from datetime import time as dttime
 from kbutils import KBCapabilities, makeFCS
 from GoodFETCCSPI import GoodFETCCSPI
 
@@ -46,6 +44,7 @@ class TELOSB:
         self.capabilities.setcapab(KBCapabilities.SNIFF, True)
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
         self.capabilities.setcapab(KBCapabilities.INJECT, True)
+        self.capabilities.setcapab(KBCapabilities.PHYJAM_REFLEX, True)
         return
 
     # KillerBee expects the driver to implement this function
@@ -102,7 +101,7 @@ class TELOSB:
         '''
         self.capabilities.require(KBCapabilities.SETCHAN)
 
-        if channel >= 10 or channel <= 26:
+        if channel >= 11 or channel <= 26:
             self.handle.RF_setchan(channel);
         else:
             raise Exception('Invalid channel')
@@ -155,7 +154,7 @@ class TELOSB:
 
         while (packet is None and (start + timedelta(microseconds=timeout) > datetime.now())):
             packet = self.handle.RF_rxpacket()
-            rssi = 0#self.handle.RF_getrssi() #TODO calibrate
+            rssi = self.handle.RF_getrssi() #TODO calibrate
 
         if packet is None:
             return None
@@ -166,6 +165,7 @@ class TELOSB:
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
         result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'location':None}
+        result['dbm'] = rssi - 45 #TODO tune specifically to the Tmote platform (does ext antenna need to different?)
         result['datetime'] = datetime.combine(date.today(), (datetime.now()).time()) #TODO address timezones by going to UTC everywhere
         return result
  

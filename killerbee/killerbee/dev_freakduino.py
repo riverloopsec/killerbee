@@ -258,6 +258,7 @@ class FREAKDUINO:
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
         result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi}
+        result['dbm'] = None #TODO calculate dBm antenna signal based on RSSI formula
         result['datetime'] = self.getCaptureDateTime(data)
         result['location'] = (self.lon, self.lat, self.alt)
         return result

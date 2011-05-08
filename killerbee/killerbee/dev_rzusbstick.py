@@ -405,7 +405,10 @@ class RZUSBSTICK:
             framedata = ''.join(framedata[:-1])
             #Return in a nicer dictionary format, so we don't have to reference by number indicies.
             #Note that 0,1,2 indicies inserted twice for backwards compatibility.
-            return {0:framedata, 1:validcrc, 2:rssi, 'bytes':framedata, 'validcrc':validcrc, 'rssi':rssi, 'datetime':datetime.now()}
+            return {0:framedata, 1:validcrc, 2:rssi, \
+                    'bytes':framedata, 'validcrc':validcrc, 'rssi':rssi, \
+                    'dbm':rssi,'datetime':datetime.now()}
+            #TODO calculate dbm based on RSSI conversion formula for the chip
         else:
             return None
             #raise Exception("Unrecognized AirCapture Data Response: 0x%02x" % pdata[0])

@@ -101,7 +101,7 @@ class PcapReader:
 
 class PcapDumper:
 
-    def __init__(self, datalink, savefile):
+    def __init__(self, datalink, savefile, ppi = False):
         '''
         Creates a libpcap file using the specified datalink type.
         @type datalink: Integer
@@ -110,7 +110,10 @@ class PcapDumper:
         @param savefile: Output libpcap filename to open
         @rtype: None
         '''
+        if ppi: from killerbee.pcapdlt import DLT_PPI
+        self.ppi = ppi
         self.__fh = open(savefile, mode='wb')
+        self.datalink = datalink
         self.__fh.write(''.join([
             struct.pack("I", PCAPH_MAGIC_NUM), 
             struct.pack("H", PCAPH_VER_MAJOR),
@@ -118,10 +121,11 @@ class PcapDumper:
             struct.pack("I", PCAPH_THISZONE),
             struct.pack("I", PCAPH_SIGFIGS),
             struct.pack("I", PCAPH_SNAPLEN),
-            struct.pack("I", datalink)
+            struct.pack("I", DLT_PPI if self.ppi else self.datalink)
             ]))
 
-    def pcap_dump(self, packet, ts_sec=None, ts_usec=None, orig_len=None):
+    def pcap_dump(self, packet, ts_sec=None, ts_usec=None, orig_len=None, 
+                  freq_mhz = None, ant_dbm = None):
         '''
         Appends a new packet to the libpcap file.  Optionally specify ts_sec
         and tv_usec for timestamp information, otherwise the current time is
@@ -141,24 +145,68 @@ class PcapDumper:
         @rtype: None
         '''
 
+        # Build CACE PPI headers if requested
+        if self.ppi is True:
+            pph_len = 8 + 24 #ppi_header + 802.11-common header and data
+            rf_freq_mhz = 0x0000
+            if freq_mhz is not None: rf_freq_mhz = freq_mhz
+            rf_ant_dbm = 0
+            if ant_dbm is not None: rf_ant_dbm = ant_dbm
+
+            #CACE PPI Header
+            caceppi_hdr = ''.join([
+                struct.pack("<B", 0),
+                struct.pack("<B", 0x01),
+                struct.pack("<H", pph_len),
+                struct.pack("<I", self.datalink)
+                ])
+
+            #CACE PPI Field 802.11-Common
+            caceppi_f80211common = ''.join([
+                struct.pack("<H", 2),        #2 = Field Type 802.11-Common
+                struct.pack("<H", 20),       #20 = 802.11-Common length in bytes
+                struct.pack("<Q", 0),        #FSF-Timer
+                struct.pack("<H", 0),        #Flags
+                struct.pack("<H", 0),        #Rate
+                struct.pack("<H", rf_freq_mhz), #Channel-Freq
+                struct.pack("<H", 0x0080),   #Channel-Flags = 2GHz
+                struct.pack("<B", 0),        #FHSS-Hopset
+                struct.pack("<B", 0),        #FHSS-Pattern
+                struct.pack("<b", rf_ant_dbm),  #dBm-Ansignal
+                struct.pack("<b", 0)         #dBm-Antnoise
+                ])
+
         if ts_sec == None or ts_usec == None:
             # There must be a better way here that I don't know -JW
             s_sec, s_usec = str(time.time()).split(".")
             ts_sec = int(s_sec)
             ts_usec = int(s_usec)
 
-        if orig_len == None:
-            orig_len = len(packet)
-
         plen = len(packet)
+        if orig_len == None:
+            orig_len = plen
 
-        self.__fh.write(''.join([
-            struct.pack("I", ts_sec),
-            struct.pack("I", ts_usec),
-            struct.pack("I", orig_len),
-            struct.pack("I", plen),
-            packet
-            ]))
+        #Encapsulated packet header and packet
+        output_list = [ struct.pack("I", ts_sec),
+                        struct.pack("I", ts_usec),
+                        struct.pack("I", orig_len),
+                        struct.pack("I", plen) ]
+
+        if self.ppi is True:
+            output_list[2] = struct.pack("I", orig_len + pph_len)
+            output_list[3] = struct.pack("I", plen + pph_len)
+            output_list.append(caceppi_hdr)
+            output_list.append(caceppi_f80211common)
+
+        output_list.append(packet)
+        output = ''.join(output_list)
+
+        #DEBUG Output:
+        #print "Pcap:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in output])
+        #print "PPI:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in (caceppi_hdr + caceppi_f80211common)])
+        #print "802154:", packet.encode("hex")
+
+        self.__fh.write(output)
 
         return
 

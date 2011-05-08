@@ -9,16 +9,6 @@ from kbutils import *
 from zigbeedecode import * #would like to import only within killerbee class
 from dot154decode import * #would like to import only within killerbee class
 
-# Define what vendors and products we recognize, in order to only consider appropriate USB devices:
-RZ_USB_VEND_ID      = 0x03EB
-RZ_USB_PROD_ID      = 0x210A
-ZN_USB_VEND_ID      = 0x04D8
-ZN_USB_PROD_ID      = 0x000E
-#FTDI_USB_VEND_ID      = 0x0403
-#FTDI_USB_PROD_ID      = 0x6001
-usbVendorList = [RZ_USB_VEND_ID, ZN_USB_VEND_ID]
-usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID]
-
 # Utility Functions
 def getKillerBee(channel):
 	kb = KillerBee()
@@ -42,7 +32,7 @@ def kb_dev_list(vendor=None, product=None):
 
 # KillerBee Class
 class KillerBee:
-    def __init__(self, device=None, datasource=None):
+    def __init__(self, device=None, datasource=None, gps=None):
         '''
         Instantiates the KillerBee class.
 
@@ -50,10 +40,18 @@ class KillerBee:
         @param device:  USB or serial device identifier
         @type datasource: String
         @param datasource: A known datasource type that is used
-                           by dblog to record how the data was captured.
+        by dblog to record how the data was captured.
+        @type gps: String
+        @param gps: Optional serial device identifier for an attached GPS
+        unit. If provided, or if global variable has previously been set, 
+        KillerBee skips that device in initalization process.
         @return: None
         @rtype: None
         '''
+
+        global gps_devstring
+        if gps_devstring is None and gps is not None:
+            gps_devstring = gps
 
         self.dev = None
         self.__bus = None
@@ -67,13 +65,13 @@ class KillerBee:
             (self.__bus, self.dev) = kbutils.search_usb(device)
             if self.dev == None:
                 raise Exception("Did not find a USB device matching %s." % device)
-                
+
         # Figure out a device from serial if one is not set
         if (device is None):
             glob_list = glob.glob("/dev/ttyUSB*");
             if len(glob_list) > 0:
                 device = glob_list[0];
-                
+
         if self.dev is not None:
             if self.__device_is(RZ_USB_VEND_ID, RZ_USB_PROD_ID):
                 from dev_rzusbstick import RZUSBSTICK
@@ -96,7 +94,9 @@ class KillerBee:
             # Recognize if device specified by serial string:
             if (device is not None and device[:5] == "/dev/"):
                 self.dev = device
-                if kbutils.isfreakduino(self.dev):
+                if self.dev == gps_devstring:
+                    print "Skipping GPS device string: %s" % serialdev #TODO remove print, make pass
+                elif kbutils.isfreakduino(self.dev):
                     from dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
                 elif kbutils.isgoodfetccspi(self.dev):
@@ -145,7 +145,7 @@ class KillerBee:
         '''
         Deprecated in class, use kbutils.devlist() instead.
         '''
-        raise DeprecationWarning("Use kb_dev_list(vendor, product) instead of class version.")
+        raise DeprecationWarning("Use kbutils.devlist(vendor, product) instead of class version.")
         #return kb_dev_list(vendor, product)
 
     def get_dev_info(self):
