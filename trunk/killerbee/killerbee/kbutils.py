@@ -8,8 +8,13 @@ RZ_USB_VEND_ID      = 0x03EB
 RZ_USB_PROD_ID      = 0x210A
 ZN_USB_VEND_ID      = 0x04D8
 ZN_USB_PROD_ID      = 0x000E
+#FTDI_USB_VEND_ID      = 0x0403
+#FTDI_USB_PROD_ID      = 0x6001
 usbVendorList = [RZ_USB_VEND_ID, ZN_USB_VEND_ID]
 usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID]
+
+# Global variables
+gps_devstring = None
 
 class KBCapabilities:
     '''
@@ -21,6 +26,7 @@ class KBCapabilities:
     INJECT             = 0x03 #: Capabilities Flag: Can Inject Frames
     PHYJAM             = 0x04 #: Capabilities Flag: Can Jam PHY Layer
     SELFACK            = 0x05 #: Capabilities Flag: Can ACK Frames Automatically
+    PHYJAM_REFLEX      = 0x06 #: Capabilities Flag: Can Jam PHY Layer Reflexively
     def __init__(self):
         self._capabilities = {
                 self.NONE : False,
@@ -28,7 +34,8 @@ class KBCapabilities:
                 self.SETCHAN : False,
                 self.INJECT : False,
                 self.PHYJAM : False,
-                self.SELFACK: False}
+                self.SELFACK: False,
+                self.PHYJAM_REFLEX: False}
     def check(self, capab):
         try:
             return self._capabilities[capab]
@@ -42,17 +49,25 @@ class KBCapabilities:
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
 
-def devlist(vendor=None, product=None):
+def devlist(vendor=None, product=None, gps=None):
     '''
     Return device information for all present devices, 
-    filtering if requested by vendor and/or product IDs on USB devices.
+    filtering if requested by vendor and/or product IDs on USB devices, and
+    running device fingerprint functions on serial devices.
+    @type gps: String
+    @param gps: Optional serial device identifier for an attached GPS
+    unit. If provided, or if global variable has previously been set, 
+    KillerBee skips that device in device enumeration process.
     @rtype: List
     @return: List of device information present.
                 For USB devices, get [busdir:devfilename, productString, serialNumber]
                 For serial devices, get [serialFileName, deviceDescription, ""]
     '''
-    global usbVendorList, usbProductList
+    global usbVendorList, usbProductList, gps_devstring
+    if gps is not None and gps_devstring is None:
+        gps_devstring = gps
     devlist = []
+
     busses = usb.busses()
     for bus in busses:
         devices = bus.devices
@@ -64,9 +79,10 @@ def devlist(vendor=None, product=None):
                                   dev.open().getString(dev.iSerialNumber, 12)])
 
     seriallist = glob.glob("/dev/ttyUSB*") #TODO make cross platform globing/winnt
-    #print "Serial List:", seriallist
     for serialdev in seriallist:
-        if (isgoodfetccspi(serialdev)):
+        if serialdev == gps_devstring:
+            print "kbutils.devlist is skipping GPS device string: %s" % serialdev #TODO remove print, make pass
+        elif (isgoodfetccspi(serialdev)):
             devlist.append([serialdev, "GoodFET TelosB/Tmote", ""])
         elif (isfreakduino(serialdev)):
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
