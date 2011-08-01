@@ -197,7 +197,7 @@ class RZUSBSTICK:
         try:
             self.handle.bulkWrite(endpoint, data)
             # Returns a tuple, first value is an int as the RZ_RESP_* code
-            time.sleep(0.05);
+            time.sleep(0.05)
             response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
         except usb.USBError, e:
             if e.args != ('No error',): # http://bugs.debian.org/476796
