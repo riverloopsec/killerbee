@@ -61,7 +61,8 @@ class DBLogger:
     def set_channel(self, chan):
         self.channel = chan
 
-    def add_packet(self, full=None, scapy=None, bytes=None, rssi=None, location=None, datetime=None):
+    def add_packet(self, full=None, scapy=None,
+                   bytes=None, rssi=None, location=None, datetime=None, channel=None):
         if (self.conn==None): raise Exception("DBLogger requires active connection status.")
         # Use values in 'full' parameter to provide data for undefined other parameters
         if bytes == None and 'bytes' in full: bytes = full['bytes']
@@ -70,16 +71,14 @@ class DBLogger:
         if location == None and 'location' in full: location = full['location']
 
         # Get the location ID, or create one, if GPS data is available
-        if location != None:
-            (lon, lat, alt) = location
-            #TODO
+        loc_id = self.add_location(location) if location is not None else None
 
         # Dissect the packet's bytes, using the Scapy'd version in parameter scapy if provided
         if scapy == None:
             # Import Scapy extensions
             import logging
             logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
-            from scapy.all import Dot15d4 #, Dot15d4Beacon, Dot15d4Data, Dot15d4Ack, Dot15d4Cmd
+            from scapy.all import Dot15d4
             scapy = Dot15d4(bytes)
         #from kbutils import hexdump
         #print "Before", hexdump(bytes)
@@ -106,7 +105,8 @@ class DBLogger:
         if srcdevid != None: sql.append("source=%d" % srcdevid)
         if destdevid != None: sql.append("dest=%d" % destdevid)
         if rssi != None: sql.append("rssi=%d" % rssi)
-        #TODO modify DB and this to support storing channel it was captured on
+        if loc_id != None: sql.append("loc_id=%d" % loc_id)
+        if channel != None: sql.append("channel=%d" % channel)
         sql.append("fcf_panidcompress=%d" % scapy.fcf_panidcompress)
         sql.append("fcf_ackreq=%d" % scapy.fcf_ackreq)
         sql.append("fcf_pending=%d" % scapy.fcf_pending)
@@ -118,6 +118,25 @@ class DBLogger:
         sql.append("seqnum=%d" % scapy.seqnum)
         # adding the bytes of the packet are handled in the insert method b/c they are binary
         return self.insert(' '.join(['INSERT INTO packets SET', ', '.join(sql)]), packetbytes=bytes)
+
+    def add_location(self, location):
+        if (self.conn==None): raise Exception("DBLogger requires active connection status.")
+        (lon, lat, alt) = location
+        self.conn.execute("SELECT loc_id FROM locations WHERE %s AND %s AND %s LIMIT 1" %          \
+                            ( ("longitude = '%f'" % lon) if lon != None else "longitude IS NULL" , \
+                              ("latitude = '%f'" % lat) if lat != None else "latitude IS NULL"   , \
+                              ("elevation = '%f'" % alt) if alt != None else "elevation IS NULL"  ))
+        res = self.conn.fetchone()
+        if (res != None):
+            return res #location already in db, return loc_id
+        else:
+            self.conn.execute("INSERT INTO locations SET %s, %s, %s" %                            \
+                            ( ("longitude = '%f'" % lon) if lon != None else "longitude = NULL" , \
+                              ("latitude = '%f'" % lat) if lat != None else "latitude = NULL"   , \
+                              ("elevation = '%f'" % alt) if alt != None else "elevation = NULL"  ))
+            if self.conn.rowcount != 1: raise Exception("Location insert did not succeed.")
+            self.db.commit()
+            return self.conn.lastrowid
 
     def add_device(self, shortaddr, panid):
         if (self.conn==None): raise Exception("DBLogger requires active connection status.")

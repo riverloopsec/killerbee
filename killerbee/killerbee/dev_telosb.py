@@ -184,7 +184,7 @@ class TELOSB:
         @param channel: Sets the channel, optional
         @rtype: None
         '''
-        self.capabilities.require(KBCapabilities.PHYJAM)
+        self.capabilities.require(KBCapabilities.PHYJAM_REFLEX)
 
         self.handle.RF_promiscuity(1)
         self.handle.RF_autocrc(0)
