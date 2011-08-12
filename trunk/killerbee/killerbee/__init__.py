@@ -2,12 +2,15 @@ import usb
 import serial
 import struct
 import os, time, glob
+
 from pcapdump import *
 from daintree import *
 from pcapdlt import *
+
 from kbutils import *
 from zigbeedecode import * #would like to import only within killerbee class
 from dot154decode import * #would like to import only within killerbee class
+from config import *       #to get DEV_ENABLE_* variables
 
 # Utility Functions
 def getKillerBee(channel):
@@ -94,12 +97,13 @@ class KillerBee:
             # Recognize if device specified by serial string:
             if (device is not None and device[:5] == "/dev/"):
                 self.dev = device
-                if self.dev == gps_devstring:
-                    print "Skipping GPS device string: %s" % serialdev #TODO remove print, make pass
-                elif kbutils.isfreakduino(self.dev):
+                if (self.dev == gps_devstring):
+                    pass
+                    #print "Skipping GPS device string: %s" % serialdev
+                elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
                     from dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
-                elif kbutils.isgoodfetccspi(self.dev):
+                elif (kbutils.isgoodfetccspi(self.dev)):
                     from dev_telosb import TELOSB
                     self.driver = TELOSB(self.dev)
                 else:

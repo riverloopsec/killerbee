@@ -139,7 +139,8 @@ class RZUSBSTICK:
             self.handle.claimInterface(alt)
             self.handle.setAltInterface(alt)
         except:
-            raise Exception("Unable to open device.  Ensure the device is free and plugged-in.")
+            raise Exception("Unable to open device. " +
+                            "Ensure the device is free and plugged-in. You may need sudo.")
 
     def close(self):
         '''
