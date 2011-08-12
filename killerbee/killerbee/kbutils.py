@@ -3,6 +3,7 @@ import os, glob
 import time
 import random
 from struct import pack
+from config import *       #to get DEV_ENABLE_* variables
 
 RZ_USB_VEND_ID      = 0x03EB
 RZ_USB_PROD_ID      = 0x210A
@@ -84,7 +85,7 @@ def devlist(vendor=None, product=None, gps=None):
             print "kbutils.devlist is skipping GPS device string: %s" % serialdev #TODO remove print, make pass
         elif (isgoodfetccspi(serialdev)):
             devlist.append([serialdev, "GoodFET TelosB/Tmote", ""])
-        elif (isfreakduino(serialdev)):
+        elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
     return devlist
     
