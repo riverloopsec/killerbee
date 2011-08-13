@@ -115,11 +115,12 @@ def isfreakduino(serialdev):
     time.sleep(1.5)
     s.write('SC!V\r')
     time.sleep(1.5)
-    #If you get "TypeError: readline() takes no keyword arguments"
-    # this results from a version issue in pySerial.
-    # readline should take an eol argument, per:
+    #readline should take an eol argument, per:
     # http://pyserial.sourceforge.net/pyserial_api.html#serial.FileLike.readline
-    s.readline(eol='&')
+    # However, many got an "TypeError: readline() takes no keyword arguments" due to a pySerial error
+    # So we have replaced it with a bruteforce method. Old: s.readline(eol='&')
+    for i in range(100):
+        if (s.read() == '&'): break
     if s.read(3) == 'C!V': version = s.read()
     else: version = None
     s.close()

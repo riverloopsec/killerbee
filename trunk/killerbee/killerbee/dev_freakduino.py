@@ -210,7 +210,7 @@ class FREAKDUINO:
         '''
         if self.__stream_open == False:
             self.sniffer_on() #start sniffing
-        self.pnext_rec(timeout)
+        return self.pnext_rec(timeout)
 
     # Bulk of pnext implementation, but does not ensure the sniffer is on first, thus usable for EEPROM reading
     def pnext_rec(self, timeout=100):
