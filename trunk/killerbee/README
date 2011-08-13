@@ -17,15 +17,16 @@ added in the future.
 We have striven to use a minimum number of software dependencies, however, it
 is necessary to install the following Python modules before installation:
 
-crypto
+serial
 usb
+crypto  (for some functions)
 pygtk   (for use of tools that have GUIs)
 cairo   (for use of tools that have GUIs)
 
 On Ubuntu systems, you can install the needed dependencies with the following
 command line:
 
-# apt-get install python-gtk2 python-cairo python-usb python-crypto
+# apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial
 
 Also note that this is a fairly advanced and un-friendly attack platform.  This
 is not Cain & Abel.  It is intended for developers and advanced analysts who are
