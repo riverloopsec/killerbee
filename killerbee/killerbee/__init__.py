@@ -70,6 +70,7 @@ class KillerBee:
                 raise Exception("Did not find a USB device matching %s." % device)
 
         # Figure out a device from serial if one is not set
+        #TODO be able to try more than one serial device here (merge with devlist code somehow)
         if (device is None):
             glob_list = glob.glob("/dev/ttyUSB*");
             if len(glob_list) > 0:
@@ -99,8 +100,8 @@ class KillerBee:
                 self.dev = device
                 if (self.dev == gps_devstring):
                     pass
-                    #print "Skipping GPS device string: %s" % serialdev
-                elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
+                    #print "Skipping GPS device string: %s" % self.dev
+                elif (DEV_ENABLE_FREAKDUINO and isfreakduino(self.dev)):
                     from dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
                 elif (kbutils.isgoodfetccspi(self.dev)):
