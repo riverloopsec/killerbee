@@ -79,7 +79,7 @@ def devlist(vendor=None, product=None, gps=None):
                                   dev.open().getString(dev.iProduct, 50),    \
                                   dev.open().getString(dev.iSerialNumber, 12)])
 
-    seriallist = glob.glob("/dev/ttyUSB*") #TODO make cross platform globing/winnt
+    seriallist = get_serial_ports()
     for serialdev in seriallist:
         if serialdev == gps_devstring:
             print "kbutils.devlist is skipping GPS device string: %s" % serialdev #TODO remove print, make pass
@@ -88,6 +88,14 @@ def devlist(vendor=None, product=None, gps=None):
         elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
     return devlist
+
+def get_serial_devs():
+    global DEV_ENABLE_FREAKDUINO
+    #TODO Continue moving code from line 83:89 here, yielding results
+
+def get_serial_ports():
+    seriallist = glob.glob("/dev/ttyUSB*") #TODO make cross platform globing/winnt
+    return seriallist
     
 def isgoodfetccspi(serialdev):
     '''

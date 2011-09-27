@@ -2,6 +2,7 @@ import usb
 import serial
 import struct
 import os, time, glob
+from warnings import warn
 
 from pcapdump import *
 from daintree import *
@@ -72,9 +73,9 @@ class KillerBee:
         # Figure out a device from serial if one is not set
         #TODO be able to try more than one serial device here (merge with devlist code somehow)
         if (device is None):
-            glob_list = glob.glob("/dev/ttyUSB*");
-            if len(glob_list) > 0:
-                device = glob_list[0];
+            seriallist = get_serial_ports();
+            if len(seriallist) > 0:
+                device = seriallist[0];
 
         if self.dev is not None:
             if self.__device_is(RZ_USB_VEND_ID, RZ_USB_PROD_ID):
@@ -115,8 +116,12 @@ class KillerBee:
 
         # Start a connection to the remote packet logging server, if able:
         if datasource is not None:
-            import dblog
-            self.dblog = dblog.DBLogger(datasource)
+            try:
+                import dblog
+                self.dblog = dblog.DBLogger(datasource)
+            except Exception as e:
+                warn("Error initializing DBLogger (%s)." % e)
+                datasource = None   #give up nicely if error connecting, etc.
 
     def __device_is(self, vendorId, productId):
         '''
@@ -243,4 +248,14 @@ class KillerBee:
         @return: Returns None is timeout expires and no packet received.  When a packet is received, a list is returned, in the form [ String: packet contents | Bool: Valid CRC | Int: Unscaled RSSI ]
         '''
         return self.driver.pnext(timeout)
+
+    def jammer_on(self, channel=None):
+        '''
+        Attempts reflexive jamming on all 802.15.4 frames.
+        Targeted frames must be >12 bytes for reliable jamming in current firmware.
+        @type channel: Integer
+        @param channel: Sets the channel, optional.
+        @rtype: None
+        '''
+        return self.driver.jammer_on(channel=channel)
 
