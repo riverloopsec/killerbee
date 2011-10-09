@@ -36,7 +36,7 @@ def display_details(routerdata):
             for ind in range(0,7):
                 extpanidstr += "%02x:"%ord(extpanid[ind])
             extpanidstr += "%02X"%ord(extpanid[-1])
-            sys.stdout.write("\tExt PANID: ", extpanidstr)
+            sys.stdout.write("\tExt PANID: " + extpanidstr)
         except IndexError:
             sys.stdout.write("\tExt PANID: Unknown")
 
