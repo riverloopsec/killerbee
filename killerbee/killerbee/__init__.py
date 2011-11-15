@@ -102,7 +102,7 @@ class KillerBee:
                 if (self.dev == gps_devstring):
                     pass
                     #print "Skipping GPS device string: %s" % self.dev
-                elif (DEV_ENABLE_FREAKDUINO and isfreakduino(self.dev)):
+                elif (DEV_ENABLE_FREAKDUINO and kbutils.isfreakduino(self.dev)):
                     from dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
                 elif (kbutils.isgoodfetccspi(self.dev)):
