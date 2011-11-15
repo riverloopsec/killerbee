@@ -69,7 +69,7 @@ def response_handler(stumbled, packet, channel):
 
     # Byte-swap the frame control field
     fcf = struct.unpack("<H", pktdecode[0])[0]
-    
+
     # Check if this is a beacon frame
     if (fcf & DOT154_FCF_TYPE_MASK) == DOT154_FCF_TYPE_BEACON:
         if arg_verbose:
@@ -95,7 +95,7 @@ def response_handler(stumbled, packet, channel):
         return value
 
     if arg_verbose:
-        print "Received frame is not a beacon."
+        print "Received frame is not a beacon (FCF=%s)." % pktdecode[0].encode('hex')
 
     return None
 
@@ -187,17 +187,18 @@ if __name__ == '__main__':
             print "Transmitting beacon request."
 
         beaconinj = ''.join([beaconp1, "%c"%seqnum, beaconp2])
-        try:
-            kb.inject(beaconinj)
-            txcount+=1
-        except Exception, e:
-            print "ERROR: Unable to inject packet"
-            print e
-            sys.exit(-1)
 
         # Process packets for arg_delay seconds looking for the beacon
         # response frame.
         start = time.time()
+
+        try:
+            txcount+=1
+            kb.inject(beaconinj)
+        except Exception, e:
+            print "ERROR: Unable to inject packet"
+            print e
+            sys.exit(-1)
 
         while (start+arg_delay > time.time()):
             # Does not block
@@ -206,8 +207,7 @@ if __name__ == '__main__':
             if recvpkt != None and recvpkt[1]:
                 rxcount+=1
                 if arg_verbose:
-                    print "Received frame."
-
+                    print "Received frame."#, time.time()-start
                 networkdata = response_handler(stumbled, recvpkt[0], channel) 
 
         kb.sniffer_off()    
