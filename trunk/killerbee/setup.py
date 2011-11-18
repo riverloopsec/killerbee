@@ -3,6 +3,7 @@ import sys
 
 err = ""
 
+#TODO consider making gtk, cairo into optional libraries
 try:
     import gtk
 except ImportError:
@@ -33,11 +34,11 @@ the setup script.
     
 
 setup  (name        = 'killerbee',
-        version     = '1.0',
+        version     = '1.3beta',
         description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
-        author = 'Joshua Wright',
-        author_email = 'jwright@willhackforsushi.com',
+        author = 'Joshua Wright, Ryan Speers, Ricky Melgares',
+        author_email = 'jwright@willhackforsushi.com, ryan@rmspeers.com',
         packages  = ['killerbee'],
         requires = ['Crypto', 'usb', 'gtk', 'cairo'], # Not causing setup to fail, not sure why
-        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 'tools/zbfind']
+        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 'tools/zbfind', 'tools/zbstumbler2']
         )
