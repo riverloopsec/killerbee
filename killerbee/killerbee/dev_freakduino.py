@@ -17,6 +17,7 @@ class FREAKDUINO:
         @return: None
         @rtype: None
         '''
+        self._channel = None
         self.handle = None
         self.dev = serialpath
         self.date = None
@@ -159,6 +160,7 @@ class FREAKDUINO:
         self.capabilities.require(KBCapabilities.SETCHAN)
 
         if channel >= 10 or channel <= 26:
+            self._channel = channel
             #TODO actually check that it responds correctly to the request
             self.__send_cmd("C!C %d" % channel)
         else:

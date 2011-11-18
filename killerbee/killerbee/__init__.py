@@ -212,6 +212,12 @@ class KillerBee:
         '''
         return self.driver.sniffer_off()
 
+    @property
+    def channel(self):
+        """Getter function for the channel that was last set on the device."""
+        # Driver must have this variable name set in it's set_channel function
+        return self.driver._channel
+
     def set_channel(self, channel):
         '''
         Sets the radio interface to the specifid channel.  Currently, support is

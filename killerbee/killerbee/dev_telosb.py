@@ -15,6 +15,7 @@ class TELOSB:
         @return: None
         @rtype: None
         '''
+        self._channel = None
         self.handle = None
         self.dev = dev
 
@@ -102,7 +103,8 @@ class TELOSB:
         self.capabilities.require(KBCapabilities.SETCHAN)
 
         if channel >= 11 or channel <= 26:
-            self.handle.RF_setchan(channel);
+            self._channel = channel
+            self.handle.RF_setchan(channel)
         else:
             raise Exception('Invalid channel')
 

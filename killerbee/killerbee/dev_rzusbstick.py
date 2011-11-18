@@ -106,6 +106,7 @@ class RZUSBSTICK:
         @return: None
         @rtype: None
         '''
+        self._channel = None
         self.handle = None
         self.dev = dev
         self.__bus = bus
@@ -327,6 +328,7 @@ class RZUSBSTICK:
             self._set_mode(RZ_CMD_MODE_AC)
 
         if channel >= 10 or channel <= 26:
+            self._channel = channel #update driver's notion of current channel
             self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_SET_CHANNEL, channel])
         else:
             raise Exception('Invalid channel')
