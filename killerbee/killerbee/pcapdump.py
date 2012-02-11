@@ -103,7 +103,6 @@ class PcapReader:
 
 
 class PcapDumper:
-
     def __init__(self, datalink, savefile, ppi = False):
         '''
         Creates a libpcap file using the specified datalink type.
@@ -245,6 +244,7 @@ class PcapDumper:
         #print "802154:", packet.encode("hex")
 
         self.__fh.write(output)
+        self.__fh.flush() #important for FIFO
 
         return
 
