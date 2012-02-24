@@ -38,12 +38,12 @@ class KBCapabilities:
                 self.SELFACK: False,
                 self.PHYJAM_REFLEX: False}
     def check(self, capab):
-        try:
+        if capab in self._capabilities:
             return self._capabilities[capab]
-        except KeyError:
+        else:
             return False
     def getlist(self):
-        return self._capabilties
+        return self._capabilities
     def setcapab(self, capab, value):
         self._capabilities[capab] = value
     def require(self, capab):
@@ -213,7 +213,7 @@ def randmac(length=8):
 #  See also: http://regregex.bbcmicro.net/crc-catalogue.htm#crc.cat.kermit
 def makeFCS(data):
     crc = 0
-    for i in range(0, len(data)):
+    for i in xrange(len(data)):
         c = ord(data[i])
 		#if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
         q = (crc ^ c) & 15				#Do low-order 4 bits

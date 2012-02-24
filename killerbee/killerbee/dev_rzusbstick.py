@@ -204,11 +204,12 @@ class RZUSBSTICK:
         except usb.USBError, e:
             if e.args != ('No error',): # http://bugs.debian.org/476796
                 raise e
-        try:
-            if response != RZ_RESP_SUCCESS:
+            response = RZ_RESP_SUCCESS
+        if response != RZ_RESP_SUCCESS:
+            if response in RESPONSE_MAP:
                 raise Exception("Error: %s" % RESPONSE_MAP[response])
-        except KeyError:
-            raise Exception("Unknown USB write error: 0x%02x" % response)
+            else:
+                raise Exception("Unknown USB write error: 0x%02x" % response)
 
     def __usb_read(self, endpoint, timeout=100):
         '''
@@ -327,7 +328,7 @@ class RZUSBSTICK:
         if self.__cmdmode != RZ_CMD_MODE_AC:
             self._set_mode(RZ_CMD_MODE_AC)
 
-        if channel >= 10 or channel <= 26:
+        if 10 <= channel <= 26:
             self._channel = channel #update driver's notion of current channel
             self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_SET_CHANNEL, channel])
         else:
@@ -361,9 +362,9 @@ class RZUSBSTICK:
             self.set_channel(channel)
 
         # Append two bytes to be replaced with FCS by firmware.
-        packet = ''.join([packet, "\x00\x00"])
+        packet += "\x00\x00"
 
-        for pnum in range(0, count):
+        for pnum in xrange(count):
             # Format for packet is opcode RZ_CMD_INJECT_FRAME, one-byte length, 
             # packet data
             self.__usb_write(RZ_USB_COMMAND_EP, struct.pack("B", RZ_CMD_INJECT_FRAME) + struct.pack("B", len(packet)) + packet)
