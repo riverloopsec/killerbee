@@ -31,6 +31,13 @@ the setup script.
 
     """, err
     sys.exit(1)
+
+zigbee_crypt = Extension('zigbee_crypt',
+                    sources = ['zigbee_crypt/zigbee_crypt.c'],
+                    libraries = ['gcrypt'],
+                    include_dirs = ['/usr/local/include', '/usr/include', 'zigbee_crypt'],
+                    library_dirs = ['/usr/local/lib', '/usr/lib']
+                    )
     
 
 setup  (name        = 'killerbee',
@@ -40,5 +47,6 @@ setup  (name        = 'killerbee',
         author_email = 'jwright@willhackforsushi.com, ryan@rmspeers.com',
         packages  = ['killerbee'],
         requires = ['Crypto', 'usb', 'gtk', 'cairo'], # Not causing setup to fail, not sure why
-        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 'tools/zbfind', 'tools/zbstumbler2']
+        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 'tools/zbfind', 'tools/zbscapy'],
+        ext_modules = [ zigbee_crypt ],
         )

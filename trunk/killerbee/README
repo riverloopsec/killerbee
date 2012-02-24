@@ -28,6 +28,11 @@ command line:
 
 # apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial
 
+Additionally, python-dev headers are required, as well as libgcrypt, for the Scapy
+Extension Patch (thanks to Spencer McIntyre for the patch):
+
+# apt-get install python-dev libgcrypt-dev
+
 Also note that this is a fairly advanced and un-friendly attack platform.  This
 is not Cain & Abel.  It is intended for developers and advanced analysts who are
 attacking ZigBee and IEEE 802.15.4 networks.  I recommend you gain some
