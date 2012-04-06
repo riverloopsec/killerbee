@@ -12,18 +12,14 @@ _Within killerbee/firmware, run:_
 
 = Compiling Firmware Image =
 *Note:*
- * This step is *not neccesssary* if you use the pre-compiled GoodFET firmware included in the killerbee/firmware directory.
- * Compiling the firmware yourself requires the GoodFET SVN project and the msp430-gcc compiler to be installed on your system. It is tested with msp430-gcc-4.4.5.
+ * This step is *not necessary* if you use the pre-compiled GoodFET firmware included in the killerbee/firmware directory.
+ * Compiling the firmware yourself requires the GoodFET SVN project and the msp430-gcc compiler and related dependencies to be installed on your system.
+ * Tested at GoodFET rev. 1131, it no longer builds with msp430-gcc-4.4.5 as the build scripts have been changed to support the new msp430-gcc which is not backwards compatible. Thus:
+ * This requires msp430-gcc version 4.5.3. On Ubuntu 11.10, this can be installed via apt-get. Verify msp430-gcc version if you have issues.
 
 _Within goodfet/trunk/firmware, run:_
 
-export platform=telosb
-
-export mcu=msp430x1611
-
-export config='monitor ccspi spi'
-
-make clean install
+platform=telosb make clean install
 
 _If make fails on goodfet.bsl command not found, simply run:_
  * ../client/goodfet.bsl --speed=38400 -e -p goodfet.hex
