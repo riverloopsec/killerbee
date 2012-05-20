@@ -145,11 +145,11 @@ class TELOSB:
     # KillerBee expects the driver to implement this function
     def pnext(self, timeout=100):
         '''
-        Returns packet data as a string, else None.
+        Returns a dictionary containing packet data, else None.
         @type timeout: Integer
         @param timeout: Timeout to wait for packet reception in usec
         @rtype: List
-        @return: Returns None is timeout expires and no packet received.  When a packet is received, a list is returned, in the form [ String: packet contents | Bool: Valid CRC | Int: Unscaled RSSI ]
+        @return: Returns None is timeout expires and no packet received.  When a packet is received, a dictionary is returned with the keys bytes (string of packet bytes), validcrc (boolean if a vaid CRC), rssi (unscaled RSSI), and location (may be set to None). For backwards compatibility, keys for 0,1,2 are provided such that it can be treated as if a list is returned, in the form [ String: packet contents | Bool: Valid CRC | Int: Unscaled RSSI ]
         '''
         if self.__stream_open == False:
             self.sniffer_on() #start sniffing

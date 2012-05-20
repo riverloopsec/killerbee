@@ -5,7 +5,7 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, cStringIO, struct, glob, serial, os;
+import sys, time, string, cStringIO, struct, glob, os;
 
 from GoodFET import GoodFET;
 
@@ -89,7 +89,8 @@ class GoodFETCCSPI(GoodFET):
                 reg,
                 val,
                 self.peek(reg,bytes));
-        return;
+            return False;
+        return True;
     
     def status(self):
         """Read the status byte."""
@@ -135,13 +136,15 @@ class GoodFETCCSPI(GoodFET):
         fsctrl=0x8000; #self.peek(0x18)&(~0x3FF);
         fsctrl=fsctrl+int(mhz-2048)
         self.poke(0x18,fsctrl);
-        self.strobe(0x02);
+        self.strobe(0x02);#SCAL
+        self.strobe(0x03);#SRXON
     def RF_getfreq(self):
         """Get the frequency in Hz."""
         fsctrl=self.peek(0x18);
         mhz=2048+(fsctrl&0x3ff)
         return mhz*1000000;
     def RF_setchan(self,channel):
+        """Set the ZigBee/802.15.4 channel number."""
         if channel < 11 or channel > 26:
             print "Only 802.15.4 channels 11 to 26 are currently supported.";
         else:
@@ -186,9 +189,10 @@ class GoodFETCCSPI(GoodFET):
         #self.strobe(0x09);
         return;
     
-    def RF_reflexjam(self):
+    def RF_reflexjam(self,duration=0):
         """Place the device into reflexive jamming mode."""
-        data = "";
+        data = [duration&0xff,
+                (duration>>8)&0xff];
         self.writecmd(self.CCSPIAPP,0xA0,len(data),data);
         return;
 
@@ -197,7 +201,7 @@ class GoodFETCCSPI(GoodFET):
            and that also sends a forged ACK if needed."""
         data = "";
         self.writecmd(self.CCSPIAPP,0xA1,len(data),data);
-        time.sleep(30);
+        print "Got:", data, "and", self.data
         return;
 
     def RF_modulated_spectrum(self):

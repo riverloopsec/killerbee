@@ -68,24 +68,24 @@ class KillerBee:
         elif (len(device)>=4 and device[3] == ":"):
             (self.__bus, self.dev) = kbutils.search_usb(device)
             if self.dev == None:
-                raise Exception("Did not find a USB device matching %s." % device)
+                raise KBInterfaceError("Did not find a USB device matching %s." % device)
 
         # Figure out a device from serial if one is not set
         #TODO be able to try more than one serial device here (merge with devlist code somehow)
         if (device is None):
-            seriallist = get_serial_ports();
+            seriallist = get_serial_ports()
             if len(seriallist) > 0:
-                device = seriallist[0];
+                device = seriallist[0]
 
         if self.dev is not None:
             if self.__device_is(RZ_USB_VEND_ID, RZ_USB_PROD_ID):
                 from dev_rzusbstick import RZUSBSTICK
                 self.driver = RZUSBSTICK(self.dev, self.__bus)
             elif self.__device_is(ZN_USB_VEND_ID, ZN_USB_PROD_ID):
-                raise Exception("Zena firmware not yet implemented.")
+                raise KBInterfaceError("Zena firmware not yet implemented.")
             else:
-                raise Exception("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x." \
-                                % (self.dev.idVendor, self.dev.idProduct))
+                raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x." \
+                    % (self.dev.idVendor, self.dev.idProduct))
 
         # If a USB device driver was not loaded, now we try serial devices
         if (self.driver is None):
@@ -109,10 +109,10 @@ class KillerBee:
                     from dev_telosb import TELOSB
                     self.driver = TELOSB(self.dev)
                 else:
-                    raise Exception("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
+                    raise KBInterfaceError("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
             # Otherwise unrecognized device string type was provided:
             else:
-                raise Exception("KillerBee doesn't understand device given by '%s'." % device)
+                raise KBInterfaceError("KillerBee doesn't understand device given by '%s'." % device)
 
         # Start a connection to the remote packet logging server, if able:
         if datasource is not None:

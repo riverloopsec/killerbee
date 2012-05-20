@@ -5,7 +5,7 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, cStringIO, struct, glob, serial, os;
+import sys, time, string, cStringIO, struct, glob, os;
 import sqlite3;
 
 fmt = ("B", "<H", None, "<L")
@@ -48,7 +48,56 @@ class SymbolTable:
                         "values(?,?,?,?,?);", (
                 adr,name,memory,size,comment));
         #print "Set %s=%s." % (name,adr);
+class GoodFETbtser:
+    """py-bluez class for emulating py-serial."""
+    def __init__(self,btaddr):
+        import bluetooth;
+        if btaddr==None or btaddr=="none" or btaddr=="bluetooth":
+            print "performing inquiry..."
+            nearby_devices = bluetooth.discover_devices(lookup_names = True)
+            print "found %d devices" % len(nearby_devices)
+            for addr, name in nearby_devices:
+                print "  %s - '%s'" % (addr, name)
+                #TODO switch to wildcards.
+                if name=='FireFly-A6BD':
+                    btaddr=addr;
+                if name=='RN42-A94A':
+                    btaddr=addr;
+                
+            print "Please set $GOODFET to the address of your device.";
+            sys.exit();
+        print "Identified GoodFET at %s" % btaddr;
 
+        # Manually use the portnumber.
+        port=1;
+        
+        print "Connecting to %s on port %i." % (btaddr, port);
+        sock=bluetooth.BluetoothSocket(bluetooth.RFCOMM);
+        self.sock=sock;
+        sock.connect((btaddr,port));
+        sock.settimeout(10);  #IMPORTANT Must be patient.
+        
+        ##This is what we'd do for a normal reset.
+        #str="";
+        #while not str.endswith("goodfet.sf.net/"):
+        #    str=self.read(64);
+        #    print str;
+        
+        # Instead, just return and hope for the best.
+        return;
+        
+    def write(self,msg):
+        """Send traffic."""
+        import time;
+        self.sock.send(msg);
+        #time.sleep(0.1);
+        return;
+    def read(self,length):
+        """Read traffic."""
+        data="";
+        while len(data)<length:
+            data=data+self.sock.recv(length-len(data));
+        return data;
 class GoodFET:
     """GoodFET Client Library"""
 
@@ -73,8 +122,24 @@ class GoodFET:
     def timeout(self):
         print "timeout\n";
     def serInit(self, port=None, timeout=2, attemptlimit=None):
+        """Open a serial port of some kind."""
+        import re;
+        
+        if port==None:
+            port=os.environ.get("GOODFET");
+        if port=="bluetooth" or (port is not None and re.match("..:..:..:..:..:..",port)):
+            self.btInit(port,timeout,attemptlimit);
+        else:
+            self.pyserInit(port,timeout,attemptlimit);
+    def btInit(self, port, timeout, attemptlimit):
+        """Open a bluetooth port.""";
+        #self.verbose=True;  #For debugging BT.
+        self.serialport=GoodFETbtser(port);
+        
+    def pyserInit(self, port, timeout, attemptlimit):
         """Open the serial port"""
         # Make timeout None to wait forever, 0 for non-blocking mode.
+        import serial;
         
         if os.name=='nt' and sys.version.find('64 bit')!=-1:
             print "WARNING: PySerial requires a 32-bit Python build in Windows.";
@@ -110,7 +175,7 @@ class GoodFET:
                     a=1;
         
         baud=115200;
-        if(os.environ.get("platform")=='arduino'):
+        if(os.environ.get("platform")=='arduino' or os.environ.get("board")=='arduino'):
             baud=19200; #Slower, for now.
         self.serialport = serial.Serial(
             port,
@@ -124,43 +189,46 @@ class GoodFET:
         attempts=0;
         connected=0;
         while connected==0:
-            #print "Got %s" % self.data;
             while self.verb!=0x7F or self.data!="http://goodfet.sf.net/":
+            #while self.data!="http://goodfet.sf.net/":
+                #print "'%s'!=\n'%s'" % (self.data,"http://goodfet.sf.net/");
                 if attemptlimit is not None and attempts >= attemptlimit:
                     return
                 elif attempts>2:
                     print "Resyncing.";
                 self.serialport.flushInput()
                 self.serialport.flushOutput()
-                #Explicitly set RTS and DTR to halt board.
-                self.serialport.setRTS(1);
-                self.serialport.setDTR(1);
-                #Drop DTR, which is !RST, low to begin the app.
-                self.serialport.setDTR(0);
                 
                 #TelosB reset, prefer software to I2C SPST Switch.
-                if(os.environ.get("platform")=='telosb'):
+                if (os.environ.get("platform")=='telosb' or  os.environ.get("board")=='telosb'):
                     #print "TelosB Reset";
                     self.telosBReset();
+                elif (os.environ.get("board")=='zolertiaz1' or  os.environ.get("board")=='z1'):
+                    self.bslResetZ1();
+                else:
+                    #Explicitly set RTS and DTR to halt board.
+                    self.serialport.setRTS(1);
+                    self.serialport.setDTR(1);
+                    #Drop DTR, which is !RST, low to begin the app.
+                    self.serialport.setDTR(0);
                 
-                    
                 #self.serialport.write(chr(0x80));
                 #self.serialport.write(chr(0x80));
                 #self.serialport.write(chr(0x80));
                 #self.serialport.write(chr(0x80));
                 
                 
-                self.serialport.flushInput()
-                self.serialport.flushOutput()
+                #self.serialport.flushInput()
+                #self.serialport.flushOutput()
                 #time.sleep(60);
                 attempts=attempts+1;
                 self.readcmd(); #Read the first command.
+                #print "Got %02x,%02x:'%s'" % (self.app,self.verb,self.data);
             #Here we have a connection, but maybe not a good one.
             #print "We have a connection."
             connected=1;
             olds=self.infostring();
             clocking=self.monitorclocking();
-            #if(os.environ.get("platform")!='arduino'):
             for foo in range(1,30):
                 if not self.monitorecho():
                     if self.verbose:
@@ -212,6 +280,81 @@ class GoodFET:
         self.telosI2CWriteByte( 0x90 | (addr << 1) )
         self.telosI2CWriteByte( cmdbyte )
         self.telosI2CStop()
+    def bslResetZ1(self, invokeBSL=0):
+        '''
+        Applies BSL entry sequence on RST/NMI and TEST/VPP pins
+        Parameters:
+            invokeBSL = 1: complete sequence
+            invokeBSL = 0: only RST/NMI pin accessed
+            
+        By now only BSL mode is accessed
+        '''
+        
+        #if DEBUG > 1: sys.stderr.write("* bslReset(invokeBSL=%s)\n" % invokeBSL)
+        if invokeBSL:
+            #sys.stderr.write("in Z1 bsl reset...\n")
+            time.sleep(0.1)
+            self.writepicROM(0xFF, 0xFF)
+            time.sleep(0.1)
+            #sys.stderr.write("z1 bsl reset done...\n")
+        else:
+            #sys.stderr.write("in Z1 reset...\n")
+            time.sleep(0.1)
+            self.writepicROM(0xFF, 0xFE)
+            time.sleep(0.1)
+            #sys.stderr.write("z1 reset done...\n")
+    def writepicROM(self, address, data):
+        ''' Writes data to @address'''
+        for i in range(7,-1,-1):
+            self.picROMclock((address >> i) & 0x01)
+        self.picROMclock(0)
+        recbuf = 0
+        for i in range(7,-1,-1):
+            s = ((data >> i) & 0x01)
+            #print s
+            if i < 1:
+                r = not self.picROMclock(s, True)
+            else:
+                r = not self.picROMclock(s)
+            recbuf = (recbuf << 1) + r
+
+        self.picROMclock(0, True)
+        #k = 1
+        #while not self.serial.getCTS():
+        #    pass 
+        #time.sleep(0.1)
+        return recbuf
+    def readpicROM(self, address):
+        ''' reads a byte from @address'''
+        for i in range(7,-1,-1):
+            self.picROMclock((address >> i) & 0x01)
+        self.picROMclock(1)
+        recbuf = 0
+        r = 0
+        for i in range(7,-1,-1):
+            r = self.picROMclock(0)
+            recbuf = (recbuf << 1) + r
+        self.picROMclock(r)
+        #time.sleep(0.1)
+        return recbuf
+        
+    def picROMclock(self, masterout, slow = False):
+        #print "setting masterout to "+str(masterout)
+        self.serialport.setRTS(masterout)
+        self.serialport.setDTR(1)
+        #time.sleep(0.02)
+        self.serialport.setDTR(0)
+        if slow:
+            time.sleep(0.02)
+        return self.serialport.getCTS()
+
+    def picROMfastclock(self, masterout):
+        #print "setting masterout to "+str(masterout)
+        self.serialport.setRTS(masterout)
+        self.serialport.setDTR(1)
+        self.serialport.setDTR(0)
+        time.sleep(0.02)
+        return self.serialport.getCTS()
 
     def telosBReset(self,invokeBSL=0):
         # "BSL entry sequence at dedicated JTAG pins"
@@ -283,8 +426,14 @@ class GoodFET:
             try:
                 #print "Reading...";
                 self.app=ord(self.serialport.read(1));
-                #print "APP=%2x" % self.app;
+                #print "APP=%02x" % self.app;
                 self.verb=ord(self.serialport.read(1));
+                
+                #Fixes an obscure bug in the TelosB.
+                if self.app==0x00:
+                    while self.verb==0x00:
+                        self.verb=ord(self.serialport.read(1));
+                
                 #print "VERB=%02x" % self.verb;
                 self.count=(
                     ord(self.serialport.read(1))
@@ -541,7 +690,7 @@ class GoodFET:
         self.MONpoke16(0x56, clock);
     def monitorgetclock(self):
         """Get the clocking value."""
-        if(os.environ.get("platform")=='arduino'):
+        if(os.environ.get("platform")=='arduino' or os.environ.get("board")=='arduino'):
             return 0xDEAD;
         #Check for MSP430 before peeking this.
         return self.MONpeek16(0x56);
@@ -549,7 +698,7 @@ class GoodFET:
     # every client.
     
     def infostring(self):
-        if(os.environ.get("platform")=='arduino'):
+        if(os.environ.get("platform")=='arduino' or os.environ.get("board")=='arduino'):
             return "Arduino";
         else:
             a=self.MONpeek8(0xff0);
