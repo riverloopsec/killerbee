@@ -223,3 +223,16 @@ def makeFCS(data):
         q = (crc ^ (c // 16)) & 15		#And high 4 bits
         crc = (crc // 16) ^ (q * 4225)
     return pack('<H', crc) #return as bytes in little endian order
+
+class KBException(Exception):
+    '''Base class for all KillerBee specific exceptions.'''
+    pass
+
+class KBInterfaceError(KBException):
+    '''
+    Custom exception for KillerBee having issues communicating
+    with an interface, such as opening a port, syncing with the firmware, etc.
+    '''
+    pass
+
+
