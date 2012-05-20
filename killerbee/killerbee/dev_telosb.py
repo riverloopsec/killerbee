@@ -6,6 +6,8 @@ from datetime import datetime, date, timedelta
 from kbutils import KBCapabilities, makeFCS
 from GoodFETCCSPI import GoodFETCCSPI
 
+CC2420_REG_SYNC = 0x14
+
 class TELOSB:
     def __init__(self, dev):
         '''
@@ -46,6 +48,7 @@ class TELOSB:
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
         self.capabilities.setcapab(KBCapabilities.INJECT, True)
         self.capabilities.setcapab(KBCapabilities.PHYJAM_REFLEX, True)
+        self.capabilities.setcapab(KBCapabilities.SET_SYNC, True)
         return
 
     # KillerBee expects the driver to implement this function
@@ -194,6 +197,13 @@ class TELOSB:
             self.set_channel(channel)
         self.handle.CC_RFST_RX()
         self.handle.RF_reflexjam()
+
+    def set_sync(self, sync=0xA70F):
+        '''Set the register controlling the 802.15.4 PHY sync byte.'''
+        self.capabilities.require(KBCapabilities.SET_SYNC)
+        if (sync >> 16) > 0:
+            raise Exception("Sync word (%x) must be 2-bytes or less." % sync)
+        return self.handle.poke(CC2420_REG_SYNC, sync)
 
     def jammer_off(self, channel=None):
         '''
