@@ -244,7 +244,11 @@ class PcapDumper:
         #print "802154:", packet.encode("hex")
 
         self.__fh.write(output)
-        self.__fh.flush() #important for FIFO
+        # Specially for handling FIFO needs:
+        try:
+            self.__fh.flush()
+        except IOError, e:
+            raise e
 
         return
 

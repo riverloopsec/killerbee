@@ -28,6 +28,7 @@ class KBCapabilities:
     PHYJAM             = 0x04 #: Capabilities Flag: Can Jam PHY Layer
     SELFACK            = 0x05 #: Capabilities Flag: Can ACK Frames Automatically
     PHYJAM_REFLEX      = 0x06 #: Capabilities Flag: Can Jam PHY Layer Reflexively
+    SET_SYNC           = 0x07 #: Capabilities Flag: Can set the register controlling 802.15.4 sync byte
     def __init__(self):
         self._capabilities = {
                 self.NONE : False,
@@ -36,7 +37,8 @@ class KBCapabilities:
                 self.INJECT : False,
                 self.PHYJAM : False,
                 self.SELFACK: False,
-                self.PHYJAM_REFLEX: False}
+                self.PHYJAM_REFLEX: False,
+                self.SET_SYNC: False }
     def check(self, capab):
         if capab in self._capabilities:
             return self._capabilities[capab]
