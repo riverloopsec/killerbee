@@ -7,7 +7,7 @@ from killerbee import *
 
 def usage():
     print >>sys.stderr, """
-zbwireshark - sends IEEE 802.15.4 packets to Wireshark via a named pipe
+zbwireshark - sends sniffed IEEE 802.15.4 packets to Wireshark via a named pipe
 
 Usage: zbwireshark [-fiwDchp] [-f channel] [-i devnumstring] [-p]
     """
@@ -70,27 +70,41 @@ rf_freq_mhz = (arg_channel - 10) * 5 + 2400
 # Make FIFO (named pipe)
 tempdir = tempfile.mkdtemp()
 pipefname = os.path.join(tempdir, pipename)
-print "Point Wireshark to read from the pipe file:", pipefname
 try:
     os.mkfifo(pipefname) #default mode 0666 (octal)
 except OSError, e:
     print "Failed to create FIFO: %s" % e
+    sys.exit(-1)
+
+# Start wireshark immediately.
+try:
+    rc = os.fork()
+    if rc == 0:
+        os.execlp("wireshark", "/usr/bin/wireshark", "-k", "-i", pipefname)
+except OSError, e:
+    print "Failed to spawn wireshark: %s" % e
+    print "Point Wireshark to read from the pipe file:", pipefname
 
 pd = PcapDumper(DLT_IEEE802_15_4, pipefname, ppi=arg_ppi)
 
 # Start KillerBee
 kb = KillerBee(device=arg_devstring)
 signal.signal(signal.SIGINT, interrupt)
-
 kb.set_channel(arg_channel)
 kb.sniffer_on()
 
 print "zbwireshark: listening on \'%s\', sending to \'%s\'" % (kb.get_dev_info()[0], pipefname)
 
-while arg_count != packetcount:
-    packet = kb.pnext()
-    if packet != None:
-        packetcount+=1
-        pd.pcap_dump(packet['bytes'], ant_dbm=packet['dbm'], freq_mhz=rf_freq_mhz)
+try:
+    while arg_count != packetcount:
+        packet = kb.pnext()
+        if packet != None:
+            packetcount+=1
+            pd.pcap_dump(packet['bytes'], ant_dbm=packet['dbm'], freq_mhz=rf_freq_mhz)
+except KeyboardInterrupt:
+    pass
+except IOError as e:
+    if e.errno == 32:
+        print "ERROR: Pipe broken. Was Wireshark closed or stopped?"
 
 interrupt(0, 0) #shutdown and exit
