@@ -109,7 +109,10 @@ def isgoodfetccspi(serialdev):
     from GoodFETCCSPI import GoodFETCCSPI
     os.environ["platform"] = "telosb" #set enviroment variable for GoodFET code to use
     gf = GoodFETCCSPI()
-    gf.serInit(port=serialdev, attemptlimit=2)
+    try:
+        gf.serInit(port=serialdev, attemptlimit=2)
+    except serial.serialutil.SerialException as e:
+        raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
     status = (gf.connected == 1)
     gf.serClose()
     return status

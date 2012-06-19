@@ -154,7 +154,7 @@ class PcapDumper:
             pph_len = 8 #ppi_header
 
             #CACE PPI Field 802.11-Common
-            pph_len += 28 #802.11-common header and data
+            pph_len += 24 #802.11-common header and data
             rf_freq_mhz = 0x0000
             if freq_mhz is not None: rf_freq_mhz = freq_mhz
             rf_ant_dbm = 0
