@@ -35,8 +35,8 @@ the setup script.
 zigbee_crypt = Extension('zigbee_crypt',
                     sources = ['zigbee_crypt/zigbee_crypt.c'],
                     libraries = ['gcrypt'],
-                    include_dirs = ['/usr/local/include', '/usr/include', 'zigbee_crypt'],
-                    library_dirs = ['/usr/local/lib', '/usr/lib']
+                    include_dirs = ['/usr/local/include', '/usr/include', '/sw/include/', 'zigbee_crypt'],
+                    library_dirs = ['/usr/local/lib', '/usr/lib','/sw/var/lib/']
                     )
     
 
