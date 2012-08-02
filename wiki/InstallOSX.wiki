@@ -9,13 +9,14 @@ Some users may want to run !KillerBee on Mac OS X. We offer some specific notes 
 
 This method was tested on Mac OS X 10.7.4, but should work for earlier versions as well. We recommend installing Fink, although applicable and related packages should be available under Macports as well, which has not been tested.
 
-Once Fink has been installed, install the following Fink packages:
- * pygtk2-gtk-py27 (Python bindings for the GTK widget set and Tools for compiling against pygtk2)
- * pycairo-py27 (Python bindings for the cairo library and Tools for compiling against pycairo)
- * pyusb-py27 (Python access to libusb)
- * pycrypto-py27 (Python Cryptographic Toolkit)
- * pyserial-py27 (Python access to serial ports)
+Once Fink has been installed (version 0.34.0 tested), install the following Fink packages, version tested listed for reference:
+|| *Package* || *Version (tested)* || *Description* ||
+|| pygtk2-gtk-py27 || 2.16.0-4 || Python bindings for the GTK widget set ||
+|| pycairo-py27 || 1.8.10-1 || Python bindings for the cairo library ||
+|| pyusb-py27 || 1.0.0a2-1 || Python access to libusb ||
+|| pycrypto-py27 || 2.6-1 || Python Cryptographic Toolkit ||
+|| pyserial-py27 || 2.6-1 || Python access to serial ports ||
 
 Additionally, python-dev headers are required, as well as libgcrypt, for the ScapyExtension Patch: 
- * py-py27 (Python development support library) 
- * libgcrypt (GNU cryptographic library)
+|| py-py27 || 1.4.6-1 || Python development support library ||
+|| libgcrypt || 1.5.0-2  || GNU cryptographic library ||
