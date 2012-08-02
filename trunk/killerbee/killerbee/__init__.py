@@ -105,7 +105,7 @@ class KillerBee:
                     from dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
                 else:
-                    gfccspi,subtype = isgoodfetccspi(serialdev)
+                    gfccspi,subtype = isgoodfetccspi(self.dev)
                     if gfccspi and subtype == 0:
                         from dev_telosb import TELOSB
                         self.driver = TELOSB(self.dev)

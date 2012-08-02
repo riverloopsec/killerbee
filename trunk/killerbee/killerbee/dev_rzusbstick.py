@@ -389,7 +389,9 @@ class RZUSBSTICK:
             pdata = self.handle.bulkRead(RZ_USB_PACKET_EP, timeout)
         except usb.USBError, e:
             if e.args != ('No error',): # http://bugs.debian.org/476796
-                raise e
+                if e.args[0] != "Connection timed out": # USB timeout issue
+                    print "Error args:", e.args
+                    raise e
 
         # PyUSB returns an empty tuple occasionally, handle as "no data"
         if pdata == None or pdata == ():
