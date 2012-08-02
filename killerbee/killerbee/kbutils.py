@@ -107,7 +107,7 @@ def get_serial_devs():
     #TODO Continue moving code from line 83:89 here, yielding results
 
 def get_serial_ports():
-    seriallist = glob.glob("/dev/ttyUSB*") #TODO make cross platform globing/winnt
+    seriallist = glob.glob("/dev/ttyUSB*") + glob.glob("/dev/tty.usbserial*")  #TODO make cross platform globing/winnt
     return seriallist
     
 def isgoodfetccspi(serialdev):
