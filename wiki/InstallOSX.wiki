@@ -1,5 +1,5 @@
 #summary Running KillerBee under Mac OS X + Fink
-#labels osx,mac,support
+#labels Phase-Deploy,osx,mac,support
 
 = Introduction =
 
