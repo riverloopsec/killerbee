@@ -5,7 +5,7 @@
 
 Some users may want to run !KillerBee on !Mac OS X. We offer some specific notes here.
 
-= !OS X 10.7.4 =
+= OS X 10.7.4 + Fink 0.34.0=
 
 This method was tested on Mac OS X 10.7.4, but should work for earlier versions as well. We recommend installing Fink, although applicable and related packages should be available under Macports as well, which has not been tested.
 
