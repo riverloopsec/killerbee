@@ -11,6 +11,9 @@ ZN_USB_VEND_ID      = 0x04D8
 ZN_USB_PROD_ID      = 0x000E
 #FTDI_USB_VEND_ID      = 0x0403
 #FTDI_USB_PROD_ID      = 0x6001
+FTDI_X_USB_VEND_ID  = 0x0403
+FTDI_X_USB_PROD_ID  = 0x6015    #api-mote FTDI chip
+
 usbVendorList = [RZ_USB_VEND_ID, ZN_USB_VEND_ID]
 usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID]
 
@@ -85,10 +88,18 @@ def devlist(vendor=None, product=None, gps=None):
     for serialdev in seriallist:
         if serialdev == gps_devstring:
             print "kbutils.devlist is skipping GPS device string: %s" % serialdev #TODO remove print, make pass
-        elif (isgoodfetccspi(serialdev)):
-            devlist.append([serialdev, "GoodFET TelosB/Tmote", ""])
         elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
+        else:
+            gfccspi,subtype = isgoodfetccspi(serialdev)
+            if gfccspi and subtype == 0:
+                devlist.append([serialdev, "GoodFET TelosB/Tmote", ""])
+                #print "Found tmote on", serialdev
+            elif gfccspi and subtype == 1:
+                devlist.append([serialdev, "GoodFET Api-Mote", ""])
+                #print "Found apimote on", serialdev
+            elif gfccspi:
+                print "kbutils.devlist has an unkown type of GoodFET CCSPI device (%s)." % serialdev #TODO
     return devlist
 
 def get_serial_devs():
@@ -107,15 +118,31 @@ def isgoodfetccspi(serialdev):
     @rtype: Boolean
     '''
     from GoodFETCCSPI import GoodFETCCSPI
+    # First try tmote detection
     os.environ["platform"] = "telosb" #set enviroment variable for GoodFET code to use
     gf = GoodFETCCSPI()
     try:
         gf.serInit(port=serialdev, attemptlimit=2)
     except serial.serialutil.SerialException as e:
         raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
-    status = (gf.connected == 1)
-    gf.serClose()
-    return status
+    if gf.connected == 1:
+        gf.serClose()
+        return True, 0
+    # Then try apimote detection
+    os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
+    os.environ["platform"] = ""
+    gf = GoodFETCCSPI()
+    try:
+        gf.serInit(port=serialdev, attemptlimit=2)
+        #gf.setup()
+        #print "Found %s on %s" % (gf.identstr(), serialdev)
+    except serial.serialutil.SerialException as e:
+        raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)    
+    if gf.connected == 1:
+        gf.serClose()
+        return True, 1
+    # Nothing found        
+    return False, None
     
 def isfreakduino(serialdev):
     '''

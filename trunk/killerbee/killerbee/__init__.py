@@ -101,15 +101,19 @@ class KillerBee:
                 self.dev = device
                 if (self.dev == gps_devstring):
                     pass
-                    #print "Skipping GPS device string: %s" % self.dev
                 elif (DEV_ENABLE_FREAKDUINO and kbutils.isfreakduino(self.dev)):
                     from dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
-                elif (kbutils.isgoodfetccspi(self.dev)):
-                    from dev_telosb import TELOSB
-                    self.driver = TELOSB(self.dev)
                 else:
-                    raise KBInterfaceError("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
+                    gfccspi,subtype = isgoodfetccspi(serialdev)
+                    if gfccspi and subtype == 0:
+                        from dev_telosb import TELOSB
+                        self.driver = TELOSB(self.dev)
+                    elif gfccspi and subtype == 1:
+                        from dev_apimote import APIMOTE
+                        self.driver = APIMOTE(self.dev)
+                    else:
+                        raise KBInterfaceError("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
             # Otherwise unrecognized device string type was provided:
             else:
                 raise KBInterfaceError("KillerBee doesn't understand device given by '%s'." % device)
