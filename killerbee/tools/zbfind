@@ -861,10 +861,10 @@ class ZBPoller(Thread):
     def zb_distance(self, rssi):
         propconst = 3 # Propagation Constant, 2-4
         # Previously was refrssi = -58 per Josh Wright's testing.
-        # Per Ben Ramsey's contribution 4/30/12, rmspeers has:
-        # Updated to -53 dbM at 1M from RZUSBSTICK transmitter.
-        # zbfind estimated max distance is now 10^((-58+91)/30) = 18.48m = 61 ft
-        refrssi = -53 # Measured RSSI 1M from transmitter
+        # Per Ben Ramsey's contribution 9/13/12, rmspeers has:
+        # B. Ramsey, B. Mullins, and E. White, "Improved Tools for Indoor ZigBee Warwalking," 7th IEEE Int'l Workshop on Practical Issues in Building Sensor Network Apps (SenseApp '12), Oct 2012.
+        # Updated to -51.7 dbM at 1M from RZUSBSTICK transmitter.
+        refrssi = -51.7 # Measured RSSI 1M from transmitter
         #TODO only accurate for RZUSBSTICK device currently, update based on dev
         return "%d'" % (pow(10,(refrssi-rssi)/float((10*propconst))) * 3.28)
 
