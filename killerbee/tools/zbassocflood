@@ -139,14 +139,23 @@ if __name__ == '__main__':
 
     # Loop injecting and receiving packets
     seqnum = 0
+    ffdswitch = False
     while 1:
         if seqnum > 254:                        # 254 to accommodate datareq
             seqnum = 0
     
         mac = randmac()
 
-        assocreqp[1] = "%c" % seqnum            # ;)
+        assocreqp[1] = "%c" % seqnum
         assocreqp[5] = mac
+        # Per Ben Ramsey's contribution 9/20/12, rmspeers has:
+        # Alternate requests as an FFD or RFD to exhaust both address pools
+        ffdswitch = not ffdswitch
+        if ffdswitch:
+            assocreqp[6] = "\x01\x8e\x67"  # Full Function Device (FFD)
+        else:
+            assocreqp[6] = "\x01\x8c\x67"  # Reduced Function Device (RFD)
+
         assocreqinj = ''.join(assocreqp)
 
         seqnum += 1
