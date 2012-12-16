@@ -10,7 +10,7 @@ RZ_USB_PROD_ID      = 0x210A
 ZN_USB_VEND_ID      = 0x04D8
 ZN_USB_PROD_ID      = 0x000E
 #FTDI_USB_VEND_ID      = 0x0403
-#FTDI_USB_PROD_ID      = 0x6001
+#FTDI_USB_PROD_ID      = 0x6001 #this is also used by FDTI cables used to attach gps
 FTDI_X_USB_VEND_ID  = 0x0403
 FTDI_X_USB_PROD_ID  = 0x6015    #api-mote FTDI chip
 
