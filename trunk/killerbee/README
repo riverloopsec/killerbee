@@ -26,12 +26,10 @@ cairo   (for use of tools that have GUIs)
 On Ubuntu systems, you can install the needed dependencies with the following
 command line:
 
-# apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial
+# apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
 
-Additionally, python-dev headers are required, as well as libgcrypt, for the Scapy
-Extension Patch (thanks to Spencer McIntyre for the patch):
-
-# apt-get install python-dev libgcrypt-dev
+The last two dependencies (python-dev and libgcrypt) are required for the Scapy
+Extension Patch (thanks to Spencer McIntyre for the patch).
 
 Also note that this is a fairly advanced and un-friendly attack platform.  This
 is not Cain & Abel.  It is intended for developers and advanced analysts who are
@@ -49,8 +47,6 @@ KillerBee with the following command:
 
 # python setup.py install
 
-The setup.py script will identify any missing dependencies before installation
-any will provide assistance on satisfying them before installing.
 
 
 DIRECTORIES

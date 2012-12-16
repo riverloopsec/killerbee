@@ -1,3 +1,5 @@
+#NOTE: See the README file for a list of dependencies to install.
+
 from distutils.core import setup, Extension
 import sys
 
