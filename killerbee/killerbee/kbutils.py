@@ -112,14 +112,18 @@ def get_serial_ports():
     
 def isgoodfetccspi(serialdev):
     '''
-    Determine if a given serial device is a TelosB/Tmote Sky GOODFET (with CCSPI application).
-    @type serialdev: String
+    Determine if a given serial device is running the GoodFET firmware with the CCSPI application.
+    This should either be a TelosB/Tmote Sky GOODFET or an Api-Mote design.
+    @type serialdev:  String
     @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
-    @rtype: Boolean
+    @rtype:   Tuple
+    @returns: Tuple with the fist element==True if it is some goodfetccspi device. The second element
+                is the subtype, and is 0 for telosb devices and 1 for apimote devices.
     '''
     from GoodFETCCSPI import GoodFETCCSPI
+    os.environ["platform"] = ""
     # First try tmote detection
-    os.environ["platform"] = "telosb" #set enviroment variable for GoodFET code to use
+    os.environ["board"] = "telosb" #set enviroment variable for GoodFET code to use
     gf = GoodFETCCSPI()
     try:
         gf.serInit(port=serialdev, attemptlimit=2)
@@ -130,7 +134,6 @@ def isgoodfetccspi(serialdev):
         return True, 0
     # Then try apimote detection
     os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
-    os.environ["platform"] = ""
     gf = GoodFETCCSPI()
     try:
         gf.serInit(port=serialdev, attemptlimit=2)

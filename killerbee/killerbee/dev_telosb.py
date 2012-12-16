@@ -21,7 +21,7 @@ class TELOSB:
         self.handle = None
         self.dev = dev
 
-        os.environ["platform"] = "telosb" #set enviroment variable for GoodFET code to use
+        os.environ["board"] = "telosb" #set enviroment variable for GoodFET code to use
         self.handle = GoodFETCCSPI()
         self.handle.serInit(port=self.dev)
         self.handle.setup()

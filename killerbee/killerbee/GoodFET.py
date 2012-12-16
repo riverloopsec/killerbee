@@ -128,7 +128,7 @@ class GoodFET:
         if port==None:
             port=os.environ.get("GOODFET");
         if port=="bluetooth" or (port is not None and re.match("..:..:..:..:..:..",port)):
-            self.btInit(port,timeout,attemptlimit);
+            self.btInit(port,2,attemptlimit);
         else:
             self.pyserInit(port,timeout,attemptlimit);
     def btInit(self, port, timeout, attemptlimit):
@@ -140,6 +140,7 @@ class GoodFET:
         """Open the serial port"""
         # Make timeout None to wait forever, 0 for non-blocking mode.
         import serial;
+        fixserial=False;
         
         if os.name=='nt' and sys.version.find('64 bit')!=-1:
             print "WARNING: PySerial requires a 32-bit Python build in Windows.";
@@ -194,18 +195,19 @@ class GoodFET:
                 #print "'%s'!=\n'%s'" % (self.data,"http://goodfet.sf.net/");
                 if attemptlimit is not None and attempts >= attemptlimit:
                     return
-                elif attempts>2:
-                    print "Resyncing.";
-                self.serialport.flushInput()
-                self.serialport.flushOutput()
+                elif attempts==2 and os.environ.get("board")!='telosb':
+                    print "See the GoodFET FAQ about missing info flash.";
+                    self.serialport.setTimeout(0.2);
+                #self.serialport.flushInput()
+                #self.serialport.flushOutput()
                 
                 #TelosB reset, prefer software to I2C SPST Switch.
-                if (os.environ.get("platform")=='telosb' or  os.environ.get("board")=='telosb'):
+                if (os.environ.get("board")=='telosb'):
                     #print "TelosB Reset";
                     self.telosBReset();
-                elif (os.environ.get("board")=='zolertiaz1' or  os.environ.get("board")=='z1'):
-                    self.bslResetZ1();
-                elif (os.environ.get("board")=='apimote1'):
+                elif (os.environ.get("board")=='z1'):
+                    self.bslResetZ1(invokeBSL=0);
+                elif (os.environ.get("board")=='apimote1') or (os.environ.get("board")=='apimote'):
                     #Explicitly set RTS and DTR to halt board.
                     self.serialport.setRTS(1);
                     self.serialport.setDTR(1);
@@ -231,6 +233,10 @@ class GoodFET:
                 attempts=attempts+1;
                 self.readcmd(); #Read the first command.
                 #print "Got %02x,%02x:'%s'" % (self.app,self.verb,self.data);
+                if self.verb!=0x7f:
+                    #Retry again. This usually times out, but helps connect.
+                    self.readcmd();
+                    #print "Retry got %02x,%02x:'%s'" % (self.app,self.verb,self.data);
             #Here we have a connection, but maybe not a good one.
             #print "We have a connection."
             connected=1;
@@ -241,8 +247,8 @@ class GoodFET:
                     if self.verbose:
                         print "Comm error on %i try, resyncing out of %s." % (foo,
                                                                               clocking);
-                        connected=0;
-                        break;
+                    connected=0;
+                    break;
         if self.verbose: print "Connected after %02i attempts." % attempts;
         self.mon_connected();
         self.serialport.setTimeout(12);
@@ -345,7 +351,8 @@ class GoodFET:
         #time.sleep(0.1)
         return recbuf
         
-    def picROMclock(self, masterout, slow = False):
+    #This seems more reliable when slowed.
+    def picROMclock(self, masterout, slow = True):
         #print "setting masterout to "+str(masterout)
         self.serialport.setRTS(masterout)
         self.serialport.setDTR(1)
@@ -569,6 +576,9 @@ class GoodFET:
         return ord(self.data[0]);
     def poke16(self,address,value):
         """Set a word of memory by the monitor."""
+        self.MONpoke16(address,value);
+    def MONpoke16(self,address,value):
+        """Set a word of memory by the monitor."""
         self.pokebyte(address,value&0xFF);
         self.pokebyte(address,(value>>8)&0xFF);
         return value;
@@ -661,7 +671,8 @@ class GoodFET:
         data="The quick brown fox jumped over the lazy dog.";
         self.writecmd(self.MONITORAPP,0x81,len(data),data);
         if self.data!=data:
-            print "Comm error recognized by monitorecho(), got:\n%s" % self.data;
+            if self.verbose:
+                print "Comm error recognized by monitorecho(), got:\n%s" % self.data;
             return 0;
         return 1;
 
