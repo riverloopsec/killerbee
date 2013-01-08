@@ -26,6 +26,14 @@ try:
 except ImportError:
     err += "usb (apt-get install python-usb)\n"
 
+#TODO remove this warning check once support is well tested:
+try:
+    import usb.core
+    print("Warning: You are using pyUSB 1.x, support is in alpha.")
+except ImportError:
+    #TODO confirm this appears on old pyUSB boxes
+    print("Note: You are using pyUSB 0.x.")
+
 if err != "":
     print >>sys.stderr, """
 Library requirements not met.  Install the following libraries, then re-run

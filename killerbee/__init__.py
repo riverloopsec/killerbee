@@ -1,14 +1,12 @@
-import usb
-import serial
 import struct
-import os, time, glob
+import glob
 from warnings import warn
 
 from pcapdump import *
 from daintree import *
 from pcapdlt import *
 
-from kbutils import *
+from kbutils import *      #provides serial, usb, USBVER
 from zigbeedecode import * #would like to import only within killerbee class
 from dot154decode import * #would like to import only within killerbee class
 from config import *       #to get DEV_ENABLE_* variables
@@ -61,18 +59,30 @@ class KillerBee:
         self.__bus = None
         self.driver = None
 
-        # Figure out a device is one is not set
-        if (device is None):
-            (self.__bus, self.dev) = kbutils.search_usb(None)
+        # Figure out a device is one is not set, trying USB devices first
+        if device == None:
+            result = kbutils.search_usb(None)
+            if result != None:
+                if USBVER == 0:
+                    (self.__bus, self.dev) = result
+                elif USBVER == 1:
+                    #TODO remove self.__bus attribute, not needed in 1.x as all info in self.dev
+                    self.dev = result
         # Recognize if device is provided in the USB format (like a 012:456 string):
-        elif (len(device)>=4 and device[3] == ":"):
-            (self.__bus, self.dev) = kbutils.search_usb(device)
-            if self.dev == None:
+        elif ":" in device:
+            result = kbutils.search_usb(device)
+            if result == None:
                 raise KBInterfaceError("Did not find a USB device matching %s." % device)
+            else:
+                if USBVER == 0:
+                    (self.__bus, self.dev) = result
+                elif USBVER == 1:
+                    #TODO remove self.__bus attribute, not needed in 1.x as all info in self.dev
+                    self.dev = result
 
         # Figure out a device from serial if one is not set
         #TODO be able to try more than one serial device here (merge with devlist code somehow)
-        if (device is None):
+        if device == None:
             seriallist = get_serial_ports()
             if len(seriallist) > 0:
                 device = seriallist[0]

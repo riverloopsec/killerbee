@@ -1,4 +1,14 @@
-import usb
+# Import USB support depending on version of pyUSB
+try:
+    import usb.core
+    import usb.util
+    USBVER=1
+    print("Warning: You are using pyUSB 1.x, support is in alpha.")
+except ImportError:
+    import usb
+    #print("Warning: You are using pyUSB 0.x, future deprecation planned.")
+    USBVER=0
+
 import time
 import struct
 from datetime import datetime
@@ -96,12 +106,13 @@ RZ_USB_PACKET_EP              = 0x81 #: RZUSB USB Packet Endpoint Identifier
 
 class RZUSBSTICK:
     def __init__(self, dev, bus):
+        #TODO deprecate bus param, and dev becomes a usb.core.Device object, not a string in pyUSB 1.x use
         '''
         Instantiates the KillerBee class for the RZUSBSTICK hardware.
 
-        @type dev:   String
+        @type dev:   TODO
         @param dev:  USB device identifier
-        @type bus:   String
+        @type bus:   TODO
         @param bus:  Identifies the USB bus the device is on
         @return: None
         @rtype: None
@@ -128,8 +139,33 @@ class RZUSBSTICK:
 
     def __handle_open(self):
         '''
-        Opens the device identified as self.dev, populating self.handle
+        Opens the device identified as self.dev, populating self.handle.
+        An RZUSBSTICK has a hierarchy of:
+            Config value: 1
+                Interface number 0, with alternate setting 0
+		            Endpoint 132 for responses
+		            Endpoint 2   for control
+		            Endpoint 129 for packets
         '''
+        if USBVER == 0:
+            self.__handle_open_v0x()
+        else: #pyUSB 1.x
+            self.__dev_setup_v1x()
+
+    def __dev_setup_v1x(self):
+            # See http://pyusb.sourceforge.net/docs/1.0/tutorial.html for reference
+            #self.dev.reset()
+            self.dev.set_configuration(1) # could also provide no config number
+            self.dev.set_interface_altsetting(interface = 0, alternate_setting = 0)
+            #TODO alternative setup code:
+            #self.dev.set_configuration()
+            #cfg = self.dev.get_active_configuration()
+            #interface_number = cfg[(0,0)].bInterfaceNumber
+            #alternate_settting = usb.control.get_interface(interface_number)
+            #intf = usb.util.find_descriptor(cfg, bInterfaceNumber=interface_number, bAlternateSetting=alternate_setting)
+            #self.handle = usb.util.find_descriptor(intf, custom_match=lambda e: (e.bEndpointAddress == TODO_TARGET_ENDPOINT))
+
+    def __handle_open_v0x(self):
         try:
             config = self.dev.configurations[0]
             intf = config.interfaces[0]
@@ -164,19 +200,17 @@ class RZUSBSTICK:
         @return: None
         '''
         # Examine the product string for this device, setting the capability information appropriately.
-        prod = self.dev.open().getString(self.dev.iProduct, 50)
+        prod = self.get_dev_info()[1] # returns a list, with second element being product string
 
         if prod == "RZUSBSTICK":
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
-            return
         elif prod == "KILLERB001":
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
-            return
         else:
-            return
+            pass
 
     def get_dev_info(self):
         '''
@@ -185,7 +219,12 @@ class RZUSBSTICK:
         @rtype: List
         @return: List of 3 strings identifying device.
         '''
-        return [''.join([self.__bus.dirname, ":", self.dev.filename]), self.dev.open().getString(self.dev.iProduct, 50), self.dev.open().getString(self.dev.iSerialNumber, 12)]
+        if USBVER == 0:
+            return [''.join([self.__bus.dirname, ":", self.dev.filename]), self.dev.open().getString(self.dev.iProduct, 50), self.dev.open().getString(self.dev.iSerialNumber, 12)]
+        elif USBVER == 1:
+            return ["{0}:{1}".format(self.dev.bus, self.dev.address),         \
+                    usb.util.get_string(self.dev, 50, self.dev.iProduct),     \
+                    usb.util.get_string(self.dev, 50, self.dev.iSerialNumber) ]
 
     def __usb_write(self, endpoint, data):
         '''
@@ -196,43 +235,32 @@ class RZUSBSTICK:
         @type data: Mixed
         @param data: The data to send to the USB endpoint
         '''
-        try:
-            self.handle.bulkWrite(endpoint, data)
-            # Returns a tuple, first value is an int as the RZ_RESP_* code
-            response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
-        except usb.USBError, e:
-            if e.args != ('No error',): # http://bugs.debian.org/476796
-                raise e
-        time.sleep(0.0005)
-        if response != RZ_RESP_SUCCESS:
-            if response in RESPONSE_MAP:
-                raise Exception("Error: %s" % RESPONSE_MAP[response])
-            else:
-                raise Exception("Unknown USB write error: 0x%02x" % response)
-
-    def __usb_read(self, endpoint, timeout=100):
-        '''
-        Reads data from the USB device on the specified endpoint.
-        
-        @type endpoint: Integer
-        @param endpoint: The USB endpoint to read from
-        @type timeout: Integer
-        @param timeout: Timeout in usec for read operation before return
-        @rtype: String
-        @return: Data returned from USB device
-        '''
-        dataread = [RZ_RESP_LOCAL_TIMEOUT,]
-        dataread = self.handle.bulkRead(endpoint, timeout)
-
-        # First byte of the return data is the success/failure code
-        response = dataread[0]
-        try:
+        if USBVER == 0:
+            try:
+                self.handle.bulkWrite(endpoint, data)
+                # Returns a tuple, first value is an int as the RZ_RESP_* code
+                response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
+            except usb.USBError, e:
+                if e.args != ('No error',): # http://bugs.debian.org/476796
+                    raise e
+            time.sleep(0.0005)
             if response != RZ_RESP_SUCCESS:
-                raise Exception("Error: %s" % RESPONSE_MAP[response])
-        except KeyError:
-            raise Exception("Unknown USB read error: 0x%02x" % response)
+                if response in RESPONSE_MAP:
+                    raise Exception("Error: %s" % RESPONSE_MAP[response])
+                else:
+                    raise Exception("Unknown USB write error: 0x%02x" % response)
+        else: #pyUSB 1.x
+            res = self.dev.write(endpoint, data, 0, 100)
+            if len(data) != res:
+                raise Exception("Issue writing USB data {0} to endpoint {1}, got a return of {2}.".format(data, endpoint, res))
+            response = self.dev.read(RZ_USB_RESPONSE_EP, 1, 0, 500).pop() #TODO reduce timeout?
+            if response != RZ_RESP_SUCCESS:
+                if response in RESPONSE_MAP:
+                    raise Exception("Error: %s" % RESPONSE_MAP[response])
+                else:
+                    raise Exception("Unknown USB write error: 0x%02x" % response)
 
-    def _set_mode(self, mode):
+    def _set_mode(self, mode=RZ_CMD_MODE_AC):
         '''
         Change the operating mode of the USB device to one of the RZ_CMD_MODE_*
         values.  Currently, RZ_CMD_MODE_AC (Air Capture) is the only mode that is
@@ -241,7 +269,7 @@ class RZUSBSTICK:
         @param mode: Operating mode for the USB stick
         @rtype: None
         '''
-        self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_SET_MODE, RZ_CMD_MODE_AC])
+        self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_SET_MODE, mode])
         self.__cmdmode = mode
 
     def _open_stream(self):
@@ -385,13 +413,22 @@ class RZUSBSTICK:
         # The RZ_USB_PACKET_EP doesn't return error codes like the standard
         # RZ_USB_RESPONSE_EP does, so we don't use __usb_read() here.
         pdata = None
-        try:
-            pdata = self.handle.bulkRead(RZ_USB_PACKET_EP, timeout)
-        except usb.USBError, e:
-            if e.args != ('No error',): # http://bugs.debian.org/476796
-                if e.args[0] != "Connection timed out": # USB timeout issue
-                    print "Error args:", e.args
-                    raise e
+        if USBVER == 0:
+            try:
+                pdata = self.handle.bulkRead(RZ_USB_PACKET_EP, timeout)
+            except usb.USBError, e:
+                if e.args != ('No error',): # http://bugs.debian.org/476796
+                    if e.args[0] != "Connection timed out": # USB timeout issue
+                        print "Error args:", e.args
+                        raise e
+        else: # pyUSB 1.x
+            print("Going to use the device in pnext")
+            #self.dev.reset()
+            #self.__dev_setup_v1x()
+            #print("Setup device in pnext")
+            pdata = self.dev.read(RZ_USB_PACKET_EP, 1, 0, 100)
+            print "Got data:", pdata
+            #TODO error handling
 
         # PyUSB returns an empty tuple occasionally, handle as "no data"
         if pdata == None or pdata == ():
@@ -425,8 +462,4 @@ class RZUSBSTICK:
         @rtype: None
         '''
         raise Exception('Not yet implemented')
-
-    # KillerBee implements this currently, does the driver need to also?
-    #def dev_list(self):
-    #    return KillerBee.dev_list(vendor=RZ_USB_VEND_ID, product=RZ_USB_PROD_ID)
 

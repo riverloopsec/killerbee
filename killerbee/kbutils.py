@@ -1,10 +1,24 @@
-import usb, serial
+# Import USB support depending on version of pyUSB
+try:
+    import usb.core
+    import usb.util
+    #import usb.backend.libusb01
+    #backend = usb.backend.libusb01.get_backend()
+    USBVER=1
+    print("Warning: You are using pyUSB 1.x, support is in alpha.")
+except ImportError:
+    import usb
+    #print("Warning: You are using pyUSB 0.x, future deprecation planned.")
+    USBVER=0
+
+import serial
 import os, glob
 import time
 import random
 from struct import pack
 from config import *       #to get DEV_ENABLE_* variables
 
+# Known devices by USB ID:
 RZ_USB_VEND_ID      = 0x03EB
 RZ_USB_PROD_ID      = 0x210A
 ZN_USB_VEND_ID      = 0x04D8
@@ -14,7 +28,7 @@ ZN_USB_PROD_ID      = 0x000E
 FTDI_X_USB_VEND_ID  = 0x0403
 FTDI_X_USB_PROD_ID  = 0x6015    #api-mote FTDI chip
 
-usbVendorList = [RZ_USB_VEND_ID, ZN_USB_VEND_ID]
+usbVendorList  = [RZ_USB_VEND_ID, ZN_USB_VEND_ID]
 usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID]
 
 # Global variables
@@ -55,6 +69,81 @@ class KBCapabilities:
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
 
+class findFromList(object):
+    '''
+    Custom matching function for pyUSB 1.x.
+    Used by usb.core.find's custom_match parameter.
+    '''
+    def __init__(self, vendors_, products_):
+        '''Takes a list of vendor IDs and product IDs.'''
+        self._vendors  = vendors_
+        self._products = products_
+    def __call__(self, device):
+        '''
+        Returns True if the device being searched
+        is in these lists.
+        '''
+        if (device.idVendor in self._vendors) and \
+           (device.idProduct in self._products):
+            return True
+        return False
+
+class findFromListAndBusDevId(findFromList):
+    '''
+    Custom matching function for pyUSB 1.x.
+    Used by usb.core.find's custom_match parameter.
+    '''
+    def __init__(self, busNum_, devNum_, vendors_, products_):
+        '''Takes a list of vendor IDs and product IDs.'''
+        findFromList.__init__(self, vendors_, products_)
+        self._busNum = busNum_
+        self._devNum = devNum_
+    def __call__(self, device):
+        '''
+        Returns True if the device being searched
+        is in these lists.
+        '''
+        if findFromList.__call__(self, device)                      and \
+           (self._busNum == None or device.bus == self._busNum)     and \
+           (self._devNum == None or device.address == self._devNum)     :
+            return True
+        return False
+
+def devlist_usb_v1x(vendor=None, product=None):
+    devlist = []
+    if vendor == None:  vendor = usbVendorList
+    else:               vendor = [vendor]
+    if product == None: product = usbProductList
+    else:               product = [product]
+    devs = usb.core.find(find_all=True, custom_match=findFromList(vendor, product)) #backend=backend, 
+    try:
+        for dev in devs:
+            # Note, can use "{0:03d}:{1:03d}" to get the old format.
+            devlist.append(["{0}:{1}".format(dev.bus, dev.address),         \
+                            usb.util.get_string(dev, 50, dev.iProduct),     \
+                            usb.util.get_string(dev, 50, dev.iSerialNumber)])
+    except usb.core.USBError as e:
+        if e.errno == 13: #usb.core.USBError: [Errno 13] Access denied (insufficient permissions)
+            raise Exception("Unable to open device. " +
+                            "Ensure the device is free and plugged-in. You may need sudo.")
+        else:
+            raise e
+
+    return devlist
+
+def devlist_usb_v0x(vendor=None, product=None):
+    devlist = []
+    busses = usb.busses()
+    for bus in busses:
+        devices = bus.devices
+        for dev in devices:
+            if ((vendor==None and dev.idVendor in usbVendorList) or dev.idVendor==vendor) \
+               and ((product==None and dev.idProduct in usbProductList) or dev.idProduct==product):
+                devlist.append([''.join([bus.dirname + ":" + dev.filename]), \
+                                  dev.open().getString(dev.iProduct, 50),    \
+                                  dev.open().getString(dev.iSerialNumber, 12)])
+    return devlist
+
 def devlist(vendor=None, product=None, gps=None):
     '''
     Return device information for all present devices, 
@@ -74,21 +163,17 @@ def devlist(vendor=None, product=None, gps=None):
         gps_devstring = gps
     devlist = []
 
-    busses = usb.busses()
-    for bus in busses:
-        devices = bus.devices
-        for dev in devices:
-            if ((vendor==None and dev.idVendor in usbVendorList) or dev.idVendor==vendor) \
-               and ((product==None and dev.idProduct in usbProductList) or dev.idProduct==product):
-                devlist.append([''.join([bus.dirname + ":" + dev.filename]), \
-                                  dev.open().getString(dev.iProduct, 50),    \
-                                  dev.open().getString(dev.iSerialNumber, 12)])
+    if USBVER == 0:
+        devlist = devlist_usb_v0x(vendor, product)
+    elif USBVER == 1:
+        devlist = devlist_usb_v1x(vendor, product)
 
     seriallist = get_serial_ports()
     for serialdev in seriallist:
         if serialdev == gps_devstring:
             print "kbutils.devlist is skipping GPS device string: %s" % serialdev #TODO remove print, make pass
         elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
+            #TODO need to move support for freakduino into goodfetccspi subtype==2
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
         else:
             gfccspi,subtype = isgoodfetccspi(serialdev)
@@ -98,13 +183,16 @@ def devlist(vendor=None, product=None, gps=None):
             elif gfccspi and subtype == 1:
                 devlist.append([serialdev, "GoodFET Api-Mote", ""])
                 #print "Found apimote on", serialdev
+            elif gfccspi and subtype == 2:
+                devlist.append([serialdev, "GoodFET Freakduino", ""])
+                #print "Found freakduino on", serialdev
             elif gfccspi:
                 print "kbutils.devlist has an unkown type of GoodFET CCSPI device (%s)." % serialdev #TODO
     return devlist
 
 def get_serial_devs():
     global DEV_ENABLE_FREAKDUINO
-    #TODO Continue moving code from line 83:89 here, yielding results
+    #TODO Continue moving code from line 163:181 here, yielding results
 
 def get_serial_ports():
     seriallist = glob.glob("/dev/ttyUSB*") + glob.glob("/dev/tty.usbserial*")  #TODO make cross platform globing/winnt
@@ -148,6 +236,7 @@ def isgoodfetccspi(serialdev):
     return False, None
     
 def isfreakduino(serialdev):
+    #TODO slated for deprecation with bx's support for Freakduino hardware in GoodFET code.
     '''
     Determine if a given serial device is a Freakduino attached with the right sketch loaded.
     @type serialdev: String
@@ -169,22 +258,42 @@ def isfreakduino(serialdev):
     s.close()
     return (version is not None)
 
-def search_usb(device, vendor=None, product=None):
-    busses = usb.busses()
-    for bus in busses:
-        dev = search_usb_bus(bus, device)
-        if dev != None:
-            return (bus, dev)
-    return (None, None)
+def search_usb(device):
+    '''
+    Takes either None, specifying that any USB device in the
+    global vendor and product lists are acceptable, or takes
+    a string that identifies a device in the format
+    <BusNumber>:<DeviceNumber>, and returns the pyUSB objects
+    for bus and device that correspond to the identifier string.
+    '''
+    if device == None:
+        busNum = None
+        devNum = None
+    else:
+        if ':' not in device:
+            raise KBInterfaceError("USB device format expects <BusNumber>:<DeviceNumber>, but got {0} instead.".format(device))
+        busNum, devNum = map(int, device.split(':', 1))
+    if USBVER == 0:
+        busses = usb.busses()
+        for bus in busses:
+            dev = search_usb_bus_v0x(bus, busNum, devNum)
+            if dev != None:
+                return (bus, dev)
+        return None #Note, can't expect a tuple returned
+    elif USBVER == 1:
+        return usb.core.find(custom_match=findFromListAndBusDevId(busNum, devNum, usbVendorList, usbProductList)) #backend=backend, 
+    else:
+        raise Exception("USB version expected to be 0.x or 1.x.")
 
-def search_usb_bus(bus, device, vendor=None, product=None):
-    global vendorList, productList
+def search_usb_bus_v0x(bus, busNum, devNum):
+    '''Helper function for USB enumeration in pyUSB 0.x enviroments.'''
     devices = bus.devices
     for dev in devices:
-        if ((vendor==None and dev.idVendor in usbVendorList) or dev.idVendor==vendor) \
-           and ((product==None and dev.idProduct in usbProductList) or dev.idProduct==product):
-            if device == None or (device == (''.join([bus.dirname, ":", dev.filename]))):
-                #Populate the capability information for this device later, when driver is initialized
+        if (dev.idVendor in usbVendorList) and (dev.idProduct in usbProductList):
+            #Populate the capability information for this device later, when driver is initialized
+            if devNum == None:
+                return dev
+            elif busNum == int(bus.dirname) and devNum == int(dev.filename):
                 #print "Choose device", bus.dirname, dev.filename, "to initialize KillerBee instance on."
                 return dev
     return None
