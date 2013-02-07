@@ -256,7 +256,16 @@ class RZUSBSTICK:
             res = self.dev.write(endpoint, data)#, 0, 100)
             if len(data) != res:
                 raise Exception("Issue writing USB data {0} to endpoint {1}, got a return of {2}.".format(data, endpoint, res))
-            response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0).pop() #1, 0, 500)
+            try:
+                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0) #1, 0, 500)
+                response = response.pop()
+            except usb.core.USBError as e:
+                if e.errno != 110: #Operation timed out
+                    print "Error args:", e.args
+                    raise e
+                elif e.errno == 110:
+                    print "DEBUG: Received operation timed out error, and response is:", response
+                    print "...attempting to continue..."
             if response != RZ_RESP_SUCCESS:
                 if response in RESPONSE_MAP:
                     raise Exception("Error: %s" % RESPONSE_MAP[response])
