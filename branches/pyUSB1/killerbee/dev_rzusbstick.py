@@ -154,9 +154,11 @@ class RZUSBSTICK:
 
     def __dev_setup_v1x(self):
             # See http://pyusb.sourceforge.net/docs/1.0/tutorial.html for reference
+            self.dev.set_configuration()
+            
             #self.dev.reset()
-            self.dev.set_configuration(1) # could also provide no config number
-            self.dev.set_interface_altsetting(interface = 0, alternate_setting = 0)
+            #self.dev.set_configuration(1) # could also provide no config number
+            #self.dev.set_interface_altsetting(interface = 0, alternate_setting = 0)
             #TODO alternative setup code:
             #self.dev.set_configuration()
             #cfg = self.dev.get_active_configuration()
@@ -185,7 +187,8 @@ class RZUSBSTICK:
         @return: None
         @rtype: None
         '''
-        self.handle.releaseInterface()
+        if USBVER == 0:
+            self.handle.releaseInterface()
 
     # KillerBee implements these, maybe it shouldn't and instead leave it to the driver as needed.
     def check_capability(self, capab):
@@ -250,10 +253,10 @@ class RZUSBSTICK:
                 else:
                     raise Exception("Unknown USB write error: 0x%02x" % response)
         else: #pyUSB 1.x
-            res = self.dev.write(endpoint, data, 0, 100)
+            res = self.dev.write(endpoint, data)#, 0, 100)
             if len(data) != res:
                 raise Exception("Issue writing USB data {0} to endpoint {1}, got a return of {2}.".format(data, endpoint, res))
-            response = self.dev.read(RZ_USB_RESPONSE_EP, 1, 0, 500).pop() #TODO reduce timeout?
+            response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0).pop() #1, 0, 500)
             if response != RZ_RESP_SUCCESS:
                 if response in RESPONSE_MAP:
                     raise Exception("Error: %s" % RESPONSE_MAP[response])
@@ -394,7 +397,7 @@ class RZUSBSTICK:
         for pnum in xrange(count):
             # Format for packet is opcode RZ_CMD_INJECT_FRAME, one-byte length, 
             # packet data
-            self.__usb_write(RZ_USB_COMMAND_EP, struct.pack("B", RZ_CMD_INJECT_FRAME) + struct.pack("B", len(packet)) + packet)
+            self.__usb_write(RZ_USB_COMMAND_EP, struct.pack("BB", RZ_CMD_INJECT_FRAME, len(packet)) + packet)
             time.sleep(delay)
 
     # KillerBee expects the driver to implement this function
@@ -422,13 +425,13 @@ class RZUSBSTICK:
                         print "Error args:", e.args
                         raise e
         else: # pyUSB 1.x
-            print("Going to use the device in pnext")
-            #self.dev.reset()
-            #self.__dev_setup_v1x()
-            #print("Setup device in pnext")
-            pdata = self.dev.read(RZ_USB_PACKET_EP, 1, 0, 100)
-            print "Got data:", pdata
-            #TODO error handling
+            try:
+                pdata = self.dev.read(RZ_USB_PACKET_EP, self.dev.bMaxPacketSize0)#1, 0, 100)
+            except usb.core.USBError as e:
+                if e.errno != 110: #Operation timed out
+                    print "Error args:", e.args
+                    raise e
+            #TODO error handling enhancements for USB 1.0
 
         # PyUSB returns an empty tuple occasionally, handle as "no data"
         if pdata == None or pdata == ():
