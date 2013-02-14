@@ -14,5 +14,9 @@ We aim to keep adding support for more hardware. We have recently added a device
     * The Api-Do project has cases available that make the board more suitable for pen-testing/field-work.
   * _MoteIV Tmote Sky_ or _TelosB_ mote
     * Not in active production. We are working on a solution. Currently available used and typically abundant at universities.
+    * We've had luck with European-sold clones, flashed with our same firmware.
+  * _Api-Mote_ (in beta)
+    * First revision had good success, working on future revisions of the hardware.
+    * Runs a ported GoodFET firmware base.
   * _Zena Packet Analyzer_ (in development)
   * _Freaklabs Freakduino_ with Dartmouth modifications (in beta)
