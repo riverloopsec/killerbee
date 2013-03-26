@@ -208,6 +208,7 @@ def isgoodfetccspi(serialdev):
     @returns: Tuple with the fist element==True if it is some goodfetccspi device. The second element
                 is the subtype, and is 0 for telosb devices and 1 for apimote devices.
     '''
+    #TODO actually check for the ccspi application as well as a goodfet device
     from GoodFETCCSPI import GoodFETCCSPI
     os.environ["platform"] = ""
     # First try tmote detection
@@ -224,7 +225,11 @@ def isgoodfetccspi(serialdev):
     os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
     gf = GoodFETCCSPI()
     try:
-        gf.serInit(port=serialdev, attemptlimit=2)
+        #TODO note that in ApiMote v1, this connect appears to be tricky sometimes
+        #     thus attempt limit is raised to 4 for now
+        #     manually verify the hardware is working by using direct GoodFET client commands, such as:
+        #       export board=apimote1; ./goodfet.ccspi info; ./goodfet.ccspi spectrum
+        gf.serInit(port=serialdev, attemptlimit=4)
         #gf.setup()
         #print "Found %s on %s" % (gf.identstr(), serialdev)
     except serial.serialutil.SerialException as e:

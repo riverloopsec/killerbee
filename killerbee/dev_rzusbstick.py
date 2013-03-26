@@ -154,8 +154,12 @@ class RZUSBSTICK:
 
     def __dev_setup_v1x(self):
             # See http://pyusb.sourceforge.net/docs/1.0/tutorial.html for reference
-            self.dev.set_configuration()
-            
+            try:
+                self.dev.set_configuration()
+            except usb.core.USBError:
+                raise Exception("Unable to open device. " +
+                            "Ensure the device is free and plugged-in. You may need sudo.")
+
             #self.dev.reset()
             #self.dev.set_configuration(1) # could also provide no config number
             #self.dev.set_interface_altsetting(interface = 0, alternate_setting = 0)
