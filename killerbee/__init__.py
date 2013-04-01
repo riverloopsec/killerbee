@@ -111,6 +111,9 @@ class KillerBee:
                 self.dev = device
                 if (self.dev == gps_devstring):
                     pass
+                elif (DEV_ENABLE_ZIGDUINO and kbutils.iszigduino(self.dev)):
+                    from dev_zigduino import ZIGDUINO
+                    self.driver = ZIGDUINO(self.dev)
                 elif (DEV_ENABLE_FREAKDUINO and kbutils.isfreakduino(self.dev)):
                     from dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
