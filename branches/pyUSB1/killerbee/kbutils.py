@@ -118,7 +118,8 @@ def devlist_usb_v1x(vendor=None, product=None):
     devs = usb.core.find(find_all=True, custom_match=findFromList(vendor, product)) #backend=backend, 
     try:
         for dev in devs:
-            # Note, can use "{0:03d}:{1:03d}" to get the old format.
+            # Note, can use "{0:03d}:{1:03d}" to get the old format,
+            # but have decided to move to the new, shorter format.
             devlist.append(["{0}:{1}".format(dev.bus, dev.address),         \
                             usb.util.get_string(dev, 50, dev.iProduct),     \
                             usb.util.get_string(dev, 50, dev.iSerialNumber)])
@@ -172,6 +173,8 @@ def devlist(vendor=None, product=None, gps=None):
     for serialdev in seriallist:
         if serialdev == gps_devstring:
             print "kbutils.devlist is skipping GPS device string: %s" % serialdev #TODO remove print, make pass
+        elif (DEV_ENABLE_ZIGDUINO and iszigduino(serialdev)):
+            devlist.append([serialdev, "Zigduino", ""])
         elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
             #TODO need to move support for freakduino into goodfetccspi subtype==2
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
@@ -208,7 +211,6 @@ def isgoodfetccspi(serialdev):
     @returns: Tuple with the fist element==True if it is some goodfetccspi device. The second element
                 is the subtype, and is 0 for telosb devices and 1 for apimote devices.
     '''
-    #TODO actually check for the ccspi application as well as a goodfet device
     from GoodFETCCSPI import GoodFETCCSPI
     os.environ["platform"] = ""
     # First try tmote detection
@@ -219,8 +221,11 @@ def isgoodfetccspi(serialdev):
     except serial.serialutil.SerialException as e:
         raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
     if gf.connected == 1:
-        gf.serClose()
-        return True, 0
+        # now check if ccspi app is installed
+        out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
+        gf.serClose()        
+        if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
+            return True, 0
     # Then try apimote detection
     os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
     gf = GoodFETCCSPI()
@@ -235,13 +240,39 @@ def isgoodfetccspi(serialdev):
     except serial.serialutil.SerialException as e:
         raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)    
     if gf.connected == 1:
-        gf.serClose()
-        return True, 1
+        # now check if ccspi app is installed
+        out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
+        gf.serClose()        
+        if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
+            return True, 1
     # Nothing found        
     return False, None
+
+def iszigduino(serialdev):
+    '''
+    Determine if a given serial device is running the GoodFET firmware with the atmel_radio application.
+    This should be a Zigduino (only tested on hardware r1 currently).
+    @type serialdev:  String
+    @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
+    @rtype:   Boolean
+    @returns: Boolean with the fist element==True if it is a goodfet atmel128 device.
+    '''
+    # TODO why does this only work every-other time zbid is invoked?
+    from GoodFETatmel128 import GoodFETatmel128rfa1
+    os.environ["platform"] = "zigduino"
+    gf = GoodFETatmel128rfa1()
+    try:
+        gf.serInit(port=serialdev, attemptlimit=2)
+    except serial.serialutil.SerialException as e:
+        raise KBInterfaceError("Serial issue in kbutils.iszigduino: %s." % e)
+    if gf.connected == 1:
+        out = gf.writecmd(gf.ATMELRADIOAPP, 0x10, 0, None)
+        gf.serClose()
+        if (gf.app == gf.ATMELRADIOAPP) and (gf.verb == 0x10): #check if ATMELRADIOAPP exists           
+            return True
+    return False
     
 def isfreakduino(serialdev):
-    #TODO slated for deprecation with bx's support for Freakduino hardware in GoodFET code.
     '''
     Determine if a given serial device is a Freakduino attached with the right sketch loaded.
     @type serialdev: String
@@ -351,7 +382,7 @@ def randmac(length=8):
                 "\x00\xa0\x50"      # Cypress
                 ]
 
-    prefix = prefixes[random.randrange(0, len(prefixes))]
+    prefix = random.choice(prefixes)
     suffix = randbytes(length-3)
     # Reverse the address for use in a packet
     return ''.join([prefix, suffix])[::-1]
