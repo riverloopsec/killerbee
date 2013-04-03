@@ -140,7 +140,7 @@ class ZIGDUINO:
 
         if channel != None:
             self.set_channel(channel)
-            self.handle.RF_autocrc(1)           #let the radio add the CRC
+        self.handle.RF_autocrc(1)               #let the radio add the CRC
         for pnum in range(0, count):
             gfready = [ord(x) for x in packet]  #convert packet string to GoodFET expected integer format
             gfready.insert(0, len(gfready)+2)   #add a length that leaves room for CRC
@@ -165,8 +165,8 @@ class ZIGDUINO:
             packet = self.handle.RF_rxpacket()
         if packet is None:
             return None
-            rssi = self.handle.RF_getrssi() #TODO calibrate            
-            frame = packet
+        rssi = self.handle.RF_getrssi() #TODO calibrate            
+        frame = packet
         if frame[-2:] == makeFCS(frame[:-2]): validcrc = True
         else: validcrc = False
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
