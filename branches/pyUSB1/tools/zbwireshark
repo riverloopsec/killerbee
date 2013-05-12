@@ -76,7 +76,13 @@ except OSError, e:
     print "Failed to create FIFO: %s" % e
     sys.exit(-1)
 
-# Start wireshark immediately.
+# Start KillerBee
+kb = KillerBee(device=arg_devstring)
+signal.signal(signal.SIGINT, interrupt)
+kb.set_channel(arg_channel)
+kb.sniffer_on()
+
+# Start wireshark as soon as KillerBee succeeds
 try:
     rc = os.fork()
     if rc == 0:
@@ -86,12 +92,6 @@ except OSError, e:
     print "Point Wireshark to read from the pipe file:", pipefname
 
 pd = PcapDumper(DLT_IEEE802_15_4, pipefname, ppi=arg_ppi)
-
-# Start KillerBee
-kb = KillerBee(device=arg_devstring)
-signal.signal(signal.SIGINT, interrupt)
-kb.set_channel(arg_channel)
-kb.sniffer_on()
 
 print "zbwireshark: listening on \'%s\', sending to \'%s\'" % (kb.get_dev_info()[0], pipefname)
 
@@ -108,3 +108,4 @@ except IOError as e:
         print "ERROR: Pipe broken. Was Wireshark closed or stopped?"
 
 interrupt(0, 0) #shutdown and exit
+
