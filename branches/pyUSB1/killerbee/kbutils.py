@@ -5,7 +5,8 @@ try:
     #import usb.backend.libusb01
     #backend = usb.backend.libusb01.get_backend()
     USBVER=1
-    print("Warning: You are using pyUSB 1.x, support is in alpha.")
+    import sys
+    print >>sys.stderr, "Warning: You are using pyUSB 1.x, support is in alpha."
 except ImportError:
     import usb
     #print("Warning: You are using pyUSB 0.x, future deprecation planned.")

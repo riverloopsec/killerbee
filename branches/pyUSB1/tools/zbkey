@@ -38,6 +38,7 @@ def associate_response_handle(packet):
     #TODO link to the correct part of the specification for this frame
     '''
     Handle the association response packet.
+    We expect the FCF to be 0xCC63 and command type to be 0x02 (Assoc Resp)
     @arg  packet 
     @type packet 
     @return A string representing the device's short address in hex notation,
@@ -45,10 +46,14 @@ def associate_response_handle(packet):
     '''
     print "Length of packet received in associate_handle: {0}".format(len(packet))
     print kbutils.hexdump(packet)
-    if len(packet) > 21:
-        #TODO mark up what these offsets are
+    if len(packet) > 24:
+        # Offset to Command Type, check to be 0x02 for assoc response type
         if packet[21] == '\x02':
-            return packet[22:24] #device's short address
+            if packet[24] != '\x00':
+                print("Association response status was not successful. Received {0}.".format(struct.unpack('B', packet[24])[0]))
+                return None
+            # Offset to Response Assigned Short Addr (in assoc response type)
+            return packet[22:24] #device's short address, as binary string
     return None   
 
 
@@ -56,6 +61,7 @@ def transport_response_handle(packet):
     #TODO link to the correct part of the specification for this frame
     '''
     Handle the transport response packet.
+    We expect the FCF to be 0x8861 and the command type to be 0x05 (Data)
     @arg  packet 
     @type packet 
     @return A string representing the key in hex notation,
@@ -69,6 +75,18 @@ def transport_response_handle(packet):
         	return key
     return None
 
+def isAckFor(packet, lastseq):
+    '''
+    Determine if the packet is an acknowledgement frame corresponding to our
+    last sent sequence number.
+    '''
+    if packet[0:2] == '\x02\x00':
+        if packet[2] == lastseq:
+            return True
+    return False
+    
+def getAckByte(packet):
+    return packet[2]
 
 # Command-line arguments
 arg_channel = None
@@ -79,17 +97,16 @@ arg_delay = 4
 # Parameters to build association packet
 arg_IEE64addr = None    #May be specified on command line
 arg_panID = None        #May be specified on command line
-ASSOC_SEQNUM = '\x00'
+ASSOC_SEQNUM = '\x01'
 ASSOC_DST = '\x00\x00'
 ASSOC_SRC_PANID = '\xff\xff'
-ASSOC_ALLOC_ADDR = '\x84' #?
 assoc_packet = None
 
 # Parameters to build data packet
-ASSOC_DATA_SEQNUM = '\xc3'
+ASSOC_DATA_SEQNUM = '\x02'
 
 # key transport data arguments
-DATA_KEY_SEQNUM = '\xc4'
+DATA_KEY_SEQNUM = '\x03'
 
 # Command Line Processing
 while len(sys.argv) > 1:
@@ -108,10 +125,12 @@ while len(sys.argv) > 1:
         arg_sleep = float(sys.argv.pop(1))
     if op == '-a':
         arg_IEE64addr = binascii.unhexlify(sys.argv.pop(1))
-        #print "reverse_addr:%s" %(arg_IEE64addr[::-1])        
+        #print "reverse_addr:%s" % arg_IEE64addr[::-1].encode('hex')
+        arg_IEE64addr = arg_IEE64addr[::-1] #hack to switch endian
     if op == '-p':
         arg_panID = binascii.unhexlify(sys.argv.pop(1))
-        #print "reverse_panid:%s" %(str(struct.pack("<L",0x1aaa)))
+        arg_panID = arg_panID[::-1] #hack to swap endian
+        #print "reverse_panid:%s" % arg_panID.encode('hex')
     if op == '-z':
         arg_IEEEcoord = sys.argv.pop(1)
     if op == '-y':
@@ -136,15 +155,17 @@ kb.set_channel(arg_channel)
 
 #./zbkey -f 14 -R test1 -s 0.1 -p aa1a -a 0fc8071c08c25100 -i [deviceid]
 
-# Build the packet we use to request association
-assoc_packet = '\x23\xc8'+ASSOC_SEQNUM+arg_panID+ASSOC_DST+ASSOC_SRC_PANID+arg_IEE64addr+'\x01'+ASSOC_ALLOC_ADDR # associate packet 
-# Build the data packet sent after the association response is received
-data_assoc_packet  = '\x63\xc8'+ASSOC_DATA_SEQNUM+arg_panID+ASSOC_DST+arg_IEE64addr+'\x04' #data packet after association        
+# Build the packet we use to send ASSOCIATION REQUEST
+#   last byte is association request, 80 to request alloc addr only, can try other combos like c0
+assoc_packet = '\x23\xc8'+ASSOC_SEQNUM+arg_panID+ASSOC_DST+ASSOC_SRC_PANID+arg_IEE64addr+'\x01'+'\x80' # associate packet 
 
-# sent associate packet
 print "Sending association packet..."
 #print kbutils.hexdump(assoc_packet)
 kb.inject(assoc_packet)
+
+# NOW SEND FIRST DATA REQUEST
+# Build the data packet sent after the association response is received
+data_assoc_packet  = '\x63\xc8'+ASSOC_DATA_SEQNUM+arg_panID+ASSOC_DST+arg_IEE64addr+'\x04' #data packet after association        
 
 time.sleep(0.5)
 # send data after association packet
@@ -156,29 +177,35 @@ kb.inject(data_assoc_packet)
 value = None
 start = time.time()
 while (start+arg_delay > time.time()):		
-    # Does not block            
-    recvpkt = kb.pnext()            
+    # Does not block
+    recvpkt = kb.pnext()
     # Check for empty packet (timeout) and valid FCS
     if recvpkt != None and recvpkt['validcrc']:
-        print "Received frame" 
+        print "Received frame"
+        # If packet is an assocation response, get the assigned device
+        # short address, else get None if packet isn't the right type
         value = associate_response_handle(recvpkt['bytes'])
         if value != None:
+            # Let's ack them to thank them for the join...
+            kb.sniffer_off()
+            kb.inject('\x02\x00'+getAckByte(recvpkt['bytes']))
             print "Short address: {0}".format(value)
-            kb.sniffer_off() # sniffer needs to be turned off
             break
 
 if value == None:
-    print "Sorry, we didn't hear a device respond. Do you have an active target within range?"
+    print "Sorry, we didn't hear a device respond with an association response. Do you have an active target within range?"
+    kb.sniffer_off()
     kb.close()
     sys.exit(1)
 
-# create data_key packet
+# Now build a packet to issue the SECOND DATA REQUEST, for the key to be sent
 if value != None:
     data_key_packet = '\x63\x88'+DATA_KEY_SEQNUM+arg_panID+ASSOC_DST+value+'\x04' # data packet after association response 
     print "Sending the data key packet..."
     #print kbutils.hexdump(data_key_packet)
     kb.inject(data_key_packet)
 
+    # Now see if someone transmits key data
     start = time.time()
     receivedKey = None
     while (start+arg_delay > time.time()):
