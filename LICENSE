@@ -1,6 +1,6 @@
 Copyright (c) 2009, Joshua Wright <jwright@willhackforsushi.com>
-Updates   (c) 2011, Ryan Speers <ryan@rmspeers.com>
-                    & Ricky Melgares <melgares@gmail.com>
+Updates   (c) 2011-13, Ryan Speers <ryan@rmspeers.com>
+                       & Ricky Melgares <melgares@gmail.com>
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
@@ -13,9 +13,9 @@ are permitted provided that the following conditions are met:
        notice, this list of conditions and the following disclaimer in the
        documentation and/or other materials provided with the distribution.
 
-    3. Neither the name Joshua Wright nor the names of contributors may be used
-       to endorse or promote products derived from this software without
-       specific prior written permission.
+    3. Neither the names of the above authors nor the names of contributors 
+       may be used to endorse or promote products derived from this software 
+       without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED

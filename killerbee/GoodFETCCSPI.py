@@ -76,10 +76,12 @@ class GoodFETCCSPI(GoodFET):
         bytes=2;
         
         self.writecmd(self.CCSPIAPP,0x02,len(data),data);
-        toret=(
-            ord(self.data[2])+
-            (ord(self.data[1])<<8)
-            );
+        try:
+            toret=( ord(self.data[2]) + (ord(self.data[1])<<8) );
+        except Exception as e:
+            print "issue in peeking for a register"
+            print e
+            toret=( (ord(self.data[1])<<8) );
         return toret;
     def poke(self,reg,val,bytes=2):
         """Write a CCSPI Register."""

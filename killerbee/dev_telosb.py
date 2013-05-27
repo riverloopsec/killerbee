@@ -140,7 +140,9 @@ class TELOSB:
             gfready = [ord(x) for x in packet]  #convert packet string to GoodFET expected integer format
             gfready.insert(0, len(gfready)+2)   #add a length that leaves room for CRC
             self.handle.RF_txpacket(gfready)
-            time.sleep(1)
+            # Sleep was for 1 second but testing by Gianfranco Costamagna suggested lowering to 1/100th of a second
+            time.sleep(0.01)                    #TODO get rid of completely, and just check CC2420 status
+            # https://github.com/alvarop/msp430-cc2500/blob/master/lib/cc2500/cc2500.c
 
     # KillerBee expects the driver to implement this function
     def pnext(self, timeout=100):
