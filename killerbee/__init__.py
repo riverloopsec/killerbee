@@ -32,13 +32,13 @@ def kb_dev_list(vendor=None, product=None):
     '''
     return kbutils.devlist()
 
-def show_dev():
+def show_dev(gps=None):
     '''
     A basic function to output the device listing.
     Placed here for reuse, as many tool scripts were implementing it.
     '''
     print "Dev\tProduct String\tSerial Number"
-    for dev in kbutils.devlist():
+    for dev in kbutils.devlist(gps=gps):
         print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
 
 # KillerBee Class

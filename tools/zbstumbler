@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+
+'''
+Transmit beacon request frames to the broadcast address while
+channel hopping to identify ZC/ZR devices.
+'''
+
 import sys
 import os
 import signal
@@ -99,12 +105,6 @@ def response_handler(stumbled, packet, channel):
 
     return None
 
-
-def show_dev():
-    print "Dev\tProduct String\tSerial Number"
-    for dev in kbutils.devlist():
-        print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
-
 def interrupt(signum, frame):
     global txcount
     global rxcount
@@ -117,7 +117,6 @@ def interrupt(signum, frame):
     sys.exit(0)
 
 if __name__ == '__main__':
-
     # Command-line arguments
     arg_devstring = None
     arg_delay = 2
@@ -204,7 +203,7 @@ if __name__ == '__main__':
             recvpkt = kb.pnext()
             # Check for empty packet (timeout) and valid FCS
             if recvpkt != None and recvpkt[1]:
-                rxcount+=1
+                rxcount += 1
                 if arg_verbose:
                     print "Received frame."#, time.time()-start
                 networkdata = response_handler(stumbled, recvpkt[0], channel) 
