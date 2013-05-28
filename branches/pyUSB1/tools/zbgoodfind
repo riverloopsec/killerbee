@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+
+'''
+Search a binary file to identify the encryption key for a given
+SNA or libpcap IEEE 802.15.4 encrypted packet.
+'''
+
 import sys
 import random
 import signal

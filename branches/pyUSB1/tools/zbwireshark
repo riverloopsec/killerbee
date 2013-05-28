@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+
+'''
+Sends sniffed IEEE 802.15.4 packets to Wireshark via a named pipe.
+
+ryan@riverloopsecurity.com
+'''
+
 import sys
 import signal
 import os, tempfile
@@ -11,11 +18,6 @@ zbwireshark - sends sniffed IEEE 802.15.4 packets to Wireshark via a named pipe
 
 Usage: zbwireshark [-fiwDchp] [-f channel] [-i devnumstring] [-p]
     """
-
-def show_dev():
-    print "Dev\tProduct String\tSerial Number"
-    for dev in kbutils.devlist():
-        print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
 
 def interrupt(signum, frame):
     global packetcount
