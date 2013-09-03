@@ -66,7 +66,7 @@ elif arg_channel < 11 or arg_channel > 26:
     sys.exit(1)
 
 kb = KillerBee(device=arg_devstring)
-print kb.get_dev_info()
+#print kb.get_dev_info()
 signal.signal(signal.SIGINT, interrupt)
 
 print "Injecting %d packets on %d channel with a %d length" % (arg_packetcount, arg_channel, len(packet))

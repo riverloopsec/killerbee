@@ -1,3 +1,15 @@
+# GoodFET Chipcon RF Radio Client
+# 
+# (C) 2013 Ryan Speers <ryan at riverloopsecurity.com>
+#
+# The ApiMote product is a work in progress.
+# This code is being rewritten and refactored.
+#
+# TODO list (help is welcomed):
+#   - RF testing and calibration for RSSI/dBm
+#   - Testing carrier jamming and implementing jammer_off()
+#   - Platform recognition (ApiMote versons)
+
 import os
 import time
 import struct
@@ -6,14 +18,22 @@ from datetime import datetime, date, timedelta
 from kbutils import KBCapabilities, makeFCS
 from GoodFETCCSPI import GoodFETCCSPI
 
+# Default revision of the ApiMote. This is liable to change at any time
+# as new ApiMote versions are released. Automatic recognition would be nice.
+DEFAULT_REVISION = 2
+
 CC2420_REG_SYNC = 0x14
 
 class APIMOTE:
-    def __init__(self, dev):
+    def __init__(self, dev, revision=DEFAULT_REVISION):
         '''
-        Instantiates the KillerBee class for our TelosB/TmoteSky running GoodFET firmware.
+        Instantiates the KillerBee class for the ApiMote platform running GoodFET firmware.
         @type dev:   String
         @param dev:  Serial device identifier (ex /dev/ttyUSB0)
+        @type revision: Integer
+        @param revision: The revision number for the ApiMote, which is used by 
+            the called GoodFET libraries to properly communicate with
+            and configure the hardware.
         @return: None
         @rtype: None
         '''
@@ -21,11 +41,14 @@ class APIMOTE:
         self.handle = None
         self.dev = dev
 
-        os.environ["platform"] = "apimote1" #set enviroment variable for GoodFET code to use
-        os.environ["board"] = "apimote1"
+        self.__revision_num = revision
+        # Set enviroment variables for GoodFET code to use
+        os.environ["platform"] = "apimote%d".format(self.__revision_num)
+        os.environ["board"] = "apimote%d".format(self.__revision_num)
         self.handle = GoodFETCCSPI()
         self.handle.serInit(port=self.dev)
         self.handle.setup()
+        # TODO can we verify here the revision number that was sent is correct?
 
         self.__stream_open = False
         self.capabilities = KBCapabilities()
@@ -53,14 +76,13 @@ class APIMOTE:
         return
 
     # KillerBee expects the driver to implement this function
-    #def get_dev_info(self, dev, bus):
     def get_dev_info(self):
 	'''
         Returns device information in a list identifying the device.
         @rtype: List
         @return: List of 3 strings identifying device.
         '''
-        return [self.dev, "TelosB/Tmote", ""]
+        return [self.dev, "GoodFET Apimote v%d".format(self.__revision_num), ""]
 
     # KillerBee expects the driver to implement this function
     def sniffer_on(self, channel=None):
@@ -171,7 +193,7 @@ class APIMOTE:
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
         result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'location':None}
-        result['dbm'] = rssi - 45 #TODO tune specifically to the Tmote platform (does ext antenna need to different?)
+        result['dbm'] = rssi - 45 #TODO tune specifically to the Apimote platform (does ext antenna need to different?)
         result['datetime'] = datetime.combine(date.today(), (datetime.now()).time()) #TODO address timezones by going to UTC everywhere
         return result
  
@@ -197,7 +219,8 @@ class APIMOTE:
         if channel != None:
             self.set_channel(channel)
         self.handle.CC_RFST_RX()
-        self.handle.RF_reflexjam()
+        self.handle.RF_carrier() #constant carrier wave jamming
+        #self.handle.RF_reflexjam() #reflexive jamming (advanced)
 
     def set_sync(self, sync=0xA70F):
         '''Set the register controlling the 802.15.4 PHY sync byte.'''

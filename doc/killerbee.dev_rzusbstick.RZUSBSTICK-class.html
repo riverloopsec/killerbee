@@ -104,10 +104,42 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="__handle_open"></a><span class="summary-sig-name">__handle_open</span>(<span class="summary-sig-arg">self</span>)</span><br />
-      Opens the device identified as self.dev, populating self.handle</td>
+          <td><span class="summary-sig"><a href="killerbee.dev_rzusbstick.RZUSBSTICK-class.html#__handle_open" class="summary-sig-name" onclick="show_private();">__handle_open</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Opens the device identified as self.dev, populating self.handle.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee.dev_rzusbstick-pysrc.html#RZUSBSTICK.__handle_open">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__dev_setup_v1x"></a><span class="summary-sig-name">__dev_setup_v1x</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.dev_rzusbstick-pysrc.html#RZUSBSTICK.__dev_setup_v1x">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__handle_open_v0x"></a><span class="summary-sig-name">__handle_open_v0x</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.dev_rzusbstick-pysrc.html#RZUSBSTICK.__handle_open_v0x">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -221,31 +253,12 @@
   </tr>
 <tr class="private">
     <td width="15%" align="right" valign="top" class="summary">
-      <span class="summary-type">String</span>
-    </td><td class="summary">
-      <table width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td><span class="summary-sig"><a href="killerbee.dev_rzusbstick.RZUSBSTICK-class.html#__usb_read" class="summary-sig-name" onclick="show_private();">__usb_read</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">endpoint</span>,
-        <span class="summary-sig-arg">timeout</span>=<span class="summary-sig-default">100</span>)</span><br />
-      Reads data from the USB device on the specified endpoint.</td>
-          <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee.dev_rzusbstick-pysrc.html#RZUSBSTICK.__usb_read">source&nbsp;code</a></span>
-            
-          </td>
-        </tr>
-      </table>
-      
-    </td>
-  </tr>
-<tr class="private">
-    <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">None</span>
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="killerbee.dev_rzusbstick.RZUSBSTICK-class.html#_set_mode" class="summary-sig-name" onclick="show_private();">_set_mode</a>(<span class="summary-sig-arg">self</span>,
-        <span class="summary-sig-arg">mode</span>)</span><br />
+        <span class="summary-sig-arg">mode</span>=<span class="summary-sig-default">0</span>)</span><br />
       Change the operating mode of the USB device to one of the 
       RZ_CMD_MODE_* values.</td>
           <td align="right" valign="top">
@@ -481,11 +494,40 @@
   <dl class="fields">
     <dt>Parameters:</dt>
     <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>dev</code></strong> (String) - USB device identifier</li>
-        <li><strong class="pname"><code>bus</code></strong> (String) - Identifies the USB bus the device is on</li>
+        <li><strong class="pname"><code>dev</code></strong> (TODO) - USB device identifier</li>
+        <li><strong class="pname"><code>bus</code></strong> (TODO) - Identifies the USB bus the device is on</li>
     </ul></dd>
     <dt>Returns: None</dt>
         <dd>None</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="__handle_open"></a>
+<div class="private">
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__handle_open</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.dev_rzusbstick-pysrc.html#RZUSBSTICK.__handle_open">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <pre class="literalblock">
+
+Opens the device identified as self.dev, populating self.handle.
+An RZUSBSTICK has a hierarchy of:
+\_ Config value: 1
+  \_ Interface number 0, with alternate setting 0
+     |- Endpoint 132 for responses
+     |- Endpoint 2   for control
+     |- Endpoint 129 for packets
+
+</pre>
+  <dl class="fields">
   </dl>
 </td></tr></table>
 </div>
@@ -580,34 +622,6 @@
   </dl>
 </td></tr></table>
 </div>
-<a name="__usb_read"></a>
-<div class="private">
-<table class="details" border="1" cellpadding="3"
-       cellspacing="0" width="100%" bgcolor="white">
-<tr><td>
-  <table width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">__usb_read</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">endpoint</span>,
-        <span class="sig-arg">timeout</span>=<span class="sig-default">100</span>)</span>
-  </h3>
-  </td><td align="right" valign="top"
-    ><span class="codelink"><a href="killerbee.dev_rzusbstick-pysrc.html#RZUSBSTICK.__usb_read">source&nbsp;code</a></span>&nbsp;
-    </td>
-  </tr></table>
-  
-  <p>Reads data from the USB device on the specified endpoint.</p>
-  <dl class="fields">
-    <dt>Parameters:</dt>
-    <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>endpoint</code></strong> (Integer) - The USB endpoint to read from</li>
-        <li><strong class="pname"><code>timeout</code></strong> (Integer) - Timeout in usec for read operation before return</li>
-    </ul></dd>
-    <dt>Returns: String</dt>
-        <dd>Data returned from USB device</dd>
-  </dl>
-</td></tr></table>
-</div>
 <a name="_set_mode"></a>
 <div class="private">
 <table class="details" border="1" cellpadding="3"
@@ -616,7 +630,7 @@
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">_set_mode</span>(<span class="sig-arg">self</span>,
-        <span class="sig-arg">mode</span>)</span>
+        <span class="sig-arg">mode</span>=<span class="sig-default">0</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="killerbee.dev_rzusbstick-pysrc.html#RZUSBSTICK._set_mode">source&nbsp;code</a></span>&nbsp;
@@ -873,7 +887,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu May  5 12:03:12 2011
+    Generated by Epydoc 3.0.1 on Tue Sep  3 18:17:11 2013
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
