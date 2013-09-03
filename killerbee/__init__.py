@@ -13,14 +13,20 @@ from config import *       #to get DEV_ENABLE_* variables
 
 # Utility Functions
 def getKillerBee(channel):
-	kb = KillerBee()
-	if kb is None:
-		raise Exception("Failed to create a KillerBee instance.")
-	try:
-		kb.set_channel(channel)
-	except Exception, e:
-		raise Exception('Error: Failed to set channel to %d' % channel, e)
-	return kb
+    '''
+    Returns an instance of a KillerBee device, setup on the given channel.
+    Error handling for KillerBee creation and setting of the channel is wrapped
+    and will raise an Exception().
+    @return: A KillerBee instance initialized to the given channel.
+    '''
+    kb = KillerBee()
+    if kb is None:
+        raise Exception("Failed to create a KillerBee instance.")
+    try:
+        kb.set_channel(channel)
+    except Exception, e:
+        raise Exception('Error: Failed to set channel to %d' % channel, e)
+    return kb
 
 def kb_dev_list(vendor=None, product=None):
     '''

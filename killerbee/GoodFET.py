@@ -313,8 +313,8 @@ class GoodFET:
         Helper function for support of the Z1 mote platform.
         Applies BSL entry sequence on RST/NMI and TEST/VPP pins.
         By now only BSL mode is accessed.
-        @type  invokeBSL Integer
-        @param invokeBSL 1 for a complete sequence, or 0 to only access RST/NMI pin
+        @type  invokeBSL: Integer
+        @param invokeBSL: 1 for a complete sequence, or 0 to only access RST/NMI pin
         '''
         #if DEBUG > 1: sys.stderr.write("* bslReset(invokeBSL=%s)\n" % invokeBSL)
         if invokeBSL:

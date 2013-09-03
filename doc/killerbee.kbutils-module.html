@@ -144,8 +144,9 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="devlist_usb_v1x"></a><span class="summary-sig-name">devlist_usb_v1x</span>(<span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
-        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#devlist_usb_v1x" class="summary-sig-name">devlist_usb_v1x</a>(<span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Private function.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist_usb_v1x">source&nbsp;code</a></span>
             
@@ -161,8 +162,9 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="devlist_usb_v0x"></a><span class="summary-sig-name">devlist_usb_v0x</span>(<span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
-        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#devlist_usb_v0x" class="summary-sig-name">devlist_usb_v0x</a>(<span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Private function.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist_usb_v0x">source&nbsp;code</a></span>
             
@@ -215,7 +217,8 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="get_serial_ports"></a><span class="summary-sig-name">get_serial_ports</span>()</span></td>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#get_serial_ports" class="summary-sig-name">get_serial_ports</a>()</span><br />
+      Private function.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee.kbutils-pysrc.html#get_serial_ports">source&nbsp;code</a></span>
             
@@ -502,6 +505,46 @@
   </td>
 </tr>
 </table>
+<a name="devlist_usb_v1x"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">devlist_usb_v1x</span>(<span class="sig-arg">vendor</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">product</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist_usb_v1x">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Private function. Do not call from tools/scripts/etc.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="devlist_usb_v0x"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">devlist_usb_v0x</span>(<span class="sig-arg">vendor</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">product</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist_usb_v0x">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Private function. Do not call from tools/scripts/etc.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
 <a name="devlist"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -532,6 +575,29 @@
         <dd>List of device information present. For USB devices, get 
           [busdir:devfilename, productString, serialNumber] For serial 
           devices, get [serialFileName, deviceDescription, &quot;&quot;]</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_serial_ports"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_serial_ports</span>()</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#get_serial_ports">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Private function. Do not call from tools/scripts/etc. This should 
+  return a list of device paths for serial devices that we are interested 
+  in, aka USB serial devices using FTDI chips such as the TelosB, ApiMote, 
+  etc. This should handle returning a list of devices regardless of the 
+  *nix it is running on. Support for more *nix and winnt needed.</p>
+  <dl class="fields">
   </dl>
 </td></tr></table>
 </div>
@@ -727,7 +793,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Tue Sep  3 18:17:11 2013
+    Generated by Epydoc 3.0.1 on Tue Sep  3 18:52:25 2013
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"
