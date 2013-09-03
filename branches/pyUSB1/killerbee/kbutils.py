@@ -109,6 +109,9 @@ class findFromListAndBusDevId(findFromList):
         return False
 
 def devlist_usb_v1x(vendor=None, product=None):
+    '''
+    Private function. Do not call from tools/scripts/etc.
+    '''
     devlist = []
     if vendor == None:  vendor = usbVendorList
     else:               vendor = [vendor]
@@ -132,6 +135,9 @@ def devlist_usb_v1x(vendor=None, product=None):
     return devlist
 
 def devlist_usb_v0x(vendor=None, product=None):
+    '''
+    Private function. Do not call from tools/scripts/etc.
+    '''
     devlist = []
     busses = usb.busses()
     for bus in busses:
@@ -197,6 +203,13 @@ def get_serial_devs():
     #TODO Continue moving code from line 163:181 here, yielding results
 
 def get_serial_ports():
+    '''
+    Private function. Do not call from tools/scripts/etc.
+    This should return a list of device paths for serial devices that we are
+    interested in, aka USB serial devices using FTDI chips such as the TelosB,
+    ApiMote, etc. This should handle returning a list of devices regardless of
+    the *nix it is running on. Support for more *nix and winnt needed.
+    '''
     seriallist = glob.glob("/dev/ttyUSB*") + glob.glob("/dev/tty.usbserial*")  #TODO make cross platform globing/winnt
     return seriallist
     

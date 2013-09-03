@@ -101,12 +101,12 @@ def kbdev():
 def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, verbose = None, realtime=None):
 	"""
 	Send a packet with KillerBee
-    channel:  802.15.4 channel to transmit/receive on
-    inter:    time to wait between tranmissions
-    loop:     number of times to process the packet list
-    iface:    KillerBee interface to use, or KillerBee() class instance
-    verbose:  set verbosity level
-    realtime: use packet's timestamp, bending time with realtime value
+    @param channel:  802.15.4 channel to transmit/receive on
+    @param inter:    time to wait between tranmissions
+    @param loop:     number of times to process the packet list
+    @param iface:    KillerBee interface to use, or KillerBee() class instance
+    @param verbose:  set verbosity level
+    @param realtime: use packet's timestamp, bending time with realtime value
     """
 	if channel == None:
 		channel = conf.killerbee_channel
@@ -126,20 +126,20 @@ def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, verbose = No
 def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
 	"""
 	Send and receive packets with KillerBee
-    channel:  802.15.4 channel to transmit/receive on
-    inter:    time to wait between tranmissions
-    count:    number of packets to capture. 0 means infinity
-    iface:    KillerBee interface to use, or KillerBee() class instance
-    store:    wether to store sniffed packets or discard them
-    prn:      function to apply to each packet. If something is returned,
-              it is displayed. Ex:
-              ex: prn = lambda x: x.summary()
-    lfilter:  python function applied to each packet to determine
-              if further action may be done
-              ex: lfilter = lambda x: x.haslayer(Padding)
-    timeout:  stop sniffing after a given time (default: None)
-    verbose:  set verbosity level
-    realtime: use packet's timestamp, bending time with realtime value
+    @param channel:  802.15.4 channel to transmit/receive on
+    @param inter:    time to wait between tranmissions
+    @param count:    number of packets to capture. 0 means infinity
+    @param iface:    KillerBee interface to use, or KillerBee() class instance
+    @param store:    wether to store sniffed packets or discard them
+    @param prn:      function to apply to each packet. If something is returned,
+                      it is displayed. Ex:
+                      ex: prn = lambda x: x.summary()
+    @param lfilter:  python function applied to each packet to determine
+                      if further action may be done
+                      ex: lfilter = lambda x: x.haslayer(Padding)
+    @param timeout:  stop sniffing after a given time (default: None)
+    @param verbose:  set verbosity level
+    @param realtime: use packet's timestamp, bending time with realtime value
     """
 	if verbose is None:
 		verbose = conf.verb
@@ -172,17 +172,17 @@ def kbsrp1(pkt, channel = None, inter = 0, iface = None, store = 1, prn = None, 
 def kbsniff(channel = None, count = 0, iface = None, store = 1, prn = None, lfilter = None, stop_filter = None, verbose = None, timeout = None):
 	"""
 	Sniff packets with KillerBee.
-    channel:  802.15.4 channel to transmit/receive on
-    count:    number of packets to capture. 0 means infinity
-    iface:    KillerBee interface to use, or KillerBee() class instance
-    store:    wether to store sniffed packets or discard them
-    prn:      function to apply to each packet. If something is returned,
-              it is displayed. Ex:
-              ex: prn = lambda x: x.summary()
-    lfilter:  python function applied to each packet to determine
-              if further action may be done
-              ex: lfilter = lambda x: x.haslayer(Padding)
-    timeout:  stop sniffing after a given time (default: None)
+    @param channel:  802.15.4 channel to transmit/receive on
+    @param count:    number of packets to capture. 0 means infinity
+    @param iface:    KillerBee interface to use, or KillerBee() class instance
+    @param store:    wether to store sniffed packets or discard them
+    @param prn:      function to apply to each packet. If something is returned,
+                      it is displayed. Ex:
+                      ex: prn = lambda x: x.summary()
+    @param lfilter:  python function applied to each packet to determine
+                      if further action may be done
+                      ex: lfilter = lambda x: x.haslayer(Padding)
+    @param timeout:  stop sniffing after a given time (default: None)
     """
 	if channel == None:
 		channel = conf.killerbee_channel
@@ -198,33 +198,37 @@ def kbsniff(channel = None, count = 0, iface = None, store = 1, prn = None, lfil
 
 @conf.commands.register
 def kbrdpcap(filename, count = -1, skip = 0):
-	"""
-	Read a pcap file with the KillerBee library
+    """
+    Read a pcap file with the KillerBee library.
     Wraps the PcapReader to return scapy packet object from pcap files.
     This uses the killerbee internal methods instead of the scapy native methods.
+    This is not necessarily better, and suggestions are welcome.
+    @return: Scapy packetlist of Dot15d4 packets parsed from the given PCAP file.
     """
-	cap = PcapReader(filename)
-	lst = []
-	packetcount = 0
-	if count > 0:
-		count += skip
-	
-	while 1:
-		packet = cap.pnext()
-		packetcount += 1
-		if packet[1] == None:
-			break
-		if skip > 0 and packetcount <= skip:
-			continue
-		packet = Dot15d4(packet[1])
-		lst.append(packet)
-		if count > 0 and packetcount >= count:
-			break
-	return plist.PacketList(lst, os.path.basename(filename))
+    cap = PcapReader(filename)
+    lst = []
+    packetcount = 0
+    if count > 0:
+        count += skip
+
+    while 1:
+        packet = cap.pnext()
+        packetcount += 1
+        if packet[1] == None:
+            break
+        if skip > 0 and packetcount <= skip:
+            continue
+        packet = Dot15d4(packet[1])
+        lst.append(packet)
+        if count > 0 and packetcount >= count:
+            break
+    return plist.PacketList(lst, os.path.basename(filename))
 
 @conf.commands.register
 def kbwrpcap(save_file, pkts):
-	"""Write a pcap using the KillerBee library"""
+	"""
+	Write a pcap using the KillerBee library.
+	"""
 	pd = PcapDumper(DLT_IEEE802_15_4, save_file, ppi=False)
 	for packet in pkts:
 		pd.pcap_dump(str(packet))
@@ -232,28 +236,32 @@ def kbwrpcap(save_file, pkts):
 
 @conf.commands.register
 def kbrddain(filename, count = -1, skip = 0):
-	"""Read a dain tree file with the KillerBee library
-Wraps the DainTreeReader to return scapy packet object from dain tree files."""
-	cap = DainTreeReader(filename)
-	lst = []
-	packetcount = 0
-	
-	while 1:
-		packet = cap.pnext()
-		packetcount += 1
-		if packet[1] == None:
-			break
-		if skip > 0 and packetcount <= skip:
-			continue
-		packet = Dot15d4(packet[1])
-		lst.append(packet)
-		if count > 0 and packetcount >= count:
-			break
-	return plist.PacketList(lst, os.path.basename(filename))
+    """
+    Read a dain tree file with the KillerBee library
+    Wraps the DainTreeReader to return scapy packet object from daintree files.
+    """
+    cap = DainTreeReader(filename)
+    lst = []
+    packetcount = 0
+
+    while 1:
+        packet = cap.pnext()
+        packetcount += 1
+        if packet[1] == None:
+            break
+        if skip > 0 and packetcount <= skip:
+            continue
+        packet = Dot15d4(packet[1])
+        lst.append(packet)
+        if count > 0 and packetcount >= count:
+            break
+    return plist.PacketList(lst, os.path.basename(filename))
 
 @conf.commands.register
 def kbwrdain(save_file, pkts):
-	"""Write a dain tree file using the KillerBee library"""
+	"""
+	Write a daintree file using the KillerBee library.
+	"""
 	dt = DainTreeDumper(save_file)
 	for packet in pkts:
 		dt.pwrite(str(packet))
@@ -261,7 +269,9 @@ def kbwrdain(save_file, pkts):
 
 @conf.commands.register
 def kbkeysearch(packet, searchdata, ispath = True, skipfcs = True, raw = False):
-	"""Search a binary file for the encryption key to an encrypted packet"""
+	"""
+	Search a binary file for the encryption key to an encrypted packet.
+	"""
 	if 'fcf_security' in packet.fields and packet.fcf_security == 0:
 		raise Exception('Packet Not Encrypted (fcf_security Not Set)')
 	if ispath:
@@ -285,8 +295,9 @@ def kbkeysearch(packet, searchdata, ispath = True, skipfcs = True, raw = False):
 
 @conf.commands.register
 def kbgetnetworkkey(pkts):
-	"""Search packets for a plaintext key exchange
-returns the first one found"""
+	"""
+	Search packets for a plaintext key exchange returns the first one found.
+	"""
 	if not isinstance(pkts, Gen):
 		pkts = SetGen(pkts)
 	for packet in pkts:
@@ -497,3 +508,4 @@ def kbencrypt(pkt, data, key = None, verbose = None):
 	f['data'] = payload
 	f['mic'] = unpack(">I", mic)[0]
 	return pkt
+
