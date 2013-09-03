@@ -5,8 +5,6 @@ try:
     #import usb.backend.libusb01
     #backend = usb.backend.libusb01.get_backend()
     USBVER=1
-    import sys
-    print >>sys.stderr, "Warning: You are using pyUSB 1.x, support is in alpha."
 except ImportError:
     import usb
     #print("Warning: You are using pyUSB 0.x, future deprecation planned.")
@@ -185,10 +183,10 @@ def devlist(vendor=None, product=None, gps=None):
                 devlist.append([serialdev, "GoodFET TelosB/Tmote", ""])
                 #print "Found tmote on", serialdev
             elif gfccspi and subtype == 1:
-                devlist.append([serialdev, "GoodFET Api-Mote", ""])
+                devlist.append([serialdev, "GoodFET Api-Mote v1", ""])
                 #print "Found apimote on", serialdev
             elif gfccspi and subtype == 2:
-                devlist.append([serialdev, "GoodFET Freakduino", ""])
+                devlist.append([serialdev, "GoodFET Api-Mote v2", ""])
                 #print "Found freakduino on", serialdev
             elif gfccspi:
                 print "kbutils.devlist has an unkown type of GoodFET CCSPI device (%s)." % serialdev #TODO
@@ -212,6 +210,7 @@ def isgoodfetccspi(serialdev):
     @returns: Tuple with the fist element==True if it is some goodfetccspi device. The second element
                 is the subtype, and is 0 for telosb devices and 1 for apimote devices.
     '''
+    #TODO reduce code, perhaps into loop iterating over board configs
     from GoodFETCCSPI import GoodFETCCSPI
     os.environ["platform"] = ""
     # First try tmote detection
@@ -227,7 +226,22 @@ def isgoodfetccspi(serialdev):
         gf.serClose()        
         if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
             return True, 0
-    # Then try apimote detection
+    # Try apimote v2 detection
+    os.environ["board"] = "apimote2" #set enviroment variable for GoodFET code to use
+    gf = GoodFETCCSPI()
+    try:
+        gf.serInit(port=serialdev, attemptlimit=2)
+        #gf.setup()
+        print "Found %s on %s" % (gf.identstr(), serialdev)
+    except serial.serialutil.SerialException as e:
+        raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)    
+    if gf.connected == 1:
+        # now check if ccspi app is installed
+        out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
+        gf.serClose()        
+        if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
+            return True, 2
+    # Then try apimote v1 detection
     os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
     gf = GoodFETCCSPI()
     try:

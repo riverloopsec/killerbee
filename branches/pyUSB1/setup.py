@@ -21,15 +21,16 @@ try:
 except ImportError:
     err += "crypto (apt-get install python-crypto)\n"
 
+# Ensure we have either pyUSB 0.x or pyUSB 1.x, but we now
+#  prefer pyUSB 1.x moving forward. Support for 0.x may be deprecated.
 try:
     import usb
 except ImportError:
     err += "usb (apt-get install python-usb)\n"
 
-#TODO remove this warning check once support is well tested:
 try:
     import usb.core
-    print("Warning: You are using pyUSB 1.x, support is in alpha.")
+    #print("Warning: You are using pyUSB 1.x, support is in beta.")
 except ImportError:
     print("Note: You are using pyUSB 0.x. Consider upgrading to pyUSB 1.x.")
 

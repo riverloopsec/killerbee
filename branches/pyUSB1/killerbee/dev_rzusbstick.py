@@ -142,11 +142,11 @@ class RZUSBSTICK:
         '''
         Opens the device identified as self.dev, populating self.handle.
         An RZUSBSTICK has a hierarchy of:
-            Config value: 1
-                Interface number 0, with alternate setting 0
-		            Endpoint 132 for responses
-		            Endpoint 2   for control
-		            Endpoint 129 for packets
+        \_ Config value: 1
+          \_ Interface number 0, with alternate setting 0
+             |- Endpoint 132 for responses
+             |- Endpoint 2   for control
+             |- Endpoint 129 for packets
         '''
         if USBVER == 0:
             self.__handle_open_v0x()

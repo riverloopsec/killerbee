@@ -95,33 +95,19 @@ def __kb_recv(kb, count = 0, store = 1, prn = None, lfilter = None, stop_filter 
 @conf.commands.register
 def kbdev():
 	"""List KillerBee recognized devices"""
-	kbdev_info = kbutils.devlist()
-	print 'Dev\tProduct String\tSerial Number\tCapabilities'
-	for dev in kbdev_info:
-		capabilities = []
-		if dev[1] == 'KILLERB001':
-			capabilities.append('SNIFF')
-			capabilities.append('SETCHAN')
-			capabilities.append('INJECT')
-		elif dev[1] == 'RZUSBSTICK':
-			capabilities.append('SNIFF')
-			capabilities.append('SETCHAN')
-		else:
-			capabilities.append('UNKNOWN')
-
-		print "%s\t%s\t%s\t%s" % (dev[0], dev[1], dev[2], ", ".join(capabilities))
-	print ''
-	print "Found %d devices." % len(kbdev_info)
+	show_dev()
 
 @conf.commands.register
 def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, verbose = None, realtime=None):
-	"""Send a packet with KillerBee
-channel:  802.15.4 channel to transmit/receive on
-inter:    time to wait between tranmissions
-loop:     number of times to process the packet list
-iface:    KillerBee interface to use, or KillerBee() class instance
-verbose:  set verbosity level
-realtime: use packet's timestamp, bending time with realtime value"""
+	"""
+	Send a packet with KillerBee
+    channel:  802.15.4 channel to transmit/receive on
+    inter:    time to wait between tranmissions
+    loop:     number of times to process the packet list
+    iface:    KillerBee interface to use, or KillerBee() class instance
+    verbose:  set verbosity level
+    realtime: use packet's timestamp, bending time with realtime value
+    """
 	if channel == None:
 		channel = conf.killerbee_channel
 	if not isinstance(iface, KillerBee):
@@ -138,21 +124,23 @@ realtime: use packet's timestamp, bending time with realtime value"""
 
 @conf.commands.register
 def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
-	"""Send and receive packets with KillerBee
-channel:  802.15.4 channel to transmit/receive on
-inter:    time to wait between tranmissions
-count:    number of packets to capture. 0 means infinity
-iface:    KillerBee interface to use, or KillerBee() class instance
-store:    wether to store sniffed packets or discard them
-prn:      function to apply to each packet. If something is returned,
-          it is displayed. Ex:
-          ex: prn = lambda x: x.summary()
-lfilter:  python function applied to each packet to determine
-          if further action may be done
-          ex: lfilter = lambda x: x.haslayer(Padding)
-timeout:  stop sniffing after a given time (default: None)
-verbose:  set verbosity level
-realtime: use packet's timestamp, bending time with realtime value"""
+	"""
+	Send and receive packets with KillerBee
+    channel:  802.15.4 channel to transmit/receive on
+    inter:    time to wait between tranmissions
+    count:    number of packets to capture. 0 means infinity
+    iface:    KillerBee interface to use, or KillerBee() class instance
+    store:    wether to store sniffed packets or discard them
+    prn:      function to apply to each packet. If something is returned,
+              it is displayed. Ex:
+              ex: prn = lambda x: x.summary()
+    lfilter:  python function applied to each packet to determine
+              if further action may be done
+              ex: lfilter = lambda x: x.haslayer(Padding)
+    timeout:  stop sniffing after a given time (default: None)
+    verbose:  set verbosity level
+    realtime: use packet's timestamp, bending time with realtime value
+    """
 	if verbose is None:
 		verbose = conf.verb
 	if channel == None:
@@ -182,18 +170,20 @@ def kbsrp1(pkt, channel = None, inter = 0, iface = None, store = 1, prn = None, 
 
 @conf.commands.register	
 def kbsniff(channel = None, count = 0, iface = None, store = 1, prn = None, lfilter = None, stop_filter = None, verbose = None, timeout = None):
-	"""Sniff packets with KillerBee
-channel:  802.15.4 channel to transmit/receive on
-count:    number of packets to capture. 0 means infinity
-iface:    KillerBee interface to use, or KillerBee() class instance
-store:    wether to store sniffed packets or discard them
-prn:      function to apply to each packet. If something is returned,
-          it is displayed. Ex:
-          ex: prn = lambda x: x.summary()
-lfilter:  python function applied to each packet to determine
-          if further action may be done
-          ex: lfilter = lambda x: x.haslayer(Padding)
-timeout:  stop sniffing after a given time (default: None)"""
+	"""
+	Sniff packets with KillerBee.
+    channel:  802.15.4 channel to transmit/receive on
+    count:    number of packets to capture. 0 means infinity
+    iface:    KillerBee interface to use, or KillerBee() class instance
+    store:    wether to store sniffed packets or discard them
+    prn:      function to apply to each packet. If something is returned,
+              it is displayed. Ex:
+              ex: prn = lambda x: x.summary()
+    lfilter:  python function applied to each packet to determine
+              if further action may be done
+              ex: lfilter = lambda x: x.haslayer(Padding)
+    timeout:  stop sniffing after a given time (default: None)
+    """
 	if channel == None:
 		channel = conf.killerbee_channel
 	if not isinstance(iface, KillerBee):
@@ -208,9 +198,11 @@ timeout:  stop sniffing after a given time (default: None)"""
 
 @conf.commands.register
 def kbrdpcap(filename, count = -1, skip = 0):
-	"""Read a pcap file with the KillerBee library
-Wraps the PcapReader to return scapy packet object from pcap files.
-This uses the killerbee internal methods instead of the scapy native methods."""
+	"""
+	Read a pcap file with the KillerBee library
+    Wraps the PcapReader to return scapy packet object from pcap files.
+    This uses the killerbee internal methods instead of the scapy native methods.
+    """
 	cap = PcapReader(filename)
 	lst = []
 	packetcount = 0
