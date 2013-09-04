@@ -175,7 +175,7 @@ class PcapDumper:
 
             #PPI-GEOLOCATION if information available
             if location is not None:
-                pph_len += 24 #geolocation header and data length
+                pph_len += 20 #geolocation header and data length
                 (lon, lat, alt) = location
                 # Sanity checking on values of location data:
                 if lat > -180.00000005 and lat < 180.00000005:
@@ -192,8 +192,8 @@ class PcapDumper:
                     raise Exception("Altitude value is out of expected range: %.8f" % lon)
                 # Build Geolocation PPI Header
                 caceppi_fgeolocation = ''.join([
-                    struct.pack("<H", GPS_TAG),  #2 = Field Type Geolocation
-                    struct.pack("<H", 20),       #20 = Geolocation length in bytes
+                    struct.pack("<H", GPS_TAG),  #2 = Field Type 802.11-Common
+                    struct.pack("<H", 20),       #20 = 802.11-Common length in bytes
                     struct.pack("<B", 1),        #Geotag Version
                     struct.pack("<B", 2),        #Geotag Pad
                     struct.pack("<H", 24),       #Geotag Length

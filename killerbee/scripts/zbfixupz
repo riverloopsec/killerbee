@@ -3,6 +3,12 @@ import sys
 import os
 from killerbee import *
 
+'''
+This is a utility script to fix up older libpcap files ouptut from zbdump in KillerBee 1.0
+which have the issue of including trailing bytes that may cause FCS errors to be reported
+in Wireshark, etc.
+'''
+
 def usage():
     print >>sys.stderr, """
 zbfixupz - Remove the trailing byte in libpcap packet captures to fix an earlier zbdump bug.  You only need to use this script if you have an older libpcap packet capture from zbdump that is giving you FCS errors.  Thanks to Tyler N. for the help in resolving this.                       jwright@willhackforsushi.com

@@ -2,8 +2,8 @@ This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4
 networks.
 
 Copyright 2009, Joshua Wright <jwright@willhackforsushi.com>
-Updates Copyright 2010-11, Ryan Speers <ryan@rmspeers.com>
-                           Ricky Melgares <rmelgares@dartmouth.edu>
+Copyright 2010-13, Ryan Speers <ryan@rmspeers.com>
+                   Ricky Melgares <rmelgares@dartmouth.edu>
 All Rights Reserved.
 
 Distributed under a BSD license, see LICENSE for details.
@@ -164,6 +164,8 @@ zbstumbler   -  Active ZigBee and IEEE 802.15.4 network discovery tool.
                 Zbstumbler sends beacon request frames out while channel
                 hopping, recording and displaying summarized information about
                 discovered devices.  Can also log results to a CSV file.
+zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time 
+                capture and viewing in Wireshark.
 
 Additional tools, that are for special cases or are not stable, are stored in
     the Api-Do project repository: http://code.google.com/p/zigbee-security/
@@ -209,10 +211,10 @@ THANKS
 
 A word of thanks to several folks who helped out with this project:
 
+Travis Goodspeed
 Mike Kershaw (dragorn)
 Chris Wang (aikiba)
 Nick DePetrillo
 Ed Skoudis
 Matt Carpenter
-Travis Goodspeed
 Sergey Bratus (research support at Dartmouth)

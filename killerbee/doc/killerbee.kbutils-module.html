@@ -87,6 +87,39 @@
         KillerBee device.
     </td>
   </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="killerbee.kbutils.findFromList-class.html" class="summary-name">findFromList</a><br />
+      Custom matching function for pyUSB 1.x.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="killerbee.kbutils.findFromListAndBusDevId-class.html" class="summary-name">findFromListAndBusDevId</a><br />
+      Custom matching function for pyUSB 1.x.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="killerbee.kbutils.KBException-class.html" class="summary-name">KBException</a><br />
+      Base class for all KillerBee specific exceptions.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="killerbee.kbutils.KBInterfaceError-class.html" class="summary-name">KBInterfaceError</a><br />
+      Custom exception for KillerBee having issues communicating with an 
+        interface, such as opening a port, syncing with the firmware, etc.
+    </td>
+  </tr>
 </table>
 <!-- ==================== FUNCTIONS ==================== -->
 <a name="section-Functions"></a>
@@ -107,16 +140,105 @@
 </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#devlist_usb_v1x" class="summary-sig-name">devlist_usb_v1x</a>(<span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Private function.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist_usb_v1x">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#devlist_usb_v0x" class="summary-sig-name">devlist_usb_v0x</a>(<span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Private function.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist_usb_v0x">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">List</span>
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#devlist" class="summary-sig-name">devlist</a>(<span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
-        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span><br />
+        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">gps</span>=<span class="summary-sig-default">None</span>)</span><br />
       Return device information for all present devices, filtering if 
-      requested by vendor and/or product IDs on USB devices.</td>
+      requested by vendor and/or product IDs on USB devices, and running 
+      device fingerprint functions on serial devices.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="get_serial_devs"></a><span class="summary-sig-name">get_serial_devs</span>()</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#get_serial_devs">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#get_serial_ports" class="summary-sig-name">get_serial_ports</a>()</span><br />
+      Private function.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#get_serial_ports">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">Tuple</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#isgoodfetccspi" class="summary-sig-name">isgoodfetccspi</a>(<span class="summary-sig-arg">serialdev</span>)</span><br />
+      Determine if a given serial device is running the GoodFET firmware 
+      with the CCSPI application.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#isgoodfetccspi">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -130,11 +252,11 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#isgoodfetccspi" class="summary-sig-name">isgoodfetccspi</a>(<span class="summary-sig-arg">serialdev</span>)</span><br />
-      Determine if a given serial device is a TelosB/Tmote Sky GOODFET 
-      (with CCSPI application).</td>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#iszigduino" class="summary-sig-name">iszigduino</a>(<span class="summary-sig-arg">serialdev</span>)</span><br />
+      Determine if a given serial device is running the GoodFET firmware 
+      with the atmel_radio application.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#isgoodfetccspi">source&nbsp;code</a></span>
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#iszigduino">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -166,9 +288,12 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="search_usb"></a><span class="summary-sig-name">search_usb</span>(<span class="summary-sig-arg">device</span>,
-        <span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
-        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td><span class="summary-sig"><a name="search_usb"></a><span class="summary-sig-name">search_usb</span>(<span class="summary-sig-arg">device</span>)</span><br />
+      Takes either None, specifying that any USB device in the global 
+      vendor and product lists are acceptable, or takes a string that 
+      identifies a device in the format 
+      &lt;BusNumber&gt;:&lt;DeviceNumber&gt;, and returns the pyUSB objects
+      for bus and device that correspond to the identifier string.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee.kbutils-pysrc.html#search_usb">source&nbsp;code</a></span>
             
@@ -184,12 +309,12 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="search_usb_bus"></a><span class="summary-sig-name">search_usb_bus</span>(<span class="summary-sig-arg">bus</span>,
-        <span class="summary-sig-arg">device</span>,
-        <span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
-        <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td><span class="summary-sig"><a name="search_usb_bus_v0x"></a><span class="summary-sig-name">search_usb_bus_v0x</span>(<span class="summary-sig-arg">bus</span>,
+        <span class="summary-sig-arg">busNum</span>,
+        <span class="summary-sig-arg">devNum</span>)</span><br />
+      Helper function for USB enumeration in pyUSB 0.x enviroments.</td>
           <td align="right" valign="top">
-            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#search_usb_bus">source&nbsp;code</a></span>
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#search_usb_bus_v0x">source&nbsp;code</a></span>
             
           </td>
         </tr>
@@ -288,6 +413,13 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="USBVER"></a><span class="summary-name">USBVER</span> = <code title="1">1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="RZ_USB_VEND_ID"></a><span class="summary-name">RZ_USB_VEND_ID</span> = <code title="1003">1003</code>
     </td>
   </tr>
@@ -316,6 +448,20 @@
     <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
+        <a name="FTDI_X_USB_VEND_ID"></a><span class="summary-name">FTDI_X_USB_VEND_ID</span> = <code title="1027">1027</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FTDI_X_USB_PROD_ID"></a><span class="summary-name">FTDI_X_USB_PROD_ID</span> = <code title="24597">24597</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
         <a name="usbVendorList"></a><span class="summary-name">usbVendorList</span> = <code title="[1003, 1240]"><code class="variable-group">[</code>1003<code class="variable-op">, </code>1240<code class="variable-group">]</code></code>
     </td>
   </tr>
@@ -324,6 +470,13 @@
       <span class="summary-type">&nbsp;</span>
     </td><td class="summary">
         <a name="usbProductList"></a><span class="summary-name">usbProductList</span> = <code title="[8458, 14]"><code class="variable-group">[</code>8458<code class="variable-op">, </code>14<code class="variable-group">]</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="gps_devstring"></a><span class="summary-name">gps_devstring</span> = <code title="None">None</code>
     </td>
   </tr>
 <tr>
@@ -352,6 +505,46 @@
   </td>
 </tr>
 </table>
+<a name="devlist_usb_v1x"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">devlist_usb_v1x</span>(<span class="sig-arg">vendor</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">product</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist_usb_v1x">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Private function. Do not call from tools/scripts/etc.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="devlist_usb_v0x"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">devlist_usb_v0x</span>(<span class="sig-arg">vendor</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">product</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist_usb_v0x">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Private function. Do not call from tools/scripts/etc.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
 <a name="devlist"></a>
 <div>
 <table class="details" border="1" cellpadding="3"
@@ -360,7 +553,8 @@
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">devlist</span>(<span class="sig-arg">vendor</span>=<span class="sig-default">None</span>,
-        <span class="sig-arg">product</span>=<span class="sig-default">None</span>)</span>
+        <span class="sig-arg">product</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">gps</span>=<span class="sig-default">None</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist">source&nbsp;code</a></span>&nbsp;
@@ -368,12 +562,42 @@
   </tr></table>
   
   <p>Return device information for all present devices, filtering if 
-  requested by vendor and/or product IDs on USB devices.</p>
+  requested by vendor and/or product IDs on USB devices, and running device
+  fingerprint functions on serial devices.</p>
   <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>gps</code></strong> (String) - Optional serial device identifier for an attached GPS unit. If 
+          provided, or if global variable has previously been set, 
+          KillerBee skips that device in device enumeration process.</li>
+    </ul></dd>
     <dt>Returns: List</dt>
         <dd>List of device information present. For USB devices, get 
           [busdir:devfilename, productString, serialNumber] For serial 
           devices, get [serialFileName, deviceDescription, &quot;&quot;]</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="get_serial_ports"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_serial_ports</span>()</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#get_serial_ports">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Private function. Do not call from tools/scripts/etc. This should 
+  return a list of device paths for serial devices that we are interested 
+  in, aka USB serial devices using FTDI chips such as the TelosB, ApiMote, 
+  etc. This should handle returning a list of devices regardless of the 
+  *nix it is running on. Support for more *nix and winnt needed.</p>
+  <dl class="fields">
   </dl>
 </td></tr></table>
 </div>
@@ -391,14 +615,46 @@
     </td>
   </tr></table>
   
-  <p>Determine if a given serial device is a TelosB/Tmote Sky GOODFET (with
-  CCSPI application).</p>
+  <p>Determine if a given serial device is running the GoodFET firmware 
+  with the CCSPI application. This should either be a TelosB/Tmote Sky 
+  GOODFET or an Api-Mote design.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>serialdev</code></strong> (String) - Path to a serial device, ex /dev/ttyUSB0.</li>
+    </ul></dd>
+    <dt>Returns: Tuple</dt>
+        <dd>Tuple with the fist element==True if it is some goodfetccspi 
+          device. The second element is the subtype, and is 0 for telosb 
+          devices and 1 for apimote devices.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="iszigduino"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">iszigduino</span>(<span class="sig-arg">serialdev</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#iszigduino">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Determine if a given serial device is running the GoodFET firmware 
+  with the atmel_radio application. This should be a Zigduino (only tested 
+  on hardware r1 currently).</p>
   <dl class="fields">
     <dt>Parameters:</dt>
     <dd><ul class="nomargin-top">
         <li><strong class="pname"><code>serialdev</code></strong> (String) - Path to a serial device, ex /dev/ttyUSB0.</li>
     </ul></dd>
     <dt>Returns: Boolean</dt>
+        <dd>Boolean with the fist element==True if it is a goodfet atmel128 
+          device.</dd>
   </dl>
 </td></tr></table>
 </div>
@@ -537,7 +793,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu May  5 12:03:11 2011
+    Generated by Epydoc 3.0.1 on Tue Sep  3 22:31:32 2013
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

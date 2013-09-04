@@ -1,22 +1,23 @@
 #!/usr/bin/env python
+
+'''
+zbdump - a tcpdump-like tool for ZigBee/IEEE 802.15.4 networks
+
+Compatible with Wireshark 1.1.2 and later - jwright@willhackforsushi.com
+The -p flag adds CACE PPI headers to the PCAP - rmspeers@gmail.com
+'''
+
 import sys
 import signal
 from killerbee import *
 
 def usage():
-    #Compatible with Wireshark 1.1.2 and later - jwright@willhackforsushi.com
-    #-p flag adds CACE PPI headers to the PCAP - rmspeers@gmail.com
     print >>sys.stderr, """
 zbdump - a tcpdump-like tool for ZigBee/IEEE 802.15.4 networks
 
 Usage: zbdump [-fiwDchp] [-f channel] [-w pcapfile] [-W daintreefile] 
          [-i devnumstring] [-p]
     """
-
-def show_dev():
-    print "Dev\tProduct String\tSerial Number"
-    for dev in kbutils.devlist():
-        print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
 
 def interrupt(signum, frame):
     global packetcount

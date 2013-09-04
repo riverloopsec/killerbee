@@ -3,8 +3,11 @@
 # can do a lot more interesting mutation than this simple example, but it
 # should be enough to get you going.  I'm still working on a reliable "ping"
 # function to measure the availability of the target.  -Josh
+
 import sys
+#TODO system path MUST be changed to your sully install path
 sys.path.append("/home/jwright/fuzzing/sulley")
+
 from killerbee import *
 from sulley import *
 
@@ -25,3 +28,4 @@ kb.set_channel(26)
 while s_mutate():
     kb.inject(s_render())
     print hexdump(s_render())
+

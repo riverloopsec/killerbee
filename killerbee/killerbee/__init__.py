@@ -1,28 +1,32 @@
-import usb
-import serial
 import struct
-import os, time, glob
+import glob
 from warnings import warn
 
 from pcapdump import *
 from daintree import *
 from pcapdlt import *
 
-from kbutils import *
+from kbutils import *      #provides serial, usb, USBVER
 from zigbeedecode import * #would like to import only within killerbee class
 from dot154decode import * #would like to import only within killerbee class
 from config import *       #to get DEV_ENABLE_* variables
 
 # Utility Functions
 def getKillerBee(channel):
-	kb = KillerBee()
-	if kb is None:
-		raise Exception("Failed to create a KillerBee instance.")
-	try:
-		kb.set_channel(channel)
-	except Exception, e:
-		raise Exception('Error: Failed to set channel to %d' % channel, e)
-	return kb
+    '''
+    Returns an instance of a KillerBee device, setup on the given channel.
+    Error handling for KillerBee creation and setting of the channel is wrapped
+    and will raise an Exception().
+    @return: A KillerBee instance initialized to the given channel.
+    '''
+    kb = KillerBee()
+    if kb is None:
+        raise Exception("Failed to create a KillerBee instance.")
+    try:
+        kb.set_channel(channel)
+    except Exception, e:
+        raise Exception('Error: Failed to set channel to %d' % channel, e)
+    return kb
 
 def kb_dev_list(vendor=None, product=None):
     '''
@@ -33,6 +37,15 @@ def kb_dev_list(vendor=None, product=None):
                 For serial devices, get [serialFileName, deviceDescription, ""]
     '''
     return kbutils.devlist()
+
+def show_dev(gps=None):
+    '''
+    A basic function to output the device listing.
+    Placed here for reuse, as many tool scripts were implementing it.
+    '''
+    print "Dev\tProduct String\tSerial Number"
+    for dev in kbutils.devlist(gps=gps):
+        print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
 
 # KillerBee Class
 class KillerBee:
@@ -61,21 +74,26 @@ class KillerBee:
         self.__bus = None
         self.driver = None
 
-        # Figure out a device is one is not set
-        if (device is None):
-            (self.__bus, self.dev) = kbutils.search_usb(None)
+        # Figure out a device is one is not set, trying USB devices first
+        if device == None:
+            result = kbutils.search_usb(None)
+            if result != None:
+                if USBVER == 0:
+                    (self.__bus, self.dev) = result
+                elif USBVER == 1:
+                    #TODO remove self.__bus attribute, not needed in 1.x as all info in self.dev
+                    self.dev = result
         # Recognize if device is provided in the USB format (like a 012:456 string):
-        elif (len(device)>=4 and device[3] == ":"):
-            (self.__bus, self.dev) = kbutils.search_usb(device)
-            if self.dev == None:
+        elif ":" in device:
+            result = kbutils.search_usb(device)
+            if result == None:
                 raise KBInterfaceError("Did not find a USB device matching %s." % device)
-
-        # Figure out a device from serial if one is not set
-        #TODO be able to try more than one serial device here (merge with devlist code somehow)
-        if (device is None):
-            seriallist = get_serial_ports()
-            if len(seriallist) > 0:
-                device = seriallist[0]
+            else:
+                if USBVER == 0:
+                    (self.__bus, self.dev) = result
+                elif USBVER == 1:
+                    #TODO remove self.__bus attribute, not needed in 1.x as all info in self.dev
+                    self.dev = result
 
         if self.dev is not None:
             if self.__device_is(RZ_USB_VEND_ID, RZ_USB_PROD_ID):
@@ -84,15 +102,20 @@ class KillerBee:
             elif self.__device_is(ZN_USB_VEND_ID, ZN_USB_PROD_ID):
                 raise KBInterfaceError("Zena firmware not yet implemented.")
             else:
-                raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x." \
-                    % (self.dev.idVendor, self.dev.idProduct))
+                raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x.".format(self.dev.idVendor, self.dev.idProduct))
+
+        # Figure out a device from serial if one is not set
+        #TODO be able to try more than one serial device here (merge with devlist code somehow)
+#        if device == None:
+#            seriallist = get_serial_ports()
+#            if len(seriallist) > 0:
+#                device = seriallist[0]
 
         # If a USB device driver was not loaded, now we try serial devices
         if (self.driver is None):
             # If no device was specified
             if (device is None):
-                #TODO use different globs for other platforms with different file handles
-                glob_list = glob.glob("/dev/ttyUSB*")
+                glob_list = get_serial_ports()
                 if len(glob_list) > 0:
                     #TODO be able to check other devices if this one is not correct
                     device = glob_list[0]
@@ -101,6 +124,9 @@ class KillerBee:
                 self.dev = device
                 if (self.dev == gps_devstring):
                     pass
+                elif (DEV_ENABLE_ZIGDUINO and kbutils.iszigduino(self.dev)):
+                    from dev_zigduino import ZIGDUINO
+                    self.driver = ZIGDUINO(self.dev)
                 elif (DEV_ENABLE_FREAKDUINO and kbutils.isfreakduino(self.dev)):
                     from dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
@@ -111,7 +137,10 @@ class KillerBee:
                         self.driver = TELOSB(self.dev)
                     elif gfccspi and subtype == 1:
                         from dev_apimote import APIMOTE
-                        self.driver = APIMOTE(self.dev)
+                        self.driver = APIMOTE(self.dev, revision=1)
+                    elif gfccspi and subtype == 2:
+                        from dev_apimote import APIMOTE
+                        self.driver = APIMOTE(self.dev, revision=2)
                     else:
                         raise KBInterfaceError("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
             # Otherwise unrecognized device string type was provided:
@@ -224,7 +253,7 @@ class KillerBee:
 
     def set_channel(self, channel):
         '''
-        Sets the radio interface to the specifid channel.  Currently, support is
+        Sets the radio interface to the specifid channel. Currently, support is
         limited to 2.4 GHz channels 11 - 26.
         @type channel: Integer
         @param channel: Sets the channel, optional

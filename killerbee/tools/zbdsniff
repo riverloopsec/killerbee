@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+
+'''
+Decode plaintext key ZigBee delivery from a capture file.  Will
+process libpcap or Daintree SNA capture files.
+'''
+
 import sys
 import os
 from killerbee import *

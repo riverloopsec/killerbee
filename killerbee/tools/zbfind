@@ -1,4 +1,19 @@
 #!/usr/bin/env python
+
+'''
+This tool sends beacon request frames, similar to zbstumbler, as it cycles
+through the 802.15.4 channels, and uses the responses and other observed 
+packets to display RSSI values to the user for different devices "seen."
+
+This is intended to be used as a tool to locate devices via manual direction-
+finding.
+
+zbstumbler will be more actively maintained for eliciting beacon responses,
+and more recent work has been completed demonstrating the ability to 
+use captures to automatically triangulate locations of devices. See:
+http://code.google.com/p/zigbee-security/wiki/PapersAndCoverage
+'''
+
 import pygtk
 pygtk.require('2.0')
 

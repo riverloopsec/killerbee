@@ -10,9 +10,11 @@ DB_USER             = ""
 DB_PASS             = ""
 
 # Device Support
-# This configuration allow you to turn on 
+# This configuration allow you to turn on
 #  support for devices on or off.
 # If marked False, KillerBee will not try to
 #  detect or load drivers for that device.
 # Useful for disabling uncommon devices.
 DEV_ENABLE_FREAKDUINO = False
+DEV_ENABLE_ZIGDUINO = False
+

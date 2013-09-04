@@ -98,6 +98,7 @@ class GoodFETbtser:
         while len(data)<length:
             data=data+self.sock.recv(length-len(data));
         return data;
+
 class GoodFET:
     """GoodFET Client Library"""
 
@@ -198,6 +199,14 @@ class GoodFET:
                 elif attempts==2 and os.environ.get("board")!='telosb':
                     print "See the GoodFET FAQ about missing info flash.";
                     self.serialport.setTimeout(0.2);
+                elif attempts == 100:
+		    print "Tried 100 times to connect and failed."
+		    sys.stdout.write("Continuing to try forever.")	# No newline
+		    sys.stdout.flush()
+		    self.verbose=True	# Something isn't going right, give the user more info
+                elif attempts > 100 and attempts % 10 == 0:
+		    sys.stdout.write('.')
+		    sys.stdout.flush()
                 #self.serialport.flushInput()
                 #self.serialport.flushOutput()
                 
@@ -208,12 +217,12 @@ class GoodFET:
                 elif (os.environ.get("board")=='z1'):
                     self.bslResetZ1(invokeBSL=0);
                 elif (os.environ.get("board")=='apimote1') or (os.environ.get("board")=='apimote'):
+                    #Not needed for the apimote2
                     #Explicitly set RTS and DTR to halt board.
                     self.serialport.setRTS(1);
                     self.serialport.setDTR(1);
                     #RTS pin, not DTR is used for reset.
                     self.serialport.setRTS(0);
-                    #print "Resetting Apimote not yet tested.";
                 else:
                     #Explicitly set RTS and DTR to halt board.
                     self.serialport.setRTS(1);
@@ -240,6 +249,8 @@ class GoodFET:
             #Here we have a connection, but maybe not a good one.
             #print "We have a connection."
             connected=1;
+	    if attempts >= 100:
+		print ""	# Add a newline
             olds=self.infostring();
             clocking=self.monitorclocking();
             for foo in range(1,30):
@@ -254,30 +265,33 @@ class GoodFET:
         self.serialport.setTimeout(12);
     def serClose(self):
         self.serialport.close();
+
     def telosSetSCL(self, level):
+        '''Helper function for support of the TelosB platform.'''
         self.serialport.setRTS(not level)
     def telosSetSDA(self, level):
+        '''Helper function for support of the TelosB platform.'''
         self.serialport.setDTR(not level)
-
     def telosI2CStart(self):
+        '''Helper function for support of the TelosB platform.'''
         self.telosSetSDA(1)
         self.telosSetSCL(1)
         self.telosSetSDA(0)
-
     def telosI2CStop(self):
+        '''Helper function for support of the TelosB platform.'''
         self.telosSetSDA(0)
         self.telosSetSCL(1)
         self.telosSetSDA(1)
-
     def telosI2CWriteBit(self, bit):
+        '''Helper function for support of the TelosB platform.'''
         self.telosSetSCL(0)
         self.telosSetSDA(bit)
         time.sleep(2e-6)
         self.telosSetSCL(1)
         time.sleep(1e-6)
         self.telosSetSCL(0)
-
     def telosI2CWriteByte(self, byte):
+        '''Helper function for support of the TelosB platform.'''
         self.telosI2CWriteBit( byte & 0x80 );
         self.telosI2CWriteBit( byte & 0x40 );
         self.telosI2CWriteBit( byte & 0x20 );
@@ -287,22 +301,21 @@ class GoodFET:
         self.telosI2CWriteBit( byte & 0x02 );
         self.telosI2CWriteBit( byte & 0x01 );
         self.telosI2CWriteBit( 0 );  # "acknowledge"
-
     def telosI2CWriteCmd(self, addr, cmdbyte):
+        '''Helper function for support of the TelosB platform.'''
         self.telosI2CStart()
         self.telosI2CWriteByte( 0x90 | (addr << 1) )
         self.telosI2CWriteByte( cmdbyte )
         self.telosI2CStop()
+
     def bslResetZ1(self, invokeBSL=0):
         '''
-        Applies BSL entry sequence on RST/NMI and TEST/VPP pins
-        Parameters:
-            invokeBSL = 1: complete sequence
-            invokeBSL = 0: only RST/NMI pin accessed
-            
-        By now only BSL mode is accessed
+        Helper function for support of the Z1 mote platform.
+        Applies BSL entry sequence on RST/NMI and TEST/VPP pins.
+        By now only BSL mode is accessed.
+        @type  invokeBSL: Integer
+        @param invokeBSL: 1 for a complete sequence, or 0 to only access RST/NMI pin
         '''
-        
         #if DEBUG > 1: sys.stderr.write("* bslReset(invokeBSL=%s)\n" % invokeBSL)
         if invokeBSL:
             #sys.stderr.write("in Z1 bsl reset...\n")
@@ -316,6 +329,7 @@ class GoodFET:
             self.writepicROM(0xFF, 0xFE)
             time.sleep(0.1)
             #sys.stderr.write("z1 reset done...\n")
+
     def writepicROM(self, address, data):
         ''' Writes data to @address'''
         for i in range(7,-1,-1):
@@ -370,7 +384,8 @@ class GoodFET:
         time.sleep(0.02)
         return self.serialport.getCTS()
 
-    def telosBReset(self,invokeBSL=0):
+    def telosBReset(self, invokeBSL=0):
+        '''Helper function for support of the TelosB platform.'''
         # "BSL entry sequence at dedicated JTAG pins"
         # rst !s0: 0 0 0 0 1 1
         # tck !s1: 1 0 1 0 0 1
@@ -398,10 +413,10 @@ class GoodFET:
         time.sleep(0.250)       #give MSP430's oscillator time to stabilize
         self.serialport.flushInput()  #clear buffers
 
-
     def getbuffer(self,size=0x1c00):
         writecmd(0,0xC2,[size&0xFF,(size>>16)&0xFF]);
         print "Got %02x%02x buffer size." % (self.data[1],self.data[0]);
+
     def writecmd(self, app, verb, count=0, data=[]):
         """Write a command and some data to the GoodFET."""
         self.serialport.write(chr(app));
@@ -477,6 +492,7 @@ class GoodFET:
                     #print "This shouldn't happen after syncing.  Exiting for safety.";                    
                     #sys.exit(-1)
                 return self.data;
+
     #Glitching stuff.
     def glitchApp(self,app):
         """Glitch into a device by its application."""
@@ -516,7 +532,6 @@ class GoodFET:
         self.writecmd(self.GLITCHAPP,0x91,2,
                       self.data);
         #return ord(self.data[0]);
-    
     
     #Monitor stuff
     def silent(self,s=0):
@@ -610,7 +625,7 @@ class GoodFET:
         self.writecmd(0,0x91,0,self.data);
         return ord(self.data[0])+(ord(self.data[1])<<8);
     
-    #Baud rates.
+    #Baud rates
     baudrates=[115200, 
                9600,
                19200,
@@ -650,6 +665,7 @@ class GoodFET:
             
             print "Read %02x %02x %02x %02x" % (
                 self.readbyte(),self.readbyte(),self.readbyte(),self.readbyte());
+
     def monitortest(self):
         """Self-test several functions through the monitor."""
         print "Performing monitor self-test.";
@@ -667,6 +683,7 @@ class GoodFET:
                 print "Echo test failed.";
         print "Self-test complete.";
         self.monitorclocking();
+
     def monitorecho(self):
         data="The quick brown fox jumped over the lazy dog.";
         self.writecmd(self.MONITORAPP,0x81,len(data),data);
@@ -721,11 +738,12 @@ class GoodFET:
             return 0xDEAD;
         #Check for MSP430 before peeking this.
         return self.MONpeek16(0x56);
+
     # The following functions ought to be implemented in
-    # every client.
-    
+    # every client.    
     def infostring(self):
         if(os.environ.get("platform")=='arduino' or os.environ.get("board")=='arduino'):
+            #TODO implement in the ardunio client and remove special case from here
             return "Arduino";
         else:
             a=self.MONpeek8(0xff0);
@@ -786,3 +804,4 @@ class GoodFET:
     def loadsymbols(self):
         """Load symbols from a file."""
         return;
+

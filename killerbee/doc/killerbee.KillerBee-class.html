@@ -86,7 +86,8 @@
         <tr>
           <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
         <span class="summary-sig-arg">device</span>=<span class="summary-sig-default">None</span>,
-        <span class="summary-sig-arg">datasource</span>=<span class="summary-sig-default">None</span>)</span><br />
+        <span class="summary-sig-arg">datasource</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">gps</span>=<span class="summary-sig-default">None</span>)</span><br />
       Instantiates the KillerBee class.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.__init__">source&nbsp;code</a></span>
@@ -342,6 +343,50 @@
       
     </td>
   </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">None</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.KillerBee-class.html#jammer_on" class="summary-sig-name">jammer_on</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">channel</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Attempts reflexive jamming on all 802.15.4 frames.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee-pysrc.html#KillerBee.jammer_on">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="killerbee.KillerBee-class.html#channel" class="summary-name">channel</a><br />
+      Getter function for the channel that was last set on the device.
+    </td>
+  </tr>
 </table>
 <!-- ==================== METHOD DETAILS ==================== -->
 <a name="section-MethodDetails"></a>
@@ -370,7 +415,8 @@
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
         <span class="sig-arg">device</span>=<span class="sig-default">None</span>,
-        <span class="sig-arg">datasource</span>=<span class="sig-default">None</span>)</span>
+        <span class="sig-arg">datasource</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">gps</span>=<span class="sig-default">None</span>)</span>
     <br /><em class="fname">(Constructor)</em>
   </h3>
   </td><td align="right" valign="top"
@@ -385,6 +431,9 @@
         <li><strong class="pname"><code>device</code></strong> (String) - USB or serial device identifier</li>
         <li><strong class="pname"><code>datasource</code></strong> (String) - A known datasource type that is used by dblog to record how the 
           data was captured.</li>
+        <li><strong class="pname"><code>gps</code></strong> (String) - Optional serial device identifier for an attached GPS unit. If 
+          provided, or if global variable has previously been set, 
+          KillerBee skips that device in initalization process.</li>
     </ul></dd>
     <dt>Returns: None</dt>
         <dd>None</dd>
@@ -571,7 +620,7 @@
     </td>
   </tr></table>
   
-  <p>Sets the radio interface to the specifid channel.  Currently, support 
+  <p>Sets the radio interface to the specifid channel. Currently, support 
   is limited to 2.4 GHz channels 11 - 26.</p>
   <dl class="fields">
     <dt>Parameters:</dt>
@@ -641,6 +690,66 @@
   </dl>
 </td></tr></table>
 </div>
+<a name="jammer_on"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">jammer_on</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">channel</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee-pysrc.html#KillerBee.jammer_on">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Attempts reflexive jamming on all 802.15.4 frames. Targeted frames 
+  must be &gt;12 bytes for reliable jamming in current firmware.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>channel</code></strong> (Integer) - Sets the channel, optional.</li>
+    </ul></dd>
+    <dt>Returns: None</dt>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== PROPERTY DETAILS ==================== -->
+<a name="section-PropertyDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Property Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-PropertyDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="channel"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">channel</h3>
+  <p>Getter function for the channel that was last set on the device.</p>
+  <dl class="fields">
+    <dt>Get Method:</dt>
+    <dd class="value"><span class="summary-sig"><i>unreachable</i>.channel(<span class="summary-sig-arg">self</span>)</span>
+        - Getter function for the channel that was last set on the device.
+    </dd>
+  </dl>
+</td></tr></table>
+</div>
 <br />
 <!-- ==================== NAVIGATION BAR ==================== -->
 <table class="navbar" border="0" width="100%" cellpadding="0"
@@ -673,7 +782,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Thu May  5 12:03:12 2011
+    Generated by Epydoc 3.0.1 on Tue Sep  3 22:31:32 2013
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

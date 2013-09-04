@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+
+'''
+Convert Daintree SNA files to libpcap format and vice-versa.
+'''
+
 import sys
 import os
 from killerbee import *
