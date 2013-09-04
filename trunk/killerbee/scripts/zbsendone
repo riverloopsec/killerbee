@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+
+# Copyright (c) 2013, Gianfranco Costamagna <costamagnagianfranco@yahoo.it> <costamagna@ismb.it>
+# http://www.ismb.it/PerT
+
+import sys
+import signal
+from killerbee import *
+
+'''
+This tool is extremely basic and can be used to repeatedly inject a hardcoded
+packet to a specific channel, for use in testing of other tools, etc.
+
+To affect the packet sent, you must open the code to this tool and modify it
+with the appropriate packet. For this reason, this script is not installed
+globally when KillerBee is installed and must be run from the killerbee/tools '
+directory such as as: ./zbsendone -f 11 -p 10
+
+It also provides a simplified introduction to scripting with KillerBee, showing
+basic command line parsing, creating a KillerBee object, and sending packets.
+'''
+
+# This tool requires that you manually set the packet to inject here:
+packet = "\x69\x88\x00\x07\x20\xef\xbe\xad\xde\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\xeb\x89\x33"
+#packet = "\x69\x88\x00\xad\xde\xef\xbe\xad\xde\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\xeb\x89\x33\x69\x88\x00\x07\x20\xef\xbe\x20\x25\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\xeb\x89\x33\x69\x88\x00\x07\x20\xef\xbe\x20\x25\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\xeb\x89\x33\x69\x88\x00\x07\x20\xef\xbe\x20\x25\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\xeb\x89\x33\x69\x88\x00\x07\x20\xef\xbe\x20\x25\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\x14\xe9\x66\x14"
+
+
+def usage():
+    print >>sys.stderr, """
+zbinject - sends a single IEEE 802.15.4 packet to remote channel
+
+Usage: zbsendone [-fip] [-f channel] [-i devnumstring] [-p packet_count]
+    """
+
+def interrupt(signum, frame):
+    global kb
+    kb.close()
+    sys.exit(0)
+
+arg_channel = None
+arg_devstring = None
+arg_packetcount = 100
+arg_delay = 0
+
+while len(sys.argv) > 1:
+    op = sys.argv.pop(1)
+    if op == '-f':
+        arg_channel = int(sys.argv.pop(1))
+    elif op == '-i':
+        arg_devstring = sys.argv.pop(1)
+    elif op == '-h':
+        usage()
+        sys.exit(0)
+    elif op == '-D':
+        show_dev()
+        sys.exit(0)
+    elif op == '-p':
+        arg_packetcount = int(sys.argv.pop(1))
+
+if arg_channel == None:
+    print >>sys.stderr, "ERROR: Must specify a channel with -f"
+    usage()
+    sys.exit(1)
+elif arg_channel < 11 or arg_channel > 26:
+    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel between 11 and 26."
+    sys.exit(1)
+
+kb = KillerBee(device=arg_devstring)
+#print kb.get_dev_info()
+signal.signal(signal.SIGINT, interrupt)
+
+print "Injecting %d packets on %d channel with a %d length" % (arg_packetcount, arg_channel, len(packet))
+# The packet variable is set by the user near the top of the script.
+kb.inject(packet, arg_channel, arg_packetcount, arg_delay)
+kb.close()
+

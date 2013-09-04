@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+
+# Copyright (c) 2013, Gianfranco Costamagna <costamagnagianfranco@yahoo.it> <costamagna@ismb.it>
+# http://www.ismb.it/PerT
+
+import socket, sys
+import signal, os, struct
+import subprocess
+from fcntl import ioctl
+
+try:
+    import pcap
+except ImportError:
+    print "You don't have any pcap library, please install python-pypcap on your system."
+    print "\tTry: sudo apt-get install python-pypcap"
+    sys.exit(1)
+
+
+'''
+Acts as a UDP server to receive 802.15.4 frames sent over the network
+to it (presumably from zbinterface) and injects them into an interface (-n)
+or displays them using Scapy dissection to the terminal (-v).
+The default port to listen on is 65500 unless specified (with -p).
+'''
+
+# Set up a UDP server
+UDPSock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+
+def usage():
+    print >>sys.stderr, """
+zbserver - listen IEEE 802.15.4 packets on a remote socket (to use with zbinterface)
+
+Usage: zbserver [-hnpvr] [-n interface_name] [-p PORT] [-v] [-r]
+    """
+
+arg_port = 65500
+arg_interface = None
+arg_verbose = False
+arg_reuse = False
+while len(sys.argv) > 1:
+    op = sys.argv.pop(1)
+    if op == '-n':
+        arg_interface = sys.argv.pop(1)
+    elif op == '-h':
+        usage()
+        sys.exit(0)
+    elif op == '-n':
+        arg_interface = sys.argv.pop(1)
+    elif op == '-r':
+        arg_reuse = True
+    elif op == '-p':
+        arg_port = int(sys.argv.pop(1))
+        if arg_port < 0 or arg_port > 65535:
+            print >>sys.stderr, "ERROR: Must specify a valid port between 0 and 65535."
+            sys.exit(1)
+    elif op == '-v':
+        arg_verbose = True
+        try:
+            from scapy.all import Dot15d4
+        except ImportError:
+            print "To use packet dissection, Scapy must be installed and have the Dot15d4 extension present."
+            print "try: hg clone http://hg.secdev.org/scapy-com";
+            print "     sudo ./setup.py install";
+            sys.exit(1)
+
+def cleanup():
+    print "cleaning everything up"
+    if arg_reuse == False:
+        with open(os.devnull, 'w') as fnull:
+            subprocess.call(["ip", "link", "del", ifname], stdout=fnull, stderr=fnull)
+
+def interrupt(signum, frame):
+    cleanup()
+    sys.exit(0)
+
+if arg_interface != None:
+    ifname = arg_interface
+    signal.signal(signal.SIGINT, interrupt) #signal handler
+
+    TUNSETIFF = 0x400454ca
+    IFF_TUN   = 0x0001
+    IFF_TAP = 0x0002
+    IFF_NO_PI = 0x1000
+    TUN_PERSIST = 0x0100
+    TUNSETPERSIST = 0x400454cb
+    TUNSETLINK = 0x400454cd
+    TUNMODE=IFF_TUN | IFF_NO_PI #| TUN_PERSIST
+    with open(os.devnull, 'w') as fnull:
+        retcode = subprocess.call(["ip", "link", "show", ifname], stdout=fnull, stderr=fnull)
+
+        with os.open("/dev/net/tun", os.O_WRONLY) as f:
+            ifs = ioctl(f, TUNSETIFF, struct.pack("16sH", ifname, TUNMODE))
+            if retcode != 0:
+                ioctl(f, TUNSETLINK, 804)
+                ioctl(f, TUNSETPERSIST, 1)
+
+        subprocess.call(["ip", "link", "set", ifname, "up"], stdout=fnull, stderr=fnull)
+    pcap_if = pcap.pcap(ifname, 127) #127 is the MTU for 802.15.4
+
+# Listen on port arg_port
+# (to all IP addresses on this system)
+listen_addr = ("", arg_port)
+UDPSock.bind(listen_addr)
+
+# Report on all data packets received and
+# where they came from in each case (as this is
+# UDP, each may be from a different source and it's
+# up to the server to sort this out!)
+while True:
+    data,addr = UDPSock.recvfrom(1024)
+    if arg_verbose == True:
+        scapyd = Dot15d4(data)
+        scapyd.show()
+    if arg_interface != None:
+        pcap_if.inject(''.join(data),len(data))
+

