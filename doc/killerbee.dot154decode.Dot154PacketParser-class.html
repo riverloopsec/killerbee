@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>killerbee.dot154decode.Dot154PacketParser</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="killerbee-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="killerbee-module.html">Package&nbsp;killerbee</a> ::
+        <a href="killerbee.dot154decode-module.html">Module&nbsp;dot154decode</a> ::
+        Class&nbsp;Dot154PacketParser
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="killerbee.dot154decode.Dot154PacketParser-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class Dot154PacketParser</h1><p class="nomargin-top"><span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser">source&nbsp;code</a></span></p>
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__init__"></a><span class="summary-sig-name">__init__</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Instantiates the Dot154PacketParser class.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.dot154decode.Dot154PacketParser-class.html#__crypt_counter" class="summary-sig-name" onclick="show_private();">__crypt_counter</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Used for AES-CTR mode after populating self.__crypt_A_i Don't call 
+      this directly.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.__crypt_counter">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">String</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.dot154decode.Dot154PacketParser-class.html#decrypt" class="summary-sig-name">decrypt</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">packet</span>,
+        <span class="summary-sig-arg">key</span>)</span><br />
+      Decrypts the specified packet.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.decrypt">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.dot154decode.Dot154PacketParser-class.html#pktchop" class="summary-sig-name">pktchop</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">packet</span>)</span><br />
+      Chops up the specified packet contents into a list of fields.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.pktchop">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">Int</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.dot154decode.Dot154PacketParser-class.html#hdrlen" class="summary-sig-name">hdrlen</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">packet</span>)</span><br />
+      Returns the length of the 802.15.4 header.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.hdrlen">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">Int</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.dot154decode.Dot154PacketParser-class.html#payloadlen" class="summary-sig-name">payloadlen</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">packet</span>)</span><br />
+      Returns the length of the 802.15.4 payload.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.payloadlen">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">String</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.dot154decode.Dot154PacketParser-class.html#nonce" class="summary-sig-name">nonce</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">packet</span>)</span><br />
+      Returns the nonce of the 802.15.4 packet.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.nonce">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__crypt_counter"></a>
+<div class="private">
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__crypt_counter</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.__crypt_counter">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Used for AES-CTR mode after populating self.__crypt_A_i Don't call 
+  this directly.  Just don't.</p>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="decrypt"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">decrypt</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">packet</span>,
+        <span class="sig-arg">key</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.decrypt">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Decrypts the specified packet. Returns empty string if the packet is 
+  not encrypted, or if decryption MIC validation fails.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>packet</code></strong> (String) - Packet contents.</li>
+        <li><strong class="pname"><code>key</code></strong> (String) - Key contents.</li>
+    </ul></dd>
+    <dt>Returns: String</dt>
+        <dd>Decrypted packet contents, empty string if not encrypted or if 
+          decryped MIC fails validation.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="pktchop"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">pktchop</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">packet</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.pktchop">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Chops up the specified packet contents into a list of fields.  Does 
+  not attempt to re-order the field values for parsing.  ''.join(X) will 
+  reassemble original packet string.  Fields which may or may not be 
+  present (such as the Source PAN field) are empty if they are not present,
+  keeping the list elements consistent, as follows: FCF | Seq# | DPAN | DA 
+  | SPAN | SA | [Beacon Data] | PHY Payload</p>
+  <p>If the packet is a beacon frame, the Beacon Data field will be 
+  populated as a list element in the format:</p>
+  <p>Superframe Spec | GTS Fields | Pending Addr Counts | Proto ID | Stack 
+  Profile/Profile Version | Device Capabilities | Ext PAN ID | TX Offset | 
+  Update ID</p>
+  <p>An exception is raised if the packet contents are too short to 
+  decode.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>packet</code></strong> (String) - Packet contents.</li>
+    </ul></dd>
+    <dt>Returns: list</dt>
+        <dd>Chopped contents of the 802.15.4 packet into list elements.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="hdrlen"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">hdrlen</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">packet</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.hdrlen">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns the length of the 802.15.4 header.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>packet</code></strong> (String) - Packet contents to evaluate for header length.</li>
+    </ul></dd>
+    <dt>Returns: Int</dt>
+        <dd>Length of the 802.15.4 header.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="payloadlen"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">payloadlen</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">packet</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.payloadlen">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns the length of the 802.15.4 payload.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>packet</code></strong> (String) - Packet contents to evaluate for header length.</li>
+    </ul></dd>
+    <dt>Returns: Int</dt>
+        <dd>Length of the 802.15.4 payload.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="nonce"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">nonce</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">packet</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.dot154decode-pysrc.html#Dot154PacketParser.nonce">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Returns the nonce of the 802.15.4 packet.  Returns empty string for 
+  unencrypted frames.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>packet</code></strong> (String) - Packet contents to evaluate for nonce.</li>
+    </ul></dd>
+    <dt>Returns: String</dt>
+        <dd>Nonce, empty when the frame is not encrypted.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="killerbee-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Tue Sep  3 22:31:33 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>
