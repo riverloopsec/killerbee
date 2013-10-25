@@ -16,7 +16,7 @@ def usage():
 zbdump - a tcpdump-like tool for ZigBee/IEEE 802.15.4 networks
 
 Usage: zbdump [-fiwDchp] [-f channel] [-w pcapfile] [-W daintreefile] 
-         [-i devnumstring] [-p]
+         [-i devnumstring] [-p] [-g serial_dev_to_ignore]
     """
 
 def interrupt(signum, frame):
@@ -45,6 +45,7 @@ arg_dsnasavefile = None
 arg_devstring = None
 arg_count = -1
 arg_ppi = False
+arg_gpsstring = None
 
 # Global
 packetcount = 0
@@ -57,6 +58,8 @@ while len(sys.argv) > 1:
         arg_pcapsavefile = sys.argv.pop(1)
     elif op == '-W':
         arg_dsnasavefile = sys.argv.pop(1)
+    elif op == '-g':
+        arg_gpsstring = sys.argv.pop(1)
     elif op == '-i':
         arg_devstring = sys.argv.pop(1)
     elif op == '-h':
@@ -89,7 +92,7 @@ if (arg_pcapsavefile != None):
 if (arg_dsnasavefile != None):
     dt = DainTreeDumper(arg_dsnasavefile)
 
-kb = KillerBee(device=arg_devstring)
+kb = KillerBee(device=arg_devstring, gps=arg_gpsstring)
 signal.signal(signal.SIGINT, interrupt)
 
 kb.set_channel(arg_channel)
