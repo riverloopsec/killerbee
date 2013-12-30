@@ -14,7 +14,7 @@ import struct
 import time
 import urllib2
 import re
-from socket import socket, AF_INET, SOCK_DGRAM, timeout as error_timeout
+from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR, timeout as error_timeout
 from struct import unpack
 
 from datetime import datetime, date, timedelta
@@ -105,6 +105,7 @@ class WISLAB:
             print("Warning: Firmware revision {0} reported by the sniffer is not currently supported. Errors may occur and dev_wislab.py may need updating.".format(self.__revision_num))
 
         self.handle = socket(AF_INET, SOCK_DGRAM)
+        self.handle.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         self.handle.bind((self.udp_recv_ip, self.udp_recv_port))
 
         self.__stream_open = False
@@ -247,12 +248,14 @@ class WISLAB:
         number.
         Captured values from sniffing Wislab web interface, unsure why these
         are done as such.
+        Available modulations are listed at:
+        http://www.sewio.net/open-sniffer/develop/http-rest-interface/
         @rtype: Integer, or None if unable to determine modulation
         '''
         if channel >= 11 or channel <= 26: return '0'   #O-QPSK 250 kb/s 2.4GHz
         elif channel >= 1 or channel <= 10: return 'c'  #O-QPSK 250 kb/s 915MHz
         elif channel >= 128 or channel <= 131: return '1c' #O-QPSK 250 kb/s 760MHz
-        elif channel == 0: return '8'                   #O-QPSK 100 kb/s 868MHz
+        elif channel == 0: return '0'                   #O-QPSK 100 kb/s 868MHz
         else: return None                               #Error status
 
     # KillerBee expects the driver to implement this function
@@ -293,9 +296,13 @@ class WISLAB:
     @staticmethod
     def __parse_zep_v2(data):
         '''
-        Parse the packet from the ZigBee encapsulation protocol version 2 and 
+        Parse the packet from the ZigBee encapsulation protocol version 2/3 and 
         return the fields desired for usage by pnext().
-        This is based on Wireshark source at:
+        There is support here for some oddities specific to the Wislab 
+        implementation of ZEP and the packet, such as CC24xx format FCS 
+        headers being expected.
+        
+        The ZEP protocol parsing is mainly based on Wireshark source at:
         http://anonsvn.wireshark.org/wireshark/trunk/epan/dissectors/packet-zep.c
         * ZEP v2 Header will have the following format (if type=1/Data):
         *  |Preamble|Version| Type |Channel ID|Device ID|CRC/LQI Mode|LQI Val|NTP Timestamp|Sequence#|Reserved|Length|
@@ -316,17 +323,41 @@ class WISLAB:
             raise Exception("Can not parse provided data as ZEP due to incorrect preamble or unsupported version.")
         if zeptype == 1: #data
             (ch, devid, crcmode, lqival, ntpsec, ntpnsec, seqnum, length) = unpack(">BHBBIII10xB", data[4:32])
-            print "Data ZEP:", ch, devid, crcmode, lqival, ntpsec, ntpnsec, seqnum, length
-            #TODO fix NTP to datetime conversion
-            print "\tConverted time:", ntp_to_system_time(ntpsec, ntpnsec)
+            #print "Data ZEP:", ch, devid, crcmode, lqival, ntpsec, ntpnsec, seqnum, length
+            #We could convert the NTP timestamp received to system time, but the
+            # Wislab firmware uses "relative timestamping" where it begins at 0 each time
+            # the sniffer is started. Thus, it isn't that useful to us, so we just add the
+            # time the packet is received at the host instead.
+            #print "\tConverted time:", ntp_to_system_time(ntpsec, ntpnsec)
             recdtime = datetime.combine(date.today(), (datetime.now()).time()) #TODO address timezones by going to UTC everywhere
-            return (data[32:], length, ch, devid, crcmode, lqival, recdtime)
+            #The LQI comes in ZEP, but the RSSI comes in the first byte of the FCS,
+            # if the FCS was correct. If the byte is 0xb1, Wireshark appears to do 0xb1-256 = -79 dBm.
+            # It appears that if CRC/LQI Mode field == 1, then checksum was bad, so the RSSI isn't
+            # available, as the CRC is left in the packet. If it == 0, then the first byte of FCS is the RSSI.
+            # From Wireshark:
+            #define IEEE802154_CC24xx_CRC_OK            0x8000
+            #define IEEE802154_CC24xx_RSSI              0x00FF
+            frame = data[32:]
+            # A length vs len(frame) check is not used here but is an 
+            #  additional way to verify that all is good (length == len(frame)).
+            if crcmode == 0:
+                validcrc = ((ord(data[-1]) & 0x80) == 0x80)
+                rssi = ord(data[-2])
+                # We have to trust the sniffer that the FCS was OK, so we compute
+                #  what a good FCS should be and patch it back into the packet.
+                frame = frame[:-2] + makeFCS(frame[:-2])
+            else:
+                validcrc = False
+                rssi = None
+            return (frame, ch, validcrc, rssi, lqival, recdtime)
         elif zeptype == 2: #ack
+            frame = data[8:]
             (seqnum) = unpack(">I", data[4:8])
             recdtime = datetime.combine(date.today(), (datetime.now()).time()) #TODO address timezones by going to UTC everywhere
-            return (data[8:], None, None, None, None, None, recdtime)
+            validcrc = (frame[-2:] == makeFCS(frame[:-2]))
+            return (frame, None, validcrc, None, None, recdtime)
         return None
-        
+
     # KillerBee expects the driver to implement this function
     def pnext(self, timeout=100):
         '''
@@ -342,8 +373,7 @@ class WISLAB:
         # Use socket timeouts to implement the timeout
         self.handle.settimeout(timeout / 1000000.0) # it takes seconds
 
-        rssi = None #TODO obtain
-        packet = None
+        frame = None
         donetime = datetime.now() + timedelta(microseconds=timeout)
         while True:
             try:
@@ -354,26 +384,23 @@ class WISLAB:
             #  check the sending IP address. Ex: addr = ('10.10.10.2', 17754)
             if addr[0] != self.dev:
                 continue
-            (frame, length, ch, devid, crcmode, lqival, recdtime) = self.__parse_zep_v2(data)
+            # Dissect the UDP packet
+            (frame, ch, validcrc, rssi, lqival, recdtime) = self.__parse_zep_v2(data)
+            print "Valid CRC", validcrc, "LQI", lqival, "RSSI", rssi
             if frame == None or (ch is not None and ch != self._channel):
+                #TODO this maybe should be an error condition, instead of ignored?
                 print("ZEP parsing issue (bytes length={0}, channel={1}).".format(len(frame) if frame is not None else None, ch))
-                return None
-            print frame.encode('hex')
+                continue
+            break
 
-        if packet is None:
+        if frame is None:
             return None
-            
-        #crc/lqi mode has 1 for CRC, or 0 for a ChipCon FCS complaint header (LQI)
-        if crcmode == 0: rssi = lqival #TODO, this is a lie... LQI != RSSI
-        else:            rssi = None #sorry, we didn't get RSSI values b/c of crcmode or a ZEP ACK
 
-        if frame[-2:] == makeFCS(frame[:-2]): validcrc = True
-        else: validcrc = False
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
-        result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'location':None, 'datetime':recdtime}
-        #TODO add dBm and real RSSI (not LQI)!!!
-        #result['dbm'] = rssi - 45 #TODO tune specifically to the platform (does ext antenna need to different?)
+        result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'dbm':None, 'location':None, 'datetime':recdtime}
+        if rssi is not None:
+            result['dbm'] = rssi - 45 #TODO tune specifically to the platform (expect antenna varriances?)
         return result
 
     def jammer_on(self, channel=None):

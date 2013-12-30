@@ -211,9 +211,11 @@ class RZUSBSTICK:
         prod = self.get_dev_info()[1] # returns a list, with second element being product string
 
         if prod == "RZUSBSTICK":
+            self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
         elif prod == "KILLERB001":
+            self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
             self.capabilities.setcapab(KBCapabilities.INJECT, True)

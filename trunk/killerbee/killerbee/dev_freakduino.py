@@ -50,6 +50,7 @@ class FREAKDUINO:
         @return: None
         '''
         #TODO have it set based on what the sketch says it can support
+        self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
         self.capabilities.setcapab(KBCapabilities.SNIFF, True)
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
         return

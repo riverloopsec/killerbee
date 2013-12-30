@@ -50,17 +50,17 @@ class ZIGDUINO:
 	    return self.capabilities.getlist()
 
     def __set_capabilities(self):
-	    '''
-	    Sets the capability information appropriate for GoodFETAVR client and firmware.
-	    @rtype: None
-	    @return: None
-	    '''
-	    self.capabilities.setcapab(KBCapabilities.SNIFF, True)
-	    self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
-	    self.capabilities.setcapab(KBCapabilities.INJECT, True)
-	    #self.capabilities.setcapab(KBCapabilities.PHYJAM_REFLEX, True)
-	    self.capabilities.setcapab(KBCapabilities.SET_SYNC, True)
-	    return
+        '''
+        Sets the capability information appropriate for GoodFETAVR client and firmware.
+        @rtype: None
+        @return: None
+        '''
+        self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
+        self.capabilities.setcapab(KBCapabilities.SNIFF, True)
+        self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
+        self.capabilities.setcapab(KBCapabilities.INJECT, True)
+        #self.capabilities.setcapab(KBCapabilities.PHYJAM_REFLEX, True)
+        self.capabilities.setcapab(KBCapabilities.SET_SYNC, True)
 
     # KillerBee expects the driver to implement this function
     def get_dev_info(self):
