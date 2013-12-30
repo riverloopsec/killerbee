@@ -44,6 +44,7 @@ class TELOSB:
         @rtype: None
         @return: None
         '''
+        self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
         self.capabilities.setcapab(KBCapabilities.SNIFF, True)
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
         self.capabilities.setcapab(KBCapabilities.INJECT, True)

@@ -61,7 +61,7 @@ except OSError, e:
 # Start KillerBee
 kb = KillerBee(device=args.devstring)
 signal.signal(signal.SIGINT, interrupt)
-if kb.is_valid_channel(args.channel):
+if not kb.is_valid_channel(args.channel):
     print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel for the selected device."
     kb.close()
     sys.exit(1)
