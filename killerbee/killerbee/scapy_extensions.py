@@ -197,12 +197,14 @@ def kbsniff(channel = None, count = 0, iface = None, store = 1, prn = None, lfil
 	return plist.PacketList(__kb_recv(kb, count = count, store = store, prn = prn, lfilter = lfilter, stop_filter = stop_filter, verbose = verbose, timeout = timeout), 'Sniffed')
 
 @conf.commands.register
-def kbrdpcap(filename, count = -1, skip = 0):
+def kbrdpcap(filename, count = -1, skip = 0, nofcs=False):
     """
     Read a pcap file with the KillerBee library.
     Wraps the PcapReader to return scapy packet object from pcap files.
     This uses the killerbee internal methods instead of the scapy native methods.
     This is not necessarily better, and suggestions are welcome.
+    Specify nofcs parameter as True if for some reason the packets in the PCAP
+    don't have FCS (checksums) at the end.
     @return: Scapy packetlist of Dot15d4 packets parsed from the given PCAP file.
     """
     cap = PcapReader(filename)
@@ -218,7 +220,8 @@ def kbrdpcap(filename, count = -1, skip = 0):
             break
         if skip > 0 and packetcount <= skip:
             continue
-        packet = Dot15d4(packet[1])
+        if nofcs: packet = Dot15d4(packet[1])
+        else:     packet = Dot15d4FCS(packet[1])
         lst.append(packet)
         if count > 0 and packetcount >= count:
             break
@@ -403,13 +406,15 @@ def kbdecrypt(pkt, key = None, verbose = None):
 	from struct import pack
 	f = pkt.getlayer(ZigbeeSecurityHeader).fields
 
-	mic = pack(">I", f['mic'])
+    #TODO fix mic!
+	mic = '\x00\x00\x00\x00' #pack(">I", f['mic'])
 	encrypted = f['data']
 
 	nonce = ""	# build the nonce
 	nonce += pack(">Q", f['source'])
 	nonce += pack(">I", f['fc'])
-	fc = (f['reserved1'] << 6) | (f['extended_nonce'] << 5) | (f['key_type'] << 3) | f['reserved2']
+	#fc = (f['reserved1'] << 6) | (f['extended_nonce'] << 5) | (f['key_type'] << 3) | f['reserved2']
+	fc = (f['reserved1'] << 6) | (f['extended_nonce'] << 5) | (f['key_type'] << 3) | f['nwk_seclevel']
 	nonce += chr(fc | 0x05)
 
 	if verbose > 2:
@@ -422,11 +427,14 @@ def kbdecrypt(pkt, key = None, verbose = None):
 	crop_size = 4 + 2 + len(pkt.getlayer(ZigbeeSecurityHeader).fields['data'])	# the size of all the zigbee crap, minus the length of the encrypted data, mic and FCS
 	
 	# the Security Control Field flags have to be adjusted before this is calculated, so we store their original values so we can reset them later
-	reserved2 = pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2']
-	pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] = (pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] | 0x05)
+	reserved2 = pkt.getlayer(ZigbeeSecurityHeader).fields['nwk_seclevel']
+	#reserved2 = pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2']
+	pkt.getlayer(ZigbeeSecurityHeader).fields['nwk_seclevel'] = (pkt.getlayer(ZigbeeSecurityHeader).fields['nwk_seclevel'] | 0x05)
+	#pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] = (pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] | 0x05)
 	zigbeeData = pkt.getlayer(ZigbeeNWK).do_build()
 	zigbeeData = zigbeeData[:-crop_size]
-	pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] = reserved2
+	pkt.getlayer(ZigbeeSecurityHeader).fields['nwk_seclevel'] = reserved2
+	#pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] = reserved2
 	
 	(payload, micCheck) = zigbee_crypt.decrypt_ccm(key, nonce, mic, encrypted, zigbeeData)
 

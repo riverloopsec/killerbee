@@ -29,23 +29,21 @@ def getKillerBee(channel):
     return kb
 
 def kb_dev_list(vendor=None, product=None):
-    '''
-    Return device information for all present devices, filtering if requested by vendor and/or product IDs on USB devices.
-    @rtype: List
-    @return: List of device information present.
-                For USB devices, get [busdir:devfilename, productString, serialNumber]
-                For serial devices, get [serialFileName, deviceDescription, ""]
-    '''
-    return kbutils.devlist()
+    '''Deprecated. Use show_dev or call kbutils.devlist.'''
+    return kbutils.devlist(vendor=None, product=None)
 
-def show_dev(gps=None):
+def show_dev(vendor=None, product=None, gps=None, include=None):
     '''
     A basic function to output the device listing.
     Placed here for reuse, as many tool scripts were implementing it.
+    @param ingore: Provide device names in this argument (previously known as
+        'gps') which you wish to not be enumerated. Aka, exclude these items.
+    @param include: Provide device names in this argument if you would like only
+        these to be enumerated. Aka, include only these items.
     '''
-    print "Dev\tProduct String\tSerial Number"
-    for dev in kbutils.devlist(gps=gps):
-        print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
+    print("{: >14} {: <20} {: >10}".format("Dev", "Product String", "Serial Number"))
+    for dev in kbutils.devlist(vendor=vendor, product=product, gps=gps, include=include):
+        print("{0: >14} {1: <20} {2: >10}".format(dev[0], dev[1], dev[2]))
 
 # KillerBee Class
 class KillerBee:
@@ -54,14 +52,14 @@ class KillerBee:
         Instantiates the KillerBee class.
 
         @type device:   String
-        @param device:  USB or serial device identifier
+        @param device:  Device identifier, either USB vendor:product, serial device node, or IP address
         @type datasource: String
         @param datasource: A known datasource type that is used
         by dblog to record how the data was captured.
         @type gps: String
         @param gps: Optional serial device identifier for an attached GPS
-        unit. If provided, or if global variable has previously been set, 
-        KillerBee skips that device in initalization process.
+            unit. If provided, or if global variable has previously been set, 
+            KillerBee skips that device in initalization process.
         @return: None
         @rtype: None
         '''
@@ -74,35 +72,46 @@ class KillerBee:
         self.__bus = None
         self.driver = None
 
-        # Figure out a device is one is not set, trying USB devices first
-        if device == None:
-            result = kbutils.search_usb(None)
-            if result != None:
-                if USBVER == 0:
-                    (self.__bus, self.dev) = result
-                elif USBVER == 1:
-                    #TODO remove self.__bus attribute, not needed in 1.x as all info in self.dev
-                    self.dev = result
-        # Recognize if device is provided in the USB format (like a 012:456 string):
-        elif ":" in device:
-            result = kbutils.search_usb(device)
-            if result == None:
-                raise KBInterfaceError("Did not find a USB device matching %s." % device)
-            else:
-                if USBVER == 0:
-                    (self.__bus, self.dev) = result
-                elif USBVER == 1:
-                    #TODO remove self.__bus attribute, not needed in 1.x as all info in self.dev
-                    self.dev = result
+        # IP devices may be the most straightforward, and we aren't doing
+        # discovery, just connecting to defined addresses, so we'll check
+        # first to see if we have an IP address given as our device parameter.
+        if (device is not None) and kbutils.isIpAddr(device):
+            from dev_wislab import isWislab
+            if isWislab(device):
+                from dev_wislab import WISLAB
+                self.driver = WISLAB(dev=device) #give it the ip address
+            else: del isWislab
 
-        if self.dev is not None:
-            if self.__device_is(RZ_USB_VEND_ID, RZ_USB_PROD_ID):
-                from dev_rzusbstick import RZUSBSTICK
-                self.driver = RZUSBSTICK(self.dev, self.__bus)
-            elif self.__device_is(ZN_USB_VEND_ID, ZN_USB_PROD_ID):
-                raise KBInterfaceError("Zena firmware not yet implemented.")
-            else:
-                raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x.".format(self.dev.idVendor, self.dev.idProduct))
+        # Figure out a device is one is not set, trying USB devices next
+        if self.driver is None:
+            if device is None:
+                result = kbutils.search_usb(None)
+                if result != None:
+                    if USBVER == 0:
+                        (self.__bus, self.dev) = result
+                    elif USBVER == 1:
+                        #TODO remove self.__bus attribute, not needed in 1.x as all info in self.dev
+                        self.dev = result
+            # Recognize if device is provided in the USB format (like a 012:456 string):
+            elif ":" in device:
+                result = kbutils.search_usb(device)
+                if result == None:
+                    raise KBInterfaceError("Did not find a USB device matching %s." % device)
+                else:
+                    if USBVER == 0:
+                        (self.__bus, self.dev) = result
+                    elif USBVER == 1:
+                        #TODO remove self.__bus attribute, not needed in 1.x as all info in self.dev
+                        self.dev = result
+
+            if self.dev is not None:
+                if self.__device_is(RZ_USB_VEND_ID, RZ_USB_PROD_ID):
+                    from dev_rzusbstick import RZUSBSTICK
+                    self.driver = RZUSBSTICK(self.dev, self.__bus)
+                elif self.__device_is(ZN_USB_VEND_ID, ZN_USB_PROD_ID):
+                    raise KBInterfaceError("Zena firmware not yet implemented.")
+                else:
+                    raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x.".format(self.dev.idVendor, self.dev.idProduct))
 
         # Figure out a device from serial if one is not set
         #TODO be able to try more than one serial device here (merge with devlist code somehow)
@@ -112,15 +121,15 @@ class KillerBee:
 #                device = seriallist[0]
 
         # If a USB device driver was not loaded, now we try serial devices
-        if (self.driver is None):
+        if self.driver is None:
             # If no device was specified
-            if (device is None):
+            if device is None:
                 glob_list = get_serial_ports()
                 if len(glob_list) > 0:
                     #TODO be able to check other devices if this one is not correct
                     device = glob_list[0]
             # Recognize if device specified by serial string:
-            if (device is not None and device[:5] == "/dev/"):
+            if (device is not None) and kbutils.isSerialDeviceString(device):
                 self.dev = device
                 if (self.dev == gps_devstring):
                     pass
@@ -262,6 +271,13 @@ class KillerBee:
         if hasattr(self, "dblog"):
             self.dblog.set_channel(channel)
         self.driver.set_channel(channel)
+
+    def is_valid_channel(self, channel):
+        '''
+        Based on sniffer capabilities, return if this is an OK channel number.
+        @rtype: Boolean
+        '''
+        return self.driver.capabilities.is_valid_channel(channel)
 
     def inject(self, packet, channel=None, count=1, delay=0):
         '''

@@ -2,85 +2,59 @@
 
 '''
 Convert Daintree SNA files to libpcap format and vice-versa.
+
+Note: timestamps are not preserved in the conversion process. Sorry.
+(jwright@willhackforsushi.com)
 '''
 
 import sys
-import os
+import os.path
+import argparse
+
 from killerbee import *
 
-def usage():
-    print >>sys.stderr, """
-zbconvert - Convert Daintree SNA files to libpcap format and vice-versa.
-jwright@willhackforsushi.com
-Note: timestamps are not preserved in the conversion process.  Sorry.
+# Command-line arguments
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('-i', '--infile', action='store', required=True)
+parser.add_argument('-o', '--outfile', action='store', required=True)
+parser.add_argument('-n', '--noclobber', action='store_true')
+parser.add_argument('-c', '--count', action='store', type=int, default=-1)
+args = parser.parse_args()
 
-Usage: zbconvert [-n] [-i input] [-o output] [-c count]
-    """
-
-
-# Global
-arg_count = -1
-arg_noclobber = False
-arg_infile = None
-arg_outfile = None
-
-while len(sys.argv) > 1:
-    op = sys.argv.pop(1)
-    if op == '-i':
-        arg_infile = sys.argv.pop(1)
-    if op == '-o':
-        arg_outfile = sys.argv.pop(1)
-    if op == '-h':
-        usage()
-        sys.exit(0)
-    if op == '-n':
-        arg_noclobber = True
-    if op == '-c':
-        arg_count = int(sys.argv.pop(1))
- 
-
-if arg_infile == None or arg_outfile == None:
-    print >>sys.stderr, "ERROR: Must specify an input file (-i) and an output file (-o)."
-    usage()
+if args.noclobber and os.path.exists(args.outfile):
+    print >>sys.stderr, "ERROR: Output file \"%s\" already exists." % args.outfile
     sys.exit(1)
 
-if arg_noclobber:
-    if os.path.exists(arg_outfile):
-        print >>sys.stderr, "ERROR: Output file \"%s\" already exists." % arg_outfile
-        sys.exit(1)
-
-if not os.path.exists(arg_infile):
-    print >>sys.stderr, "ERROR: Input file \"%s\" does not exist." % arg_infile
+if not os.path.exists(args.infile):
+    print >>sys.stderr, "ERROR: Input file \"%s\" does not exist." % args.infile
     sys.exit(1)
-
 
 # Check if the input file is libpcap; if not, assume SNA.
 outcap = None
 try:
-    pr = PcapReader(arg_infile)
+    pr = PcapReader(args.infile)
 except Exception, e:
     if e.args == ('Unsupported pcap header format or version',):
         # Input file was not pcap, open it as SNA
-        incap = DainTreeReader(arg_infile)
-        outcap = PcapDumper(DLT_IEEE802_15_4, arg_outfile)
-
+        incap = DainTreeReader(args.infile)
+        outcap = PcapDumper(DLT_IEEE802_15_4, args.outfile)
 # Following exception
-if outcap == None:
+if outcap is None:
         incap = pr
-        outcap = DainTreeDumper(arg_outfile)
+        outcap = DainTreeDumper(args.outfile)
 
 packetcount = 0
-while arg_count != packetcount:
+while args.count != packetcount:
     packet = incap.pnext()
-    if packet[1] == None:
-        # End of capture
+    if packet[1] is None: # End of capture
         break
 
-    #print hexdump(packet[1])
-    if packet != None and packet[1]:
-        packetcount+=1
+    # packet[1] is True if CRC is correct, check removed to have conversion regardless of CRC
+    if packet is not None: # and packet[1]:
+        packetcount += 1
         outcap.pcap_dump(packet[1])
 
 incap.close()
 outcap.close()
-print "Converted %d packets." % packetcount
+print("Converted {0} packets.".format(packetcount))
+

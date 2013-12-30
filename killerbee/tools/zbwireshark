@@ -2,22 +2,15 @@
 
 '''
 Sends sniffed IEEE 802.15.4 packets to Wireshark via a named pipe.
-
-ryan@riverloopsecurity.com
+(ryan@riverloopsecurity.com)
 '''
 
 import sys
 import signal
 import os, tempfile
+import argparse
 
 from killerbee import *
-
-def usage():
-    print >>sys.stderr, """
-zbwireshark - sends sniffed IEEE 802.15.4 packets to Wireshark via a named pipe
-
-Usage: zbwireshark [-fiwDchp] [-f channel] [-i devnumstring] [-p]
-    """
 
 def interrupt(signum, frame):
     global packetcount
@@ -30,44 +23,31 @@ def interrupt(signum, frame):
     pd.close()
     os.remove(pipefname)
     os.rmdir(tempdir)
-    print "%d packets captured" % packetcount
+    print("{0} packets captured".format(packetcount))
     sys.exit(0)
 
 pipename = 'zbwireshark'
-# Command-line arguments
-arg_channel = None
-arg_devstring = None
-arg_count = -1
-arg_ppi = False
 
 # Global
 packetcount = 0
 
-while len(sys.argv) > 1:
-    op = sys.argv.pop(1)
-    if op == '-f':
-        arg_channel = int(sys.argv.pop(1))
-    elif op == '-i':
-        arg_devstring = sys.argv.pop(1)
-    elif op == '-h':
-        usage()
-        sys.exit(0)
-    elif op == '-D':
-        show_dev()
-        sys.exit(0)
-    elif op == '-c':
-        arg_count = int(sys.argv.pop(1))
-    elif op == '-p':
-        arg_ppi = True
+# Command-line arguments
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring')
+#parser.add_argument('-g', '--gps', '--ignore', action='append', dest='ignore')
+parser.add_argument('-p', '--ppi', action='store_true')
+parser.add_argument('-c', '-f', '--channel', action='store', type=int, default=None)
+parser.add_argument('-n', '--count', action='store', default=None)
+parser.add_argument('-D', action='store_true', dest='showdev')
+args = parser.parse_args()
+
+if args.showdev:
+    show_dev()
+    sys.exit(0)
  
-if arg_channel == None:
-    print >>sys.stderr, "ERROR: Must specify a channel with -f"
-    usage()
+if args.channel == None:
+    print >>sys.stderr, "ERROR: Must specify a channel."
     sys.exit(1)
-elif arg_channel < 11 or arg_channel > 26:
-    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel between 11 and 26."
-    sys.exit(1)
-rf_freq_mhz = (arg_channel - 10) * 5 + 2400
 
 # Make FIFO (named pipe)
 tempdir = tempfile.mkdtemp()
@@ -75,13 +55,17 @@ pipefname = os.path.join(tempdir, pipename)
 try:
     os.mkfifo(pipefname) #default mode 0666 (octal)
 except OSError, e:
-    print "Failed to create FIFO: %s" % e
+    print("Failed to create FIFO: {0}".format(e))
     sys.exit(-1)
 
 # Start KillerBee
-kb = KillerBee(device=arg_devstring)
+kb = KillerBee(device=args.devstring)
 signal.signal(signal.SIGINT, interrupt)
-kb.set_channel(arg_channel)
+if kb.is_valid_channel(args.channel):
+    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel for the selected device."
+    kb.close()
+    sys.exit(1)
+kb.set_channel(args.channel)
 kb.sniffer_on()
 
 # Start wireshark as soon as KillerBee succeeds
@@ -90,15 +74,15 @@ try:
     if rc == 0:
         os.execlp("wireshark", "/usr/bin/wireshark", "-k", "-i", pipefname)
 except OSError, e:
-    print "Failed to spawn wireshark: %s" % e
-    print "Point Wireshark to read from the pipe file:", pipefname
+    print("Failed to automatically spawn wireshark: {0}".format(e))
+    print("You should manually point Wireshark to read from the pipe file: {0}".format(pipefname))
 
-pd = PcapDumper(DLT_IEEE802_15_4, pipefname, ppi=arg_ppi)
-
-print "zbwireshark: listening on \'%s\', sending to \'%s\'" % (kb.get_dev_info()[0], pipefname)
+pd = PcapDumper(DLT_IEEE802_15_4, pipefname, ppi=args.ppi)
+rf_freq_mhz = (args.channel - 10) * 5 + 2400
+print("zbwireshark: listening on \'{0}\', sending to \'{1}\'".format(kb.get_dev_info()[0], pipefname))
 
 try:
-    while arg_count != packetcount:
+    while args.count != packetcount:
         packet = kb.pnext()
         if packet != None:
             packetcount+=1
@@ -107,7 +91,7 @@ except KeyboardInterrupt:
     pass
 except IOError as e:
     if e.errno == 32:
-        print "ERROR: Pipe broken. Was Wireshark closed or stopped?"
+        print("ERROR: Pipe broken. Was Wireshark closed or stopped?")
 
 interrupt(0, 0) #shutdown and exit
 

@@ -8,14 +8,17 @@ serial device which should be ignored by KillerBee.
 '''
 
 import sys
+import argparse
+
 from killerbee import show_dev
 
-arg_gpsdev = None
-
 if __name__ == '__main__':
-    while len(sys.argv) > 1:
-        op = sys.argv.pop(1)
-        if op == '-g':
-            arg_gpsdev = sys.argv.pop(1)
-    show_dev(gps=arg_gpsdev)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-i', '--iface', '--dev', action='append', dest='include')
+    parser.add_argument('-g', '--gps', '--ignore', action='append', dest='ignore')
+    args = parser.parse_args()
+    #TODO can these be handled directly in argparse?
+    arg_gpsdev = args.ignore[0] if args.ignore is not None else None
+    #arg_include = args.include if len(args.include)>0 else None
+    show_dev(gps=arg_gpsdev, include=args.include)
 

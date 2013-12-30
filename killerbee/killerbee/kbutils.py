@@ -15,6 +15,7 @@ import os, glob
 import time
 import random
 from struct import pack
+
 from config import *       #to get DEV_ENABLE_* variables
 
 # Known devices by USB ID:
@@ -45,6 +46,8 @@ class KBCapabilities:
     SELFACK            = 0x05 #: Capabilities Flag: Can ACK Frames Automatically
     PHYJAM_REFLEX      = 0x06 #: Capabilities Flag: Can Jam PHY Layer Reflexively
     SET_SYNC           = 0x07 #: Capabilities Flag: Can set the register controlling 802.15.4 sync byte
+    FREQ_2400          = 0x08 #: Capabilities Flag: Can preform 2.4 GHz sniffing (ch 11-26)
+    FREQ_900           = 0x09 #: Capabilities Flag: Can preform 900 MHz sniffing (ch 1-10)
     def __init__(self):
         self._capabilities = {
                 self.NONE : False,
@@ -54,7 +57,9 @@ class KBCapabilities:
                 self.PHYJAM : False,
                 self.SELFACK: False,
                 self.PHYJAM_REFLEX: False,
-                self.SET_SYNC: False }
+                self.SET_SYNC: False,
+                self.FREQ_2400: False,
+                self.FREQ_900: False }
     def check(self, capab):
         if capab in self._capabilities:
             return self._capabilities[capab]
@@ -67,6 +72,16 @@ class KBCapabilities:
     def require(self, capab):
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
+    def is_valid_channel(self, channel):
+        '''
+        Based on sniffer capabilities, return if this is an OK channel number.
+        @rtype: Boolean
+        '''
+        if (channel >= 11 or channel <= 26) and self.check(self.FREQ_2400):
+            return True
+        elif (channel >= 1 or channel <= 10) and self.check(self.FREQ_900):
+            return True
+        return False
 
 class findFromList(object):
     '''
@@ -150,15 +165,36 @@ def devlist_usb_v0x(vendor=None, product=None):
                                   dev.open().getString(dev.iSerialNumber, 12)])
     return devlist
 
-def devlist(vendor=None, product=None, gps=None):
+def isIpAddr(ip):
+    '''Return True if the given string is a valid IPv4 or IPv6 address.'''
+    import socket
+    def is_valid_ipv4_address(address):
+        try:                    socket.inet_pton(socket.AF_INET, address)
+        except AttributeError:  # no inet_pton here, sorry
+            try:                    socket.inet_aton(address)
+            except socket.error:    return False
+            return (address.count('.') == 3)
+        except socket.error:    return False
+        return True
+    def is_valid_ipv6_address(address):
+        try:                    socket.inet_pton(socket.AF_INET6, address)
+        except socket.error:    return False
+        return True
+    return ( is_valid_ipv6_address(ip) or is_valid_ipv4_address(ip) )
+
+def devlist(vendor=None, product=None, gps=None, include=None):
     '''
     Return device information for all present devices, 
     filtering if requested by vendor and/or product IDs on USB devices, and
     running device fingerprint functions on serial devices.
     @type gps: String
     @param gps: Optional serial device identifier for an attached GPS
-    unit. If provided, or if global variable has previously been set, 
-    KillerBee skips that device in device enumeration process.
+        unit. If provided, or if global variable has previously been set, 
+        KillerBee skips that device in device enumeration process.
+    @type include: List of Strings
+    @param include: Optional list of device handles to be appended to the 
+        normally found devices. This is useful for providing IP addresses for
+        remote scanners.
     @rtype: List
     @return: List of device information present.
                 For USB devices, get [busdir:devfilename, productString, serialNumber]
@@ -174,45 +210,64 @@ def devlist(vendor=None, product=None, gps=None):
     elif USBVER == 1:
         devlist = devlist_usb_v1x(vendor, product)
 
-    seriallist = get_serial_ports()
-    for serialdev in seriallist:
+    for serialdev in get_serial_ports(include=include):
         if serialdev == gps_devstring:
-            print "kbutils.devlist is skipping GPS device string: %s" % serialdev #TODO remove print, make pass
+            print("kbutils.devlist is skipping ignored/GPS device string {0}".format(serialdev)) #TODO remove debugging print
+            continue
         elif (DEV_ENABLE_ZIGDUINO and iszigduino(serialdev)):
             devlist.append([serialdev, "Zigduino", ""])
         elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
-            #TODO need to move support for freakduino into goodfetccspi subtype==2
+            #TODO maybe move support for freakduino into goodfetccspi subtype==?
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
         else:
             gfccspi,subtype = isgoodfetccspi(serialdev)
             if gfccspi and subtype == 0:
                 devlist.append([serialdev, "GoodFET TelosB/Tmote", ""])
-                #print "Found tmote on", serialdev
             elif gfccspi and subtype == 1:
                 devlist.append([serialdev, "GoodFET Api-Mote v1", ""])
-                #print "Found apimote on", serialdev
             elif gfccspi and subtype == 2:
                 devlist.append([serialdev, "GoodFET Api-Mote v2", ""])
-                #print "Found freakduino on", serialdev
             elif gfccspi:
-                print "kbutils.devlist has an unkown type of GoodFET CCSPI device (%s)." % serialdev #TODO
+                print("kbutils.devlist has an unknown type of GoodFET CCSPI device ({0}).".format(serialdev))
+
+    if include is not None:
+        # Ugly nested load, so we don't load this class when unneeded!
+        import dev_wislab #use isWislab, getFirmwareVersion
+        for ipaddr in filter(isIpAddr, include):
+            if dev_wislab.isWislab(ipaddr):
+                devlist.append([ipaddr, "Wislab Sniffer v{0}".format(dev_wislab.getFirmwareVersion(ipaddr)), dev_wislab.getMacAddr(ipaddr)])
+            #NOTE: Enumerations of other IP connected sniffers go here.
+            else:
+                print("kbutils.devlist has an unknown type of IP sniffer device ({0}).".format(ipaddr))
+    
     return devlist
 
-def get_serial_devs():
-    global DEV_ENABLE_FREAKDUINO
+def get_serial_devs(seriallist):
+    global DEV_ENABLE_FREAKDUINO, DEV_ENABLE_ZIGDUINO
     #TODO Continue moving code from line 163:181 here, yielding results
 
-def get_serial_ports():
+def isSerialDeviceString(s):
+    return ( ( s.count('/') + s.count('tty') ) > 0 )
+
+def get_serial_ports(include=None):
     '''
     Private function. Do not call from tools/scripts/etc.
     This should return a list of device paths for serial devices that we are
     interested in, aka USB serial devices using FTDI chips such as the TelosB,
     ApiMote, etc. This should handle returning a list of devices regardless of
     the *nix it is running on. Support for more *nix and winnt needed.
+    
+    @type include: List of Strings, or None
+    @param include: A list of device strings, of which any which appear to be
+        serial device handles will be added to the set of serial ports returned
+        by the normal search. This may be useful if we're not including some
+        oddly named serial port which you have a KillerBee device on. Optional.
     '''
     seriallist = glob.glob("/dev/ttyUSB*") + glob.glob("/dev/tty.usbserial*")  #TODO make cross platform globing/winnt
+    if include is not None:
+        seriallist = list( set(seriallist).union(set(filter(isSerialDeviceString, include))) )
     return seriallist
-    
+
 def isgoodfetccspi(serialdev):
     '''
     Determine if a given serial device is running the GoodFET firmware with the CCSPI application.
@@ -234,6 +289,7 @@ def isgoodfetccspi(serialdev):
     except serial.serialutil.SerialException as e:
         raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
     if gf.connected == 1:
+        #print "TelosB/Tmote attempts: found %s on %s" % (gf.identstr(), serialdev)
         # now check if ccspi app is installed
         out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
         gf.serClose()        
@@ -245,10 +301,10 @@ def isgoodfetccspi(serialdev):
     try:
         gf.serInit(port=serialdev, attemptlimit=2)
         #gf.setup()
-        print "Found %s on %s" % (gf.identstr(), serialdev)
     except serial.serialutil.SerialException as e:
         raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)    
     if gf.connected == 1:
+        #print "ApiMotev2+ attempts: found %s on %s" % (gf.identstr(), serialdev)
         # now check if ccspi app is installed
         out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
         gf.serClose()        
@@ -268,6 +324,7 @@ def isgoodfetccspi(serialdev):
     except serial.serialutil.SerialException as e:
         raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)    
     if gf.connected == 1:
+        #print "ApiMotev1 attempts: found %s on %s" % (gf.identstr(), serialdev)
         # now check if ccspi app is installed
         out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
         gf.serClose()        
@@ -391,10 +448,13 @@ def randbytes(size):
 
 def randmac(length=8):
     '''
-    Returns a random MAC address using a list valid OUI's from ZigBee device manufacturers.  Data is returned in air-format byte order (LSB first).
+    Returns a random MAC address using a list valid OUI's from ZigBee device 
+    manufacturers.  Data is returned in air-format byte order (LSB first).
     @type length: String
-    @param length: Optional length of MAC address, def=8.  Minimum address return length is 3 bytes for the valid OUI.
+    @param length: Optional length of MAC address, def=8.  
+        Minimum address return length is 3 bytes for the valid OUI.
     @rtype: String
+    @returns: A randomized MAC address in a little-endian byte string.
     '''
     # Valid OUI prefixes for MAC addresses
     prefixes = [ "\x00\x0d\x6f",    # Ember
@@ -415,11 +475,15 @@ def randmac(length=8):
     # Reverse the address for use in a packet
     return ''.join([prefix, suffix])[::-1]
 
-# Do a CRC-CCITT Kermit 16bit on the data given
-# Returns a CRC that is the FCS for the frame
-#  Implemented using pseudocode from: June 1986, Kermit Protocol Manual
-#  See also: http://regregex.bbcmicro.net/crc-catalogue.htm#crc.cat.kermit
 def makeFCS(data):
+    '''
+    Do a CRC-CCITT Kermit 16bit on the data given
+    Implemented using pseudocode from: June 1986, Kermit Protocol Manual
+    See also: http://regregex.bbcmicro.net/crc-catalogue.htm#crc.cat.kermit
+
+    @return: a CRC that is the FCS for the frame, as two hex bytes in
+        little-endian order.
+    '''
     crc = 0
     for i in xrange(len(data)):
         c = ord(data[i])
@@ -440,5 +504,4 @@ class KBInterfaceError(KBException):
     with an interface, such as opening a port, syncing with the firmware, etc.
     '''
     pass
-
 

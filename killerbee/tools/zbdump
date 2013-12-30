@@ -3,34 +3,27 @@
 '''
 zbdump - a tcpdump-like tool for ZigBee/IEEE 802.15.4 networks
 
-Compatible with Wireshark 1.1.2 and later - jwright@willhackforsushi.com
-The -p flag adds CACE PPI headers to the PCAP - rmspeers@gmail.com
+Compatible with Wireshark 1.1.2 and later (jwright@willhackforsushi.com)
+The -p flag adds CACE PPI headers to the PCAP (ryan@rmspeers.com)
 '''
 
 import sys
 import signal
+import argparse
+
 from killerbee import *
-
-def usage():
-    print >>sys.stderr, """
-zbdump - a tcpdump-like tool for ZigBee/IEEE 802.15.4 networks
-
-Usage: zbdump [-fiwDchp] [-f channel] [-w pcapfile] [-W daintreefile] 
-         [-i devnumstring] [-p]
-    """
 
 def interrupt(signum, frame):
     global packetcount
     global kb
-    global pd
-    global dt
+    global pd, dt
     kb.sniffer_off()
     kb.close()
     if pd:
         pd.close()
     if dt:
         dt.close()
-    print "%d packets captured" % packetcount
+    print("{0} packets captured".format(packetcount))
     sys.exit(0)
 
 # PcapDumper, only used if -w is specified
@@ -38,66 +31,50 @@ pd = None
 # DainTreeDumper, only used if -W is specified
 dt = None
 
-# Command-line arguments
-arg_channel = None
-arg_pcapsavefile = None
-arg_dsnasavefile = None
-arg_devstring = None
-arg_count = -1
-arg_ppi = False
-
 # Global
 packetcount = 0
 
-while len(sys.argv) > 1:
-    op = sys.argv.pop(1)
-    if op == '-f':
-        arg_channel = int(sys.argv.pop(1))
-    elif op == '-w':
-        arg_pcapsavefile = sys.argv.pop(1)
-    elif op == '-W':
-        arg_dsnasavefile = sys.argv.pop(1)
-    elif op == '-i':
-        arg_devstring = sys.argv.pop(1)
-    elif op == '-h':
-        usage()
-        sys.exit(0)
-    elif op == '-D':
-        show_dev()
-        sys.exit(0)
-    elif op == '-c':
-        arg_count = int(sys.argv.pop(1))
-    elif op == '-p':
-        arg_ppi = True
- 
-if arg_channel == None:
-    print >>sys.stderr, "ERROR: Must specify a channel with -f"
-    usage()
-    sys.exit(1)
-elif arg_channel < 11 or arg_channel > 26:
-    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel between 11 and 26."
-    sys.exit(1)
-rf_freq_mhz = (arg_channel - 10) * 5 + 2400
+# Command-line arguments
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring')
+#parser.add_argument('-g', '--gps', '--ignore', action='append', dest='ignore')
+parser.add_argument('-w', '--pcapfile', action='store')
+parser.add_argument('-W', '--dsnafile', action='store')
+parser.add_argument('-p', '--ppi', action='store_true')
+parser.add_argument('-c', '-f', '--channel', action='store', type=int, default=None)
+parser.add_argument('-n', '--count', action='store', type=int, default=-1)
+parser.add_argument('-D', action='store_true', dest='showdev')
+args = parser.parse_args()
 
-if arg_pcapsavefile == None and arg_dsnasavefile == None:
+if args.showdev:
+    show_dev()
+    sys.exit(0)
+
+if args.channel == None:
+    print >>sys.stderr, "ERROR: Must specify a channel."
+    sys.exit(1)
+
+if args.pcapfile is None and args.dsnafile is None:
     print >>sys.stderr, "ERROR: Must specify a savefile with -w (libpcap) or -W (Daintree SNA)"
-    usage()
     sys.exit(1)
+elif args.pcapfile is not None:
+    pd = PcapDumper(DLT_IEEE802_15_4, args.pcapfile, ppi=args.ppi)
+elif args.dsnafile is not None:
+    dt = DainTreeDumper(args.dsnafile)
 
-if (arg_pcapsavefile != None):
-    pd = PcapDumper(DLT_IEEE802_15_4, arg_pcapsavefile, ppi=arg_ppi)
-if (arg_dsnasavefile != None):
-    dt = DainTreeDumper(arg_dsnasavefile)
-
-kb = KillerBee(device=arg_devstring)
+kb = KillerBee(device=args.devstring)
 signal.signal(signal.SIGINT, interrupt)
-
-kb.set_channel(arg_channel)
+if kb.is_valid_channel(args.channel):
+    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel for the selected device."
+    kb.close()
+    sys.exit(1)
+kb.set_channel(args.channel)
 kb.sniffer_on()
 
-print "zbdump: listening on \'%s\', link-type DLT_IEEE802_15_4, capture size 127 bytes" % kb.get_dev_info()[0]
+print("zbdump: listening on \'{0}\', link-type DLT_IEEE802_15_4, capture size 127 bytes".format(kb.get_dev_info()[0]))
 
-while arg_count != packetcount:
+rf_freq_mhz = (args.channel - 10) * 5 + 2400
+while args.count != packetcount:
     packet = kb.pnext()
     # packet[1] is True if CRC is correct, check removed to have promiscous capture regardless of CRC
     if packet != None: # and packet[1]:
@@ -114,4 +91,5 @@ if pd:
 if dt:
     dt.close()
 
-print "%d packets captured" % packetcount
+print("{0} packets captured".format(packetcount))
+
