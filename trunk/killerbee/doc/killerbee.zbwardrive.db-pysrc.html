@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>killerbee.zbwardrive.db</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="killerbee-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="killerbee-module.html">Package&nbsp;killerbee</a> ::
+        <a href="killerbee.zbwardrive-module.html">Package&nbsp;zbwardrive</a> ::
+        Module&nbsp;db
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="killerbee.zbwardrive.db-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="killerbee.zbwardrive.db-module.html">Module killerbee.zbwardrive.db</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">string</tt> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"> </tt>
+<a name="L3"></a><tt class="py-lineno"> 3</tt>  <tt class="py-line"><tt class="py-comment"># Manages Local "database" for ZBWarDrive:</tt> </tt>
+<a name="L4"></a><tt class="py-lineno"> 4</tt>  <tt class="py-line"><tt class="py-comment"># This keeps track of current ZBWarDrive and Sniffing Device State.</tt> </tt>
+<a name="L5"></a><tt class="py-lineno"> 5</tt>  <tt class="py-line"><tt class="py-comment"># It is different from the online logging database.</tt> </tt>
+<a name="L6"></a><tt class="py-lineno"> 6</tt>  <tt class="py-line"> </tt>
+<a name="ZBScanDB"></a><div id="ZBScanDB-def"><a name="L7"></a><tt class="py-lineno"> 7</tt> <a class="py-toggle" href="#" id="ZBScanDB-toggle" onclick="return toggle('ZBScanDB');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="killerbee.zbwardrive.db.ZBScanDB-class.html">ZBScanDB</a><tt class="py-op">:</tt> </tt>
+</div><div id="ZBScanDB-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="ZBScanDB-expanded"><a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line"><tt class="py-docstring">    API to interact with the "database" storing information </tt> </tt>
+<a name="L10"></a><tt class="py-lineno">10</tt>  <tt class="py-line"><tt class="py-docstring">    for the zbscanning program.</tt> </tt>
+<a name="L11"></a><tt class="py-lineno">11</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L12"></a><tt class="py-lineno">12</tt>  <tt class="py-line"> </tt>
+<a name="ZBScanDB.__init__"></a><div id="ZBScanDB.__init__-def"><a name="L13"></a><tt class="py-lineno">13</tt> <a class="py-toggle" href="#" id="ZBScanDB.__init__-toggle" onclick="return toggle('ZBScanDB.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.db.ZBScanDB-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ZBScanDB.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="ZBScanDB.__init__-expanded"><a name="L14"></a><tt class="py-lineno">14</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">channels</tt> <tt class="py-op">=</tt> <tt class="py-op">{</tt><tt class="py-number">11</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">12</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">13</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">14</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">15</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">16</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">17</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">18</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">19</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">20</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">21</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">22</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">23</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">24</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">25</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-number">26</tt><tt class="py-op">:</tt><tt class="py-name">None</tt><tt class="py-op">}</tt> </tt>
+<a name="L15"></a><tt class="py-lineno">15</tt>  <tt class="py-line">        <tt class="py-comment"># Devices is indexed by deviceId and stores a 4-tuple of device string, device serial, current status, and current channel</tt> </tt>
+<a name="L16"></a><tt class="py-lineno">16</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">devices</tt> <tt class="py-op">=</tt> <tt class="py-op">{</tt><tt class="py-op">}</tt> </tt>
+</div><a name="L17"></a><tt class="py-lineno">17</tt>  <tt class="py-line"> </tt>
+<a name="ZBScanDB.close"></a><div id="ZBScanDB.close-def"><a name="L18"></a><tt class="py-lineno">18</tt> <a class="py-toggle" href="#" id="ZBScanDB.close-toggle" onclick="return toggle('ZBScanDB.close');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.db.ZBScanDB-class.html#close">close</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ZBScanDB.close-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="ZBScanDB.close-expanded"><a name="L19"></a><tt class="py-lineno">19</tt>  <tt class="py-line">        <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L20"></a><tt class="py-lineno">20</tt>  <tt class="py-line"> </tt>
+<a name="L21"></a><tt class="py-lineno">21</tt>  <tt class="py-line">    <tt class="py-comment"># Add a new devices to the DB</tt> </tt>
+<a name="ZBScanDB.store_devices"></a><div id="ZBScanDB.store_devices-def"><a name="L22"></a><tt class="py-lineno">22</tt> <a class="py-toggle" href="#" id="ZBScanDB.store_devices-toggle" onclick="return toggle('ZBScanDB.store_devices');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.db.ZBScanDB-class.html#store_devices">store_devices</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">devid</tt><tt class="py-op">,</tt> <tt class="py-param">devstr</tt><tt class="py-op">,</tt> <tt class="py-param">devserial</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ZBScanDB.store_devices-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="ZBScanDB.store_devices-expanded"><a name="L23"></a><tt class="py-lineno">23</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">devices</tt><tt class="py-op">[</tt><tt class="py-name">devid</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">devstr</tt><tt class="py-op">,</tt> <tt class="py-name">devserial</tt><tt class="py-op">,</tt> <tt class="py-string">'Free'</tt><tt class="py-op">,</tt> <tt class="py-name">None</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L24"></a><tt class="py-lineno">24</tt>  <tt class="py-line"> </tt>
+<a name="L25"></a><tt class="py-lineno">25</tt>  <tt class="py-line">    <tt class="py-comment"># Returns the devid of a device marked 'Free',</tt> </tt>
+<a name="L26"></a><tt class="py-lineno">26</tt>  <tt class="py-line">    <tt class="py-comment"># or None if there are no Free devices in the DB.</tt> </tt>
+<a name="ZBScanDB.get_devices_nextFree"></a><div id="ZBScanDB.get_devices_nextFree-def"><a name="L27"></a><tt class="py-lineno">27</tt> <a class="py-toggle" href="#" id="ZBScanDB.get_devices_nextFree-toggle" onclick="return toggle('ZBScanDB.get_devices_nextFree');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.db.ZBScanDB-class.html#get_devices_nextFree">get_devices_nextFree</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ZBScanDB.get_devices_nextFree-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="ZBScanDB.get_devices_nextFree-expanded"><a name="L28"></a><tt class="py-lineno">28</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">devid</tt><tt class="py-op">,</tt> <tt class="py-name">dev</tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">devices</tt><tt class="py-op">.</tt><tt class="py-name">items</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L29"></a><tt class="py-lineno">29</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">dev</tt><tt class="py-op">[</tt><tt class="py-number">2</tt><tt class="py-op">]</tt> <tt class="py-op">==</tt> <tt class="py-string">'Free'</tt><tt class="py-op">:</tt> </tt>
+<a name="L30"></a><tt class="py-lineno">30</tt>  <tt class="py-line">                <tt class="py-keyword">return</tt> <tt class="py-name">devid</tt> </tt>
+</div><a name="L31"></a><tt class="py-lineno">31</tt>  <tt class="py-line"> </tt>
+<a name="ZBScanDB.update_devices_status"></a><div id="ZBScanDB.update_devices_status-def"><a name="L32"></a><tt class="py-lineno">32</tt> <a class="py-toggle" href="#" id="ZBScanDB.update_devices_status-toggle" onclick="return toggle('ZBScanDB.update_devices_status');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.db.ZBScanDB-class.html#update_devices_status">update_devices_status</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">devid</tt><tt class="py-op">,</tt> <tt class="py-param">newstatus</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ZBScanDB.update_devices_status-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="ZBScanDB.update_devices_status-expanded"><a name="L33"></a><tt class="py-lineno">33</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">devid</tt> <tt class="py-keyword">not</tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">devices</tt><tt class="py-op">:</tt> </tt>
+<a name="L34"></a><tt class="py-lineno">34</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">None</tt> </tt>
+<a name="L35"></a><tt class="py-lineno">35</tt>  <tt class="py-line">        <tt class="py-op">(</tt><tt class="py-name">devstr</tt><tt class="py-op">,</tt> <tt class="py-name">devserial</tt><tt class="py-op">,</tt> <tt class="py-name">_</tt><tt class="py-op">,</tt> <tt class="py-name">chan</tt><tt class="py-op">)</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">devices</tt><tt class="py-op">[</tt><tt class="py-name">devid</tt><tt class="py-op">]</tt> </tt>
+<a name="L36"></a><tt class="py-lineno">36</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">devices</tt><tt class="py-op">[</tt><tt class="py-name">devid</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">devstr</tt><tt class="py-op">,</tt> <tt class="py-name">devserial</tt><tt class="py-op">,</tt> <tt class="py-name">newstatus</tt><tt class="py-op">,</tt> <tt class="py-name">chan</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L37"></a><tt class="py-lineno">37</tt>  <tt class="py-line"> </tt>
+<a name="ZBScanDB.update_devices_start_capture"></a><div id="ZBScanDB.update_devices_start_capture-def"><a name="L38"></a><tt class="py-lineno">38</tt> <a class="py-toggle" href="#" id="ZBScanDB.update_devices_start_capture-toggle" onclick="return toggle('ZBScanDB.update_devices_start_capture');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.db.ZBScanDB-class.html#update_devices_start_capture">update_devices_start_capture</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">devid</tt><tt class="py-op">,</tt> <tt class="py-param">channel</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ZBScanDB.update_devices_start_capture-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="ZBScanDB.update_devices_start_capture-expanded"><a name="L39"></a><tt class="py-lineno">39</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">devid</tt> <tt class="py-keyword">not</tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">devices</tt><tt class="py-op">:</tt> </tt>
+<a name="L40"></a><tt class="py-lineno">40</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">None</tt> </tt>
+<a name="L41"></a><tt class="py-lineno">41</tt>  <tt class="py-line">        <tt class="py-op">(</tt><tt class="py-name">devstr</tt><tt class="py-op">,</tt> <tt class="py-name">devserial</tt><tt class="py-op">,</tt> <tt class="py-name">_</tt><tt class="py-op">,</tt> <tt class="py-name">_</tt><tt class="py-op">)</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">devices</tt><tt class="py-op">[</tt><tt class="py-name">devid</tt><tt class="py-op">]</tt> </tt>
+<a name="L42"></a><tt class="py-lineno">42</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">devices</tt><tt class="py-op">[</tt><tt class="py-name">devid</tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">devstr</tt><tt class="py-op">,</tt> <tt class="py-name">devserial</tt><tt class="py-op">,</tt> <tt class="py-string">"Capture"</tt><tt class="py-op">,</tt> <tt id="link-0" class="py-name" targets="Variable killerbee.KillerBee.channel=killerbee.KillerBee-class.html#channel"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-0', 'channel', 'link-0');">channel</a></tt><tt class="py-op">)</tt> </tt>
+</div><a name="L43"></a><tt class="py-lineno">43</tt>  <tt class="py-line"> </tt>
+<a name="L44"></a><tt class="py-lineno">44</tt>  <tt class="py-line">    <tt class="py-comment"># Add a new network to the DB</tt> </tt>
+<a name="ZBScanDB.store_networks"></a><div id="ZBScanDB.store_networks-def"><a name="L45"></a><tt class="py-lineno">45</tt> <a class="py-toggle" href="#" id="ZBScanDB.store_networks-toggle" onclick="return toggle('ZBScanDB.store_networks');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.db.ZBScanDB-class.html#store_networks">store_networks</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">key</tt><tt class="py-op">,</tt> <tt class="py-param">spanid</tt><tt class="py-op">,</tt> <tt class="py-param">source</tt><tt class="py-op">,</tt> <tt class="py-param">channel</tt><tt class="py-op">,</tt> <tt class="py-param">packet</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ZBScanDB.store_networks-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="ZBScanDB.store_networks-expanded"><a name="L46"></a><tt class="py-lineno">46</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt id="link-1" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-1', 'channel', 'link-0');">channel</a></tt> <tt class="py-keyword">not</tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">channels</tt><tt class="py-op">:</tt> </tt>
+<a name="L47"></a><tt class="py-lineno">47</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">None</tt> </tt>
+<a name="L48"></a><tt class="py-lineno">48</tt>  <tt class="py-line">        <tt class="py-comment"># TODO note this only stores the most recent in the channel</tt> </tt>
+<a name="L49"></a><tt class="py-lineno">49</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">channels</tt><tt class="py-op">[</tt><tt id="link-2" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-2', 'channel', 'link-0');">channel</a></tt><tt class="py-op">]</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">key</tt><tt class="py-op">,</tt> <tt class="py-name">spanid</tt><tt class="py-op">,</tt> <tt class="py-name">source</tt><tt class="py-op">,</tt> <tt class="py-name">packet</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L50"></a><tt class="py-lineno">50</tt>  <tt class="py-line"> </tt>
+<a name="L51"></a><tt class="py-lineno">51</tt>  <tt class="py-line">    <tt class="py-comment"># Return the channel of the network identified by key,</tt> </tt>
+<a name="L52"></a><tt class="py-lineno">52</tt>  <tt class="py-line">    <tt class="py-comment"># or None if it doesn't exist in the DB.</tt> </tt>
+<a name="ZBScanDB.get_networks_channel"></a><div id="ZBScanDB.get_networks_channel-def"><a name="L53"></a><tt class="py-lineno">53</tt> <a class="py-toggle" href="#" id="ZBScanDB.get_networks_channel-toggle" onclick="return toggle('ZBScanDB.get_networks_channel');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.db.ZBScanDB-class.html#get_networks_channel">get_networks_channel</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">key</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ZBScanDB.get_networks_channel-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="ZBScanDB.get_networks_channel-expanded"><a name="L54"></a><tt class="py-lineno">54</tt>  <tt class="py-line">        <tt class="py-comment">#print "Looking up channel for network with key of %s" % (key)</tt> </tt>
+<a name="L55"></a><tt class="py-lineno">55</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">chan</tt><tt class="py-op">,</tt> <tt id="link-3" class="py-name" targets="Variable killerbee.GoodFET.GoodFET.data=killerbee.GoodFET.GoodFET-class.html#data"><a title="killerbee.GoodFET.GoodFET.data" class="py-name" href="#" onclick="return doclink('link-3', 'data', 'link-3');">data</a></tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">channels</tt><tt class="py-op">:</tt> </tt>
+<a name="L56"></a><tt class="py-lineno">56</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt id="link-4" class="py-name"><a title="killerbee.GoodFET.GoodFET.data" class="py-name" href="#" onclick="return doclink('link-4', 'data', 'link-3');">data</a></tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-op">==</tt> <tt class="py-name">key</tt><tt class="py-op">:</tt> <tt class="py-keyword">return</tt> <tt class="py-name">chan</tt> </tt>
+<a name="L57"></a><tt class="py-lineno">57</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">None</tt> </tt>
+</div><a name="L58"></a><tt class="py-lineno">58</tt>  <tt class="py-line"> </tt>
+<a name="ZBScanDB.channel_status_logging"></a><div id="ZBScanDB.channel_status_logging-def"><a name="L59"></a><tt class="py-lineno">59</tt> <a class="py-toggle" href="#" id="ZBScanDB.channel_status_logging-toggle" onclick="return toggle('ZBScanDB.channel_status_logging');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.db.ZBScanDB-class.html#channel_status_logging">channel_status_logging</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">chan</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ZBScanDB.channel_status_logging-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="ZBScanDB.channel_status_logging-expanded"><a name="L60"></a><tt class="py-lineno">60</tt>  <tt class="py-line">        <tt class="py-docstring">'''</tt> </tt>
+<a name="L61"></a><tt class="py-lineno">61</tt>  <tt class="py-line"><tt class="py-docstring">        Returns False if we have not seen the network or are not currently </tt> </tt>
+<a name="L62"></a><tt class="py-lineno">62</tt>  <tt class="py-line"><tt class="py-docstring">        logging it's channel, and returns True if we are currently logging it.</tt> </tt>
+<a name="L63"></a><tt class="py-lineno">63</tt>  <tt class="py-line"><tt class="py-docstring">        @return boolean</tt> </tt>
+<a name="L64"></a><tt class="py-lineno">64</tt>  <tt class="py-line"><tt class="py-docstring">        '''</tt> </tt>
+<a name="L65"></a><tt class="py-lineno">65</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">chan</tt> <tt class="py-op">==</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> <tt class="py-keyword">raise</tt> <tt class="py-name">Exception</tt><tt class="py-op">(</tt><tt class="py-string">"None given for channel number"</tt><tt class="py-op">)</tt> </tt>
+<a name="L66"></a><tt class="py-lineno">66</tt>  <tt class="py-line">        <tt class="py-keyword">elif</tt> <tt class="py-name">chan</tt> <tt class="py-keyword">not</tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">channels</tt><tt class="py-op">:</tt> <tt class="py-keyword">raise</tt> <tt class="py-name">Exception</tt><tt class="py-op">(</tt><tt class="py-string">"Invalid channel"</tt><tt class="py-op">)</tt> </tt>
+<a name="L67"></a><tt class="py-lineno">67</tt>  <tt class="py-line">        <tt class="py-keyword">for</tt> <tt class="py-name">dev</tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">devices</tt><tt class="py-op">.</tt><tt class="py-name">values</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L68"></a><tt class="py-lineno">68</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">dev</tt><tt class="py-op">[</tt><tt class="py-number">3</tt><tt class="py-op">]</tt> <tt class="py-op">==</tt> <tt class="py-name">chan</tt> <tt class="py-keyword">and</tt> <tt class="py-name">dev</tt><tt class="py-op">[</tt><tt class="py-number">2</tt><tt class="py-op">]</tt> <tt class="py-op">==</tt> <tt class="py-string">'Capture'</tt><tt class="py-op">:</tt> </tt>
+<a name="L69"></a><tt class="py-lineno">69</tt>  <tt class="py-line">                <tt class="py-keyword">return</tt> <tt class="py-name">True</tt> </tt>
+<a name="L70"></a><tt class="py-lineno">70</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">False</tt> </tt>
+</div></div><a name="L71"></a><tt class="py-lineno">71</tt>  <tt class="py-line"><tt class="py-comment"># end of ZBScanDB class</tt> </tt>
+<a name="L72"></a><tt class="py-lineno">72</tt>  <tt class="py-line"> </tt>
+<a name="toHex"></a><div id="toHex-def"><a name="L73"></a><tt class="py-lineno">73</tt> <a class="py-toggle" href="#" id="toHex-toggle" onclick="return toggle('toHex');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.db-module.html#toHex">toHex</a><tt class="py-op">(</tt><tt class="py-param">bin</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="toHex-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="toHex-expanded"><a name="L74"></a><tt class="py-lineno">74</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-string">''</tt><tt class="py-op">.</tt><tt class="py-name">join</tt><tt class="py-op">(</tt><tt class="py-op">[</tt><tt class="py-string">"%02x"</tt> <tt class="py-op">%</tt> <tt class="py-name">ord</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> <tt class="py-keyword">for</tt> <tt class="py-name">x</tt> <tt class="py-keyword">in</tt> <tt class="py-name">bin</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L75"></a><tt class="py-lineno">75</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="killerbee-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Mon Dec 30 17:49:14 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

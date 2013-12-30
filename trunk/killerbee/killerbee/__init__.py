@@ -36,7 +36,7 @@ def show_dev(vendor=None, product=None, gps=None, include=None):
     '''
     A basic function to output the device listing.
     Placed here for reuse, as many tool scripts were implementing it.
-    @param ingore: Provide device names in this argument (previously known as
+    @param gps: Provide device names in this argument (previously known as
         'gps') which you wish to not be enumerated. Aka, exclude these items.
     @param include: Provide device names in this argument if you would like only
         these to be enumerated. Aka, include only these items.

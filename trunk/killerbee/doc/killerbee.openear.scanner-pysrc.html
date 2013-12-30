@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>killerbee.openear.scanner</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="killerbee-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="killerbee-module.html">Package&nbsp;killerbee</a> ::
+        <a href="killerbee.openear-module.html">Package&nbsp;openear</a> ::
+        Module&nbsp;scanner
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="killerbee.openear.scanner-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="killerbee.openear.scanner-module.html">Module killerbee.openear.scanner</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment">#!/usr/bin/env python</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-comment"># ZBScanner</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-comment"># rmelgares 2011</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-comment"># Promiscious capture on multiple channels at once</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-0" class="py-name" targets="Package killerbee.openear.gps=killerbee.openear.gps-module.html,Class killerbee.openear.gps.gps'.gps=killerbee.openear.gps.gps%27.gps-class.html,Package killerbee.zbwardrive.gps=killerbee.zbwardrive.gps-module.html,Class killerbee.zbwardrive.gps.gps'.gps=killerbee.zbwardrive.gps.gps%27.gps-class.html"><a title="killerbee.openear.gps
+killerbee.openear.gps.gps'.gps
+killerbee.zbwardrive.gps
+killerbee.zbwardrive.gps.gps'.gps" class="py-name" href="#" onclick="return doclink('link-0', 'gps', 'link-0');">gps</a></tt><tt class="py-op">,</tt> <tt class="py-name">time</tt><tt class="py-op">,</tt> <tt class="py-name">os</tt><tt class="py-op">,</tt> <tt class="py-name">signal</tt><tt class="py-op">,</tt> <tt class="py-name">sys</tt><tt class="py-op">,</tt> <tt class="py-name">operator</tt><tt class="py-op">,</tt> <tt class="py-name">threading</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">string</tt><tt class="py-op">,</tt> <tt class="py-name">socket</tt><tt class="py-op">,</tt> <tt class="py-name">struct</tt><tt class="py-op">,</tt> <tt class="py-name">datetime</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt id="link-1" class="py-name" targets="Package killerbee=killerbee-module.html"><a title="killerbee" class="py-name" href="#" onclick="return doclink('link-1', 'killerbee', 'link-1');">killerbee</a></tt> <tt class="py-keyword">import</tt> <tt class="py-op">*</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">Queue</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt class="py-comment"># Globals</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt id="link-2" class="py-name" targets="Variable killerbee.openear.gps.session=killerbee.openear.gps-module.html#session,Variable killerbee.openear.scanner.session=killerbee.openear.scanner-module.html#session,Variable killerbee.zbwardrive.testGPS.session=killerbee.zbwardrive.testGPS-module.html#session"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-2', 'session', 'link-2');">session</a></tt> <tt class="py-op">=</tt> <tt class="py-string">""</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt id="link-3" class="py-name" targets="Variable killerbee.openear.scanner.active_queues=killerbee.openear.scanner-module.html#active_queues"><a title="killerbee.openear.scanner.active_queues" class="py-name" href="#" onclick="return doclink('link-3', 'active_queues', 'link-3');">active_queues</a></tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt id="link-4" class="py-name" targets="Variable killerbee.openear.scanner.arg_verbose=killerbee.openear.scanner-module.html#arg_verbose"><a title="killerbee.openear.scanner.arg_verbose" class="py-name" href="#" onclick="return doclink('link-4', 'arg_verbose', 'link-4');">arg_verbose</a></tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt id="link-5" class="py-name" targets="Variable killerbee.openear.scanner.arg_ppi=killerbee.openear.scanner-module.html#arg_ppi"><a title="killerbee.openear.scanner.arg_ppi" class="py-name" href="#" onclick="return doclink('link-5', 'arg_ppi', 'link-5');">arg_ppi</a></tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt id="link-6" class="py-name" targets="Variable killerbee.openear.scanner.arg_db=killerbee.openear.scanner-module.html#arg_db"><a title="killerbee.openear.scanner.arg_db" class="py-name" href="#" onclick="return doclink('link-6', 'arg_db', 'link-6');">arg_db</a></tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt id="link-7" class="py-name" targets="Variable killerbee.openear.scanner.arg_gps=killerbee.openear.scanner-module.html#arg_gps"><a title="killerbee.openear.scanner.arg_gps" class="py-name" href="#" onclick="return doclink('link-7', 'arg_gps', 'link-7');">arg_gps</a></tt> <tt class="py-op">=</tt> <tt class="py-name">False</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt id="link-8" class="py-name" targets="Variable killerbee.openear.scanner.arg_gps_devstring=killerbee.openear.scanner-module.html#arg_gps_devstring"><a title="killerbee.openear.scanner.arg_gps_devstring" class="py-name" href="#" onclick="return doclink('link-8', 'arg_gps_devstring', 'link-8');">arg_gps_devstring</a></tt> <tt class="py-op">=</tt> <tt class="py-string">""</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt id="link-9" class="py-name" targets="Variable killerbee.openear.scanner.latitude=killerbee.openear.scanner-module.html#latitude"><a title="killerbee.openear.scanner.latitude" class="py-name" href="#" onclick="return doclink('link-9', 'latitude', 'link-9');">latitude</a></tt> <tt class="py-op">=</tt> <tt class="py-string">""</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt id="link-10" class="py-name" targets="Variable killerbee.openear.scanner.longitude=killerbee.openear.scanner-module.html#longitude"><a title="killerbee.openear.scanner.longitude" class="py-name" href="#" onclick="return doclink('link-10', 'longitude', 'link-10');">longitude</a></tt> <tt class="py-op">=</tt> <tt class="py-string">""</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"><tt id="link-11" class="py-name" targets="Variable killerbee.openear.scanner.altitude=killerbee.openear.scanner-module.html#altitude"><a title="killerbee.openear.scanner.altitude" class="py-name" href="#" onclick="return doclink('link-11', 'altitude', 'link-11');">altitude</a></tt> <tt class="py-op">=</tt> <tt class="py-string">""</tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"><tt id="link-12" class="py-name" targets="Variable killerbee.openear.scanner.last_seen=killerbee.openear.scanner-module.html#last_seen"><a title="killerbee.openear.scanner.last_seen" class="py-name" href="#" onclick="return doclink('link-12', 'last_seen', 'link-12');">last_seen</a></tt> <tt class="py-op">=</tt> <tt class="py-string">""</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line"> </tt>
+<a name="broadcast_event"></a><div id="broadcast_event-def"><a name="L25"></a><tt class="py-lineno"> 25</tt> <a class="py-toggle" href="#" id="broadcast_event-toggle" onclick="return toggle('broadcast_event');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.scanner-module.html#broadcast_event">broadcast_event</a><tt class="py-op">(</tt><tt class="py-param">data</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="broadcast_event-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="broadcast_event-expanded"><a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line">    <tt class="py-docstring">''' Send broadcast data to all active threads '''</tt> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line">    <tt class="py-keyword">print</tt> <tt class="py-string">"\nShutting down threads."</tt>  </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line">    <tt class="py-keyword">for</tt> <tt class="py-name">q</tt> <tt class="py-keyword">in</tt> <tt id="link-13" class="py-name"><a title="killerbee.openear.scanner.active_queues" class="py-name" href="#" onclick="return doclink('link-13', 'active_queues', 'link-3');">active_queues</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line">        <tt class="py-name">q</tt><tt class="py-op">.</tt><tt class="py-name">put</tt><tt class="py-op">(</tt><tt id="link-14" class="py-name" targets="Variable killerbee.GoodFET.GoodFET.data=killerbee.GoodFET.GoodFET-class.html#data"><a title="killerbee.GoodFET.GoodFET.data" class="py-name" href="#" onclick="return doclink('link-14', 'data', 'link-14');">data</a></tt><tt class="py-op">)</tt> </tt>
+</div><a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"> </tt>
+<a name="LocationThread"></a><div id="LocationThread-def"><a name="L31"></a><tt class="py-lineno"> 31</tt> <a class="py-toggle" href="#" id="LocationThread-toggle" onclick="return toggle('LocationThread');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="killerbee.openear.scanner.LocationThread-class.html">LocationThread</a><tt class="py-op">(</tt><tt class="py-base-class">threading</tt><tt class="py-op">.</tt><tt class="py-base-class">Thread</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="LocationThread-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="LocationThread-expanded"><a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line">    <tt class="py-docstring">''' Thread to update gps location from gpsd '''</tt> </tt>
+<a name="LocationThread.__init__"></a><div id="LocationThread.__init__-def"><a name="L33"></a><tt class="py-lineno"> 33</tt> <a class="py-toggle" href="#" id="LocationThread.__init__-toggle" onclick="return toggle('LocationThread.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.scanner.LocationThread-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="LocationThread.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="LocationThread.__init__-expanded"><a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line">        <tt class="py-keyword">global</tt> <tt id="link-15" class="py-name"><a title="killerbee.openear.scanner.active_queues" class="py-name" href="#" onclick="return doclink('link-15', 'active_queues', 'link-3');">active_queues</a></tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line">        <tt class="py-name">threading</tt><tt class="py-op">.</tt><tt class="py-name">Thread</tt><tt class="py-op">.</tt><tt id="link-16" class="py-name" targets="Method killerbee.GoodFET.GoodFET.__init__()=killerbee.GoodFET.GoodFET-class.html#__init__,Method killerbee.GoodFET.GoodFETbtser.__init__()=killerbee.GoodFET.GoodFETbtser-class.html#__init__,Method killerbee.GoodFET.SymbolTable.__init__()=killerbee.GoodFET.SymbolTable-class.html#__init__,Method killerbee.KillerBee.__init__()=killerbee.KillerBee-class.html#__init__,Method killerbee.daintree.DainTreeDumper.__init__()=killerbee.daintree.DainTreeDumper-class.html#__init__,Method killerbee.daintree.DainTreeReader.__init__()=killerbee.daintree.DainTreeReader-class.html#__init__,Method killerbee.dblog.DBLogger.__init__()=killerbee.dblog.DBLogger-class.html#__init__,Method killerbee.dblog.DBReader.__init__()=killerbee.dblog.DBReader-class.html#__init__,Method killerbee.dev_apimote.APIMOTE.__init__()=killerbee.dev_apimote.APIMOTE-class.html#__init__,Method killerbee.dev_freakduino.FREAKDUINO.__init__()=killerbee.dev_freakduino.FREAKDUINO-class.html#__init__,Method killerbee.dev_rzusbstick.RZUSBSTICK.__init__()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#__init__,Method killerbee.dev_telosb.TELOSB.__init__()=killerbee.dev_telosb.TELOSB-class.html#__init__,Method killerbee.dev_wislab.WISLAB.__init__()=killerbee.dev_wislab.WISLAB-class.html#__init__,Method killerbee.dev_zigduino.ZIGDUINO.__init__()=killerbee.dev_zigduino.ZIGDUINO-class.html#__init__,Method killerbee.dot154decode.Dot154PacketParser.__init__()=killerbee.dot154decode.Dot154PacketParser-class.html#__init__,Method killerbee.kbutils.KBCapabilities.__init__()=killerbee.kbutils.KBCapabilities-class.html#__init__,Method killerbee.kbutils.findFromList.__init__()=killerbee.kbutils.findFromList-class.html#__init__,Method killerbee.kbutils.findFromListAndBusDevId.__init__()=killerbee.kbutils.findFromListAndBusDevId-class.html#__init__,Method killerbee.openear.capture.CaptureThread.__init__()=killerbee.openear.capture.CaptureThread-class.html#__init__,Method killerbee.openear.gps.client.dictwrapper.__init__()=killerbee.openear.gps.client.dictwrapper-class.html#__init__,Method killerbee.openear.gps.client.gpscommon.__init__()=killerbee.openear.gps.client.gpscommon-class.html#__init__,Method killerbee.openear.gps.gps.satellite.__init__()=killerbee.openear.gps.gps.satellite-class.html#__init__,Method killerbee.openear.gps.gps'.gps.__init__()=killerbee.openear.gps.gps%27.gps-class.html#__init__,Method killerbee.openear.gps.gps'.gpsdata.__init__()=killerbee.openear.gps.gps%27.gpsdata-class.html#__init__,Method killerbee.openear.gps.gps'.gpsfix.__init__()=killerbee.openear.gps.gps%27.gpsfix-class.html#__init__,Method killerbee.openear.scanner.CaptureThread.__init__()=killerbee.openear.scanner.CaptureThread-class.html#__init__,Method killerbee.openear.scanner.LocationThread.__init__()=killerbee.openear.scanner.LocationThread-class.html#__init__,Method killerbee.pcapdump.PcapDumper.__init__()=killerbee.pcapdump.PcapDumper-class.html#__init__,Method killerbee.pcapdump.PcapReader.__init__()=killerbee.pcapdump.PcapReader-class.html#__init__,Method killerbee.zbwardrive.capture.CaptureThread.__init__()=killerbee.zbwardrive.capture.CaptureThread-class.html#__init__,Method killerbee.zbwardrive.db.ZBScanDB.__init__()=killerbee.zbwardrive.db.ZBScanDB-class.html#__init__,Method killerbee.zbwardrive.gps.client.dictwrapper.__init__()=killerbee.zbwardrive.gps.client.dictwrapper-class.html#__init__,Method killerbee.zbwardrive.gps.client.gpscommon.__init__()=killerbee.zbwardrive.gps.client.gpscommon-class.html#__init__,Method killerbee.zbwardrive.gps.gps.satellite.__init__()=killerbee.zbwardrive.gps.gps.satellite-class.html#__init__,Method killerbee.zbwardrive.gps.gps'.gps.__init__()=killerbee.zbwardrive.gps.gps%27.gps-class.html#__init__,Method killerbee.zbwardrive.gps.gps'.gpsdata.__init__()=killerbee.zbwardrive.gps.gps%27.gpsdata-class.html#__init__,Method killerbee.zbwardrive.gps.gps'.gpsfix.__init__()=killerbee.zbwardrive.gps.gps%27.gpsfix-class.html#__init__,Method killerbee.zigbeedecode.ZigBeeAPSPacketParser.__init__()=killerbee.zigbeedecode.ZigBeeAPSPacketParser-class.html#__init__,Method killerbee.zigbeedecode.ZigBeeNWKPacketParser.__init__()=killerbee.zigbeedecode.ZigBeeNWKPacketParser-class.html#__init__"><a title="killerbee.GoodFET.GoodFET.__init__
+killerbee.GoodFET.GoodFETbtser.__init__
+killerbee.GoodFET.SymbolTable.__init__
+killerbee.KillerBee.__init__
+killerbee.daintree.DainTreeDumper.__init__
+killerbee.daintree.DainTreeReader.__init__
+killerbee.dblog.DBLogger.__init__
+killerbee.dblog.DBReader.__init__
+killerbee.dev_apimote.APIMOTE.__init__
+killerbee.dev_freakduino.FREAKDUINO.__init__
+killerbee.dev_rzusbstick.RZUSBSTICK.__init__
+killerbee.dev_telosb.TELOSB.__init__
+killerbee.dev_wislab.WISLAB.__init__
+killerbee.dev_zigduino.ZIGDUINO.__init__
+killerbee.dot154decode.Dot154PacketParser.__init__
+killerbee.kbutils.KBCapabilities.__init__
+killerbee.kbutils.findFromList.__init__
+killerbee.kbutils.findFromListAndBusDevId.__init__
+killerbee.openear.capture.CaptureThread.__init__
+killerbee.openear.gps.client.dictwrapper.__init__
+killerbee.openear.gps.client.gpscommon.__init__
+killerbee.openear.gps.gps.satellite.__init__
+killerbee.openear.gps.gps'.gps.__init__
+killerbee.openear.gps.gps'.gpsdata.__init__
+killerbee.openear.gps.gps'.gpsfix.__init__
+killerbee.openear.scanner.CaptureThread.__init__
+killerbee.openear.scanner.LocationThread.__init__
+killerbee.pcapdump.PcapDumper.__init__
+killerbee.pcapdump.PcapReader.__init__
+killerbee.zbwardrive.capture.CaptureThread.__init__
+killerbee.zbwardrive.db.ZBScanDB.__init__
+killerbee.zbwardrive.gps.client.dictwrapper.__init__
+killerbee.zbwardrive.gps.client.gpscommon.__init__
+killerbee.zbwardrive.gps.gps.satellite.__init__
+killerbee.zbwardrive.gps.gps'.gps.__init__
+killerbee.zbwardrive.gps.gps'.gpsdata.__init__
+killerbee.zbwardrive.gps.gps'.gpsfix.__init__
+killerbee.zigbeedecode.ZigBeeAPSPacketParser.__init__
+killerbee.zigbeedecode.ZigBeeNWKPacketParser.__init__" class="py-name" href="#" onclick="return doclink('link-16', '__init__', 'link-16');">__init__</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">)</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mesg</tt> <tt class="py-op">=</tt> <tt class="py-name">Queue</tt><tt class="py-op">.</tt><tt class="py-name">Queue</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line">        <tt id="link-17" class="py-name"><a title="killerbee.openear.scanner.active_queues" class="py-name" href="#" onclick="return doclink('link-17', 'active_queues', 'link-3');">active_queues</a></tt><tt class="py-op">.</tt><tt class="py-name">append</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mesg</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line"> </tt>
+<a name="LocationThread.run"></a><div id="LocationThread.run-def"><a name="L39"></a><tt class="py-lineno"> 39</tt> <a class="py-toggle" href="#" id="LocationThread.run-toggle" onclick="return toggle('LocationThread.run');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.scanner.LocationThread-class.html#run">run</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="LocationThread.run-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="LocationThread.run-expanded"><a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line">        <tt class="py-keyword">global</tt> <tt id="link-18" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-18', 'session', 'link-2');">session</a></tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line">        <tt class="py-keyword">global</tt> <tt id="link-19" class="py-name"><a title="killerbee.openear.scanner.active_queues" class="py-name" href="#" onclick="return doclink('link-19', 'active_queues', 'link-3');">active_queues</a></tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line">        <tt class="py-keyword">global</tt> <tt id="link-20" class="py-name"><a title="killerbee.openear.scanner.longitude" class="py-name" href="#" onclick="return doclink('link-20', 'longitude', 'link-10');">longitude</a></tt><tt class="py-op">,</tt> <tt id="link-21" class="py-name"><a title="killerbee.openear.scanner.latitude" class="py-name" href="#" onclick="return doclink('link-21', 'latitude', 'link-9');">latitude</a></tt><tt class="py-op">,</tt> <tt id="link-22" class="py-name"><a title="killerbee.openear.scanner.altitude" class="py-name" href="#" onclick="return doclink('link-22', 'altitude', 'link-11');">altitude</a></tt><tt class="py-op">,</tt> <tt id="link-23" class="py-name"><a title="killerbee.openear.scanner.last_seen" class="py-name" href="#" onclick="return doclink('link-23', 'last_seen', 'link-12');">last_seen</a></tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line">        <tt class="py-name">message</tt> <tt class="py-op">=</tt> <tt class="py-string">""</tt> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line">        <tt id="link-24" class="py-name"><a title="killerbee.openear.scanner.last_seen" class="py-name" href="#" onclick="return doclink('link-24', 'last_seen', 'link-12');">last_seen</a></tt> <tt class="py-op">=</tt> <tt class="py-name">datetime</tt><tt class="py-op">.</tt><tt class="py-name">datetime</tt><tt class="py-op">.</tt><tt class="py-name">now</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line">        <tt class="py-keyword">while</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line">            <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line">                <tt class="py-name">message</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mesg</tt><tt class="py-op">.</tt><tt id="link-25" class="py-name" targets="Method killerbee.GoodFET.SymbolTable.get()=killerbee.GoodFET.SymbolTable-class.html#get,Method killerbee.openear.gps.client.dictwrapper.get()=killerbee.openear.gps.client.dictwrapper-class.html#get,Method killerbee.zbwardrive.gps.client.dictwrapper.get()=killerbee.zbwardrive.gps.client.dictwrapper-class.html#get"><a title="killerbee.GoodFET.SymbolTable.get
+killerbee.openear.gps.client.dictwrapper.get
+killerbee.zbwardrive.gps.client.dictwrapper.get" class="py-name" href="#" onclick="return doclink('link-25', 'get', 'link-25');">get</a></tt><tt class="py-op">(</tt><tt id="link-26" class="py-name" targets="Method killerbee.GoodFET.GoodFET.timeout()=killerbee.GoodFET.GoodFET-class.html#timeout"><a title="killerbee.GoodFET.GoodFET.timeout" class="py-name" href="#" onclick="return doclink('link-26', 'timeout', 'link-26');">timeout</a></tt><tt class="py-op">=</tt><tt class="py-number">.00001</tt><tt class="py-op">)</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line">            <tt class="py-keyword">except</tt> <tt class="py-name">Queue</tt><tt class="py-op">.</tt><tt class="py-name">Empty</tt><tt class="py-op">:</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line">                <tt class="py-keyword">pass</tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">message</tt> <tt class="py-op">==</tt> <tt class="py-string">"shutdown"</tt><tt class="py-op">:</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line">                <tt class="py-keyword">break</tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line">            <tt id="link-27" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-27', 'session', 'link-2');">session</a></tt><tt class="py-op">.</tt><tt id="link-28" class="py-name" targets="Method killerbee.openear.gps.gps'.gps.poll()=killerbee.openear.gps.gps%27.gps-class.html#poll,Method killerbee.zbwardrive.gps.gps'.gps.poll()=killerbee.zbwardrive.gps.gps%27.gps-class.html#poll"><a title="killerbee.openear.gps.gps'.gps.poll
+killerbee.zbwardrive.gps.gps'.gps.poll" class="py-name" href="#" onclick="return doclink('link-28', 'poll', 'link-28');">poll</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line">            <tt class="py-name">t_latitude</tt> <tt class="py-op">=</tt> <tt id="link-29" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-29', 'session', 'link-2');">session</a></tt><tt class="py-op">.</tt><tt class="py-name">fix</tt><tt class="py-op">.</tt><tt id="link-30" class="py-name"><a title="killerbee.openear.scanner.latitude" class="py-name" href="#" onclick="return doclink('link-30', 'latitude', 'link-9');">latitude</a></tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line">            <tt class="py-name">t_longitude</tt> <tt class="py-op">=</tt> <tt id="link-31" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-31', 'session', 'link-2');">session</a></tt><tt class="py-op">.</tt><tt class="py-name">fix</tt><tt class="py-op">.</tt><tt id="link-32" class="py-name"><a title="killerbee.openear.scanner.longitude" class="py-name" href="#" onclick="return doclink('link-32', 'longitude', 'link-10');">longitude</a></tt> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">            <tt class="py-name">t_altitude</tt> <tt class="py-op">=</tt> <tt id="link-33" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-33', 'session', 'link-2');">session</a></tt><tt class="py-op">.</tt><tt class="py-name">fix</tt><tt class="py-op">.</tt><tt id="link-34" class="py-name"><a title="killerbee.openear.scanner.altitude" class="py-name" href="#" onclick="return doclink('link-34', 'altitude', 'link-11');">altitude</a></tt> </tt>
+<a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt><tt class="py-op">(</tt><tt class="py-name">t_latitude</tt> <tt class="py-op">!=</tt> <tt id="link-35" class="py-name"><a title="killerbee.openear.scanner.latitude" class="py-name" href="#" onclick="return doclink('link-35', 'latitude', 'link-9');">latitude</a></tt> <tt class="py-keyword">and</tt> <tt class="py-name">t_longitude</tt> <tt class="py-op">!=</tt> <tt id="link-36" class="py-name"><a title="killerbee.openear.scanner.longitude" class="py-name" href="#" onclick="return doclink('link-36', 'longitude', 'link-10');">longitude</a></tt> <tt class="py-keyword">and</tt> <tt class="py-name">t_altitude</tt> <tt class="py-op">!=</tt> <tt id="link-37" class="py-name"><a title="killerbee.openear.scanner.altitude" class="py-name" href="#" onclick="return doclink('link-37', 'altitude', 'link-11');">altitude</a></tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">                <tt id="link-38" class="py-name"><a title="killerbee.openear.scanner.latitude" class="py-name" href="#" onclick="return doclink('link-38', 'latitude', 'link-9');">latitude</a></tt>  <tt class="py-op">=</tt> <tt class="py-name">t_latitude</tt> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">                <tt id="link-39" class="py-name"><a title="killerbee.openear.scanner.longitude" class="py-name" href="#" onclick="return doclink('link-39', 'longitude', 'link-10');">longitude</a></tt> <tt class="py-op">=</tt> <tt class="py-name">t_longitude</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">                <tt id="link-40" class="py-name"><a title="killerbee.openear.scanner.altitude" class="py-name" href="#" onclick="return doclink('link-40', 'altitude', 'link-11');">altitude</a></tt>  <tt class="py-op">=</tt> <tt class="py-name">t_altitude</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">                <tt id="link-41" class="py-name"><a title="killerbee.openear.scanner.last_seen" class="py-name" href="#" onclick="return doclink('link-41', 'last_seen', 'link-12');">last_seen</a></tt> <tt class="py-op">=</tt> <tt class="py-name">datetime</tt><tt class="py-op">.</tt><tt class="py-name">datetime</tt><tt class="py-op">.</tt><tt class="py-name">now</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">            <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">                <tt class="py-name">end_time</tt> <tt class="py-op">=</tt> <tt class="py-name">datetime</tt><tt class="py-op">.</tt><tt class="py-name">datetime</tt><tt class="py-op">.</tt><tt class="py-name">now</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line">                <tt class="py-name">elapsed_time</tt> <tt class="py-op">=</tt> <tt class="py-name">end_time</tt> <tt class="py-op">-</tt> <tt id="link-42" class="py-name"><a title="killerbee.openear.scanner.last_seen" class="py-name" href="#" onclick="return doclink('link-42', 'last_seen', 'link-12');">last_seen</a></tt> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line">                <tt class="py-keyword">print</tt> <tt class="py-name">chr</tt><tt class="py-op">(</tt><tt class="py-number">0x1b</tt><tt class="py-op">)</tt> <tt class="py-op">+</tt> <tt class="py-string">"[2;5fElapsed time since last location change: %s"</tt> <tt class="py-op">%</tt> <tt class="py-name">str</tt><tt class="py-op">(</tt><tt class="py-name">elapsed_time</tt><tt class="py-op">)</tt>  </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-name">chr</tt><tt class="py-op">(</tt><tt class="py-number">0x1b</tt><tt class="py-op">)</tt> <tt class="py-op">+</tt> <tt class="py-string">"[3;5fLat: %f, Long: %f, Alt: %f."</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt id="link-43" class="py-name"><a title="killerbee.openear.scanner.latitude" class="py-name" href="#" onclick="return doclink('link-43', 'latitude', 'link-9');">latitude</a></tt><tt class="py-op">,</tt> <tt id="link-44" class="py-name"><a title="killerbee.openear.scanner.longitude" class="py-name" href="#" onclick="return doclink('link-44', 'longitude', 'link-10');">longitude</a></tt><tt class="py-op">,</tt> <tt id="link-45" class="py-name"><a title="killerbee.openear.scanner.altitude" class="py-name" href="#" onclick="return doclink('link-45', 'altitude', 'link-11');">altitude</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">            <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">sleep</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">  </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line"> </tt>
+<a name="CaptureThread"></a><div id="CaptureThread-def"><a name="L69"></a><tt class="py-lineno"> 69</tt> <a class="py-toggle" href="#" id="CaptureThread-toggle" onclick="return toggle('CaptureThread');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="killerbee.openear.scanner.CaptureThread-class.html">CaptureThread</a><tt class="py-op">(</tt><tt class="py-base-class">threading</tt><tt class="py-op">.</tt><tt class="py-base-class">Thread</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="CaptureThread-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="CaptureThread-expanded"><a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">    <tt class="py-docstring">''' Thread to capture on a given channel, using a given device, to a given pcap file, exits when it receives a broadcast shutdown message via Queue.Queue'''</tt> </tt>
+<a name="CaptureThread.__init__"></a><div id="CaptureThread.__init__-def"><a name="L71"></a><tt class="py-lineno"> 71</tt> <a class="py-toggle" href="#" id="CaptureThread.__init__-toggle" onclick="return toggle('CaptureThread.__init__');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.scanner.CaptureThread-class.html#__init__">__init__</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">dev</tt><tt class="py-op">,</tt> <tt class="py-param">channel</tt><tt class="py-op">,</tt> <tt class="py-param">pd</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="CaptureThread.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="CaptureThread.__init__-expanded"><a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line">        <tt class="py-keyword">global</tt> <tt id="link-46" class="py-name"><a title="killerbee.openear.scanner.active_queues" class="py-name" href="#" onclick="return doclink('link-46', 'active_queues', 'link-3');">active_queues</a></tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">        <tt class="py-name">threading</tt><tt class="py-op">.</tt><tt class="py-name">Thread</tt><tt class="py-op">.</tt><tt id="link-47" class="py-name"><a title="killerbee.GoodFET.GoodFET.__init__
+killerbee.GoodFET.GoodFETbtser.__init__
+killerbee.GoodFET.SymbolTable.__init__
+killerbee.KillerBee.__init__
+killerbee.daintree.DainTreeDumper.__init__
+killerbee.daintree.DainTreeReader.__init__
+killerbee.dblog.DBLogger.__init__
+killerbee.dblog.DBReader.__init__
+killerbee.dev_apimote.APIMOTE.__init__
+killerbee.dev_freakduino.FREAKDUINO.__init__
+killerbee.dev_rzusbstick.RZUSBSTICK.__init__
+killerbee.dev_telosb.TELOSB.__init__
+killerbee.dev_wislab.WISLAB.__init__
+killerbee.dev_zigduino.ZIGDUINO.__init__
+killerbee.dot154decode.Dot154PacketParser.__init__
+killerbee.kbutils.KBCapabilities.__init__
+killerbee.kbutils.findFromList.__init__
+killerbee.kbutils.findFromListAndBusDevId.__init__
+killerbee.openear.capture.CaptureThread.__init__
+killerbee.openear.gps.client.dictwrapper.__init__
+killerbee.openear.gps.client.gpscommon.__init__
+killerbee.openear.gps.gps.satellite.__init__
+killerbee.openear.gps.gps'.gps.__init__
+killerbee.openear.gps.gps'.gpsdata.__init__
+killerbee.openear.gps.gps'.gpsfix.__init__
+killerbee.openear.scanner.CaptureThread.__init__
+killerbee.openear.scanner.LocationThread.__init__
+killerbee.pcapdump.PcapDumper.__init__
+killerbee.pcapdump.PcapReader.__init__
+killerbee.zbwardrive.capture.CaptureThread.__init__
+killerbee.zbwardrive.db.ZBScanDB.__init__
+killerbee.zbwardrive.gps.client.dictwrapper.__init__
+killerbee.zbwardrive.gps.client.gpscommon.__init__
+killerbee.zbwardrive.gps.gps.satellite.__init__
+killerbee.zbwardrive.gps.gps'.gps.__init__
+killerbee.zbwardrive.gps.gps'.gpsdata.__init__
+killerbee.zbwardrive.gps.gps'.gpsfix.__init__
+killerbee.zigbeedecode.ZigBeeAPSPacketParser.__init__
+killerbee.zigbeedecode.ZigBeeNWKPacketParser.__init__" class="py-name" href="#" onclick="return doclink('link-47', '__init__', 'link-16');">__init__</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">)</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mesg</tt> <tt class="py-op">=</tt> <tt class="py-name">Queue</tt><tt class="py-op">.</tt><tt class="py-name">Queue</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line">        <tt id="link-48" class="py-name"><a title="killerbee.openear.scanner.active_queues" class="py-name" href="#" onclick="return doclink('link-48', 'active_queues', 'link-3');">active_queues</a></tt><tt class="py-op">.</tt><tt class="py-name">append</tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mesg</tt><tt class="py-op">)</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-49" class="py-name" targets="Variable killerbee.KillerBee.channel=killerbee.KillerBee-class.html#channel"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-49', 'channel', 'link-49');">channel</a></tt> <tt class="py-op">=</tt> <tt id="link-50" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-50', 'channel', 'link-49');">channel</a></tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">freq</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt id="link-51" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-51', 'channel', 'link-49');">channel</a></tt> <tt class="py-op">-</tt> <tt class="py-number">10</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-number">5</tt> <tt class="py-op">+</tt> <tt class="py-number">2400</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">dev</tt> <tt class="py-op">=</tt> <tt class="py-name">dev</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pd</tt> <tt class="py-op">=</tt> <tt class="py-name">pd</tt> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">packetcount</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> </tt>
+</div><a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line"> </tt>
+<a name="CaptureThread.run"></a><div id="CaptureThread.run-def"><a name="L82"></a><tt class="py-lineno"> 82</tt> <a class="py-toggle" href="#" id="CaptureThread.run-toggle" onclick="return toggle('CaptureThread.run');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.scanner.CaptureThread-class.html#run">run</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="CaptureThread.run-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="CaptureThread.run-expanded"><a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">        <tt class="py-keyword">global</tt> <tt id="link-52" class="py-name"><a title="killerbee.openear.scanner.active_queues" class="py-name" href="#" onclick="return doclink('link-52', 'active_queues', 'link-3');">active_queues</a></tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">        <tt class="py-keyword">global</tt> <tt id="link-53" class="py-name"><a title="killerbee.openear.scanner.longitude" class="py-name" href="#" onclick="return doclink('link-53', 'longitude', 'link-10');">longitude</a></tt><tt class="py-op">,</tt> <tt id="link-54" class="py-name"><a title="killerbee.openear.scanner.latitude" class="py-name" href="#" onclick="return doclink('link-54', 'latitude', 'link-9');">latitude</a></tt><tt class="py-op">,</tt> <tt id="link-55" class="py-name"><a title="killerbee.openear.scanner.altitude" class="py-name" href="#" onclick="return doclink('link-55', 'altitude', 'link-11');">altitude</a></tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kb</tt> <tt class="py-op">=</tt> <tt id="link-56" class="py-name" targets="Class killerbee.KillerBee=killerbee.KillerBee-class.html"><a title="killerbee.KillerBee" class="py-name" href="#" onclick="return doclink('link-56', 'KillerBee', 'link-56');">KillerBee</a></tt><tt class="py-op">(</tt><tt class="py-name">device</tt><tt class="py-op">=</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">dev</tt><tt class="py-op">)</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kb</tt><tt class="py-op">.</tt><tt id="link-57" class="py-name" targets="Method killerbee.KillerBee.set_channel()=killerbee.KillerBee-class.html#set_channel,Method killerbee.dblog.DBLogger.set_channel()=killerbee.dblog.DBLogger-class.html#set_channel,Method killerbee.dev_apimote.APIMOTE.set_channel()=killerbee.dev_apimote.APIMOTE-class.html#set_channel,Method killerbee.dev_freakduino.FREAKDUINO.set_channel()=killerbee.dev_freakduino.FREAKDUINO-class.html#set_channel,Method killerbee.dev_rzusbstick.RZUSBSTICK.set_channel()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#set_channel,Method killerbee.dev_telosb.TELOSB.set_channel()=killerbee.dev_telosb.TELOSB-class.html#set_channel,Method killerbee.dev_wislab.WISLAB.set_channel()=killerbee.dev_wislab.WISLAB-class.html#set_channel,Method killerbee.dev_zigduino.ZIGDUINO.set_channel()=killerbee.dev_zigduino.ZIGDUINO-class.html#set_channel"><a title="killerbee.KillerBee.set_channel
+killerbee.dblog.DBLogger.set_channel
+killerbee.dev_apimote.APIMOTE.set_channel
+killerbee.dev_freakduino.FREAKDUINO.set_channel
+killerbee.dev_rzusbstick.RZUSBSTICK.set_channel
+killerbee.dev_telosb.TELOSB.set_channel
+killerbee.dev_wislab.WISLAB.set_channel
+killerbee.dev_zigduino.ZIGDUINO.set_channel" class="py-name" href="#" onclick="return doclink('link-57', 'set_channel', 'link-57');">set_channel</a></tt><tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-58" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-58', 'channel', 'link-49');">channel</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kb</tt><tt class="py-op">.</tt><tt id="link-59" class="py-name" targets="Method killerbee.KillerBee.sniffer_on()=killerbee.KillerBee-class.html#sniffer_on,Method killerbee.dev_apimote.APIMOTE.sniffer_on()=killerbee.dev_apimote.APIMOTE-class.html#sniffer_on,Method killerbee.dev_freakduino.FREAKDUINO.sniffer_on()=killerbee.dev_freakduino.FREAKDUINO-class.html#sniffer_on,Method killerbee.dev_rzusbstick.RZUSBSTICK.sniffer_on()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#sniffer_on,Method killerbee.dev_telosb.TELOSB.sniffer_on()=killerbee.dev_telosb.TELOSB-class.html#sniffer_on,Method killerbee.dev_wislab.WISLAB.sniffer_on()=killerbee.dev_wislab.WISLAB-class.html#sniffer_on,Method killerbee.dev_zigduino.ZIGDUINO.sniffer_on()=killerbee.dev_zigduino.ZIGDUINO-class.html#sniffer_on"><a title="killerbee.KillerBee.sniffer_on
+killerbee.dev_apimote.APIMOTE.sniffer_on
+killerbee.dev_freakduino.FREAKDUINO.sniffer_on
+killerbee.dev_rzusbstick.RZUSBSTICK.sniffer_on
+killerbee.dev_telosb.TELOSB.sniffer_on
+killerbee.dev_wislab.WISLAB.sniffer_on
+killerbee.dev_zigduino.ZIGDUINO.sniffer_on" class="py-name" href="#" onclick="return doclink('link-59', 'sniffer_on', 'link-59');">sniffer_on</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">         </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">        <tt class="py-comment"># loop capturing packets to dblog and file</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">        <tt class="py-name">message</tt> <tt class="py-op">=</tt> <tt class="py-string">""</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">        <tt class="py-keyword">while</tt> <tt class="py-op">(</tt><tt class="py-name">True</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">            <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line">                <tt class="py-name">message</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">mesg</tt><tt class="py-op">.</tt><tt id="link-60" class="py-name"><a title="killerbee.GoodFET.SymbolTable.get
+killerbee.openear.gps.client.dictwrapper.get
+killerbee.zbwardrive.gps.client.dictwrapper.get" class="py-name" href="#" onclick="return doclink('link-60', 'get', 'link-25');">get</a></tt><tt class="py-op">(</tt><tt id="link-61" class="py-name"><a title="killerbee.GoodFET.GoodFET.timeout" class="py-name" href="#" onclick="return doclink('link-61', 'timeout', 'link-26');">timeout</a></tt><tt class="py-op">=</tt><tt class="py-number">.00001</tt><tt class="py-op">)</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line">            <tt class="py-keyword">except</tt> <tt class="py-name">Queue</tt><tt class="py-op">.</tt><tt class="py-name">Empty</tt><tt class="py-op">:</tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line">                <tt class="py-keyword">pass</tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">message</tt> <tt class="py-op">==</tt> <tt class="py-string">"shutdown"</tt><tt class="py-op">:</tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">                <tt class="py-keyword">break</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">            <tt class="py-name">packet</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kb</tt><tt class="py-op">.</tt><tt id="link-62" class="py-name" targets="Method killerbee.KillerBee.pnext()=killerbee.KillerBee-class.html#pnext,Method killerbee.daintree.DainTreeReader.pnext()=killerbee.daintree.DainTreeReader-class.html#pnext,Method killerbee.dev_apimote.APIMOTE.pnext()=killerbee.dev_apimote.APIMOTE-class.html#pnext,Method killerbee.dev_freakduino.FREAKDUINO.pnext()=killerbee.dev_freakduino.FREAKDUINO-class.html#pnext,Method killerbee.dev_rzusbstick.RZUSBSTICK.pnext()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#pnext,Method killerbee.dev_telosb.TELOSB.pnext()=killerbee.dev_telosb.TELOSB-class.html#pnext,Method killerbee.dev_wislab.WISLAB.pnext()=killerbee.dev_wislab.WISLAB-class.html#pnext,Method killerbee.dev_zigduino.ZIGDUINO.pnext()=killerbee.dev_zigduino.ZIGDUINO-class.html#pnext,Method killerbee.pcapdump.PcapReader.pnext()=killerbee.pcapdump.PcapReader-class.html#pnext"><a title="killerbee.KillerBee.pnext
+killerbee.daintree.DainTreeReader.pnext
+killerbee.dev_apimote.APIMOTE.pnext
+killerbee.dev_freakduino.FREAKDUINO.pnext
+killerbee.dev_rzusbstick.RZUSBSTICK.pnext
+killerbee.dev_telosb.TELOSB.pnext
+killerbee.dev_wislab.WISLAB.pnext
+killerbee.dev_zigduino.ZIGDUINO.pnext
+killerbee.pcapdump.PcapReader.pnext" class="py-name" href="#" onclick="return doclink('link-62', 'pnext', 'link-62');">pnext</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">packet</tt> <tt class="py-op">!=</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">packetcount</tt><tt class="py-op">+=</tt><tt class="py-number">1</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt id="link-63" class="py-name"><a title="killerbee.openear.scanner.arg_gps" class="py-name" href="#" onclick="return doclink('link-63', 'arg_gps', 'link-7');">arg_gps</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">                    <tt id="link-64" class="py-name" targets="Class killerbee.openear.gps.gps'.gpsdata=killerbee.openear.gps.gps%27.gpsdata-class.html,Class killerbee.zbwardrive.gps.gps'.gpsdata=killerbee.zbwardrive.gps.gps%27.gpsdata-class.html"><a title="killerbee.openear.gps.gps'.gpsdata
+killerbee.zbwardrive.gps.gps'.gpsdata" class="py-name" href="#" onclick="return doclink('link-64', 'gpsdata', 'link-64');">gpsdata</a></tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt id="link-65" class="py-name"><a title="killerbee.openear.scanner.longitude" class="py-name" href="#" onclick="return doclink('link-65', 'longitude', 'link-10');">longitude</a></tt><tt class="py-op">,</tt> <tt id="link-66" class="py-name"><a title="killerbee.openear.scanner.latitude" class="py-name" href="#" onclick="return doclink('link-66', 'latitude', 'link-9');">latitude</a></tt><tt class="py-op">,</tt> <tt id="link-67" class="py-name"><a title="killerbee.openear.scanner.altitude" class="py-name" href="#" onclick="return doclink('link-67', 'altitude', 'link-11');">altitude</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line">                    <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pd</tt><tt class="py-op">.</tt><tt id="link-68" class="py-name" targets="Method killerbee.daintree.DainTreeDumper.pcap_dump()=killerbee.daintree.DainTreeDumper-class.html#pcap_dump,Method killerbee.pcapdump.PcapDumper.pcap_dump()=killerbee.pcapdump.PcapDumper-class.html#pcap_dump"><a title="killerbee.daintree.DainTreeDumper.pcap_dump
+killerbee.pcapdump.PcapDumper.pcap_dump" class="py-name" href="#" onclick="return doclink('link-68', 'pcap_dump', 'link-68');">pcap_dump</a></tt><tt class="py-op">(</tt><tt class="py-name">packet</tt><tt class="py-op">[</tt><tt class="py-string">'bytes'</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-name">ant_dbm</tt><tt class="py-op">=</tt><tt class="py-name">packet</tt><tt class="py-op">[</tt><tt class="py-string">'dbm'</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-name">freq_mhz</tt><tt class="py-op">=</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">freq</tt><tt class="py-op">,</tt> <tt class="py-name">location</tt><tt class="py-op">=</tt><tt class="py-name">map</tt><tt class="py-op">(</tt><tt class="py-name">float</tt><tt class="py-op">,</tt> <tt id="link-69" class="py-name"><a title="killerbee.openear.gps.gps'.gpsdata
+killerbee.zbwardrive.gps.gps'.gpsdata" class="py-name" href="#" onclick="return doclink('link-69', 'gpsdata', 'link-64');">gpsdata</a></tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line">                    <tt class="py-keyword">if</tt> <tt id="link-70" class="py-name"><a title="killerbee.openear.scanner.arg_db" class="py-name" href="#" onclick="return doclink('link-70', 'arg_db', 'link-6');">arg_db</a></tt><tt class="py-op">:</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kb</tt><tt class="py-op">.</tt><tt id="link-71" class="py-name" targets="Module killerbee.dblog=killerbee.dblog-module.html"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-71', 'dblog', 'link-71');">dblog</a></tt><tt class="py-op">.</tt><tt id="link-72" class="py-name" targets="Method killerbee.dblog.DBLogger.add_packet()=killerbee.dblog.DBLogger-class.html#add_packet"><a title="killerbee.dblog.DBLogger.add_packet" class="py-name" href="#" onclick="return doclink('link-72', 'add_packet', 'link-72');">add_packet</a></tt><tt class="py-op">(</tt><tt class="py-name">full</tt><tt class="py-op">=</tt><tt class="py-name">packet</tt><tt class="py-op">,</tt> <tt class="py-name">location</tt><tt class="py-op">=</tt><tt id="link-73" class="py-name"><a title="killerbee.openear.gps.gps'.gpsdata
+killerbee.zbwardrive.gps.gps'.gpsdata" class="py-name" href="#" onclick="return doclink('link-73', 'gpsdata', 'link-64');">gpsdata</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line">                <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line">                    <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pd</tt><tt class="py-op">.</tt><tt id="link-74" class="py-name"><a title="killerbee.daintree.DainTreeDumper.pcap_dump
+killerbee.pcapdump.PcapDumper.pcap_dump" class="py-name" href="#" onclick="return doclink('link-74', 'pcap_dump', 'link-68');">pcap_dump</a></tt><tt class="py-op">(</tt><tt class="py-name">packet</tt><tt class="py-op">[</tt><tt class="py-string">'bytes'</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line">                    <tt class="py-keyword">if</tt> <tt id="link-75" class="py-name"><a title="killerbee.openear.scanner.arg_db" class="py-name" href="#" onclick="return doclink('link-75', 'arg_db', 'link-6');">arg_db</a></tt><tt class="py-op">:</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kb</tt><tt class="py-op">.</tt><tt id="link-76" class="py-name"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-76', 'dblog', 'link-71');">dblog</a></tt><tt class="py-op">.</tt><tt id="link-77" class="py-name"><a title="killerbee.dblog.DBLogger.add_packet" class="py-name" href="#" onclick="return doclink('link-77', 'add_packet', 'link-72');">add_packet</a></tt><tt class="py-op">(</tt><tt class="py-name">full</tt><tt class="py-op">=</tt><tt class="py-name">packet</tt><tt class="py-op">)</tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line">                <tt class="py-keyword">print</tt> <tt class="py-name">chr</tt><tt class="py-op">(</tt><tt class="py-number">0x1b</tt><tt class="py-op">)</tt> <tt class="py-op">+</tt> <tt class="py-string">"[%d;5fChannel %d: %d packets captured."</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-78" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-78', 'channel', 'link-49');">channel</a></tt> <tt class="py-op">-</tt> <tt class="py-number">6</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-79" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-79', 'channel', 'link-49');">channel</a></tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">packetcount</tt><tt class="py-op">)</tt> </tt>
+<a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line">        <tt class="py-comment"># trigger threading.Event set to false, so shutdown thread</tt> </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt id="link-80" class="py-name"><a title="killerbee.openear.scanner.arg_verbose" class="py-name" href="#" onclick="return doclink('link-80', 'arg_verbose', 'link-4');">arg_verbose</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-string">"%s on channel %d shutting down..."</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">threading</tt><tt class="py-op">.</tt><tt class="py-name">currentThread</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">getName</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-81" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-81', 'channel', 'link-49');">channel</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kb</tt><tt class="py-op">.</tt><tt id="link-82" class="py-name" targets="Method killerbee.KillerBee.sniffer_off()=killerbee.KillerBee-class.html#sniffer_off,Method killerbee.dev_apimote.APIMOTE.sniffer_off()=killerbee.dev_apimote.APIMOTE-class.html#sniffer_off,Method killerbee.dev_freakduino.FREAKDUINO.sniffer_off()=killerbee.dev_freakduino.FREAKDUINO-class.html#sniffer_off,Method killerbee.dev_rzusbstick.RZUSBSTICK.sniffer_off()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#sniffer_off,Method killerbee.dev_telosb.TELOSB.sniffer_off()=killerbee.dev_telosb.TELOSB-class.html#sniffer_off,Method killerbee.dev_wislab.WISLAB.sniffer_off()=killerbee.dev_wislab.WISLAB-class.html#sniffer_off,Method killerbee.dev_zigduino.ZIGDUINO.sniffer_off()=killerbee.dev_zigduino.ZIGDUINO-class.html#sniffer_off"><a title="killerbee.KillerBee.sniffer_off
+killerbee.dev_apimote.APIMOTE.sniffer_off
+killerbee.dev_freakduino.FREAKDUINO.sniffer_off
+killerbee.dev_rzusbstick.RZUSBSTICK.sniffer_off
+killerbee.dev_telosb.TELOSB.sniffer_off
+killerbee.dev_wislab.WISLAB.sniffer_off
+killerbee.dev_zigduino.ZIGDUINO.sniffer_off" class="py-name" href="#" onclick="return doclink('link-82', 'sniffer_off', 'link-82');">sniffer_off</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">kb</tt><tt class="py-op">.</tt><tt id="link-83" class="py-name" targets="Method killerbee.KillerBee.close()=killerbee.KillerBee-class.html#close,Method killerbee.daintree.DainTreeDumper.close()=killerbee.daintree.DainTreeDumper-class.html#close,Method killerbee.daintree.DainTreeReader.close()=killerbee.daintree.DainTreeReader-class.html#close,Method killerbee.dblog.DBLogger.close()=killerbee.dblog.DBLogger-class.html#close,Method killerbee.dblog.DBReader.close()=killerbee.dblog.DBReader-class.html#close,Method killerbee.dev_apimote.APIMOTE.close()=killerbee.dev_apimote.APIMOTE-class.html#close,Method killerbee.dev_freakduino.FREAKDUINO.close()=killerbee.dev_freakduino.FREAKDUINO-class.html#close,Method killerbee.dev_rzusbstick.RZUSBSTICK.close()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#close,Method killerbee.dev_telosb.TELOSB.close()=killerbee.dev_telosb.TELOSB-class.html#close,Method killerbee.dev_wislab.WISLAB.close()=killerbee.dev_wislab.WISLAB-class.html#close,Method killerbee.dev_zigduino.ZIGDUINO.close()=killerbee.dev_zigduino.ZIGDUINO-class.html#close,Method killerbee.openear.gps.client.gpscommon.close()=killerbee.openear.gps.client.gpscommon-class.html#close,Method killerbee.pcapdump.PcapDumper.close()=killerbee.pcapdump.PcapDumper-class.html#close,Method killerbee.pcapdump.PcapReader.close()=killerbee.pcapdump.PcapReader-class.html#close,Method killerbee.zbwardrive.db.ZBScanDB.close()=killerbee.zbwardrive.db.ZBScanDB-class.html#close,Method killerbee.zbwardrive.gps.client.gpscommon.close()=killerbee.zbwardrive.gps.client.gpscommon-class.html#close"><a title="killerbee.KillerBee.close
+killerbee.daintree.DainTreeDumper.close
+killerbee.daintree.DainTreeReader.close
+killerbee.dblog.DBLogger.close
+killerbee.dblog.DBReader.close
+killerbee.dev_apimote.APIMOTE.close
+killerbee.dev_freakduino.FREAKDUINO.close
+killerbee.dev_rzusbstick.RZUSBSTICK.close
+killerbee.dev_telosb.TELOSB.close
+killerbee.dev_wislab.WISLAB.close
+killerbee.dev_zigduino.ZIGDUINO.close
+killerbee.openear.gps.client.gpscommon.close
+killerbee.pcapdump.PcapDumper.close
+killerbee.pcapdump.PcapReader.close
+killerbee.zbwardrive.db.ZBScanDB.close
+killerbee.zbwardrive.gps.client.gpscommon.close" class="py-name" href="#" onclick="return doclink('link-83', 'close', 'link-83');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">pd</tt><tt class="py-op">.</tt><tt id="link-84" class="py-name"><a title="killerbee.KillerBee.close
+killerbee.daintree.DainTreeDumper.close
+killerbee.daintree.DainTreeReader.close
+killerbee.dblog.DBLogger.close
+killerbee.dblog.DBReader.close
+killerbee.dev_apimote.APIMOTE.close
+killerbee.dev_freakduino.FREAKDUINO.close
+killerbee.dev_rzusbstick.RZUSBSTICK.close
+killerbee.dev_telosb.TELOSB.close
+killerbee.dev_wislab.WISLAB.close
+killerbee.dev_zigduino.ZIGDUINO.close
+killerbee.openear.gps.client.gpscommon.close
+killerbee.pcapdump.PcapDumper.close
+killerbee.pcapdump.PcapReader.close
+killerbee.zbwardrive.db.ZBScanDB.close
+killerbee.zbwardrive.gps.client.gpscommon.close" class="py-name" href="#" onclick="return doclink('link-84', 'close', 'link-83');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt> <tt class="py-string">"%d packets captured on channel %d"</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">packetcount</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-85" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-85', 'channel', 'link-49');">channel</a></tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line"> </tt>
+<a name="signal_handler"></a><div id="signal_handler-def"><a name="L117"></a><tt class="py-lineno">117</tt> <a class="py-toggle" href="#" id="signal_handler-toggle" onclick="return toggle('signal_handler');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.scanner-module.html#signal_handler">signal_handler</a><tt class="py-op">(</tt><tt class="py-param">signal</tt><tt class="py-op">,</tt> <tt class="py-param">frame</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="signal_handler-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="signal_handler-expanded"><a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line">    <tt class="py-docstring">''' Signal handler called on keyboard interrupt to exit threads and exit scanner script'''</tt> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line">    <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">system</tt><tt class="py-op">(</tt><tt class="py-string">'clear'</tt><tt class="py-op">)</tt>  </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line">    <tt id="link-86" class="py-name" targets="Function killerbee.openear.scanner.broadcast_event()=killerbee.openear.scanner-module.html#broadcast_event"><a title="killerbee.openear.scanner.broadcast_event" class="py-name" href="#" onclick="return doclink('link-86', 'broadcast_event', 'link-86');">broadcast_event</a></tt><tt class="py-op">(</tt><tt class="py-string">"shutdown"</tt><tt class="py-op">)</tt> </tt>
+<a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line">    <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">sleep</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+<a name="L122"></a><tt class="py-lineno">122</tt>  <tt class="py-line">    <tt class="py-name">sys</tt><tt class="py-op">.</tt><tt class="py-name">exit</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L123"></a><tt class="py-lineno">123</tt>  <tt class="py-line"> </tt>
+<a name="main"></a><div id="main-def"><a name="L124"></a><tt class="py-lineno">124</tt> <a class="py-toggle" href="#" id="main-toggle" onclick="return toggle('main');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.scanner-module.html#main">main</a><tt class="py-op">(</tt><tt class="py-param">args</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="main-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="main-expanded"><a name="L125"></a><tt class="py-lineno">125</tt>  <tt class="py-line">    <tt class="py-keyword">global</tt> <tt id="link-87" class="py-name"><a title="killerbee.openear.scanner.arg_verbose" class="py-name" href="#" onclick="return doclink('link-87', 'arg_verbose', 'link-4');">arg_verbose</a></tt> </tt>
+<a name="L126"></a><tt class="py-lineno">126</tt>  <tt class="py-line">    <tt class="py-keyword">global</tt> <tt id="link-88" class="py-name"><a title="killerbee.openear.scanner.arg_gps" class="py-name" href="#" onclick="return doclink('link-88', 'arg_gps', 'link-7');">arg_gps</a></tt><tt class="py-op">,</tt> <tt id="link-89" class="py-name"><a title="killerbee.openear.scanner.arg_gps_devstring" class="py-name" href="#" onclick="return doclink('link-89', 'arg_gps_devstring', 'link-8');">arg_gps_devstring</a></tt> </tt>
+<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line">    <tt class="py-keyword">global</tt> <tt id="link-90" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-90', 'session', 'link-2');">session</a></tt> </tt>
+<a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line">    <tt class="py-keyword">global</tt> <tt id="link-91" class="py-name"><a title="killerbee.openear.scanner.longitude" class="py-name" href="#" onclick="return doclink('link-91', 'longitude', 'link-10');">longitude</a></tt><tt class="py-op">,</tt> <tt id="link-92" class="py-name"><a title="killerbee.openear.scanner.latitude" class="py-name" href="#" onclick="return doclink('link-92', 'latitude', 'link-9');">latitude</a></tt><tt class="py-op">,</tt> <tt id="link-93" class="py-name"><a title="killerbee.openear.scanner.altitude" class="py-name" href="#" onclick="return doclink('link-93', 'altitude', 'link-11');">altitude</a></tt> </tt>
+<a name="L129"></a><tt class="py-lineno">129</tt>  <tt class="py-line">    <tt class="py-comment"># parse command line options</tt> </tt>
+<a name="L130"></a><tt class="py-lineno">130</tt>  <tt class="py-line">    <tt class="py-keyword">while</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">args</tt><tt class="py-op">)</tt> <tt class="py-op">&gt;</tt> <tt class="py-number">1</tt><tt class="py-op">:</tt> </tt>
+<a name="L131"></a><tt class="py-lineno">131</tt>  <tt class="py-line">        <tt class="py-name">op</tt> <tt class="py-op">=</tt> <tt class="py-name">args</tt><tt class="py-op">.</tt><tt class="py-name">pop</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+<a name="L132"></a><tt class="py-lineno">132</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">op</tt> <tt class="py-op">==</tt> <tt class="py-string">'-v'</tt><tt class="py-op">:</tt>                          <tt class="py-comment"># Verbose mode</tt> </tt>
+<a name="L133"></a><tt class="py-lineno">133</tt>  <tt class="py-line">            <tt id="link-94" class="py-name"><a title="killerbee.openear.scanner.arg_verbose" class="py-name" href="#" onclick="return doclink('link-94', 'arg_verbose', 'link-4');">arg_verbose</a></tt> <tt class="py-op">=</tt> <tt class="py-name">True</tt> </tt>
+<a name="L134"></a><tt class="py-lineno">134</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">op</tt> <tt class="py-op">==</tt> <tt class="py-string">'-g'</tt><tt class="py-op">:</tt>                          <tt class="py-comment"># GPS device</tt> </tt>
+<a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line">            <tt id="link-95" class="py-name"><a title="killerbee.openear.scanner.arg_gps_devstring" class="py-name" href="#" onclick="return doclink('link-95', 'arg_gps_devstring', 'link-8');">arg_gps_devstring</a></tt> <tt class="py-op">=</tt> <tt class="py-name">sys</tt><tt class="py-op">.</tt><tt class="py-name">argv</tt><tt class="py-op">.</tt><tt class="py-name">pop</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+<a name="L136"></a><tt class="py-lineno">136</tt>  <tt class="py-line">            <tt id="link-96" class="py-name"><a title="killerbee.openear.scanner.arg_gps" class="py-name" href="#" onclick="return doclink('link-96', 'arg_gps', 'link-7');">arg_gps</a></tt> <tt class="py-op">=</tt> <tt class="py-name">True</tt> </tt>
+<a name="L137"></a><tt class="py-lineno">137</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">op</tt> <tt class="py-op">==</tt> <tt class="py-string">'-p'</tt><tt class="py-op">:</tt>                          <tt class="py-comment"># PCAP PPI geolocation support</tt> </tt>
+<a name="L138"></a><tt class="py-lineno">138</tt>  <tt class="py-line">            <tt id="link-97" class="py-name"><a title="killerbee.openear.scanner.arg_ppi" class="py-name" href="#" onclick="return doclink('link-97', 'arg_ppi', 'link-5');">arg_ppi</a></tt> <tt class="py-op">=</tt> <tt class="py-name">True</tt> </tt>
+<a name="L139"></a><tt class="py-lineno">139</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">op</tt> <tt class="py-op">==</tt> <tt class="py-string">'-d'</tt><tt class="py-op">:</tt>                          <tt class="py-comment"># Database logging</tt> </tt>
+<a name="L140"></a><tt class="py-lineno">140</tt>  <tt class="py-line">            <tt id="link-98" class="py-name"><a title="killerbee.openear.scanner.arg_db" class="py-name" href="#" onclick="return doclink('link-98', 'arg_db', 'link-6');">arg_db</a></tt> <tt class="py-op">=</tt> <tt class="py-name">True</tt> </tt>
+<a name="L141"></a><tt class="py-lineno">141</tt>  <tt class="py-line"> </tt>
+<a name="L142"></a><tt class="py-lineno">142</tt>  <tt class="py-line">    <tt class="py-name">signal</tt><tt class="py-op">.</tt><tt class="py-name">signal</tt><tt class="py-op">(</tt><tt class="py-name">signal</tt><tt class="py-op">.</tt><tt class="py-name">SIGINT</tt><tt class="py-op">,</tt> <tt id="link-99" class="py-name" targets="Function killerbee.openear.scanner.signal_handler()=killerbee.openear.scanner-module.html#signal_handler"><a title="killerbee.openear.scanner.signal_handler" class="py-name" href="#" onclick="return doclink('link-99', 'signal_handler', 'link-99');">signal_handler</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L143"></a><tt class="py-lineno">143</tt>  <tt class="py-line"> </tt>
+<a name="L144"></a><tt class="py-lineno">144</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt id="link-100" class="py-name"><a title="killerbee.openear.scanner.arg_gps" class="py-name" href="#" onclick="return doclink('link-100', 'arg_gps', 'link-7');">arg_gps</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L145"></a><tt class="py-lineno">145</tt>  <tt class="py-line">        <tt class="py-name">kbdev_info</tt> <tt class="py-op">=</tt> <tt id="link-101" class="py-name" targets="Module killerbee.kbutils=killerbee.kbutils-module.html"><a title="killerbee.kbutils" class="py-name" href="#" onclick="return doclink('link-101', 'kbutils', 'link-101');">kbutils</a></tt><tt class="py-op">.</tt><tt id="link-102" class="py-name" targets="Function killerbee.kbutils.devlist()=killerbee.kbutils-module.html#devlist"><a title="killerbee.kbutils.devlist" class="py-name" href="#" onclick="return doclink('link-102', 'devlist', 'link-102');">devlist</a></tt><tt class="py-op">(</tt><tt id="link-103" class="py-name"><a title="killerbee.openear.gps
+killerbee.openear.gps.gps'.gps
+killerbee.zbwardrive.gps
+killerbee.zbwardrive.gps.gps'.gps" class="py-name" href="#" onclick="return doclink('link-103', 'gps', 'link-0');">gps</a></tt><tt class="py-op">=</tt><tt id="link-104" class="py-name"><a title="killerbee.openear.scanner.arg_gps_devstring" class="py-name" href="#" onclick="return doclink('link-104', 'arg_gps_devstring', 'link-8');">arg_gps_devstring</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L146"></a><tt class="py-lineno">146</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L147"></a><tt class="py-lineno">147</tt>  <tt class="py-line">        <tt class="py-name">kbdev_info</tt> <tt class="py-op">=</tt> <tt id="link-105" class="py-name"><a title="killerbee.kbutils" class="py-name" href="#" onclick="return doclink('link-105', 'kbutils', 'link-101');">kbutils</a></tt><tt class="py-op">.</tt><tt id="link-106" class="py-name"><a title="killerbee.kbutils.devlist" class="py-name" href="#" onclick="return doclink('link-106', 'devlist', 'link-102');">devlist</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L148"></a><tt class="py-lineno">148</tt>  <tt class="py-line">    <tt id="link-107" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-107', 'channel', 'link-49');">channel</a></tt> <tt class="py-op">=</tt> <tt class="py-number">11</tt> </tt>
+<a name="L149"></a><tt class="py-lineno">149</tt>  <tt class="py-line">    <tt class="py-keyword">print</tt> <tt class="py-string">"Found %d devices."</tt> <tt class="py-op">%</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">kbdev_info</tt><tt class="py-op">)</tt> </tt>
+<a name="L150"></a><tt class="py-lineno">150</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">kbdev_info</tt><tt class="py-op">)</tt> <tt class="py-op">&lt;</tt> <tt class="py-number">1</tt><tt class="py-op">:</tt> </tt>
+<a name="L151"></a><tt class="py-lineno">151</tt>  <tt class="py-line">        <tt class="py-name">exit</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+<a name="L152"></a><tt class="py-lineno">152</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt id="link-108" class="py-name"><a title="killerbee.openear.scanner.arg_gps" class="py-name" href="#" onclick="return doclink('link-108', 'arg_gps', 'link-7');">arg_gps</a></tt> <tt class="py-op">==</tt> <tt class="py-name">True</tt><tt class="py-op">:</tt> </tt>
+<a name="L153"></a><tt class="py-lineno">153</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt> <tt class="py-string">"Initializing GPS device %s ... "</tt><tt class="py-op">%</tt> <tt class="py-op">(</tt><tt id="link-109" class="py-name"><a title="killerbee.openear.scanner.arg_gps_devstring" class="py-name" href="#" onclick="return doclink('link-109', 'arg_gps_devstring', 'link-8');">arg_gps_devstring</a></tt><tt class="py-op">)</tt><tt class="py-op">,</tt> </tt>
+<a name="L154"></a><tt class="py-lineno">154</tt>  <tt class="py-line">        <tt id="link-110" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-110', 'session', 'link-2');">session</a></tt> <tt class="py-op">=</tt> <tt id="link-111" class="py-name"><a title="killerbee.openear.gps
+killerbee.openear.gps.gps'.gps
+killerbee.zbwardrive.gps
+killerbee.zbwardrive.gps.gps'.gps" class="py-name" href="#" onclick="return doclink('link-111', 'gps', 'link-0');">gps</a></tt><tt class="py-op">.</tt><tt id="link-112" class="py-name"><a title="killerbee.openear.gps
+killerbee.openear.gps.gps'.gps
+killerbee.zbwardrive.gps
+killerbee.zbwardrive.gps.gps'.gps" class="py-name" href="#" onclick="return doclink('link-112', 'gps', 'link-0');">gps</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L155"></a><tt class="py-lineno">155</tt>  <tt class="py-line">        <tt id="link-113" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-113', 'session', 'link-2');">session</a></tt><tt class="py-op">.</tt><tt id="link-114" class="py-name"><a title="killerbee.openear.gps.gps'.gps.poll
+killerbee.zbwardrive.gps.gps'.gps.poll" class="py-name" href="#" onclick="return doclink('link-114', 'poll', 'link-28');">poll</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L156"></a><tt class="py-lineno">156</tt>  <tt class="py-line">        <tt id="link-115" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-115', 'session', 'link-2');">session</a></tt><tt class="py-op">.</tt><tt id="link-116" class="py-name" targets="Method killerbee.openear.gps.client.gpsjson.stream()=killerbee.openear.gps.client.gpsjson-class.html#stream,Method killerbee.openear.gps.gps'.gps.stream()=killerbee.openear.gps.gps%27.gps-class.html#stream,Method killerbee.zbwardrive.gps.client.gpsjson.stream()=killerbee.zbwardrive.gps.client.gpsjson-class.html#stream,Method killerbee.zbwardrive.gps.gps'.gps.stream()=killerbee.zbwardrive.gps.gps%27.gps-class.html#stream"><a title="killerbee.openear.gps.client.gpsjson.stream
+killerbee.openear.gps.gps'.gps.stream
+killerbee.zbwardrive.gps.client.gpsjson.stream
+killerbee.zbwardrive.gps.gps'.gps.stream" class="py-name" href="#" onclick="return doclink('link-116', 'stream', 'link-116');">stream</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L157"></a><tt class="py-lineno">157</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt> <tt class="py-string">"Waiting for fix... "</tt><tt class="py-op">,</tt> </tt>
+<a name="L158"></a><tt class="py-lineno">158</tt>  <tt class="py-line">        <tt class="py-keyword">while</tt><tt class="py-op">(</tt><tt id="link-117" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-117', 'session', 'link-2');">session</a></tt><tt class="py-op">.</tt><tt class="py-name">fix</tt><tt class="py-op">.</tt><tt class="py-name">mode</tt> <tt class="py-op">==</tt> <tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L159"></a><tt class="py-lineno">159</tt>  <tt class="py-line">            <tt id="link-118" class="py-name"><a title="killerbee.openear.gps.session
+killerbee.openear.scanner.session
+killerbee.zbwardrive.testGPS.session" class="py-name" href="#" onclick="return doclink('link-118', 'session', 'link-2');">session</a></tt><tt class="py-op">.</tt><tt id="link-119" class="py-name"><a title="killerbee.openear.gps.gps'.gps.poll
+killerbee.zbwardrive.gps.gps'.gps.poll" class="py-name" href="#" onclick="return doclink('link-119', 'poll', 'link-28');">poll</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L160"></a><tt class="py-lineno">160</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt> <tt class="py-string">"Fix acquired!"</tt> </tt>
+<a name="L161"></a><tt class="py-lineno">161</tt>  <tt class="py-line">        <tt class="py-name">t</tt> <tt class="py-op">=</tt> <tt id="link-120" class="py-name" targets="Class killerbee.openear.scanner.LocationThread=killerbee.openear.scanner.LocationThread-class.html"><a title="killerbee.openear.scanner.LocationThread" class="py-name" href="#" onclick="return doclink('link-120', 'LocationThread', 'link-120');">LocationThread</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L162"></a><tt class="py-lineno">162</tt>  <tt class="py-line">        <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-121" class="py-name" targets="Method killerbee.GoodFET.GoodFET.start()=killerbee.GoodFET.GoodFET-class.html#start,Method killerbee.GoodFETAVR.GoodFETAVR.start()=killerbee.GoodFETAVR.GoodFETAVR-class.html#start"><a title="killerbee.GoodFET.GoodFET.start
+killerbee.GoodFETAVR.GoodFETAVR.start" class="py-name" href="#" onclick="return doclink('link-121', 'start', 'link-121');">start</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L163"></a><tt class="py-lineno">163</tt>  <tt class="py-line">    <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">sleep</tt><tt class="py-op">(</tt><tt class="py-number">2</tt><tt class="py-op">)</tt> </tt>
+<a name="L164"></a><tt class="py-lineno">164</tt>  <tt class="py-line">    <tt class="py-keyword">for</tt> <tt class="py-name">i</tt> <tt class="py-keyword">in</tt> <tt class="py-name">range</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">,</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">kbdev_info</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L165"></a><tt class="py-lineno">165</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">kbdev_info</tt><tt class="py-op">[</tt><tt class="py-name">i</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> <tt class="py-op">==</tt> <tt id="link-122" class="py-name"><a title="killerbee.openear.scanner.arg_gps_devstring" class="py-name" href="#" onclick="return doclink('link-122', 'arg_gps_devstring', 'link-8');">arg_gps_devstring</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L166"></a><tt class="py-lineno">166</tt>  <tt class="py-line">                <tt class="py-keyword">print</tt> <tt class="py-string">"Skipping device %s"</tt> <tt class="py-op">%</tt> <tt id="link-123" class="py-name"><a title="killerbee.openear.scanner.arg_gps_devstring" class="py-name" href="#" onclick="return doclink('link-123', 'arg_gps_devstring', 'link-8');">arg_gps_devstring</a></tt> </tt>
+<a name="L167"></a><tt class="py-lineno">167</tt>  <tt class="py-line">            <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L168"></a><tt class="py-lineno">168</tt>  <tt class="py-line">                <tt class="py-keyword">print</tt> <tt class="py-string">'Device at %s: \'%s\''</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">kbdev_info</tt><tt class="py-op">[</tt><tt class="py-name">i</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt class="py-name">kbdev_info</tt><tt class="py-op">[</tt><tt class="py-name">i</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L169"></a><tt class="py-lineno">169</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt id="link-124" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-124', 'channel', 'link-49');">channel</a></tt> <tt class="py-op">&lt;=</tt> <tt class="py-number">26</tt><tt class="py-op">:</tt> </tt>
+<a name="L170"></a><tt class="py-lineno">170</tt>  <tt class="py-line">                    <tt class="py-keyword">print</tt> <tt class="py-string">'\tAssigning to channel %d.'</tt> <tt class="py-op">%</tt> <tt id="link-125" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-125', 'channel', 'link-49');">channel</a></tt> </tt>
+<a name="L171"></a><tt class="py-lineno">171</tt>  <tt class="py-line">                <tt class="py-name">timeLabel</tt> <tt class="py-op">=</tt> <tt class="py-name">datetime</tt><tt class="py-op">.</tt><tt class="py-name">datetime</tt><tt class="py-op">.</tt><tt class="py-name">now</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">strftime</tt><tt class="py-op">(</tt><tt class="py-string">'%Y%m%d-%H%M'</tt><tt class="py-op">)</tt> </tt>
+<a name="L172"></a><tt class="py-lineno">172</tt>  <tt class="py-line">                <tt class="py-name">fname</tt> <tt class="py-op">=</tt> <tt class="py-string">'zb_c%s_%s.pcap'</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt id="link-126" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-126', 'channel', 'link-49');">channel</a></tt><tt class="py-op">,</tt> <tt class="py-name">timeLabel</tt><tt class="py-op">)</tt> <tt class="py-comment">#fname is -w equiv</tt> </tt>
+<a name="L173"></a><tt class="py-lineno">173</tt>  <tt class="py-line">                <tt class="py-name">pcap</tt> <tt class="py-op">=</tt> <tt id="link-127" class="py-name" targets="Class killerbee.pcapdump.PcapDumper=killerbee.pcapdump.PcapDumper-class.html"><a title="killerbee.pcapdump.PcapDumper" class="py-name" href="#" onclick="return doclink('link-127', 'PcapDumper', 'link-127');">PcapDumper</a></tt><tt class="py-op">(</tt><tt id="link-128" class="py-name" targets="Variable killerbee.pcapdlt.DLT_IEEE802_15_4=killerbee.pcapdlt-module.html#DLT_IEEE802_15_4"><a title="killerbee.pcapdlt.DLT_IEEE802_15_4" class="py-name" href="#" onclick="return doclink('link-128', 'DLT_IEEE802_15_4', 'link-128');">DLT_IEEE802_15_4</a></tt><tt class="py-op">,</tt> <tt class="py-name">fname</tt><tt class="py-op">,</tt> <tt class="py-name">ppi</tt><tt class="py-op">=</tt><tt id="link-129" class="py-name"><a title="killerbee.openear.scanner.arg_ppi" class="py-name" href="#" onclick="return doclink('link-129', 'arg_ppi', 'link-5');">arg_ppi</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L174"></a><tt class="py-lineno">174</tt>  <tt class="py-line">                <tt class="py-name">t</tt> <tt class="py-op">=</tt> <tt id="link-130" class="py-name" targets="Class killerbee.openear.capture.CaptureThread=killerbee.openear.capture.CaptureThread-class.html,Class killerbee.openear.scanner.CaptureThread=killerbee.openear.scanner.CaptureThread-class.html,Class killerbee.zbwardrive.capture.CaptureThread=killerbee.zbwardrive.capture.CaptureThread-class.html"><a title="killerbee.openear.capture.CaptureThread
+killerbee.openear.scanner.CaptureThread
+killerbee.zbwardrive.capture.CaptureThread" class="py-name" href="#" onclick="return doclink('link-130', 'CaptureThread', 'link-130');">CaptureThread</a></tt><tt class="py-op">(</tt><tt class="py-name">kbdev_info</tt><tt class="py-op">[</tt><tt class="py-name">i</tt><tt class="py-op">]</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt><tt class="py-op">,</tt> <tt id="link-131" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-131', 'channel', 'link-49');">channel</a></tt><tt class="py-op">,</tt> <tt class="py-name">pcap</tt><tt class="py-op">)</tt> </tt>
+<a name="L175"></a><tt class="py-lineno">175</tt>  <tt class="py-line">                <tt class="py-name">t</tt><tt class="py-op">.</tt><tt id="link-132" class="py-name"><a title="killerbee.GoodFET.GoodFET.start
+killerbee.GoodFETAVR.GoodFETAVR.start" class="py-name" href="#" onclick="return doclink('link-132', 'start', 'link-121');">start</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L176"></a><tt class="py-lineno">176</tt>  <tt class="py-line">                <tt id="link-133" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-133', 'channel', 'link-49');">channel</a></tt> <tt class="py-op">+=</tt> <tt class="py-number">1</tt> </tt>
+<a name="L177"></a><tt class="py-lineno">177</tt>  <tt class="py-line">    <tt class="py-name">os</tt><tt class="py-op">.</tt><tt class="py-name">system</tt><tt class="py-op">(</tt><tt class="py-string">'clear'</tt><tt class="py-op">)</tt> </tt>
+<a name="L178"></a><tt class="py-lineno">178</tt>  <tt class="py-line">    <tt class="py-keyword">print</tt> <tt class="py-name">chr</tt><tt class="py-op">(</tt><tt class="py-number">0x1b</tt><tt class="py-op">)</tt> <tt class="py-op">+</tt> <tt class="py-string">"[1;5fLive Stats:"</tt> </tt>
+<a name="L179"></a><tt class="py-lineno">179</tt>  <tt class="py-line">    <tt class="py-keyword">while</tt> <tt class="py-name">True</tt><tt class="py-op">:</tt> <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L180"></a><tt class="py-lineno">180</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="killerbee-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Mon Dec 30 17:49:14 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+
+"""
+ZBOpenEar is a ZigBee/802.15.4 many channel listener.
+This is useful for when you have enough capture devices for every channel,
+and are first auditing a system which is using channel hopping, etc.
+(rmspeers 2010)
+
+NOTE: Major updates to this code are needed to make it most useful.
+
+It was kept in the Api-Do repository but is now migrated
+to the KillerBee trunk. (jeff 2013)
+"""
+
+import sys
+import argparse
+
+from killerbee import *
+from killerbee.openear import startCapture
+
+# Command line main function
+if __name__ == '__main__':
+    # Command-line arguments
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-i', '--iface', '--dev', action='append', dest='include')
+    parser.add_argument('-g', '--gps', '--ignore', action='store', dest='ignore')
+    parser.add_argument('-D', action='store_true', dest='showdev')
+    args = parser.parse_args()
+
+    if args.showdev:
+        show_dev()
+        sys.exit(0)
+
+    # try-except block to catch keyboard interrupt.
+    try:
+        kbdev_info = kbutils.devlist(include=args.include, gps=args.ignore)
+        channel = 11
+        for i in range(0, len(kbdev_info)):
+            print 'Found device at %s: \'%s\'' % (kbdev_info[i][0], kbdev_info[i][1])
+            if channel <= 26:
+                print '\tAssigning to channel %d.' % channel
+                startCapture(kbdev_info[i][0], channel)
+                channel += 1
+    except KeyboardInterrupt:
+        print 'Shutting down'
+

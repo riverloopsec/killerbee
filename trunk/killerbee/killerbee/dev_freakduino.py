@@ -1,3 +1,9 @@
+'''
+Support from the Freakduino platform from Abika/Freaklabs.
+
+This is not a maintained platfrom and functionality may be broken or lacking.
+'''
+
 import usb
 import serial
 import time
