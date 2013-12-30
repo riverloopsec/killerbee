@@ -1,0 +1,146 @@
+#!/usr/bin/env python
+
+'''
+A script to send/receive long packets of bytes with incremented values.
+There should be one of these processes transmitting, and another one should be
+set up to receive (-r flag) on a second interface. The receiver will analyze
+the results and issue warnings when corruption or packet loss may have occured.
+This is useful for debugging/tool development.
+Requires the KillerBee library.
+2012-13 rmspeers
+'''
+
+import sys
+import os
+import signal
+import time
+import argparse
+
+from killerbee import *
+
+DEFAULT_PKT_LENGTH = 50
+
+txcount = rxcount = rxbadcount = seqnum = 0
+
+def interrupt(signum, frame):
+    global txcount
+    global rxcount
+    global rxbadcount
+    global args
+    global kb
+    kb.close()
+    if args.recv:
+        print "\n%d packets received, %d were likely bad (%f%%)." % (rxcount,rxbadcount,(rxbadcount/rxcount)*100.0)
+    else:
+        print "\n%d packets transmitted." % (txcount)
+    sys.exit(0)
+
+def restricted_length(string):
+    value = int(string)
+    if value < 1 or value > 127:
+        raise argparse.ArgumentTypeError("Length of packet must not be greater than 127 bytes.")
+    return value
+
+if __name__ == '__main__':
+    # Command-line arguments
+    parser = argparse.ArgumentParser(description="zbtestpkts: \
+        Send or receive packets in a known pattern, intended for testing \
+        and tool development. (2012-13 rmspeers)")
+    parser.add_argument('-r', '--recv', action='store_true', default=False, 
+        help='receive packets, and compare them to the expected values to detect alteration (default is to transmit packets)')
+    parser.add_argument('-i', '--interface', action='store', type=str, default=None, 
+        help='provide the USB ID or Serial Device Path to use that device')
+    parser.add_argument('-c', '--channel', action='store', type=int, default=11, 
+        help='tx/rx on given channel (default 11)')
+    parser.add_argument('-d', '--delay', action='store', type=float, default=2, 
+        help='if tx, wait given seconds between packet injections (default 2)')
+    parser.add_argument('-l', '--length', action='store', 
+        type=restricted_length, default=DEFAULT_PKT_LENGTH, 
+        help='if tx, send packets with main body of the given length (default {0})'.format(DEFAULT_PKT_LENGTH))
+
+    args = parser.parse_args()
+    args.length -= 4 #leave room for sequence numbers and the FCS
+
+    signal.signal(signal.SIGINT, interrupt)
+    
+    kb = KillerBee(device=args.interface)
+    kb.set_channel(args.channel)
+
+    print "zbtestpkts: %s on interface \'%s\'" % \
+          ("Receiving" if args.recv else "Transmitting", kb.get_dev_info()[0])
+    
+    # Create the default frame we will be testing with (will add seqnums later):
+    injframe = ''.join(["%c"%num for num in range(args.length)])
+    
+    # Loop receiving packets, if instructed by args.recv == True:
+    while args.recv:
+        packet = kb.pnext()
+        notoursprob = 0 #as this gets bigger, we have less faith the rx'ed frame is meant for us
+        issuesinpkt = 0 #number of bad things in the pkt
+        if packet != None:
+            rxcount+=1
+            try:
+                rxseqnum = ord(packet['bytes'][0])
+            except Exception as e:
+                print("Error: {0}, where packet[bytes]=`{1}`".format(e, packet['bytes']))
+            print packet['bytes'].encode('hex')
+            if len(packet['bytes']) < 3:
+                print " > Extremely short packet. Will not try to compare."
+                notoursprob += 1
+                continue
+            # Make sure sequence numbers match
+            if packet['bytes'][0] != packet['bytes'][-3]:
+                print " > Sequence number missmatch!"
+                notoursprob += 1
+            # Make sure we don't have a missed packet
+            elif seqnum != rxseqnum:
+                print " > Expected sequence number {0}, received {1}. Possible dropped frame?".format(seqnum, rxseqnum)
+                issuesinpkt += 1
+                seqnum = rxseqnum
+            # Compare the middle of the message to ensure no corruption
+            compbytes = packet['bytes'][1:-3] #cut off seq nums and FCSs
+            if compbytes != injframe:
+                print " > Variation from expected frame contents."
+                if len(injframe) == DEFAULT_PKT_LENGTH:
+                    print " ? If you are transmitting with a non-default length (-l), you should set the same length on this receiver."
+                for i in range(len(injframe)):
+                    if compbytes[:i] != injframe[:i]:
+                        print " > Variation occurs at byte %d." % i
+                        if i < 5: notoursprob += 1
+                        issuesinpkt += 1
+                        break
+            # Compare expected vs actual checksum on the received packet
+            if makeFCS(packet['bytes'][:-2]) != packet['bytes'][-2:]:
+                print " > Received checksum is not the expected FCS."
+                issuesinpkt += 1
+            # Increment our sequence number, if we believe the frame rx'ed was meant for us
+            if notoursprob > 1:
+                print " ! This packet was likely not meant for our test. Will not count against our ratio."
+            else:
+                if issuesinpkt >= 1:
+                    rxbadcount += 1
+                seqnum += 1
+                if seqnum > 255:
+                    print " > Wrapping around sequence number."
+                    seqnum = 0
+            
+    
+    # If not set to receive, we fall through to here.
+    # Loop injecting packets:
+    while 1:
+        if seqnum > 255:
+            print " . Wrapping around sequence number."
+            seqnum = 0
+        # Transmitted frame is: SEQNUM / Bytes 0x00 -> args.length / SEQNUM / FCS
+        injbytes = "%c"%seqnum + injframe + "%c"%seqnum
+        print "Sending:", injbytes.encode('hex')
+        try:
+            kb.inject(injbytes)
+            txcount += 1
+            seqnum += 1
+        except Exception, e:
+            print "ERROR: Unable to inject packet:", e
+            sys.exit(-1)
+        if args.delay:
+            time.sleep(args.delay)
+
