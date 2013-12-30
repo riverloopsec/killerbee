@@ -55,9 +55,9 @@ setup  (name        = 'killerbee',
         description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
         author = 'Joshua Wright, Ryan Speers, Ricky Melgares',
         author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
-        packages  = ['killerbee'],
+        packages  = ['killerbee', 'killerbee.openear', 'killerbee.zbwardrive'],
         requires = ['Crypto', 'usb', 'gtk', 'cairo'], # Not causing setup to fail, not sure why
-        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey'],
+        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey','tools/zbwardrive', 'tools/openear'],
         ext_modules = [ zigbee_crypt ],
         )
 
