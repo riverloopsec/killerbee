@@ -86,7 +86,9 @@
 <a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line">        <tt class="py-name">PCAPH_LEN</tt> <tt class="py-op">=</tt> <tt class="py-number">24</tt> </tt>
 <a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__fh</tt> <tt class="py-op">=</tt> <tt class="py-name">open</tt><tt class="py-op">(</tt><tt class="py-name">savefile</tt><tt class="py-op">,</tt> <tt class="py-name">mode</tt><tt class="py-op">=</tt><tt class="py-string">'rb'</tt><tt class="py-op">)</tt> </tt>
 <a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_pcaphsnaplen</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> </tt>
-<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line">        <tt class="py-name">header</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__fh</tt><tt class="py-op">.</tt><tt id="link-8" class="py-name" targets="Method killerbee.GoodFET.GoodFETbtser.read()=killerbee.GoodFET.GoodFETbtser-class.html#read"><a title="killerbee.GoodFET.GoodFETbtser.read" class="py-name" href="#" onclick="return doclink('link-8', 'read', 'link-8');">read</a></tt><tt class="py-op">(</tt><tt class="py-name">PCAPH_LEN</tt><tt class="py-op">)</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line">        <tt class="py-name">header</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__fh</tt><tt class="py-op">.</tt><tt id="link-8" class="py-name" targets="Method killerbee.GoodFET.GoodFETbtser.read()=killerbee.GoodFET.GoodFETbtser-class.html#read,Method killerbee.openear.gps.client.gpscommon.read()=killerbee.openear.gps.client.gpscommon-class.html#read,Method killerbee.zbwardrive.gps.client.gpscommon.read()=killerbee.zbwardrive.gps.client.gpscommon-class.html#read"><a title="killerbee.GoodFET.GoodFETbtser.read
+killerbee.openear.gps.client.gpscommon.read
+killerbee.zbwardrive.gps.client.gpscommon.read" class="py-name" href="#" onclick="return doclink('link-8', 'read', 'link-8');">read</a></tt><tt class="py-op">(</tt><tt class="py-name">PCAPH_LEN</tt><tt class="py-op">)</tt> </tt>
 <a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"> </tt>
 <a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line">        <tt class="py-comment"># Read the first 4 bytes for the magic number, determine endianness</tt> </tt>
 <a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line">        <tt class="py-name">magicnum</tt> <tt class="py-op">=</tt> <tt class="py-name">struct</tt><tt class="py-op">.</tt><tt class="py-name">unpack</tt><tt class="py-op">(</tt><tt class="py-string">"I"</tt><tt class="py-op">,</tt> <tt class="py-name">header</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">:</tt><tt class="py-number">4</tt><tt class="py-op">]</tt><tt class="py-op">)</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> </tt>
@@ -128,7 +130,7 @@ killerbee.pcapdump.PcapReader.pcap_close" class="py-name" href="#" onclick="retu
 <a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line"><tt class="py-docstring">        Closes the output packet capture.</tt> </tt>
 <a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line"><tt class="py-docstring">        @rtype: None</tt> </tt>
 <a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line"><tt class="py-docstring">        '''</tt> </tt>
-<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__fh</tt><tt class="py-op">.</tt><tt id="link-15" class="py-name" targets="Method killerbee.KillerBee.close()=killerbee.KillerBee-class.html#close,Method killerbee.daintree.DainTreeDumper.close()=killerbee.daintree.DainTreeDumper-class.html#close,Method killerbee.daintree.DainTreeReader.close()=killerbee.daintree.DainTreeReader-class.html#close,Method killerbee.dblog.DBLogger.close()=killerbee.dblog.DBLogger-class.html#close,Method killerbee.dblog.DBReader.close()=killerbee.dblog.DBReader-class.html#close,Method killerbee.dev_apimote.APIMOTE.close()=killerbee.dev_apimote.APIMOTE-class.html#close,Method killerbee.dev_freakduino.FREAKDUINO.close()=killerbee.dev_freakduino.FREAKDUINO-class.html#close,Method killerbee.dev_rzusbstick.RZUSBSTICK.close()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#close,Method killerbee.dev_telosb.TELOSB.close()=killerbee.dev_telosb.TELOSB-class.html#close,Method killerbee.dev_zigduino.ZIGDUINO.close()=killerbee.dev_zigduino.ZIGDUINO-class.html#close,Method killerbee.pcapdump.PcapDumper.close()=killerbee.pcapdump.PcapDumper-class.html#close,Method killerbee.pcapdump.PcapReader.close()=killerbee.pcapdump.PcapReader-class.html#close"><a title="killerbee.KillerBee.close
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">        <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__fh</tt><tt class="py-op">.</tt><tt id="link-15" class="py-name" targets="Method killerbee.KillerBee.close()=killerbee.KillerBee-class.html#close,Method killerbee.daintree.DainTreeDumper.close()=killerbee.daintree.DainTreeDumper-class.html#close,Method killerbee.daintree.DainTreeReader.close()=killerbee.daintree.DainTreeReader-class.html#close,Method killerbee.dblog.DBLogger.close()=killerbee.dblog.DBLogger-class.html#close,Method killerbee.dblog.DBReader.close()=killerbee.dblog.DBReader-class.html#close,Method killerbee.dev_apimote.APIMOTE.close()=killerbee.dev_apimote.APIMOTE-class.html#close,Method killerbee.dev_freakduino.FREAKDUINO.close()=killerbee.dev_freakduino.FREAKDUINO-class.html#close,Method killerbee.dev_rzusbstick.RZUSBSTICK.close()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#close,Method killerbee.dev_telosb.TELOSB.close()=killerbee.dev_telosb.TELOSB-class.html#close,Method killerbee.dev_wislab.WISLAB.close()=killerbee.dev_wislab.WISLAB-class.html#close,Method killerbee.dev_zigduino.ZIGDUINO.close()=killerbee.dev_zigduino.ZIGDUINO-class.html#close,Method killerbee.openear.gps.client.gpscommon.close()=killerbee.openear.gps.client.gpscommon-class.html#close,Method killerbee.pcapdump.PcapDumper.close()=killerbee.pcapdump.PcapDumper-class.html#close,Method killerbee.pcapdump.PcapReader.close()=killerbee.pcapdump.PcapReader-class.html#close,Method killerbee.zbwardrive.db.ZBScanDB.close()=killerbee.zbwardrive.db.ZBScanDB-class.html#close,Method killerbee.zbwardrive.gps.client.gpscommon.close()=killerbee.zbwardrive.gps.client.gpscommon-class.html#close"><a title="killerbee.KillerBee.close
 killerbee.daintree.DainTreeDumper.close
 killerbee.daintree.DainTreeReader.close
 killerbee.dblog.DBLogger.close
@@ -137,9 +139,13 @@ killerbee.dev_apimote.APIMOTE.close
 killerbee.dev_freakduino.FREAKDUINO.close
 killerbee.dev_rzusbstick.RZUSBSTICK.close
 killerbee.dev_telosb.TELOSB.close
+killerbee.dev_wislab.WISLAB.close
 killerbee.dev_zigduino.ZIGDUINO.close
+killerbee.openear.gps.client.gpscommon.close
 killerbee.pcapdump.PcapDumper.close
-killerbee.pcapdump.PcapReader.close" class="py-name" href="#" onclick="return doclink('link-15', 'close', 'link-15');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+killerbee.pcapdump.PcapReader.close
+killerbee.zbwardrive.db.ZBScanDB.close
+killerbee.zbwardrive.gps.client.gpscommon.close" class="py-name" href="#" onclick="return doclink('link-15', 'close', 'link-15');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
 </div><a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line"> </tt>
 <a name="PcapReader.pnext"></a><div id="PcapReader.pnext-def"><a name="L69"></a><tt class="py-lineno"> 69</tt> <a class="py-toggle" href="#" id="PcapReader.pnext-toggle" onclick="return toggle('PcapReader.pnext');">-</a><tt class="py-line">    <tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.pcapdump.PcapReader-class.html#pnext">pnext</a><tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
 </div><div id="PcapReader.pnext-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="PcapReader.pnext-expanded"><a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">        <tt class="py-docstring">'''</tt> </tt>
@@ -157,7 +163,9 @@ killerbee.pcapdump.PcapReader.close" class="py-name" href="#" onclick="return do
 <a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line"><tt class="py-docstring">        '''</tt> </tt>
 <a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">        <tt class="py-comment"># Read the next header block</tt> </tt>
 <a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">        <tt class="py-name">PCAPH_RECLEN</tt> <tt class="py-op">=</tt> <tt class="py-number">16</tt> </tt>
-<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">        <tt class="py-name">rechdrdata</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__fh</tt><tt class="py-op">.</tt><tt id="link-17" class="py-name"><a title="killerbee.GoodFET.GoodFETbtser.read" class="py-name" href="#" onclick="return doclink('link-17', 'read', 'link-8');">read</a></tt><tt class="py-op">(</tt><tt class="py-name">PCAPH_RECLEN</tt><tt class="py-op">)</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">        <tt class="py-name">rechdrdata</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__fh</tt><tt class="py-op">.</tt><tt id="link-17" class="py-name"><a title="killerbee.GoodFET.GoodFETbtser.read
+killerbee.openear.gps.client.gpscommon.read
+killerbee.zbwardrive.gps.client.gpscommon.read" class="py-name" href="#" onclick="return doclink('link-17', 'read', 'link-8');">read</a></tt><tt class="py-op">(</tt><tt class="py-name">PCAPH_RECLEN</tt><tt class="py-op">)</tt> </tt>
 <a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line"> </tt>
 <a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
 <a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">            <tt class="py-name">rechdrtmp</tt> <tt class="py-op">=</tt> <tt class="py-name">struct</tt><tt class="py-op">.</tt><tt class="py-name">unpack</tt><tt class="py-op">(</tt><tt class="py-string">"%sIIII"</tt><tt class="py-op">%</tt><tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__endflag</tt><tt class="py-op">,</tt> <tt class="py-name">rechdrdata</tt><tt class="py-op">)</tt> </tt>
@@ -173,7 +181,9 @@ killerbee.pcapdump.PcapReader.close" class="py-name" href="#" onclick="return do
 <a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">            <tt class="py-keyword">raise</tt> <tt class="py-name">Exception</tt><tt class="py-op">(</tt><tt class="py-string">'Corrupted or invalid libpcap record header (included length exceeds actual length)'</tt><tt class="py-op">)</tt> </tt>
 <a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line"> </tt>
 <a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line">        <tt class="py-comment"># Read the included packet length</tt> </tt>
-<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">        <tt class="py-name">frame</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__fh</tt><tt class="py-op">.</tt><tt id="link-18" class="py-name"><a title="killerbee.GoodFET.GoodFETbtser.read" class="py-name" href="#" onclick="return doclink('link-18', 'read', 'link-8');">read</a></tt><tt class="py-op">(</tt><tt class="py-name">rechdr</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">        <tt class="py-name">frame</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">__fh</tt><tt class="py-op">.</tt><tt id="link-18" class="py-name"><a title="killerbee.GoodFET.GoodFETbtser.read
+killerbee.openear.gps.client.gpscommon.read
+killerbee.zbwardrive.gps.client.gpscommon.read" class="py-name" href="#" onclick="return doclink('link-18', 'read', 'link-8');">read</a></tt><tt class="py-op">(</tt><tt class="py-name">rechdr</tt><tt class="py-op">[</tt><tt class="py-number">1</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
 <a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-op">[</tt><tt class="py-name">rechdr</tt><tt class="py-op">,</tt> <tt class="py-name">frame</tt><tt class="py-op">]</tt> </tt>
 </div></div><a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line"> </tt>
 <a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line"> </tt>
@@ -350,9 +360,13 @@ killerbee.dev_apimote.APIMOTE.close
 killerbee.dev_freakduino.FREAKDUINO.close
 killerbee.dev_rzusbstick.RZUSBSTICK.close
 killerbee.dev_telosb.TELOSB.close
+killerbee.dev_wislab.WISLAB.close
 killerbee.dev_zigduino.ZIGDUINO.close
+killerbee.openear.gps.client.gpscommon.close
 killerbee.pcapdump.PcapDumper.close
-killerbee.pcapdump.PcapReader.close" class="py-name" href="#" onclick="return doclink('link-38', 'close', 'link-15');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+killerbee.pcapdump.PcapReader.close
+killerbee.zbwardrive.db.ZBScanDB.close
+killerbee.zbwardrive.gps.client.gpscommon.close" class="py-name" href="#" onclick="return doclink('link-38', 'close', 'link-15');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
 </div></div><a name="L269"></a><tt class="py-lineno">269</tt>  <tt class="py-line"> </tt><script type="text/javascript">
 <!--
 expandto(location.href);
@@ -391,7 +405,7 @@ expandto(location.href);
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Tue Sep  3 22:31:33 2013
+    Generated by Epydoc 3.0.1 on Mon Dec 30 17:49:13 2013
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

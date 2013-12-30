@@ -1,6 +1,6 @@
 '''
-Zigduino support is contributed by neighbor bx.
 Support is currently only tested with Zigduino r1.
+Zigduino support is contributed by neighbor bx.
 If you can test with or can provide us a Zigduino r2 for testing, that would be great.
 
 Items still TODO:

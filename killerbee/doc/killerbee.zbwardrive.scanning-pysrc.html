@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>killerbee.zbwardrive.scanning</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="killerbee-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="killerbee-module.html">Package&nbsp;killerbee</a> ::
+        <a href="killerbee.zbwardrive-module.html">Package&nbsp;zbwardrive</a> ::
+        Module&nbsp;scanning
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="killerbee.zbwardrive.scanning-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="killerbee.zbwardrive.scanning-module.html">Module killerbee.zbwardrive.scanning</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment">#!/usr/bin/env python</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">sys</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">string</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">socket</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">struct</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt id="link-0" class="py-name" targets="Package killerbee=killerbee-module.html"><a title="killerbee" class="py-name" href="#" onclick="return doclink('link-0', 'killerbee', 'link-0');">killerbee</a></tt> <tt class="py-keyword">import</tt> <tt class="py-op">*</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt id="link-1" class="py-name" targets="Variable killerbee.GoodFET.SymbolTable.db=killerbee.GoodFET.SymbolTable-class.html#db,Module killerbee.zbwardrive.db=killerbee.zbwardrive.db-module.html"><a title="killerbee.GoodFET.SymbolTable.db
+killerbee.zbwardrive.db" class="py-name" href="#" onclick="return doclink('link-1', 'db', 'link-1');">db</a></tt> <tt class="py-keyword">import</tt> <tt id="link-2" class="py-name" targets="Function killerbee.zbwardrive.db.toHex()=killerbee.zbwardrive.db-module.html#toHex"><a title="killerbee.zbwardrive.db.toHex" class="py-name" href="#" onclick="return doclink('link-2', 'toHex', 'link-2');">toHex</a></tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt id="link-3" class="py-name" targets="Module killerbee.openear.capture=killerbee.openear.capture-module.html,Module killerbee.zbwardrive.capture=killerbee.zbwardrive.capture-module.html"><a title="killerbee.openear.capture
+killerbee.zbwardrive.capture" class="py-name" href="#" onclick="return doclink('link-3', 'capture', 'link-3');">capture</a></tt> <tt class="py-keyword">import</tt> <tt id="link-4" class="py-name" targets="Function killerbee.openear.capture.startCapture()=killerbee.openear.capture-module.html#startCapture,Function killerbee.zbwardrive.capture.startCapture()=killerbee.zbwardrive.capture-module.html#startCapture"><a title="killerbee.openear.capture.startCapture
+killerbee.zbwardrive.capture.startCapture" class="py-name" href="#" onclick="return doclink('link-4', 'startCapture', 'link-4');">startCapture</a></tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line">        <tt class="py-keyword">from</tt> <tt class="py-name">scapy</tt><tt class="py-op">.</tt><tt class="py-name">all</tt> <tt class="py-keyword">import</tt> <tt class="py-name">Dot15d4</tt><tt class="py-op">,</tt> <tt class="py-name">Dot15d4Beacon</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-keyword">except</tt> <tt class="py-name">ImportError</tt><tt class="py-op">:</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line">        <tt class="py-keyword">print</tt> <tt class="py-string">'This Requires Scapy To Be Installed.'</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line">        <tt class="py-keyword">from</tt> <tt class="py-name">sys</tt> <tt class="py-keyword">import</tt> <tt class="py-name">exit</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line">        <tt class="py-name">exit</tt><tt class="py-op">(</tt><tt class="py-op">-</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-comment">#TODO set iteration min to a sensical parameter</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt id="link-5" class="py-name" targets="Variable killerbee.zbwardrive.scanning.MIN_ITERATIONS_AGRESSIVE=killerbee.zbwardrive.scanning-module.html#MIN_ITERATIONS_AGRESSIVE"><a title="killerbee.zbwardrive.scanning.MIN_ITERATIONS_AGRESSIVE" class="py-name" href="#" onclick="return doclink('link-5', 'MIN_ITERATIONS_AGRESSIVE', 'link-5');">MIN_ITERATIONS_AGRESSIVE</a></tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt class="py-comment"># doScan_processResponse</tt> </tt>
+<a name="doScan_processResponse"></a><div id="doScan_processResponse-def"><a name="L22"></a><tt class="py-lineno"> 22</tt> <a class="py-toggle" href="#" id="doScan_processResponse-toggle" onclick="return toggle('doScan_processResponse');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.scanning-module.html#doScan_processResponse">doScan_processResponse</a><tt class="py-op">(</tt><tt class="py-param">packet</tt><tt class="py-op">,</tt> <tt class="py-param">channel</tt><tt class="py-op">,</tt> <tt class="py-param">zbdb</tt><tt class="py-op">,</tt> <tt class="py-param">kbscan</tt><tt class="py-op">,</tt> <tt class="py-param">verbose</tt><tt class="py-op">=</tt><tt class="py-name">False</tt><tt class="py-op">,</tt> <tt class="py-param">dblog</tt><tt class="py-op">=</tt><tt class="py-name">False</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="doScan_processResponse-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="doScan_processResponse-expanded"><a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line">    <tt class="py-name">scapyd</tt> <tt class="py-op">=</tt> <tt class="py-name">Dot15d4</tt><tt class="py-op">(</tt><tt class="py-name">packet</tt><tt class="py-op">[</tt><tt class="py-string">'bytes'</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line">    <tt class="py-comment"># Check if this is a beacon frame</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">isinstance</tt><tt class="py-op">(</tt><tt class="py-name">scapyd</tt><tt class="py-op">.</tt><tt class="py-name">payload</tt><tt class="py-op">,</tt> <tt class="py-name">Dot15d4Beacon</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt id="link-6" class="py-name" targets="Variable killerbee.GoodFET.GoodFET.verbose=killerbee.GoodFET.GoodFET-class.html#verbose,Variable killerbee.GoodFETatmel128.GoodFETatmel128rfa1.verbose=killerbee.GoodFETatmel128.GoodFETatmel128rfa1-class.html#verbose"><a title="killerbee.GoodFET.GoodFET.verbose
+killerbee.GoodFETatmel128.GoodFETatmel128rfa1.verbose" class="py-name" href="#" onclick="return doclink('link-6', 'verbose', 'link-6');">verbose</a></tt><tt class="py-op">:</tt> <tt class="py-keyword">print</tt> <tt class="py-string">"Received frame is a beacon."</tt> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line">            <tt class="py-name">spanid</tt> <tt class="py-op">=</tt> <tt class="py-name">scapyd</tt><tt class="py-op">.</tt><tt class="py-name">src_panid</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line">            <tt class="py-name">source</tt> <tt class="py-op">=</tt> <tt class="py-name">scapyd</tt><tt class="py-op">.</tt><tt class="py-name">src_addr</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt> <tt class="py-name">Exception</tt> <tt class="py-keyword">as</tt> <tt class="py-name">e</tt><tt class="py-op">:</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-string">"DEBUG: Issue fetching src panid/addr from scapy packet ({0})."</tt><tt class="py-op">.</tt><tt class="py-name">format</tt><tt class="py-op">(</tt><tt class="py-name">e</tt><tt class="py-op">)</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-string">"\t{0}"</tt><tt class="py-op">.</tt><tt class="py-name">format</tt><tt class="py-op">(</tt><tt class="py-name">scapyd</tt><tt class="py-op">.</tt><tt class="py-name">summary</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-name">scapyd</tt><tt class="py-op">.</tt><tt class="py-name">show2</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-string">"-"</tt><tt class="py-op">*</tt><tt class="py-number">25</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt class="py-name">None</tt> <tt class="py-comment">#ignore this received frame for now</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line">        <tt class="py-name">key</tt> <tt class="py-op">=</tt> <tt class="py-string">'%x%x'</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">spanid</tt><tt class="py-op">,</tt> <tt class="py-name">source</tt><tt class="py-op">)</tt> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line">        <tt class="py-comment">#TODO if channel already being logged, ignore it as something new to capture</tt> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">zbdb</tt><tt class="py-op">.</tt><tt id="link-7" class="py-name" targets="Method killerbee.zbwardrive.db.ZBScanDB.channel_status_logging()=killerbee.zbwardrive.db.ZBScanDB-class.html#channel_status_logging"><a title="killerbee.zbwardrive.db.ZBScanDB.channel_status_logging" class="py-name" href="#" onclick="return doclink('link-7', 'channel_status_logging', 'link-7');">channel_status_logging</a></tt><tt class="py-op">(</tt><tt id="link-8" class="py-name" targets="Variable killerbee.KillerBee.channel=killerbee.KillerBee-class.html#channel"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-8', 'channel', 'link-8');">channel</a></tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-name">False</tt><tt class="py-op">:</tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt id="link-9" class="py-name"><a title="killerbee.GoodFET.GoodFET.verbose
+killerbee.GoodFETatmel128.GoodFETatmel128rfa1.verbose" class="py-name" href="#" onclick="return doclink('link-9', 'verbose', 'link-6');">verbose</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line">                <tt class="py-keyword">print</tt> <tt class="py-string">"A network on a channel that is not currently being logged replied to our beacon request."</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line">            <tt class="py-comment"># Store the network in local database so we treat it as already discovered by this program:</tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line">            <tt class="py-name">zbdb</tt><tt class="py-op">.</tt><tt id="link-10" class="py-name" targets="Method killerbee.zbwardrive.db.ZBScanDB.store_networks()=killerbee.zbwardrive.db.ZBScanDB-class.html#store_networks"><a title="killerbee.zbwardrive.db.ZBScanDB.store_networks" class="py-name" href="#" onclick="return doclink('link-10', 'store_networks', 'link-10');">store_networks</a></tt><tt class="py-op">(</tt><tt class="py-name">key</tt><tt class="py-op">,</tt> <tt class="py-name">spanid</tt><tt class="py-op">,</tt> <tt class="py-name">source</tt><tt class="py-op">,</tt> <tt id="link-11" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-11', 'channel', 'link-8');">channel</a></tt><tt class="py-op">,</tt> <tt class="py-name">packet</tt><tt class="py-op">[</tt><tt class="py-string">'bytes'</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line">            <tt class="py-comment"># Log to the mysql db or to the appropriate pcap file</tt> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt id="link-12" class="py-name" targets="Module killerbee.dblog=killerbee.dblog-module.html"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-12', 'dblog', 'link-12');">dblog</a></tt> <tt class="py-op">==</tt> <tt class="py-name">True</tt><tt class="py-op">:</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line">                <tt class="py-name">kbscan</tt><tt class="py-op">.</tt><tt id="link-13" class="py-name"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-13', 'dblog', 'link-12');">dblog</a></tt><tt class="py-op">.</tt><tt id="link-14" class="py-name" targets="Method killerbee.dblog.DBLogger.add_packet()=killerbee.dblog.DBLogger-class.html#add_packet"><a title="killerbee.dblog.DBLogger.add_packet" class="py-name" href="#" onclick="return doclink('link-14', 'add_packet', 'link-14');">add_packet</a></tt><tt class="py-op">(</tt><tt class="py-name">full</tt><tt class="py-op">=</tt><tt class="py-name">packet</tt><tt class="py-op">,</tt> <tt class="py-name">scapy</tt><tt class="py-op">=</tt><tt class="py-name">scapyd</tt><tt class="py-op">)</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line">            <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line">                <tt class="py-comment">#TODO log this to a PPI pcap file maybe, so the packet is not lost? or print to screen?</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line">                <tt class="py-keyword">pass</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line">            <tt class="py-keyword">return</tt> <tt id="link-15" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-15', 'channel', 'link-8');">channel</a></tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> <tt class="py-comment">#network designated by key is already being logged</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt id="link-16" class="py-name"><a title="killerbee.GoodFET.GoodFET.verbose
+killerbee.GoodFETatmel128.GoodFETatmel128rfa1.verbose" class="py-name" href="#" onclick="return doclink('link-16', 'verbose', 'link-6');">verbose</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line">                <tt class="py-keyword">print</tt> <tt class="py-string">'Received frame is a beacon for a network we already found and are logging.'</tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line">                <tt class="py-keyword">return</tt> <tt class="py-name">None</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> <tt class="py-comment">#frame doesn't look like a beacon according to scapy</tt> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">None</tt> </tt>
+</div><a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line"><tt class="py-comment"># --- end of doScan_processResponse ---</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line"> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line"><tt class="py-comment"># doScan</tt> </tt>
+<a name="doScan"></a><div id="doScan-def"><a name="L59"></a><tt class="py-lineno"> 59</tt> <a class="py-toggle" href="#" id="doScan-toggle" onclick="return toggle('doScan');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.zbwardrive.scanning-module.html#doScan">doScan</a><tt class="py-op">(</tt><tt class="py-param">zbdb</tt><tt class="py-op">,</tt> <tt class="py-param">currentGPS</tt><tt class="py-op">,</tt> <tt class="py-param">verbose</tt><tt class="py-op">=</tt><tt class="py-name">False</tt><tt class="py-op">,</tt> <tt class="py-param">dblog</tt><tt class="py-op">=</tt><tt class="py-name">False</tt><tt class="py-op">,</tt> <tt class="py-param">agressive</tt><tt class="py-op">=</tt><tt class="py-name">False</tt><tt class="py-op">,</tt> <tt class="py-param">staytime</tt><tt class="py-op">=</tt><tt class="py-number">2</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="doScan-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="doScan-expanded"><a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">    <tt class="py-comment"># Choose a device for injection scanning:</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">    <tt class="py-name">scannerDevId</tt> <tt class="py-op">=</tt> <tt class="py-name">zbdb</tt><tt class="py-op">.</tt><tt id="link-17" class="py-name" targets="Method killerbee.zbwardrive.db.ZBScanDB.get_devices_nextFree()=killerbee.zbwardrive.db.ZBScanDB-class.html#get_devices_nextFree"><a title="killerbee.zbwardrive.db.ZBScanDB.get_devices_nextFree" class="py-name" href="#" onclick="return doclink('link-17', 'get_devices_nextFree', 'link-17');">get_devices_nextFree</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">    <tt class="py-comment"># log to online mysql db or to some local pcap files?</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line">    <tt class="py-name">kbscan</tt> <tt class="py-op">=</tt> <tt id="link-18" class="py-name" targets="Class killerbee.KillerBee=killerbee.KillerBee-class.html"><a title="killerbee.KillerBee" class="py-name" href="#" onclick="return doclink('link-18', 'KillerBee', 'link-18');">KillerBee</a></tt><tt class="py-op">(</tt><tt class="py-name">device</tt><tt class="py-op">=</tt><tt class="py-name">scannerDevId</tt><tt class="py-op">,</tt> <tt class="py-name">datasource</tt><tt class="py-op">=</tt><tt class="py-op">(</tt><tt class="py-string">"Wardrive Live"</tt> <tt class="py-keyword">if</tt> <tt id="link-19" class="py-name"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-19', 'dblog', 'link-12');">dblog</a></tt> <tt class="py-keyword">else</tt> <tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line">    <tt class="py-comment">#  we want one that can do injection</tt> </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line">    <tt class="py-name">inspectedDevs</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">    <tt class="py-keyword">while</tt> <tt class="py-op">(</tt><tt class="py-name">kbscan</tt><tt class="py-op">.</tt><tt id="link-20" class="py-name" targets="Method killerbee.KillerBee.check_capability()=killerbee.KillerBee-class.html#check_capability,Method killerbee.dev_apimote.APIMOTE.check_capability()=killerbee.dev_apimote.APIMOTE-class.html#check_capability,Method killerbee.dev_freakduino.FREAKDUINO.check_capability()=killerbee.dev_freakduino.FREAKDUINO-class.html#check_capability,Method killerbee.dev_rzusbstick.RZUSBSTICK.check_capability()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#check_capability,Method killerbee.dev_telosb.TELOSB.check_capability()=killerbee.dev_telosb.TELOSB-class.html#check_capability,Method killerbee.dev_wislab.WISLAB.check_capability()=killerbee.dev_wislab.WISLAB-class.html#check_capability,Method killerbee.dev_zigduino.ZIGDUINO.check_capability()=killerbee.dev_zigduino.ZIGDUINO-class.html#check_capability"><a title="killerbee.KillerBee.check_capability
+killerbee.dev_apimote.APIMOTE.check_capability
+killerbee.dev_freakduino.FREAKDUINO.check_capability
+killerbee.dev_rzusbstick.RZUSBSTICK.check_capability
+killerbee.dev_telosb.TELOSB.check_capability
+killerbee.dev_wislab.WISLAB.check_capability
+killerbee.dev_zigduino.ZIGDUINO.check_capability" class="py-name" href="#" onclick="return doclink('link-20', 'check_capability', 'link-20');">check_capability</a></tt><tt class="py-op">(</tt><tt id="link-21" class="py-name" targets="Class killerbee.kbutils.KBCapabilities=killerbee.kbutils.KBCapabilities-class.html"><a title="killerbee.kbutils.KBCapabilities" class="py-name" href="#" onclick="return doclink('link-21', 'KBCapabilities', 'link-21');">KBCapabilities</a></tt><tt class="py-op">.</tt><tt id="link-22" class="py-name" targets="Variable killerbee.kbutils.KBCapabilities.INJECT=killerbee.kbutils.KBCapabilities-class.html#INJECT"><a title="killerbee.kbutils.KBCapabilities.INJECT" class="py-name" href="#" onclick="return doclink('link-22', 'INJECT', 'link-22');">INJECT</a></tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-name">False</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">        <tt class="py-name">zbdb</tt><tt class="py-op">.</tt><tt id="link-23" class="py-name" targets="Method killerbee.zbwardrive.db.ZBScanDB.update_devices_status()=killerbee.zbwardrive.db.ZBScanDB-class.html#update_devices_status"><a title="killerbee.zbwardrive.db.ZBScanDB.update_devices_status" class="py-name" href="#" onclick="return doclink('link-23', 'update_devices_status', 'link-23');">update_devices_status</a></tt><tt class="py-op">(</tt><tt class="py-name">scannerDevId</tt><tt class="py-op">,</tt> <tt class="py-string">'Ignore'</tt><tt class="py-op">)</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">        <tt class="py-name">inspectedDevs</tt><tt class="py-op">.</tt><tt class="py-name">append</tt><tt class="py-op">(</tt><tt class="py-name">scannerDevId</tt><tt class="py-op">)</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line">        <tt class="py-name">kbscan</tt><tt class="py-op">.</tt><tt id="link-24" class="py-name" targets="Method killerbee.KillerBee.close()=killerbee.KillerBee-class.html#close,Method killerbee.daintree.DainTreeDumper.close()=killerbee.daintree.DainTreeDumper-class.html#close,Method killerbee.daintree.DainTreeReader.close()=killerbee.daintree.DainTreeReader-class.html#close,Method killerbee.dblog.DBLogger.close()=killerbee.dblog.DBLogger-class.html#close,Method killerbee.dblog.DBReader.close()=killerbee.dblog.DBReader-class.html#close,Method killerbee.dev_apimote.APIMOTE.close()=killerbee.dev_apimote.APIMOTE-class.html#close,Method killerbee.dev_freakduino.FREAKDUINO.close()=killerbee.dev_freakduino.FREAKDUINO-class.html#close,Method killerbee.dev_rzusbstick.RZUSBSTICK.close()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#close,Method killerbee.dev_telosb.TELOSB.close()=killerbee.dev_telosb.TELOSB-class.html#close,Method killerbee.dev_wislab.WISLAB.close()=killerbee.dev_wislab.WISLAB-class.html#close,Method killerbee.dev_zigduino.ZIGDUINO.close()=killerbee.dev_zigduino.ZIGDUINO-class.html#close,Method killerbee.openear.gps.client.gpscommon.close()=killerbee.openear.gps.client.gpscommon-class.html#close,Method killerbee.pcapdump.PcapDumper.close()=killerbee.pcapdump.PcapDumper-class.html#close,Method killerbee.pcapdump.PcapReader.close()=killerbee.pcapdump.PcapReader-class.html#close,Method killerbee.zbwardrive.db.ZBScanDB.close()=killerbee.zbwardrive.db.ZBScanDB-class.html#close,Method killerbee.zbwardrive.gps.client.gpscommon.close()=killerbee.zbwardrive.gps.client.gpscommon-class.html#close"><a title="killerbee.KillerBee.close
+killerbee.daintree.DainTreeDumper.close
+killerbee.daintree.DainTreeReader.close
+killerbee.dblog.DBLogger.close
+killerbee.dblog.DBReader.close
+killerbee.dev_apimote.APIMOTE.close
+killerbee.dev_freakduino.FREAKDUINO.close
+killerbee.dev_rzusbstick.RZUSBSTICK.close
+killerbee.dev_telosb.TELOSB.close
+killerbee.dev_wislab.WISLAB.close
+killerbee.dev_zigduino.ZIGDUINO.close
+killerbee.openear.gps.client.gpscommon.close
+killerbee.pcapdump.PcapDumper.close
+killerbee.pcapdump.PcapReader.close
+killerbee.zbwardrive.db.ZBScanDB.close
+killerbee.zbwardrive.gps.client.gpscommon.close" class="py-name" href="#" onclick="return doclink('link-24', 'close', 'link-24');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">        <tt class="py-name">scannerDevId</tt> <tt class="py-op">=</tt> <tt class="py-name">zbdb</tt><tt class="py-op">.</tt><tt id="link-25" class="py-name"><a title="killerbee.zbwardrive.db.ZBScanDB.get_devices_nextFree" class="py-name" href="#" onclick="return doclink('link-25', 'get_devices_nextFree', 'link-17');">get_devices_nextFree</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">scannerDevId</tt> <tt class="py-op">==</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line">            <tt class="py-keyword">raise</tt> <tt class="py-name">Exception</tt><tt class="py-op">(</tt><tt class="py-string">"Error: No free devices capable of injection were found."</tt><tt class="py-op">)</tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">        <tt class="py-name">kbscan</tt> <tt class="py-op">=</tt> <tt id="link-26" class="py-name"><a title="killerbee.KillerBee" class="py-name" href="#" onclick="return doclink('link-26', 'KillerBee', 'link-18');">KillerBee</a></tt><tt class="py-op">(</tt><tt class="py-name">device</tt><tt class="py-op">=</tt><tt class="py-name">scannerDevId</tt><tt class="py-op">,</tt> <tt class="py-name">datasource</tt><tt class="py-op">=</tt><tt class="py-op">(</tt><tt class="py-string">"Wardrive Live"</tt> <tt class="py-keyword">if</tt> <tt id="link-27" class="py-name"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-27', 'dblog', 'link-12');">dblog</a></tt> <tt class="py-keyword">else</tt> <tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">    <tt class="py-comment">#  return devices that we didn't choose to the free state</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line">    <tt class="py-keyword">for</tt> <tt class="py-name">inspectedDevId</tt> <tt class="py-keyword">in</tt> <tt class="py-name">inspectedDevs</tt><tt class="py-op">:</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">        <tt class="py-name">zbdb</tt><tt class="py-op">.</tt><tt id="link-28" class="py-name"><a title="killerbee.zbwardrive.db.ZBScanDB.update_devices_status" class="py-name" href="#" onclick="return doclink('link-28', 'update_devices_status', 'link-23');">update_devices_status</a></tt><tt class="py-op">(</tt><tt class="py-name">inspectedDevId</tt><tt class="py-op">,</tt> <tt class="py-string">'Free'</tt><tt class="py-op">)</tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line">    <tt class="py-keyword">print</tt> <tt class="py-string">'Network discovery device is %s'</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">scannerDevId</tt><tt class="py-op">)</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line">    <tt class="py-name">zbdb</tt><tt class="py-op">.</tt><tt id="link-29" class="py-name"><a title="killerbee.zbwardrive.db.ZBScanDB.update_devices_status" class="py-name" href="#" onclick="return doclink('link-29', 'update_devices_status', 'link-23');">update_devices_status</a></tt><tt class="py-op">(</tt><tt class="py-name">scannerDevId</tt><tt class="py-op">,</tt> <tt class="py-string">'Discovery'</tt><tt class="py-op">)</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line"> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">    <tt class="py-comment"># Much of this code adapted from killerbee/tools/zbstumbler:main</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line">    <tt class="py-comment"># Could build this with Scapy but keeping manual construction for performance</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line">    <tt class="py-name">beacon</tt> <tt class="py-op">=</tt> <tt class="py-string">"\x03\x08\x00\xff\xff\xff\xff\x07"</tt> <tt class="py-comment">#beacon frame</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">    <tt class="py-name">beaconp1</tt> <tt class="py-op">=</tt> <tt class="py-name">beacon</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">:</tt><tt class="py-number">2</tt><tt class="py-op">]</tt>  <tt class="py-comment">#beacon part before seqnum field</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">    <tt class="py-name">beaconp2</tt> <tt class="py-op">=</tt> <tt class="py-name">beacon</tt><tt class="py-op">[</tt><tt class="py-number">3</tt><tt class="py-op">:</tt><tt class="py-op">]</tt>   <tt class="py-comment">#beacon part after seqnum field</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">    <tt class="py-name">seqnum</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt>              <tt class="py-comment">#seqnum to use (will cycle)</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">    <tt id="link-30" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-30', 'channel', 'link-8');">channel</a></tt> <tt class="py-op">=</tt> <tt class="py-number">11</tt>            <tt class="py-comment">#starting channel (will cycle)</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">    <tt class="py-name">iteration</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt>           <tt class="py-comment">#how many loops have we done through the channels?</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">    <tt class="py-comment"># Loop injecting and receiving packets</tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">    <tt class="py-keyword">while</tt> <tt class="py-number">1</tt><tt class="py-op">:</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt id="link-31" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-31', 'channel', 'link-8');">channel</a></tt> <tt class="py-op">&gt;</tt> <tt class="py-number">26</tt><tt class="py-op">:</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">            <tt id="link-32" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-32', 'channel', 'link-8');">channel</a></tt> <tt class="py-op">=</tt> <tt class="py-number">11</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">            <tt class="py-name">iteration</tt> <tt class="py-op">+=</tt> <tt class="py-number">1</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">seqnum</tt> <tt class="py-op">&gt;</tt> <tt class="py-number">255</tt><tt class="py-op">:</tt> <tt class="py-name">seqnum</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line">            <tt class="py-comment">#if verbose: print 'Setting channel to %d' % channel</tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">            <tt class="py-name">kbscan</tt><tt class="py-op">.</tt><tt id="link-33" class="py-name" targets="Method killerbee.KillerBee.set_channel()=killerbee.KillerBee-class.html#set_channel,Method killerbee.dblog.DBLogger.set_channel()=killerbee.dblog.DBLogger-class.html#set_channel,Method killerbee.dev_apimote.APIMOTE.set_channel()=killerbee.dev_apimote.APIMOTE-class.html#set_channel,Method killerbee.dev_freakduino.FREAKDUINO.set_channel()=killerbee.dev_freakduino.FREAKDUINO-class.html#set_channel,Method killerbee.dev_rzusbstick.RZUSBSTICK.set_channel()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#set_channel,Method killerbee.dev_telosb.TELOSB.set_channel()=killerbee.dev_telosb.TELOSB-class.html#set_channel,Method killerbee.dev_wislab.WISLAB.set_channel()=killerbee.dev_wislab.WISLAB-class.html#set_channel,Method killerbee.dev_zigduino.ZIGDUINO.set_channel()=killerbee.dev_zigduino.ZIGDUINO-class.html#set_channel"><a title="killerbee.KillerBee.set_channel
+killerbee.dblog.DBLogger.set_channel
+killerbee.dev_apimote.APIMOTE.set_channel
+killerbee.dev_freakduino.FREAKDUINO.set_channel
+killerbee.dev_rzusbstick.RZUSBSTICK.set_channel
+killerbee.dev_telosb.TELOSB.set_channel
+killerbee.dev_wislab.WISLAB.set_channel
+killerbee.dev_zigduino.ZIGDUINO.set_channel" class="py-name" href="#" onclick="return doclink('link-33', 'set_channel', 'link-33');">set_channel</a></tt><tt class="py-op">(</tt><tt id="link-34" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-34', 'channel', 'link-8');">channel</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt> <tt class="py-name">Exception</tt> <tt class="py-keyword">as</tt> <tt class="py-name">e</tt><tt class="py-op">:</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">            <tt class="py-keyword">raise</tt> <tt class="py-name">Exception</tt><tt class="py-op">(</tt><tt class="py-string">'Failed to set channel to %d (%s).'</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt id="link-35" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-35', 'channel', 'link-8');">channel</a></tt><tt class="py-op">,</tt><tt class="py-name">e</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt id="link-36" class="py-name"><a title="killerbee.GoodFET.GoodFET.verbose
+killerbee.GoodFETatmel128.GoodFETatmel128rfa1.verbose" class="py-name" href="#" onclick="return doclink('link-36', 'verbose', 'link-6');">verbose</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line">            <tt class="py-keyword">print</tt> <tt class="py-string">'Injecting a beacon request on channel %d.'</tt> <tt class="py-op">%</tt> <tt id="link-37" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-37', 'channel', 'link-8');">channel</a></tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">        <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">            <tt class="py-name">beaconinj</tt> <tt class="py-op">=</tt> <tt class="py-name">beaconp1</tt> <tt class="py-op">+</tt> <tt class="py-string">"%c"</tt> <tt class="py-op">%</tt> <tt class="py-name">seqnum</tt> <tt class="py-op">+</tt> <tt class="py-name">beaconp2</tt> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line">            <tt class="py-name">kbscan</tt><tt class="py-op">.</tt><tt id="link-38" class="py-name" targets="Method killerbee.KillerBee.inject()=killerbee.KillerBee-class.html#inject,Method killerbee.dev_apimote.APIMOTE.inject()=killerbee.dev_apimote.APIMOTE-class.html#inject,Method killerbee.dev_freakduino.FREAKDUINO.inject()=killerbee.dev_freakduino.FREAKDUINO-class.html#inject,Method killerbee.dev_rzusbstick.RZUSBSTICK.inject()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#inject,Method killerbee.dev_telosb.TELOSB.inject()=killerbee.dev_telosb.TELOSB-class.html#inject,Method killerbee.dev_wislab.WISLAB.inject()=killerbee.dev_wislab.WISLAB-class.html#inject,Method killerbee.dev_zigduino.ZIGDUINO.inject()=killerbee.dev_zigduino.ZIGDUINO-class.html#inject"><a title="killerbee.KillerBee.inject
+killerbee.dev_apimote.APIMOTE.inject
+killerbee.dev_freakduino.FREAKDUINO.inject
+killerbee.dev_rzusbstick.RZUSBSTICK.inject
+killerbee.dev_telosb.TELOSB.inject
+killerbee.dev_wislab.WISLAB.inject
+killerbee.dev_zigduino.ZIGDUINO.inject" class="py-name" href="#" onclick="return doclink('link-38', 'inject', 'link-38');">inject</a></tt><tt class="py-op">(</tt><tt class="py-name">beaconinj</tt><tt class="py-op">)</tt> </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line">        <tt class="py-keyword">except</tt> <tt class="py-name">Exception</tt><tt class="py-op">,</tt> <tt class="py-name">e</tt><tt class="py-op">:</tt> </tt>
+<a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line">            <tt class="py-keyword">raise</tt> <tt class="py-name">Exception</tt><tt class="py-op">(</tt><tt class="py-string">'Unable to inject packet (%s).'</tt> <tt class="py-op">%</tt> <tt class="py-name">e</tt><tt class="py-op">)</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line"> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line">        <tt class="py-comment"># Process packets for staytime (default 2 seconds) looking for the beacon response frame</tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line">        <tt class="py-name">endtime</tt> <tt class="py-op">=</tt> <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">time</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> <tt class="py-op">+</tt> <tt class="py-name">staytime</tt> </tt>
+<a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line">        <tt class="py-name">nonbeacons</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line">        <tt class="py-keyword">while</tt> <tt class="py-op">(</tt><tt class="py-name">endtime</tt> <tt class="py-op">&gt;</tt> <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">time</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">            <tt class="py-name">recvpkt</tt> <tt class="py-op">=</tt> <tt class="py-name">kbscan</tt><tt class="py-op">.</tt><tt id="link-39" class="py-name" targets="Method killerbee.KillerBee.pnext()=killerbee.KillerBee-class.html#pnext,Method killerbee.daintree.DainTreeReader.pnext()=killerbee.daintree.DainTreeReader-class.html#pnext,Method killerbee.dev_apimote.APIMOTE.pnext()=killerbee.dev_apimote.APIMOTE-class.html#pnext,Method killerbee.dev_freakduino.FREAKDUINO.pnext()=killerbee.dev_freakduino.FREAKDUINO-class.html#pnext,Method killerbee.dev_rzusbstick.RZUSBSTICK.pnext()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#pnext,Method killerbee.dev_telosb.TELOSB.pnext()=killerbee.dev_telosb.TELOSB-class.html#pnext,Method killerbee.dev_wislab.WISLAB.pnext()=killerbee.dev_wislab.WISLAB-class.html#pnext,Method killerbee.dev_zigduino.ZIGDUINO.pnext()=killerbee.dev_zigduino.ZIGDUINO-class.html#pnext,Method killerbee.pcapdump.PcapReader.pnext()=killerbee.pcapdump.PcapReader-class.html#pnext"><a title="killerbee.KillerBee.pnext
+killerbee.daintree.DainTreeReader.pnext
+killerbee.dev_apimote.APIMOTE.pnext
+killerbee.dev_freakduino.FREAKDUINO.pnext
+killerbee.dev_rzusbstick.RZUSBSTICK.pnext
+killerbee.dev_telosb.TELOSB.pnext
+killerbee.dev_wislab.WISLAB.pnext
+killerbee.dev_zigduino.ZIGDUINO.pnext
+killerbee.pcapdump.PcapReader.pnext" class="py-name" href="#" onclick="return doclink('link-39', 'pnext', 'link-39');">pnext</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> <tt class="py-comment">#get a packet (is non-blocking)</tt> </tt>
+<a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">            <tt class="py-comment"># Check for empty packet (timeout) and valid FCS</tt> </tt>
+<a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt class="py-name">recvpkt</tt> <tt class="py-op">!=</tt> <tt class="py-name">None</tt> <tt class="py-keyword">and</tt> <tt class="py-name">recvpkt</tt><tt class="py-op">[</tt><tt class="py-string">'validcrc'</tt><tt class="py-op">]</tt><tt class="py-op">:</tt> </tt>
+<a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line">                <tt class="py-comment">#if verbose: print "Received frame."</tt> </tt>
+<a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line">                <tt class="py-name">newNetworkChannel</tt> <tt class="py-op">=</tt> <tt id="link-40" class="py-name" targets="Function killerbee.zbwardrive.scanning.doScan_processResponse()=killerbee.zbwardrive.scanning-module.html#doScan_processResponse"><a title="killerbee.zbwardrive.scanning.doScan_processResponse" class="py-name" href="#" onclick="return doclink('link-40', 'doScan_processResponse', 'link-40');">doScan_processResponse</a></tt><tt class="py-op">(</tt><tt class="py-name">recvpkt</tt><tt class="py-op">,</tt> <tt id="link-41" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-41', 'channel', 'link-8');">channel</a></tt><tt class="py-op">,</tt> <tt class="py-name">zbdb</tt><tt class="py-op">,</tt> <tt class="py-name">kbscan</tt><tt class="py-op">,</tt> <tt id="link-42" class="py-name"><a title="killerbee.GoodFET.GoodFET.verbose
+killerbee.GoodFETatmel128.GoodFETatmel128rfa1.verbose" class="py-name" href="#" onclick="return doclink('link-42', 'verbose', 'link-6');">verbose</a></tt><tt class="py-op">=</tt><tt id="link-43" class="py-name"><a title="killerbee.GoodFET.GoodFET.verbose
+killerbee.GoodFETatmel128.GoodFETatmel128rfa1.verbose" class="py-name" href="#" onclick="return doclink('link-43', 'verbose', 'link-6');">verbose</a></tt><tt class="py-op">,</tt> <tt id="link-44" class="py-name"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-44', 'dblog', 'link-12');">dblog</a></tt><tt class="py-op">=</tt><tt id="link-45" class="py-name"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-45', 'dblog', 'link-12');">dblog</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">newNetworkChannel</tt> <tt class="py-op">!=</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line">                    <tt id="link-46" class="py-name"><a title="killerbee.openear.capture.startCapture
+killerbee.zbwardrive.capture.startCapture" class="py-name" href="#" onclick="return doclink('link-46', 'startCapture', 'link-4');">startCapture</a></tt><tt class="py-op">(</tt><tt class="py-name">zbdb</tt><tt class="py-op">,</tt> <tt class="py-name">newNetworkChannel</tt><tt class="py-op">,</tt> <tt id="link-47" class="py-name" targets="Package killerbee.openear.gps=killerbee.openear.gps-module.html,Class killerbee.openear.gps.gps'.gps=killerbee.openear.gps.gps%27.gps-class.html,Package killerbee.zbwardrive.gps=killerbee.zbwardrive.gps-module.html,Class killerbee.zbwardrive.gps.gps'.gps=killerbee.zbwardrive.gps.gps%27.gps-class.html"><a title="killerbee.openear.gps
+killerbee.openear.gps.gps'.gps
+killerbee.zbwardrive.gps
+killerbee.zbwardrive.gps.gps'.gps" class="py-name" href="#" onclick="return doclink('link-47', 'gps', 'link-47');">gps</a></tt><tt class="py-op">=</tt><tt class="py-name">currentGPS</tt><tt class="py-op">,</tt> <tt id="link-48" class="py-name"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-48', 'dblog', 'link-12');">dblog</a></tt><tt class="py-op">=</tt><tt id="link-49" class="py-name"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-49', 'dblog', 'link-12');">dblog</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line">                    <tt class="py-name">nonbeacons</tt> <tt class="py-op">=</tt> <tt class="py-number">0</tt> <tt class="py-comment"># forget about any non-beacons, as we don't care, we saw a beacon!</tt> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line">                    <tt class="py-keyword">break</tt>          <tt class="py-comment"># made up our mind, stop wasting time</tt> </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line">                <tt class="py-keyword">elif</tt> <tt class="py-name">agressive</tt><tt class="py-op">:</tt>    <tt class="py-comment"># we may care even though it wasn't a beacon</tt> </tt>
+<a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line">                    <tt class="py-name">nonbeacons</tt> <tt class="py-op">+=</tt> <tt class="py-number">1</tt> </tt>
+<a name="L122"></a><tt class="py-lineno">122</tt>  <tt class="py-line">                    <tt class="py-keyword">if</tt> <tt id="link-50" class="py-name"><a title="killerbee.GoodFET.GoodFET.verbose
+killerbee.GoodFETatmel128.GoodFETatmel128rfa1.verbose" class="py-name" href="#" onclick="return doclink('link-50', 'verbose', 'link-6');">verbose</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L123"></a><tt class="py-lineno">123</tt>  <tt class="py-line">                        <tt class="py-keyword">print</tt> <tt class="py-string">'Received frame (# %d) is not a beacon.'</tt> <tt class="py-op">%</tt> <tt class="py-name">nonbeacons</tt><tt class="py-op">,</tt> <tt id="link-51" class="py-name"><a title="killerbee.zbwardrive.db.toHex" class="py-name" href="#" onclick="return doclink('link-51', 'toHex', 'link-2');">toHex</a></tt><tt class="py-op">(</tt><tt class="py-name">recvpkt</tt><tt class="py-op">[</tt><tt class="py-string">'bytes'</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L124"></a><tt class="py-lineno">124</tt>  <tt class="py-line"> </tt>
+<a name="L125"></a><tt class="py-lineno">125</tt>  <tt class="py-line">        <tt class="py-comment"># If we're in agressive mode and didn't see a beacon, we have nonbeacons &gt; 0.</tt> </tt>
+<a name="L126"></a><tt class="py-lineno">126</tt>  <tt class="py-line">        <tt class="py-comment"># If we aren't logging the channel currently, and</tt> </tt>
+<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line">        <tt class="py-comment"># If we have already tried a loop through without being agressive</tt> </tt>
+<a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">nonbeacons</tt> <tt class="py-op">&gt;</tt> <tt class="py-number">0</tt> <tt class="py-keyword">and</tt> <tt class="py-name">iteration</tt> <tt class="py-op">&gt;</tt> <tt id="link-52" class="py-name"><a title="killerbee.zbwardrive.scanning.MIN_ITERATIONS_AGRESSIVE" class="py-name" href="#" onclick="return doclink('link-52', 'MIN_ITERATIONS_AGRESSIVE', 'link-5');">MIN_ITERATIONS_AGRESSIVE</a></tt> <tt class="py-keyword">and</tt> <tt class="py-name">zbdb</tt><tt class="py-op">.</tt><tt id="link-53" class="py-name"><a title="killerbee.zbwardrive.db.ZBScanDB.channel_status_logging" class="py-name" href="#" onclick="return doclink('link-53', 'channel_status_logging', 'link-7');">channel_status_logging</a></tt><tt class="py-op">(</tt><tt id="link-54" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-54', 'channel', 'link-8');">channel</a></tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-name">False</tt><tt class="py-op">:</tt> </tt>
+<a name="L129"></a><tt class="py-lineno">129</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt id="link-55" class="py-name"><a title="killerbee.GoodFET.GoodFET.verbose
+killerbee.GoodFETatmel128.GoodFETatmel128rfa1.verbose" class="py-name" href="#" onclick="return doclink('link-55', 'verbose', 'link-6');">verbose</a></tt><tt class="py-op">:</tt> </tt>
+<a name="L130"></a><tt class="py-lineno">130</tt>  <tt class="py-line">                <tt class="py-keyword">print</tt> <tt class="py-string">"Start capture on %d as a channel without beacon."</tt> <tt class="py-op">%</tt> <tt id="link-56" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-56', 'channel', 'link-8');">channel</a></tt> </tt>
+<a name="L131"></a><tt class="py-lineno">131</tt>  <tt class="py-line">            <tt class="py-comment">#TODO</tt> </tt>
+<a name="L132"></a><tt class="py-lineno">132</tt>  <tt class="py-line">            <tt class="py-comment"># Maybe just increase a count and increase stay time on this channel to see if we get a few packets, thus making us care?</tt> </tt>
+<a name="L133"></a><tt class="py-lineno">133</tt>  <tt class="py-line">            <tt class="py-comment"># Maybe also do at least a full loop first every so often before going after these random packets...</tt> </tt>
+<a name="L134"></a><tt class="py-lineno">134</tt>  <tt class="py-line">            <tt id="link-57" class="py-name"><a title="killerbee.openear.capture.startCapture
+killerbee.zbwardrive.capture.startCapture" class="py-name" href="#" onclick="return doclink('link-57', 'startCapture', 'link-4');">startCapture</a></tt><tt class="py-op">(</tt><tt class="py-name">zbdb</tt><tt class="py-op">,</tt> <tt id="link-58" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-58', 'channel', 'link-8');">channel</a></tt><tt class="py-op">,</tt> <tt id="link-59" class="py-name"><a title="killerbee.openear.gps
+killerbee.openear.gps.gps'.gps
+killerbee.zbwardrive.gps
+killerbee.zbwardrive.gps.gps'.gps" class="py-name" href="#" onclick="return doclink('link-59', 'gps', 'link-47');">gps</a></tt><tt class="py-op">=</tt><tt class="py-name">currentGPS</tt><tt class="py-op">,</tt> <tt id="link-60" class="py-name"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-60', 'dblog', 'link-12');">dblog</a></tt><tt class="py-op">=</tt><tt id="link-61" class="py-name"><a title="killerbee.dblog" class="py-name" href="#" onclick="return doclink('link-61', 'dblog', 'link-12');">dblog</a></tt><tt class="py-op">)</tt> </tt>
+<a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line">        <tt class="py-comment">#elif verbose:</tt> </tt>
+<a name="L136"></a><tt class="py-lineno">136</tt>  <tt class="py-line">        <tt class="py-comment">#    print "Had {0} nonbeacon packets on loop iteration {1} and found that channel {2} being already logged was {3}.".format(</tt> </tt>
+<a name="L137"></a><tt class="py-lineno">137</tt>  <tt class="py-line">        <tt class="py-comment">#        nonbeacons, iteration, channel, zbdb.channel_status_logging(channel))</tt> </tt>
+<a name="L138"></a><tt class="py-lineno">138</tt>  <tt class="py-line"> </tt>
+<a name="L139"></a><tt class="py-lineno">139</tt>  <tt class="py-line">        <tt class="py-name">kbscan</tt><tt class="py-op">.</tt><tt id="link-62" class="py-name" targets="Method killerbee.KillerBee.sniffer_off()=killerbee.KillerBee-class.html#sniffer_off,Method killerbee.dev_apimote.APIMOTE.sniffer_off()=killerbee.dev_apimote.APIMOTE-class.html#sniffer_off,Method killerbee.dev_freakduino.FREAKDUINO.sniffer_off()=killerbee.dev_freakduino.FREAKDUINO-class.html#sniffer_off,Method killerbee.dev_rzusbstick.RZUSBSTICK.sniffer_off()=killerbee.dev_rzusbstick.RZUSBSTICK-class.html#sniffer_off,Method killerbee.dev_telosb.TELOSB.sniffer_off()=killerbee.dev_telosb.TELOSB-class.html#sniffer_off,Method killerbee.dev_wislab.WISLAB.sniffer_off()=killerbee.dev_wislab.WISLAB-class.html#sniffer_off,Method killerbee.dev_zigduino.ZIGDUINO.sniffer_off()=killerbee.dev_zigduino.ZIGDUINO-class.html#sniffer_off"><a title="killerbee.KillerBee.sniffer_off
+killerbee.dev_apimote.APIMOTE.sniffer_off
+killerbee.dev_freakduino.FREAKDUINO.sniffer_off
+killerbee.dev_rzusbstick.RZUSBSTICK.sniffer_off
+killerbee.dev_telosb.TELOSB.sniffer_off
+killerbee.dev_wislab.WISLAB.sniffer_off
+killerbee.dev_zigduino.ZIGDUINO.sniffer_off" class="py-name" href="#" onclick="return doclink('link-62', 'sniffer_off', 'link-62');">sniffer_off</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L140"></a><tt class="py-lineno">140</tt>  <tt class="py-line">        <tt class="py-name">seqnum</tt> <tt class="py-op">+=</tt> <tt class="py-number">1</tt> </tt>
+<a name="L141"></a><tt class="py-lineno">141</tt>  <tt class="py-line">        <tt id="link-63" class="py-name"><a title="killerbee.KillerBee.channel" class="py-name" href="#" onclick="return doclink('link-63', 'channel', 'link-8');">channel</a></tt> <tt class="py-op">+=</tt> <tt class="py-number">1</tt> </tt>
+<a name="L142"></a><tt class="py-lineno">142</tt>  <tt class="py-line"> </tt>
+<a name="L143"></a><tt class="py-lineno">143</tt>  <tt class="py-line">    <tt class="py-comment">#TODO currently unreachable code, but maybe add a condition to break the infinite while loop in some circumstance to free that device for capture?</tt> </tt>
+<a name="L144"></a><tt class="py-lineno">144</tt>  <tt class="py-line">    <tt class="py-name">kbscan</tt><tt class="py-op">.</tt><tt id="link-64" class="py-name"><a title="killerbee.KillerBee.close
+killerbee.daintree.DainTreeDumper.close
+killerbee.daintree.DainTreeReader.close
+killerbee.dblog.DBLogger.close
+killerbee.dblog.DBReader.close
+killerbee.dev_apimote.APIMOTE.close
+killerbee.dev_freakduino.FREAKDUINO.close
+killerbee.dev_rzusbstick.RZUSBSTICK.close
+killerbee.dev_telosb.TELOSB.close
+killerbee.dev_wislab.WISLAB.close
+killerbee.dev_zigduino.ZIGDUINO.close
+killerbee.openear.gps.client.gpscommon.close
+killerbee.pcapdump.PcapDumper.close
+killerbee.pcapdump.PcapReader.close
+killerbee.zbwardrive.db.ZBScanDB.close
+killerbee.zbwardrive.gps.client.gpscommon.close" class="py-name" href="#" onclick="return doclink('link-64', 'close', 'link-24');">close</a></tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+<a name="L145"></a><tt class="py-lineno">145</tt>  <tt class="py-line">    <tt class="py-name">zbdb</tt><tt class="py-op">.</tt><tt id="link-65" class="py-name"><a title="killerbee.zbwardrive.db.ZBScanDB.update_devices_status" class="py-name" href="#" onclick="return doclink('link-65', 'update_devices_status', 'link-23');">update_devices_status</a></tt><tt class="py-op">(</tt><tt class="py-name">scannerDevId</tt><tt class="py-op">,</tt> <tt class="py-string">'Free'</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L146"></a><tt class="py-lineno">146</tt>  <tt class="py-line"><tt class="py-comment"># --- end of doScan ---</tt> </tt>
+<a name="L147"></a><tt class="py-lineno">147</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="killerbee-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Mon Dec 30 17:49:14 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

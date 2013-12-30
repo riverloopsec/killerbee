@@ -4,10 +4,7 @@
 # rmspeers 2010-13
 # ZigBee/802.15.4 WarDriving Platform
 
-import sys
-import argparse
 from time import sleep
-from multiprocessing import Process, Manager
 from usb import USBError
 
 from killerbee import KillerBee, kbutils
@@ -53,10 +50,10 @@ def gpsdPoller(currentGPS):
 # startScan
 # Detects attached interfaces
 # Initiates scanning using doScan()
-def startScan(zbdb, currentGPS, verbose=False, dblog=False, agressive=False):
+def startScan(zbdb, currentGPS, verbose=False, dblog=False, agressive=False, include=[], ignore=None):
     try:
         kb = KillerBee()
-    except usb.USBError, e:
+    except USBError, e:
         if e.args[0].find('Operation not permitted') >= 0:
             print 'Error: Permissions error, try running using sudo.'
         else:
@@ -66,7 +63,7 @@ def startScan(zbdb, currentGPS, verbose=False, dblog=False, agressive=False):
         #print 'Error: Missing KillerBee USB hardware:', e
         print 'Error: Issue starting KillerBee instance:', e
         return False
-    for kbdev in kbutils.devlist():
+    for kbdev in kbutils.devlist(gps=ignore, include=include):
         print 'Found device at %s: \'%s\'' % (kbdev[0], kbdev[1])
         zbdb.store_devices(
             kbdev[0], #devid

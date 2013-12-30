@@ -1,14 +1,16 @@
-# GoodFET Chipcon RF Radio Client
-# 
-# (C) 2013 Ryan Speers <ryan at riverloopsecurity.com>
-#
-# The ApiMote product is a work in progress.
-# This code is being rewritten and refactored.
-#
-# TODO list (help is welcomed):
-#   - RF testing and calibration for RSSI/dBm
-#   - Testing carrier jamming and implementing jammer_off()
-#   - Platform recognition (ApiMote versons)
+'''
+GoodFET Chipcon RF Radio Client for ApiMote Hardware
+
+(C) 2013 Ryan Speers <ryan at riverloopsecurity.com>
+
+The ApiMote product is a work in progress.
+This code is being rewritten and refactored.
+
+TODO list (help is welcomed):
+  - RF testing and calibration for RSSI/dBm
+  - Testing carrier jamming and implementing jammer_off()
+  - Platform recognition (ApiMote versons)
+'''
 
 import os
 import time

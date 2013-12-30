@@ -82,10 +82,10 @@ class WISLAB:
         Instantiates the KillerBee class for the Wislab Sniffer.
         @type dev:   String
         @param dev:  IP address (ex 10.10.10.2)
-        @type revision: Integer
-        @param revision: The revision number for the ApiMote, which is used by 
-            the called GoodFET libraries to properly communicate with
-            and configure the hardware.
+        @type recvport: Integer
+        @param recvport: UDP port to listen for sniffed packets on.
+        @type recvip: String
+        @param recvip: IP address of the host, where the sniffer will send sniffed packets to.
         @return: None
         @rtype: None
         '''

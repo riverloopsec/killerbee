@@ -176,13 +176,31 @@
   </tr>
 <tr>
     <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="isIpAddr"></a><span class="summary-sig-name">isIpAddr</span>(<span class="summary-sig-arg">ip</span>)</span><br />
+      Return True if the given string is a valid IPv4 or IPv6 address.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#isIpAddr">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
       <span class="summary-type">List</span>
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#devlist" class="summary-sig-name">devlist</a>(<span class="summary-sig-arg">vendor</span>=<span class="summary-sig-default">None</span>,
         <span class="summary-sig-arg">product</span>=<span class="summary-sig-default">None</span>,
-        <span class="summary-sig-arg">gps</span>=<span class="summary-sig-default">None</span>)</span><br />
+        <span class="summary-sig-arg">gps</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">include</span>=<span class="summary-sig-default">None</span>)</span><br />
       Return device information for all present devices, filtering if 
       requested by vendor and/or product IDs on USB devices, and running 
       device fingerprint functions on serial devices.</td>
@@ -201,7 +219,7 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="get_serial_devs"></a><span class="summary-sig-name">get_serial_devs</span>()</span></td>
+          <td><span class="summary-sig"><a name="get_serial_devs"></a><span class="summary-sig-name">get_serial_devs</span>(<span class="summary-sig-arg">seriallist</span>)</span></td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee.kbutils-pysrc.html#get_serial_devs">source&nbsp;code</a></span>
             
@@ -217,7 +235,23 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#get_serial_ports" class="summary-sig-name">get_serial_ports</a>()</span><br />
+          <td><span class="summary-sig"><a name="isSerialDeviceString"></a><span class="summary-sig-name">isSerialDeviceString</span>(<span class="summary-sig-arg">s</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="killerbee.kbutils-pysrc.html#isSerialDeviceString">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#get_serial_ports" class="summary-sig-name">get_serial_ports</a>(<span class="summary-sig-arg">include</span>=<span class="summary-sig-default">None</span>)</span><br />
       Private function.</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee.kbutils-pysrc.html#get_serial_ports">source&nbsp;code</a></span>
@@ -381,7 +415,10 @@
     </td><td class="summary">
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
-          <td><span class="summary-sig"><a name="makeFCS"></a><span class="summary-sig-name">makeFCS</span>(<span class="summary-sig-arg">data</span>)</span></td>
+          <td><span class="summary-sig"><a href="killerbee.kbutils-module.html#makeFCS" class="summary-sig-name">makeFCS</a>(<span class="summary-sig-arg">data</span>)</span><br />
+      Do a CRC-CCITT Kermit 16bit on the data given Implemented using 
+      pseudocode from: June 1986, Kermit Protocol Manual See also: 
+      http://regregex.bbcmicro.net/crc-catalogue.htm#crc.cat.kermit</td>
           <td align="right" valign="top">
             <span class="codelink"><a href="killerbee.kbutils-pysrc.html#makeFCS">source&nbsp;code</a></span>
             
@@ -554,7 +591,8 @@
   <tr valign="top"><td>
   <h3 class="epydoc"><span class="sig"><span class="sig-name">devlist</span>(<span class="sig-arg">vendor</span>=<span class="sig-default">None</span>,
         <span class="sig-arg">product</span>=<span class="sig-default">None</span>,
-        <span class="sig-arg">gps</span>=<span class="sig-default">None</span>)</span>
+        <span class="sig-arg">gps</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">include</span>=<span class="sig-default">None</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#devlist">source&nbsp;code</a></span>&nbsp;
@@ -570,6 +608,9 @@
         <li><strong class="pname"><code>gps</code></strong> (String) - Optional serial device identifier for an attached GPS unit. If 
           provided, or if global variable has previously been set, 
           KillerBee skips that device in device enumeration process.</li>
+        <li><strong class="pname"><code>include</code></strong> (List of Strings) - Optional list of device handles to be appended to the normally 
+          found devices. This is useful for providing IP addresses for 
+          remote scanners.</li>
     </ul></dd>
     <dt>Returns: List</dt>
         <dd>List of device information present. For USB devices, get 
@@ -585,7 +626,7 @@
 <tr><td>
   <table width="100%" cellpadding="0" cellspacing="0" border="0">
   <tr valign="top"><td>
-  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_serial_ports</span>()</span>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">get_serial_ports</span>(<span class="sig-arg">include</span>=<span class="sig-default">None</span>)</span>
   </h3>
   </td><td align="right" valign="top"
     ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#get_serial_ports">source&nbsp;code</a></span>&nbsp;
@@ -598,6 +639,14 @@
   etc. This should handle returning a list of devices regardless of the 
   *nix it is running on. Support for more *nix and winnt needed.</p>
   <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>include</code></strong> (List of Strings, or None) - A list of device strings, of which any which appear to be serial 
+          device handles will be added to the set of serial ports returned 
+          by the normal search. This may be useful if we're not including 
+          some oddly named serial port which you have a KillerBee device 
+          on. Optional.</li>
+    </ul></dd>
   </dl>
 </td></tr></table>
 </div>
@@ -754,10 +803,35 @@
   <dl class="fields">
     <dt>Parameters:</dt>
     <dd><ul class="nomargin-top">
-        <li><strong class="pname"><code>length</code></strong> (String) - Optional length of MAC address, def=8.  Minimum address return 
+        <li><strong class="pname"><code>length</code></strong> (String) - Optional length of MAC address, def=8. Minimum address return 
           length is 3 bytes for the valid OUI.</li>
     </ul></dd>
     <dt>Returns: String</dt>
+        <dd>A randomized MAC address in a little-endian byte string.</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="makeFCS"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">makeFCS</span>(<span class="sig-arg">data</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="killerbee.kbutils-pysrc.html#makeFCS">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Do a CRC-CCITT Kermit 16bit on the data given Implemented using 
+  pseudocode from: June 1986, Kermit Protocol Manual See also: 
+  http://regregex.bbcmicro.net/crc-catalogue.htm#crc.cat.kermit</p>
+  <dl class="fields">
+    <dt>Returns:</dt>
+        <dd>a CRC that is the FCS for the frame, as two hex bytes in 
+          little-endian order.</dd>
   </dl>
 </td></tr></table>
 </div>
@@ -793,7 +867,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="100%%">
   <tr>
     <td align="left" class="footer">
-    Generated by Epydoc 3.0.1 on Tue Sep  3 22:31:32 2013
+    Generated by Epydoc 3.0.1 on Mon Dec 30 17:49:11 2013
     </td>
     <td align="right" class="footer">
       <a target="mainFrame" href="http://epydoc.sourceforge.net"

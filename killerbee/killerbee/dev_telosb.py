@@ -1,3 +1,9 @@
+'''
+Support for the TelosB / Tmote Sky platforms, and close clones.
+
+Utilizes the GoodFET firmware with CCSPI application, and the GoodFET client code.
+'''
+
 import os
 import time
 import struct

@@ -48,7 +48,6 @@ KillerBee with the following command:
 # python setup.py install
 
 
-
 DIRECTORIES
 
 The directory structure for the KillerBee code is described as follows:
@@ -60,7 +59,6 @@ sample    - Sample packet captures, referenced below.
 scripts   - Shell scripts used in development.
 tools     - ZigBee and IEEE 802.15.4 attack tools developed using this
             framework.
-
 
 REQUIRED HARDWARE
 
@@ -125,7 +123,9 @@ instructions documented by running the tool with the "-h" argument, and
 summarized below.
 
 
-openear	     -  Assists in data capture where devices are operating on multiple channels or fast-frequency-hopping. It assigns multiple interfaces sequentially across all channels
+zbopenear    -  Assists in data capture where devices are operating on multiple 
+                channels or fast-frequency-hopping. It assigns multiple 
+                interfaces sequentially across all channels.
 zbassocflood -  Repeatedly associate to the target PANID in an effort to cause
                 the device to crash from too many connected stations.
 zbconvert    -  Convert a packet capture from Libpcap to Daintree SNA format,
@@ -165,7 +165,13 @@ zbstumbler   -  Active ZigBee and IEEE 802.15.4 network discovery tool.
                 Zbstumbler sends beacon request frames out while channel
                 hopping, recording and displaying summarized information about
                 discovered devices.  Can also log results to a CSV file.
-zbwardrive   -	Discovers available interfaces and uses one to inject beacon requests and listen for respones across channels. Once a network is found on a channel, it assigns another device to continuously capture traffic on that channel to a PCAP file. Scapy must be installed to run this.
+zbwardrive   -	Discovers available interfaces and uses one to inject beacon 
+                requests and listen for respones across channels. Once a network
+                is found on a channel, it assigns another device to continuously
+                capture traffic on that channel to a PCAP file. Scapy must be 
+                installed to run this.
+zbscapy      -  Provides an interactive Scapy shell for interacting via a
+                KillerBee interface. Scapy must be installed to run this.
 zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time 
                 capture and viewing in Wireshark.
 
@@ -220,3 +226,5 @@ Nick DePetrillo
 Ed Skoudis
 Matt Carpenter
 Sergey Bratus (research support at Dartmouth)
+Jeff Spielberg
+

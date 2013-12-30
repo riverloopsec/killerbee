@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>killerbee.openear.gps.misc</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="killerbee-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="killerbee-module.html">Package&nbsp;killerbee</a> ::
+        <a href="killerbee.openear-module.html">Package&nbsp;openear</a> ::
+        <a href="killerbee.openear.gps-module.html">Package&nbsp;gps</a> ::
+        Module&nbsp;misc
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="killerbee.openear.gps.misc-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="killerbee.openear.gps.misc-module.html">Module killerbee.openear.gps.misc</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-comment"># misc.py - miscellaneous geodesy and time functions</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-comment">#</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-comment"># This file is Copyright (c) 2010 by the GPSD project</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-comment"># BSD terms apply: see the file COPYING in the distribution root for details.</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">time</tt><tt class="py-op">,</tt> <tt class="py-name">calendar</tt><tt class="py-op">,</tt> <tt class="py-name">math</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-comment"># some multipliers for interpreting GPS output</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt id="link-0" class="py-name" targets="Variable killerbee.openear.gps.METERS_TO_FEET=killerbee.openear.gps-module.html#METERS_TO_FEET,Variable killerbee.openear.gps.misc.METERS_TO_FEET=killerbee.openear.gps.misc-module.html#METERS_TO_FEET,Variable killerbee.zbwardrive.gps.METERS_TO_FEET=killerbee.zbwardrive.gps-module.html#METERS_TO_FEET,Variable killerbee.zbwardrive.gps.misc.METERS_TO_FEET=killerbee.zbwardrive.gps.misc-module.html#METERS_TO_FEET"><a title="killerbee.openear.gps.METERS_TO_FEET
+killerbee.openear.gps.misc.METERS_TO_FEET
+killerbee.zbwardrive.gps.METERS_TO_FEET
+killerbee.zbwardrive.gps.misc.METERS_TO_FEET" class="py-name" href="#" onclick="return doclink('link-0', 'METERS_TO_FEET', 'link-0');">METERS_TO_FEET</a></tt>  <tt class="py-op">=</tt> <tt class="py-number">3.2808399</tt>     <tt class="py-comment"># Meters to U.S./British feet</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt id="link-1" class="py-name" targets="Variable killerbee.openear.gps.METERS_TO_MILES=killerbee.openear.gps-module.html#METERS_TO_MILES,Variable killerbee.openear.gps.misc.METERS_TO_MILES=killerbee.openear.gps.misc-module.html#METERS_TO_MILES,Variable killerbee.zbwardrive.gps.METERS_TO_MILES=killerbee.zbwardrive.gps-module.html#METERS_TO_MILES,Variable killerbee.zbwardrive.gps.misc.METERS_TO_MILES=killerbee.zbwardrive.gps.misc-module.html#METERS_TO_MILES"><a title="killerbee.openear.gps.METERS_TO_MILES
+killerbee.openear.gps.misc.METERS_TO_MILES
+killerbee.zbwardrive.gps.METERS_TO_MILES
+killerbee.zbwardrive.gps.misc.METERS_TO_MILES" class="py-name" href="#" onclick="return doclink('link-1', 'METERS_TO_MILES', 'link-1');">METERS_TO_MILES</a></tt> <tt class="py-op">=</tt> <tt class="py-number">0.00062137119</tt> <tt class="py-comment"># Meters to miles</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt id="link-2" class="py-name" targets="Variable killerbee.openear.gps.KNOTS_TO_MPH=killerbee.openear.gps-module.html#KNOTS_TO_MPH,Variable killerbee.openear.gps.misc.KNOTS_TO_MPH=killerbee.openear.gps.misc-module.html#KNOTS_TO_MPH,Variable killerbee.zbwardrive.gps.KNOTS_TO_MPH=killerbee.zbwardrive.gps-module.html#KNOTS_TO_MPH,Variable killerbee.zbwardrive.gps.misc.KNOTS_TO_MPH=killerbee.zbwardrive.gps.misc-module.html#KNOTS_TO_MPH"><a title="killerbee.openear.gps.KNOTS_TO_MPH
+killerbee.openear.gps.misc.KNOTS_TO_MPH
+killerbee.zbwardrive.gps.KNOTS_TO_MPH
+killerbee.zbwardrive.gps.misc.KNOTS_TO_MPH" class="py-name" href="#" onclick="return doclink('link-2', 'KNOTS_TO_MPH', 'link-2');">KNOTS_TO_MPH</a></tt>    <tt class="py-op">=</tt> <tt class="py-number">1.1507794</tt>     <tt class="py-comment"># Knots to miles per hour</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt id="link-3" class="py-name" targets="Variable killerbee.openear.gps.KNOTS_TO_KPH=killerbee.openear.gps-module.html#KNOTS_TO_KPH,Variable killerbee.openear.gps.misc.KNOTS_TO_KPH=killerbee.openear.gps.misc-module.html#KNOTS_TO_KPH,Variable killerbee.zbwardrive.gps.KNOTS_TO_KPH=killerbee.zbwardrive.gps-module.html#KNOTS_TO_KPH,Variable killerbee.zbwardrive.gps.misc.KNOTS_TO_KPH=killerbee.zbwardrive.gps.misc-module.html#KNOTS_TO_KPH"><a title="killerbee.openear.gps.KNOTS_TO_KPH
+killerbee.openear.gps.misc.KNOTS_TO_KPH
+killerbee.zbwardrive.gps.KNOTS_TO_KPH
+killerbee.zbwardrive.gps.misc.KNOTS_TO_KPH" class="py-name" href="#" onclick="return doclink('link-3', 'KNOTS_TO_KPH', 'link-3');">KNOTS_TO_KPH</a></tt>    <tt class="py-op">=</tt> <tt class="py-number">1.852</tt>         <tt class="py-comment"># Knots to kilometers per hour</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt id="link-4" class="py-name" targets="Variable killerbee.openear.gps.KNOTS_TO_MPS=killerbee.openear.gps-module.html#KNOTS_TO_MPS,Variable killerbee.openear.gps.misc.KNOTS_TO_MPS=killerbee.openear.gps.misc-module.html#KNOTS_TO_MPS,Variable killerbee.zbwardrive.gps.KNOTS_TO_MPS=killerbee.zbwardrive.gps-module.html#KNOTS_TO_MPS,Variable killerbee.zbwardrive.gps.misc.KNOTS_TO_MPS=killerbee.zbwardrive.gps.misc-module.html#KNOTS_TO_MPS"><a title="killerbee.openear.gps.KNOTS_TO_MPS
+killerbee.openear.gps.misc.KNOTS_TO_MPS
+killerbee.zbwardrive.gps.KNOTS_TO_MPS
+killerbee.zbwardrive.gps.misc.KNOTS_TO_MPS" class="py-name" href="#" onclick="return doclink('link-4', 'KNOTS_TO_MPS', 'link-4');">KNOTS_TO_MPS</a></tt>    <tt class="py-op">=</tt> <tt class="py-number">0.51444444</tt>    <tt class="py-comment"># Knots to meters per second</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt id="link-5" class="py-name" targets="Variable killerbee.openear.gps.MPS_TO_KPH=killerbee.openear.gps-module.html#MPS_TO_KPH,Variable killerbee.openear.gps.misc.MPS_TO_KPH=killerbee.openear.gps.misc-module.html#MPS_TO_KPH,Variable killerbee.zbwardrive.gps.MPS_TO_KPH=killerbee.zbwardrive.gps-module.html#MPS_TO_KPH,Variable killerbee.zbwardrive.gps.misc.MPS_TO_KPH=killerbee.zbwardrive.gps.misc-module.html#MPS_TO_KPH"><a title="killerbee.openear.gps.MPS_TO_KPH
+killerbee.openear.gps.misc.MPS_TO_KPH
+killerbee.zbwardrive.gps.MPS_TO_KPH
+killerbee.zbwardrive.gps.misc.MPS_TO_KPH" class="py-name" href="#" onclick="return doclink('link-5', 'MPS_TO_KPH', 'link-5');">MPS_TO_KPH</a></tt>      <tt class="py-op">=</tt> <tt class="py-number">3.6</tt>           <tt class="py-comment"># Meters per second to klicks/hr</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt id="link-6" class="py-name" targets="Variable killerbee.openear.gps.MPS_TO_MPH=killerbee.openear.gps-module.html#MPS_TO_MPH,Variable killerbee.openear.gps.misc.MPS_TO_MPH=killerbee.openear.gps.misc-module.html#MPS_TO_MPH,Variable killerbee.zbwardrive.gps.MPS_TO_MPH=killerbee.zbwardrive.gps-module.html#MPS_TO_MPH,Variable killerbee.zbwardrive.gps.misc.MPS_TO_MPH=killerbee.zbwardrive.gps.misc-module.html#MPS_TO_MPH"><a title="killerbee.openear.gps.MPS_TO_MPH
+killerbee.openear.gps.misc.MPS_TO_MPH
+killerbee.zbwardrive.gps.MPS_TO_MPH
+killerbee.zbwardrive.gps.misc.MPS_TO_MPH" class="py-name" href="#" onclick="return doclink('link-6', 'MPS_TO_MPH', 'link-6');">MPS_TO_MPH</a></tt>      <tt class="py-op">=</tt> <tt class="py-number">2.2369363</tt>     <tt class="py-comment"># Meters/second to miles per hour</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt id="link-7" class="py-name" targets="Variable killerbee.openear.gps.MPS_TO_KNOTS=killerbee.openear.gps-module.html#MPS_TO_KNOTS,Variable killerbee.openear.gps.misc.MPS_TO_KNOTS=killerbee.openear.gps.misc-module.html#MPS_TO_KNOTS,Variable killerbee.zbwardrive.gps.MPS_TO_KNOTS=killerbee.zbwardrive.gps-module.html#MPS_TO_KNOTS,Variable killerbee.zbwardrive.gps.misc.MPS_TO_KNOTS=killerbee.zbwardrive.gps.misc-module.html#MPS_TO_KNOTS"><a title="killerbee.openear.gps.MPS_TO_KNOTS
+killerbee.openear.gps.misc.MPS_TO_KNOTS
+killerbee.zbwardrive.gps.MPS_TO_KNOTS
+killerbee.zbwardrive.gps.misc.MPS_TO_KNOTS" class="py-name" href="#" onclick="return doclink('link-7', 'MPS_TO_KNOTS', 'link-7');">MPS_TO_KNOTS</a></tt>    <tt class="py-op">=</tt> <tt class="py-number">1.9438445</tt>     <tt class="py-comment"># Meters per second to knots</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-comment"># EarthDistance code swiped from Kismet and corrected</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"> </tt>
+<a name="Deg2Rad"></a><div id="Deg2Rad-def"><a name="L20"></a><tt class="py-lineno"> 20</tt> <a class="py-toggle" href="#" id="Deg2Rad-toggle" onclick="return toggle('Deg2Rad');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.gps.misc-module.html#Deg2Rad">Deg2Rad</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Deg2Rad-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Deg2Rad-expanded"><a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line">    <tt class="py-docstring">"Degrees to radians."</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">x</tt> <tt class="py-op">*</tt> <tt class="py-op">(</tt><tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">pi</tt><tt class="py-op">/</tt><tt class="py-number">180</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"> </tt>
+<a name="Rad2Deg"></a><div id="Rad2Deg-def"><a name="L24"></a><tt class="py-lineno"> 24</tt> <a class="py-toggle" href="#" id="Rad2Deg-toggle" onclick="return toggle('Rad2Deg');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.gps.misc-module.html#Rad2Deg">Rad2Deg</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Rad2Deg-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Rad2Deg-expanded"><a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line">    <tt class="py-docstring">"Radians to degress."</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">x</tt> <tt class="py-op">*</tt> <tt class="py-op">(</tt><tt class="py-number">180</tt><tt class="py-op">/</tt><tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">pi</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"> </tt>
+<a name="CalcRad"></a><div id="CalcRad-def"><a name="L28"></a><tt class="py-lineno"> 28</tt> <a class="py-toggle" href="#" id="CalcRad-toggle" onclick="return toggle('CalcRad');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.gps.misc-module.html#CalcRad">CalcRad</a><tt class="py-op">(</tt><tt class="py-param">lat</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="CalcRad-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="CalcRad-expanded"><a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line">    <tt class="py-docstring">"Radius of curvature in meters at specified latitude."</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line">    <tt class="py-name">a</tt> <tt class="py-op">=</tt> <tt class="py-number">6378.137</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line">    <tt class="py-name">e2</tt> <tt class="py-op">=</tt> <tt class="py-number">0.081082</tt> <tt class="py-op">*</tt> <tt class="py-number">0.081082</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line">    <tt class="py-comment"># the radius of curvature of an ellipsoidal Earth in the plane of a</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line">    <tt class="py-comment"># meridian of latitude is given by</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line">    <tt class="py-comment">#</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line">    <tt class="py-comment"># R' = a * (1 - e^2) / (1 - e^2 * (sin(lat))^2)^(3/2)</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line">    <tt class="py-comment">#</tt> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line">    <tt class="py-comment"># where a is the equatorial radius,</tt> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line">    <tt class="py-comment"># b is the polar radius, and</tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line">    <tt class="py-comment"># e is the eccentricity of the ellipsoid = sqrt(1 - b^2/a^2)</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line">    <tt class="py-comment">#</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line">    <tt class="py-comment"># a = 6378 km (3963 mi) Equatorial radius (surface to center distance)</tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line">    <tt class="py-comment"># b = 6356.752 km (3950 mi) Polar radius (surface to center distance)</tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line">    <tt class="py-comment"># e = 0.081082 Eccentricity</tt> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line">    <tt class="py-name">sc</tt> <tt class="py-op">=</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">sin</tt><tt class="py-op">(</tt><tt id="link-8" class="py-name" targets="Function killerbee.openear.gps.misc.Deg2Rad()=killerbee.openear.gps.misc-module.html#Deg2Rad,Function killerbee.zbwardrive.gps.misc.Deg2Rad()=killerbee.zbwardrive.gps.misc-module.html#Deg2Rad"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-8', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-name">lat</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">a</tt> <tt class="py-op">*</tt> <tt class="py-op">(</tt><tt class="py-number">1.0</tt> <tt class="py-op">-</tt> <tt class="py-name">e2</tt><tt class="py-op">)</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line">    <tt class="py-name">z</tt> <tt class="py-op">=</tt> <tt class="py-number">1.0</tt> <tt class="py-op">-</tt> <tt class="py-name">e2</tt> <tt class="py-op">*</tt> <tt class="py-name">sc</tt> <tt class="py-op">*</tt> <tt class="py-name">sc</tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line">    <tt class="py-name">y</tt> <tt class="py-op">=</tt> <tt class="py-name">pow</tt><tt class="py-op">(</tt><tt class="py-name">z</tt><tt class="py-op">,</tt> <tt class="py-number">1.5</tt><tt class="py-op">)</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line">    <tt class="py-name">r</tt> <tt class="py-op">=</tt> <tt class="py-name">x</tt> <tt class="py-op">/</tt> <tt class="py-name">y</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line"> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line">    <tt class="py-name">r</tt> <tt class="py-op">=</tt> <tt class="py-name">r</tt> <tt class="py-op">*</tt> <tt class="py-number">1000.0</tt>      <tt class="py-comment"># Convert to meters</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">r</tt> </tt>
+</div><a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line"> </tt>
+<a name="EarthDistance"></a><div id="EarthDistance-def"><a name="L53"></a><tt class="py-lineno"> 53</tt> <a class="py-toggle" href="#" id="EarthDistance-toggle" onclick="return toggle('EarthDistance');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.gps.misc-module.html#EarthDistance">EarthDistance</a><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-param">lat1</tt><tt class="py-op">,</tt> <tt class="py-param">lon1</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-op">(</tt><tt class="py-param">lat2</tt><tt class="py-op">,</tt> <tt class="py-param">lon2</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="EarthDistance-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="EarthDistance-expanded"><a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line">    <tt class="py-docstring">"Distance in meters between two points specified in degrees."</tt> </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">    <tt class="py-name">x1</tt> <tt class="py-op">=</tt> <tt id="link-9" class="py-name" targets="Function killerbee.openear.gps.misc.CalcRad()=killerbee.openear.gps.misc-module.html#CalcRad,Function killerbee.zbwardrive.gps.misc.CalcRad()=killerbee.zbwardrive.gps.misc-module.html#CalcRad"><a title="killerbee.openear.gps.misc.CalcRad
+killerbee.zbwardrive.gps.misc.CalcRad" class="py-name" href="#" onclick="return doclink('link-9', 'CalcRad', 'link-9');">CalcRad</a></tt><tt class="py-op">(</tt><tt class="py-name">lat1</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">cos</tt><tt class="py-op">(</tt><tt id="link-10" class="py-name"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-10', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-name">lon1</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">sin</tt><tt class="py-op">(</tt><tt id="link-11" class="py-name"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-11', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-number">90</tt><tt class="py-op">-</tt><tt class="py-name">lat1</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">    <tt class="py-name">x2</tt> <tt class="py-op">=</tt> <tt id="link-12" class="py-name"><a title="killerbee.openear.gps.misc.CalcRad
+killerbee.zbwardrive.gps.misc.CalcRad" class="py-name" href="#" onclick="return doclink('link-12', 'CalcRad', 'link-9');">CalcRad</a></tt><tt class="py-op">(</tt><tt class="py-name">lat2</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">cos</tt><tt class="py-op">(</tt><tt id="link-13" class="py-name"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-13', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-name">lon2</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">sin</tt><tt class="py-op">(</tt><tt id="link-14" class="py-name"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-14', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-number">90</tt><tt class="py-op">-</tt><tt class="py-name">lat2</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">    <tt class="py-name">y1</tt> <tt class="py-op">=</tt> <tt id="link-15" class="py-name"><a title="killerbee.openear.gps.misc.CalcRad
+killerbee.zbwardrive.gps.misc.CalcRad" class="py-name" href="#" onclick="return doclink('link-15', 'CalcRad', 'link-9');">CalcRad</a></tt><tt class="py-op">(</tt><tt class="py-name">lat1</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">sin</tt><tt class="py-op">(</tt><tt id="link-16" class="py-name"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-16', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-name">lon1</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">sin</tt><tt class="py-op">(</tt><tt id="link-17" class="py-name"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-17', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-number">90</tt><tt class="py-op">-</tt><tt class="py-name">lat1</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">    <tt class="py-name">y2</tt> <tt class="py-op">=</tt> <tt id="link-18" class="py-name"><a title="killerbee.openear.gps.misc.CalcRad
+killerbee.zbwardrive.gps.misc.CalcRad" class="py-name" href="#" onclick="return doclink('link-18', 'CalcRad', 'link-9');">CalcRad</a></tt><tt class="py-op">(</tt><tt class="py-name">lat2</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">sin</tt><tt class="py-op">(</tt><tt id="link-19" class="py-name"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-19', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-name">lon2</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">sin</tt><tt class="py-op">(</tt><tt id="link-20" class="py-name"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-20', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-number">90</tt><tt class="py-op">-</tt><tt class="py-name">lat2</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">    <tt class="py-name">z1</tt> <tt class="py-op">=</tt> <tt id="link-21" class="py-name"><a title="killerbee.openear.gps.misc.CalcRad
+killerbee.zbwardrive.gps.misc.CalcRad" class="py-name" href="#" onclick="return doclink('link-21', 'CalcRad', 'link-9');">CalcRad</a></tt><tt class="py-op">(</tt><tt class="py-name">lat1</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">cos</tt><tt class="py-op">(</tt><tt id="link-22" class="py-name"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-22', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-number">90</tt><tt class="py-op">-</tt><tt class="py-name">lat1</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">    <tt class="py-name">z2</tt> <tt class="py-op">=</tt> <tt id="link-23" class="py-name"><a title="killerbee.openear.gps.misc.CalcRad
+killerbee.zbwardrive.gps.misc.CalcRad" class="py-name" href="#" onclick="return doclink('link-23', 'CalcRad', 'link-9');">CalcRad</a></tt><tt class="py-op">(</tt><tt class="py-name">lat2</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">cos</tt><tt class="py-op">(</tt><tt id="link-24" class="py-name"><a title="killerbee.openear.gps.misc.Deg2Rad
+killerbee.zbwardrive.gps.misc.Deg2Rad" class="py-name" href="#" onclick="return doclink('link-24', 'Deg2Rad', 'link-8');">Deg2Rad</a></tt><tt class="py-op">(</tt><tt class="py-number">90</tt><tt class="py-op">-</tt><tt class="py-name">lat2</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">    <tt class="py-name">a</tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">x1</tt><tt class="py-op">*</tt><tt class="py-name">x2</tt> <tt class="py-op">+</tt> <tt class="py-name">y1</tt><tt class="py-op">*</tt><tt class="py-name">y2</tt> <tt class="py-op">+</tt> <tt class="py-name">z1</tt><tt class="py-op">*</tt><tt class="py-name">z2</tt><tt class="py-op">)</tt><tt class="py-op">/</tt><tt class="py-name">pow</tt><tt class="py-op">(</tt><tt id="link-25" class="py-name"><a title="killerbee.openear.gps.misc.CalcRad
+killerbee.zbwardrive.gps.misc.CalcRad" class="py-name" href="#" onclick="return doclink('link-25', 'CalcRad', 'link-9');">CalcRad</a></tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">lat1</tt><tt class="py-op">+</tt><tt class="py-name">lat2</tt><tt class="py-op">)</tt><tt class="py-op">/</tt><tt class="py-number">2</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-number">2</tt><tt class="py-op">)</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">    <tt class="py-comment"># a should be in [1, -1] but can sometimes fall outside it by</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line">    <tt class="py-comment"># a very small amount due to rounding errors in the preceding</tt> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line">    <tt class="py-comment"># calculations (this is prone to happen when the argument points</tt> </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line">    <tt class="py-comment"># are very close together).  Thus we constrain it here.</tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">abs</tt><tt class="py-op">(</tt><tt class="py-name">a</tt><tt class="py-op">)</tt> <tt class="py-op">&gt;</tt> <tt class="py-number">1</tt><tt class="py-op">:</tt> <tt class="py-name">a</tt> <tt class="py-op">=</tt> <tt class="py-number">1</tt> </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">    <tt class="py-keyword">elif</tt> <tt class="py-name">a</tt> <tt class="py-op">&lt;</tt> <tt class="py-op">-</tt><tt class="py-number">1</tt><tt class="py-op">:</tt> <tt class="py-name">a</tt> <tt class="py-op">=</tt> <tt class="py-op">-</tt><tt class="py-number">1</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt id="link-26" class="py-name"><a title="killerbee.openear.gps.misc.CalcRad
+killerbee.zbwardrive.gps.misc.CalcRad" class="py-name" href="#" onclick="return doclink('link-26', 'CalcRad', 'link-9');">CalcRad</a></tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">lat1</tt><tt class="py-op">+</tt><tt class="py-name">lat2</tt><tt class="py-op">)</tt> <tt class="py-op">/</tt> <tt class="py-number">2</tt><tt class="py-op">)</tt> <tt class="py-op">*</tt> <tt class="py-name">math</tt><tt class="py-op">.</tt><tt class="py-name">acos</tt><tt class="py-op">(</tt><tt class="py-name">a</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line"> </tt>
+<a name="MeterOffset"></a><div id="MeterOffset-def"><a name="L70"></a><tt class="py-lineno"> 70</tt> <a class="py-toggle" href="#" id="MeterOffset-toggle" onclick="return toggle('MeterOffset');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.gps.misc-module.html#MeterOffset">MeterOffset</a><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-param">lat1</tt><tt class="py-op">,</tt> <tt class="py-param">lon1</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-op">(</tt><tt class="py-param">lat2</tt><tt class="py-op">,</tt> <tt class="py-param">lon2</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="MeterOffset-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="MeterOffset-expanded"><a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">    <tt class="py-docstring">"Return offset in meters of second arg from first."</tt> </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line">    <tt class="py-name">dx</tt> <tt class="py-op">=</tt> <tt id="link-27" class="py-name" targets="Function killerbee.openear.gps.misc.EarthDistance()=killerbee.openear.gps.misc-module.html#EarthDistance,Function killerbee.zbwardrive.gps.misc.EarthDistance()=killerbee.zbwardrive.gps.misc-module.html#EarthDistance"><a title="killerbee.openear.gps.misc.EarthDistance
+killerbee.zbwardrive.gps.misc.EarthDistance" class="py-name" href="#" onclick="return doclink('link-27', 'EarthDistance', 'link-27');">EarthDistance</a></tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">lat1</tt><tt class="py-op">,</tt> <tt class="py-name">lon1</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-op">(</tt><tt class="py-name">lat1</tt><tt class="py-op">,</tt> <tt class="py-name">lon2</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line">    <tt class="py-name">dy</tt> <tt class="py-op">=</tt> <tt id="link-28" class="py-name"><a title="killerbee.openear.gps.misc.EarthDistance
+killerbee.zbwardrive.gps.misc.EarthDistance" class="py-name" href="#" onclick="return doclink('link-28', 'EarthDistance', 'link-27');">EarthDistance</a></tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">lat1</tt><tt class="py-op">,</tt> <tt class="py-name">lon1</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-op">(</tt><tt class="py-name">lat2</tt><tt class="py-op">,</tt> <tt class="py-name">lon1</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">lat1</tt> <tt class="py-op">&lt;</tt> <tt class="py-name">lat2</tt><tt class="py-op">:</tt> <tt class="py-name">dy</tt> <tt class="py-op">*=</tt> <tt class="py-op">-</tt><tt class="py-number">1</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">lon1</tt> <tt class="py-op">&lt;</tt> <tt class="py-name">lon2</tt><tt class="py-op">:</tt> <tt class="py-name">dx</tt> <tt class="py-op">*=</tt> <tt class="py-op">-</tt><tt class="py-number">1</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-op">(</tt><tt class="py-name">dx</tt><tt class="py-op">,</tt> <tt class="py-name">dy</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line"> </tt>
+<a name="isotime"></a><div id="isotime-def"><a name="L78"></a><tt class="py-lineno"> 78</tt> <a class="py-toggle" href="#" id="isotime-toggle" onclick="return toggle('isotime');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="killerbee.openear.gps.misc-module.html#isotime">isotime</a><tt class="py-op">(</tt><tt class="py-param">s</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="isotime-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="isotime-expanded"><a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line">    <tt class="py-docstring">"Convert timestamps in ISO8661 format to and from Unix time."</tt> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">type</tt><tt class="py-op">(</tt><tt class="py-name">s</tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-name">type</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">strftime</tt><tt class="py-op">(</tt><tt class="py-string">"%Y-%m-%dT%H:%M:%S"</tt><tt class="py-op">,</tt> <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">gmtime</tt><tt class="py-op">(</tt><tt class="py-name">s</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line">    <tt class="py-keyword">elif</tt> <tt class="py-name">type</tt><tt class="py-op">(</tt><tt class="py-name">s</tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-name">type</tt><tt class="py-op">(</tt><tt class="py-number">1.0</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">        <tt class="py-name">date</tt> <tt class="py-op">=</tt> <tt class="py-name">int</tt><tt class="py-op">(</tt><tt class="py-name">s</tt><tt class="py-op">)</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">        <tt class="py-name">msec</tt> <tt class="py-op">=</tt> <tt class="py-name">s</tt> <tt class="py-op">-</tt> <tt class="py-name">date</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">        <tt class="py-name">date</tt> <tt class="py-op">=</tt> <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">strftime</tt><tt class="py-op">(</tt><tt class="py-string">"%Y-%m-%dT%H:%M:%S"</tt><tt class="py-op">,</tt> <tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">gmtime</tt><tt class="py-op">(</tt><tt class="py-name">s</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">date</tt> <tt class="py-op">+</tt> <tt class="py-string">"."</tt> <tt class="py-op">+</tt> <tt class="py-op">`</tt><tt class="py-name">msec</tt><tt class="py-op">`</tt><tt class="py-op">[</tt><tt class="py-number">2</tt><tt class="py-op">:</tt><tt class="py-op">]</tt> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">    <tt class="py-keyword">elif</tt> <tt class="py-name">type</tt><tt class="py-op">(</tt><tt class="py-name">s</tt><tt class="py-op">)</tt> <tt class="py-op">==</tt> <tt class="py-name">type</tt><tt class="py-op">(</tt><tt class="py-string">""</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-name">s</tt><tt class="py-op">[</tt><tt class="py-op">-</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> <tt class="py-op">==</tt> <tt class="py-string">"Z"</tt><tt class="py-op">:</tt> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">            <tt class="py-name">s</tt> <tt class="py-op">=</tt> <tt class="py-name">s</tt><tt class="py-op">[</tt><tt class="py-op">:</tt><tt class="py-op">-</tt><tt class="py-number">1</tt><tt class="py-op">]</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line">        <tt class="py-keyword">if</tt> <tt class="py-string">"."</tt> <tt class="py-keyword">in</tt> <tt class="py-name">s</tt><tt class="py-op">:</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">            <tt class="py-op">(</tt><tt class="py-name">date</tt><tt class="py-op">,</tt> <tt class="py-name">msec</tt><tt class="py-op">)</tt> <tt class="py-op">=</tt> <tt class="py-name">s</tt><tt class="py-op">.</tt><tt class="py-name">split</tt><tt class="py-op">(</tt><tt class="py-string">"."</tt><tt class="py-op">)</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line">        <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line">            <tt class="py-name">date</tt> <tt class="py-op">=</tt> <tt class="py-name">s</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line">            <tt class="py-name">msec</tt> <tt class="py-op">=</tt> <tt class="py-string">"0"</tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line">        <tt class="py-comment"># Note: no leap-second correction! </tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">calendar</tt><tt class="py-op">.</tt><tt class="py-name">timegm</tt><tt class="py-op">(</tt><tt class="py-name">time</tt><tt class="py-op">.</tt><tt class="py-name">strptime</tt><tt class="py-op">(</tt><tt class="py-name">date</tt><tt class="py-op">,</tt> <tt class="py-string">"%Y-%m-%dT%H:%M:%S"</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> <tt class="py-op">+</tt> <tt class="py-name">float</tt><tt class="py-op">(</tt><tt class="py-string">"0."</tt> <tt class="py-op">+</tt> <tt class="py-name">msec</tt><tt class="py-op">)</tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line">        <tt class="py-keyword">raise</tt> <tt class="py-name">TypeError</tt> </tt>
+</div><a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line"> </tt>
+<a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line"><tt class="py-comment"># End</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="killerbee-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            ><a class="navbar" target="_top" href="http://code.google.com/p/killerbee/">KillerBee</a></th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Mon Dec 30 17:49:14 2013
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>
