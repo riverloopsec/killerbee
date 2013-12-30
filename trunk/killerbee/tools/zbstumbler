@@ -2,27 +2,20 @@
 
 '''
 Transmit beacon request frames to the broadcast address while
-channel hopping to identify ZC/ZR devices.
+channel hopping to identify ZigBee Coordinator/Router devices.
 '''
 
 import sys
 import os
 import signal
 import time
+import argparse
+
 from killerbee import *
 
 txcount = 0
 rxcount = 0
 stumbled = {}
-
-def usage():
-    print >>sys.stderr, """
-zbstumbler: Transmit beacon request frames to the broadcast address while
-channel hopping to identify ZC/ZR devices.  jwright@willhackforsushi.com
-
-Usage: zbstumbler [-iscwD] [-i devnumstring] [-s per-channel delay] [-c channel]
-                          [-w report.csv]
-    """
 
 def display_details(routerdata):
         stackprofile_map = {0:"Network Specific",
@@ -62,13 +55,12 @@ def display_details(routerdata):
 
         print "\tChannel: %d"%channel
 
-        if report_csv != None:
-            report_csv.write("0x%02X%02X,0x%02X%02X,%s,%s,%s,%d\n"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1]), extpanidstr, stackprofilestr, stackverstr, channel))
+        if csvfile != None:
+            csvfile.write("0x%02X%02X,0x%02X%02X,%s,%s,%s,%d\n"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1]), extpanidstr, stackprofilestr, stackverstr, channel))
 
 
 def response_handler(stumbled, packet, channel):
-    global arg_verbose
-    global report_csv
+    global args
     d154 = Dot154PacketParser()
     # Chop the packet up
     pktdecode = d154.pktchop(packet)
@@ -78,7 +70,7 @@ def response_handler(stumbled, packet, channel):
 
     # Check if this is a beacon frame
     if (fcf & DOT154_FCF_TYPE_MASK) == DOT154_FCF_TYPE_BEACON:
-        if arg_verbose:
+        if args.verbose:
             print "Received frame is a beacon."
 
         # The 6th element offset in the Dot154PacketParser.pktchop() method
@@ -92,73 +84,66 @@ def response_handler(stumbled, packet, channel):
         key = ''.join([spanid, source])
         value = [spanid, source, extpanid, stackprofilever, channel]
         if not key in stumbled:
-            if arg_verbose:
-                print "Beacon represents new network."
+            if args.verbose:
+                print("Beacon represents new network.")
                 #print hexdump(packet)
                 #print pktdecode
             stumbled[key] = value
             display_details(value)
         return value
 
-    if arg_verbose:
-        print "Received frame is not a beacon (FCF=%s)." % pktdecode[0].encode('hex')
+    if args.verbose:
+        print("Received frame is not a beacon (FCF={0}).".format(pktdecode[0].encode('hex')))
 
     return None
 
 def interrupt(signum, frame):
-    global txcount
-    global rxcount
+    global txcount, rxcount
     global kb
-    global report_csv
-    if report_csv != None:
-        report_csv.close()
+    global args
+    if csvfile is not None:
+        csvfile.close()
     kb.close()
     print "\n%d packets transmitted, %d responses." % (txcount, rxcount)
     sys.exit(0)
 
 if __name__ == '__main__':
     # Command-line arguments
-    arg_devstring = None
-    arg_delay = 2
-    arg_verbose = False
-    arg_channel = None
-    report_csv = None
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring')
+    parser.add_argument('-g', '--gps', '--ignore', action='append', dest='ignore')
+    parser.add_argument('-s', '--delay', action='store', type=float, dest='delay', default=2.0)
+    parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('-c', '--channel', action='store', type=int, default=None)
+    parser.add_argument('-w', '--file', action='store', dest='csvfile', default=None)
+    parser.add_argument('-D', action='store_true', dest='showdev')
+    args = parser.parse_args()
 
+    if args.showdev:
+        show_dev()
+        sys.exit(0)
+
+    if args.csvfile is not None:
+        try:
+            csvfile = open(args.csvfile, 'w')
+        except Exception as e:
+            print("Issue opening CSV output file: {0}.".format(e))
+        csvfile.write("panid,source,extpanid,stackprofile,stackversion,channel\n")
+    
     # Beacon frame
     beacon = "\x03\x08\x00\xff\xff\xff\xff\x07"
     # Immutable strings - split beacon around sequence number field
     beaconp1 = beacon[0:2]
     beaconp2 = beacon[3:]
 
-    while len(sys.argv) > 1:
-        op = sys.argv.pop(1)
-        if op == '-i':
-            arg_devstring = sys.argv.pop(1)
-        if op == '-s':
-            arg_delay = float(sys.argv.pop(1))
-        if op == '-h':
-            usage()
-            sys.exit(0)
-        if op == '-v':
-            arg_verbose = True
-        if op == '-c':
-            arg_channel = int(sys.argv.pop(1))
-        if op == '-w':
-            report_csv = open(sys.argv.pop(1), "w")
-            report_csv.write("panid,source,extpanid,stackprofile,stackversion,channel\n")
-        if op == '-D':
-            show_dev()
-            sys.exit(0)
-    
-    kb = KillerBee(device=arg_devstring)
+    kb = KillerBee(device=args.devstring)
     signal.signal(signal.SIGINT, interrupt)
-
     print "zbstumbler: Transmitting and receiving on interface \'%s\'" % kb.get_dev_info()[0]
     
     # Sequence number of beacon request frame
     seqnum = 0
-    if arg_channel:
-        channel = arg_channel
+    if args.channel:
+        channel = args.channel
         kb.set_channel(channel)
     else:
         channel = 11
@@ -171,8 +156,8 @@ if __name__ == '__main__':
         if seqnum > 255:
             seqnum = 0
     
-        if not arg_channel:
-            if arg_verbose:
+        if not args.channel:
+            if args.verbose:
                 print "Setting channel to %d"%channel
             try:
                 kb.set_channel(channel)
@@ -181,7 +166,7 @@ if __name__ == '__main__':
                 print e
                 sys.exit(-1)
     
-        if arg_verbose:
+        if args.verbose:
             print "Transmitting beacon request."
 
         beaconinj = ''.join([beaconp1, "%c"%seqnum, beaconp2])
@@ -198,19 +183,18 @@ if __name__ == '__main__':
             print e
             sys.exit(-1)
 
-        while (start+arg_delay > time.time()):
+        while (start+args.delay > time.time()):
             # Does not block
             recvpkt = kb.pnext()
             # Check for empty packet (timeout) and valid FCS
             if recvpkt != None and recvpkt[1]:
                 rxcount += 1
-                if arg_verbose:
+                if args.verbose:
                     print "Received frame."#, time.time()-start
                 networkdata = response_handler(stumbled, recvpkt[0], channel) 
 
         kb.sniffer_off()    
         seqnum += 1
-        if not arg_channel:
+        if not args.channel:
             channel += 1
 
-    # main

@@ -1,23 +1,16 @@
 #!/usr/bin/env python
+
+"""
+zbreplay: replay ZigBee/802.15.4 network traffic from libpcap or Daintree files
+jwright@willhackforsushi.com
+"""
+
 import sys
 import time
 import signal
+import argparse
+
 from killerbee import *
-
-def usage():
-    print >>sys.stderr, """
-zbreplay: replay ZigBee/802.15.4 network traffic from libpcap or Daintree files
-jwright@willhackforsushi.com
-
-Usage: zbreplay [-rRfiDch] [-f channel] [-r pcapfile] [-R daintreefile] 
-         [-i devnumstring] [-s delay/float] [-c countpackets]
-    """
-
-def show_dev():
-    kb = KillerBee()
-    print "Dev\tProduct String\tSerial Number"
-    for dev in kb.dev_list():
-        print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
 
 def interrupt(signum, frame):
     global packetcount
@@ -26,91 +19,76 @@ def interrupt(signum, frame):
     kb.close()
     if cap:
         cap.close()
-    print "%d packets transmitted" % packetcount
+    print("{0} packets transmitted".format(packetcount))
     sys.exit(0)
 
-# Returns True if the packet is an ACK
 def packet_ack(packet):
+    '''Returns True if the packet is an ACK.'''
     MAC_FC_FTYPE_MASK = 0x0007
     MAC_FC_FTYPE_ACK = 2
-
     fc = struct.unpack("H", packet[0:2])[0]
-    
     if (fc & MAC_FC_FTYPE_MASK) == MAC_FC_FTYPE_ACK:
         return True
-
     return False
 
 # Pcap or Daintree reader object
 cap = None
 
-# Command-line arguments
-arg_channel = None
-arg_pcapfile = None
-arg_dsnafile = None
-arg_devstring = None
-arg_count = -1
-arg_sleep = 1
-
 # Global
 packetcount = 0
 
-while len(sys.argv) > 1:
-    op = sys.argv.pop(1)
-    if op == '-f':
-        arg_channel = int(sys.argv.pop(1))
-    if op == '-r':
-        arg_pcapfile = sys.argv.pop(1)
-    if op == '-R':
-        arg_dsnafile = sys.argv.pop(1)
-    if op == '-i':
-        arg_devstring = sys.argv.pop(1)
-    if op == '-h':
-        usage()
-        sys.exit(0)
-    if op == '-D':
-        show_dev()
-        sys.exit(0)
-    if op == '-c':
-        arg_count = int(sys.argv.pop(1))
-    if op == '-s':
-        arg_sleep = float(sys.argv.pop(1))
- 
-if arg_channel == None:
-    print >>sys.stderr, "ERROR: Must specify a channel with -f"
-    usage()
+# Command-line arguments
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring')
+parser.add_argument('-r', '--pcapfile', action='store', default=None)
+parser.add_argument('-R', '--dsnafile', action='store', default=None)
+#parser.add_argument('-g', '--gps', '--ignore', action='append', dest='ignore')
+parser.add_argument('-c', '-f', '--channel', action='store', type=int, default=None)
+parser.add_argument('-n', '--count', action='store', type=int, default=-1)
+parser.add_argument('-s', '--sleep', action='store', type=float, default=1.0)
+parser.add_argument('-D', action='store_true', dest='showdev')
+args = parser.parse_args()
+
+if args.showdev:
+    show_dev()
+    sys.exit(0)
+
+if args.channel == None:
+    print >>sys.stderr, "ERROR: Must specify a channel."
     sys.exit(1)
 
-if arg_pcapfile == None and arg_dsnafile == None:
+if args.pcapfile == None and args.dsnafile == None:
     print >>sys.stderr, "ERROR: Must specify a file with frames to replay using -r (libpcap) or -R (Daintree SNA)"
-    usage()
     sys.exit(1)
+elif args.pcapfile is not None:
+    savefile = args.pcapfile
+    cap = PcapReader(args.pcapfile)
+elif args.dsnafile is not None:
+    savefile = args.dsnafile
+    cap = DainTreeReader(args.dsnafile)
 
-if (arg_pcapfile != None):
-    savefile = arg_pcapfile
-    cap = PcapReader(arg_pcapfile)
-elif (arg_dsnafile != None):
-    savefile = arg_dsnafile
-    cap = DainTreeReader(arg_dsnafile)
-
-kb = KillerBee(device=arg_devstring)
+kb = KillerBee(device=args.devstring)
 signal.signal(signal.SIGINT, interrupt)
+if kb.is_valid_channel(args.channel):
+    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel for the selected device."
+    kb.close()
+    sys.exit(1)
+kb.set_channel(args.channel)
 
-kb.set_channel(arg_channel)
+print("zbreplay: retransmitting frames from \'{0}\' on interface \'{1}\' with a delay of {2} seconds.".format(savefile, kb.get_dev_info()[0], args.sleep))
 
-print "zbreplay: retransmitting frames from \'%s\' on interface \'%s\' with a delay of %f seconds." % (savefile, kb.get_dev_info()[0], arg_sleep)
-
-while arg_count != packetcount:
+while args.count != packetcount:
     try:
         packet = cap.pnext()[1]
+        # We don't want to replay ACK packets from the capture, typically.
         if not packet_ack(packet):
-            packetcount+=1
+            packetcount += 1
             kb.inject(packet)
-            time.sleep(arg_sleep)
+            time.sleep(args.sleep)
     except TypeError:       # raised when pnext returns Null (end of capture)
         break
 
 kb.close()
 cap.close()
 
-print "%d packets transmitted" % packetcount
+print("{0} packets transmitted".format(packetcount))

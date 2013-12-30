@@ -14,7 +14,7 @@ zbkey: Attempts to retrieve a key by sending the associate request followed by t
        Example usage: ./zbkey -f 14 -s 0.1 -p aa1a -a 0fc8071c08c25100 -i [deviceid]
 
 Contributed by: mandar.satam@gmail.com
-Edited by:      ApiDo team (rmspeers)
+Edited by:      ryan@riverloopsecurity.com
 Version:        BETA
 
 Usage: ./zbkey -f [channel] -s 0.1 -p [PANID] -a [IEEE64bitaddress] -i [deviceid]

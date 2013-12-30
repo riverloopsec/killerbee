@@ -4,7 +4,7 @@ try:
     import usb.util
     USBVER=1
     import sys
-    print >>sys.stderr, "Warning: You are using pyUSB 1.x, support is in alpha."
+    print >>sys.stderr, "Warning: You are using pyUSB 1.x, support is in beta."
 except ImportError:
     import usb
     #print("Warning: You are using pyUSB 0.x, future deprecation planned.")
@@ -445,10 +445,11 @@ class RZUSBSTICK:
                 if e.errno != 110: #Operation timed out
                     print "Error args:", e.args
                     raise e
-            #TODO error handling enhancements for USB 1.0
+                    #TODO error handling enhancements for USB 1.0
 
         # PyUSB returns an empty tuple occasionally, handle as "no data"
-        if pdata == None or pdata == ():
+        #TODO added len(pdata) check as some arrays were failing
+        if pdata == None or pdata == () or len(pdata)==0:
             return None
 
         if pdata[0] == RZ_EVENT_STREAM_AC_DATA:
