@@ -34,6 +34,11 @@ try:
 except ImportError:
     print("Note: You are using pyUSB 0.x. Consider upgrading to pyUSB 1.x.")
 
+try:
+    import serial
+except ImportError:
+    err += "serial (apt-get install python-serial)\n"
+
 if err != "":
     print >>sys.stderr, """
 Library requirements not met.  Install the following libraries, then re-run
