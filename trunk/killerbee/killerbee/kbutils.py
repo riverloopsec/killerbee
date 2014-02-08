@@ -232,10 +232,10 @@ def devlist(vendor=None, product=None, gps=None, include=None):
 
     if include is not None:
         # Ugly nested load, so we don't load this class when unneeded!
-        import dev_wislab #use isWislab, getFirmwareVersion
+        import dev_sewio #use isSewio, getFirmwareVersion
         for ipaddr in filter(isIpAddr, include):
-            if dev_wislab.isWislab(ipaddr):
-                devlist.append([ipaddr, "Wislab Sniffer v{0}".format(dev_wislab.getFirmwareVersion(ipaddr)), dev_wislab.getMacAddr(ipaddr)])
+            if dev_sewio.isSewio(ipaddr):
+                devlist.append([ipaddr, "Sewio Open-Sniffer v{0}".format(dev_sewio.getFirmwareVersion(ipaddr)), dev_sewio.getMacAddr(ipaddr)])
             #NOTE: Enumerations of other IP connected sniffers go here.
             else:
                 print("kbutils.devlist has an unknown type of IP sniffer device ({0}).".format(ipaddr))

@@ -1,5 +1,6 @@
 # KillerBee Device Support for:
-# Wislab Sniffer Radio Client
+# Sewio Open-Sniffer Radio Client
+# (product previously known as Wislab Sniffer)
 # This sniffer is a remote IPv4 host.
 # 
 # (C) 2013 Ryan Speers <ryan at riverloopsecurity.com>
@@ -73,13 +74,13 @@ def getMacAddr(ip):
         print("Unable to connect to IP {0} (error: {1}).".format(ip, e))
     return None
 
-def isWislab(dev):
+def isSewio(dev):
     return ( isIpAddr(dev) and getFirmwareVersion(dev) != None )
 
-class WISLAB:
+class SEWIO:
     def __init__(self, dev=DEFAULT_IP, recvport=DEFAULT_UDP, recvip=DEFAULT_GW):
         '''
-        Instantiates the KillerBee class for the Wislab Sniffer.
+        Instantiates the KillerBee class for the Sewio Sniffer.
         @type dev:   String
         @param dev:  IP address (ex 10.10.10.2)
         @type recvport: Integer
@@ -95,14 +96,14 @@ class WISLAB:
         self.dev = dev
         
         #TODO The receive port and receive IP address are currently not 
-        # obtained from or verified against the Wislab sniffer, nor are they
+        # obtained from or verified against the Sewio sniffer, nor are they
         # used to change the settings on the sniffer.
         self.udp_recv_port = recvport
         self.udp_recv_ip   = recvip
 
         self.__revision_num = getFirmwareVersion(self.dev)
         if self.__revision_num not in TESTED_FW_VERS:
-            print("Warning: Firmware revision {0} reported by the sniffer is not currently supported. Errors may occur and dev_wislab.py may need updating.".format(self.__revision_num))
+            print("Warning: Firmware revision {0} reported by the sniffer is not currently supported. Errors may occur and dev_sewio.py may need updating.".format(self.__revision_num))
 
         self.handle = socket(AF_INET, SOCK_DGRAM)
         self.handle.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -141,7 +142,7 @@ class WISLAB:
         @rtype: List
         @return: List of 3 strings identifying device.
         '''
-        return [self.dev, "Wislab Sniffer v{0}".format(self.__revision_num), getMacAddr(self.dev)]
+        return [self.dev, "Sewio Open-Sniffer v{0}".format(self.__revision_num), getMacAddr(self.dev)]
 
     def __make_rest_call(self, path, fetch=True):
         '''
@@ -207,7 +208,7 @@ class WISLAB:
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
 
-        # Because the Wislab just toggles, we have to only hit the page 
+        # Because the Sewio just toggles, we have to only hit the page 
         # if we need to go from off to on state.
         self.__sync_status()
         if self.__stream_open == False:
@@ -228,7 +229,7 @@ class WISLAB:
         Turns the sniffer off.
         @rtype: None
         '''
-        # Because the Wislab just toggles, we have to only hit the page 
+        # Because the Sewio just toggles, we have to only hit the page 
         # if we need to go from on to off state.
         self.__sync_status()
         if self.__stream_open == True:
@@ -243,10 +244,10 @@ class WISLAB:
     @staticmethod
     def __get_default_modulation(channel):
         '''
-        Return the Wislab-specific integer representing the modulation which
+        Return the Sewio-specific integer representing the modulation which
         should be choosen to be IEEE 802.15.4 complinating for a given channel 
         number.
-        Captured values from sniffing Wislab web interface, unsure why these
+        Captured values from sniffing Sewio web interface, unsure why these
         are done as such.
         Available modulations are listed at:
         http://www.sewio.net/open-sniffer/develop/http-rest-interface/
@@ -279,7 +280,8 @@ class WISLAB:
                 #   channel 12, 250 compliant: http://10.10.10.2/settings.cgi?chn=12&modul=0&rxsens=0
                 #   chinese 0, 780 MHz, 250 compliant: http://10.10.10.2/settings.cgi?chn=128&modul=1c&rxsens=0
                 #   chinese 3, 786 MHz, 250 compliant: http://10.10.10.2/settings.cgi?chn=131&modul=1c&rxsens=0
-                self.__make_rest_call("settings.cgi?chn={0}&modul={1}&rxsens=0".format(channel, self.modulation), fetch=False)
+                #rxsens 0 is normal, 3 is high sensitivity to receive at
+                self.__make_rest_call("settings.cgi?chn={0}&modul={1}&rxsens=3".format(channel, self.modulation), fetch=False)
                 self._channel = self.__sniffer_channel()
             else:
                 self._channel = curChannel
@@ -298,7 +300,7 @@ class WISLAB:
         '''
         Parse the packet from the ZigBee encapsulation protocol version 2/3 and 
         return the fields desired for usage by pnext().
-        There is support here for some oddities specific to the Wislab 
+        There is support here for some oddities specific to the Sewio 
         implementation of ZEP and the packet, such as CC24xx format FCS 
         headers being expected.
         
@@ -325,7 +327,7 @@ class WISLAB:
             (ch, devid, crcmode, lqival, ntpsec, ntpnsec, seqnum, length) = unpack(">BHBBIII10xB", data[4:32])
             #print "Data ZEP:", ch, devid, crcmode, lqival, ntpsec, ntpnsec, seqnum, length
             #We could convert the NTP timestamp received to system time, but the
-            # Wislab firmware uses "relative timestamping" where it begins at 0 each time
+            # Sewio firmware uses "relative timestamping" where it begins at 0 each time
             # the sniffer is started. Thus, it isn't that useful to us, so we just add the
             # time the packet is received at the host instead.
             #print "\tConverted time:", ntp_to_system_time(ntpsec, ntpnsec)
@@ -400,7 +402,9 @@ class WISLAB:
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
         result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'dbm':None, 'location':None, 'datetime':recdtime}
         if rssi is not None:
-            result['dbm'] = rssi - 45 #TODO tune specifically to the platform (expect antenna varriances?)
+            # Per note from Sewino team regarding encoding of RSSI value as 2's complement dBm values
+            if rssi > 127:  result['dbm'] = rssi - 256
+            else:           result['dbm'] = rssi
         return result
 
     def jammer_on(self, channel=None):
