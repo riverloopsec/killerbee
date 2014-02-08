@@ -76,11 +76,11 @@ class KillerBee:
         # discovery, just connecting to defined addresses, so we'll check
         # first to see if we have an IP address given as our device parameter.
         if (device is not None) and kbutils.isIpAddr(device):
-            from dev_wislab import isWislab
-            if isWislab(device):
-                from dev_wislab import WISLAB
-                self.driver = WISLAB(dev=device) #give it the ip address
-            else: del isWislab
+            from dev_sewio import isSewio
+            if isSewio(device):
+                from dev_sewio import SEWIO
+                self.driver = SEWIO(dev=device) #give it the ip address
+            else: del isSewio
 
         # Figure out a device is one is not set, trying USB devices next
         if self.driver is None:
