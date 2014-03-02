@@ -56,13 +56,17 @@ zigbee_crypt = Extension('zigbee_crypt',
     
 
 setup  (name        = 'killerbee',
-        version     = '2.5.rc1',
+        version     = '2.5.0',
         description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
         author = 'Joshua Wright, Ryan Speers, Ricky Melgares',
         author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
+        license   = 'LICENSE.txt',
         packages  = ['killerbee', 'killerbee.openear', 'killerbee.zbwardrive'],
         requires = ['Crypto', 'usb', 'gtk', 'cairo'], # Not causing setup to fail, not sure why
-        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey', 'tools/zbwardrive', 'tools/zbopenear'],
+        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 
+                   'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 
+                   'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey', 
+                    'tools/zbwardrive', 'tools/zbopenear'],
         ext_modules = [ zigbee_crypt ],
         )
 
