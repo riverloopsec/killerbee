@@ -469,7 +469,7 @@ class RZUSBSTICK:
             #Note that 0,1,2 indicies inserted twice for backwards compatibility.
             return {0:framedata, 1:validcrc, 2:rssi, \
                     'bytes':framedata, 'validcrc':validcrc, 'rssi':rssi, \
-                    'dbm':rssi,'datetime':datetime.now()}
+                    'dbm':rssi,'datetime':datetime.utcnow()}
             #TODO calculate dbm based on RSSI conversion formula for the chip
         else:
             return None

@@ -10,7 +10,7 @@ triggers = []
 # Given a database and a key into the database's networks table,
 #  initiate a pcap and online database capture.
 def startCapture(dev, capChan):
-    timeLabel = datetime.now().strftime('%Y%m%d-%H%M')
+    timeLabel = datetime.utcnow().strftime('%Y%m%d-%H%M')
     print 'Cap%s: Launching a capture on channel %s.' % (dev, capChan)
     fname = 'zb_c%s_%s.pcap' % (capChan, timeLabel) #fname is -w equiv
     signal.signal(signal.SIGINT, interrupt)

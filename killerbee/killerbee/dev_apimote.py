@@ -16,7 +16,7 @@ import os
 import time
 import struct
 import time
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from kbutils import KBCapabilities, makeFCS
 from GoodFETCCSPI import GoodFETCCSPI
 
@@ -181,9 +181,9 @@ class APIMOTE:
             self.sniffer_on() #start sniffing
 
         packet = None;
-        start = datetime.now()
+        start = datetime.utcnow()
 
-        while (packet is None and (start + timedelta(microseconds=timeout) > datetime.now())):
+        while (packet is None and (start + timedelta(microseconds=timeout) > datetime.utcnow())):
             packet = self.handle.RF_rxpacket()
             rssi = self.handle.RF_getrssi() #TODO calibrate
 
@@ -197,7 +197,7 @@ class APIMOTE:
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
         result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'location':None}
         result['dbm'] = rssi - 45 #TODO tune specifically to the Apimote platform (does ext antenna need to different?)
-        result['datetime'] = datetime.combine(date.today(), (datetime.now()).time()) #TODO address timezones by going to UTC everywhere
+        result['datetime'] = datetime.utcnow()
         return result
  
     def ping(self, da, panid, sa, channel=None):

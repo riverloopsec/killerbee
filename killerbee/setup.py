@@ -1,6 +1,10 @@
 #NOTE: See the README file for a list of dependencies to install.
 
-from distutils.core import setup, Extension
+try:
+    from setuptools import setup
+except ImportError:
+    print("No setuptools found, attempting to use distutils instead.")
+    from distutils.core import setup, Extension
 import sys
 
 err = ""
@@ -67,6 +71,7 @@ setup  (name        = 'killerbee',
                    'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 
                    'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey', 
                     'tools/zbwardrive', 'tools/zbopenear'],
+        install_requires=['serial', 'usb', 'crypto'],
         ext_modules = [ zigbee_crypt ],
         )
 
