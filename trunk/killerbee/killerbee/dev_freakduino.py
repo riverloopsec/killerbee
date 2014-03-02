@@ -279,8 +279,8 @@ class FREAKDUINO:
         except:
             print "Issue with time format:", timestr, data
             time = None
-        if self.date == None: self.date = date.today()
-        if time == None or time == dttime.min: time = (datetime.now()).time()
+        if self.date == None: self.date = date.utcnow().date()
+        if time == None or time == dttime.min: time = (datetime.utcnow()).time()
         #TODO address timezones by going to UTC everywhere
         return datetime.combine(self.date, time)
 

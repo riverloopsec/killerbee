@@ -41,7 +41,7 @@ class LocationThread(threading.Thread):
         global active_queues
         global longitude, latitude, altitude, last_seen
         message = ""
-        last_seen = datetime.datetime.now()
+        last_seen = datetime.datetime.utcnow()
         while(1):
             try:
                 message = self.mesg.get(timeout=.00001)
@@ -57,9 +57,9 @@ class LocationThread(threading.Thread):
                 latitude  = t_latitude
                 longitude = t_longitude
                 altitude  = t_altitude
-                last_seen = datetime.datetime.now()
+                last_seen = datetime.datetime.utcnow()
             else:
-                end_time = datetime.datetime.now()
+                end_time = datetime.datetime.utcnow()
                 elapsed_time = end_time - last_seen
                 print chr(0x1b) + "[2;5fElapsed time since last location change: %s" % str(elapsed_time) 
             print chr(0x1b) + "[3;5fLat: %f, Long: %f, Alt: %f." % (latitude, longitude, altitude)
@@ -168,7 +168,7 @@ def main(args):
                 print 'Device at %s: \'%s\'' % (kbdev_info[i][0], kbdev_info[i][1])
                 if channel <= 26:
                     print '\tAssigning to channel %d.' % channel
-                timeLabel = datetime.datetime.now().strftime('%Y%m%d-%H%M')
+                timeLabel = datetime.datetime.utcnow().strftime('%Y%m%d-%H%M')
                 fname = 'zb_c%s_%s.pcap' % (channel, timeLabel) #fname is -w equiv
                 pcap = PcapDumper(DLT_IEEE802_15_4, fname, ppi=arg_ppi)
                 t = CaptureThread(kbdev_info[i][0], channel, pcap)

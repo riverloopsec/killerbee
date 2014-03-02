@@ -18,7 +18,7 @@ import re
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR, timeout as error_timeout
 from struct import unpack
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from kbutils import KBCapabilities, makeFCS, isIpAddr, KBInterfaceError
 
 DEFAULT_IP = "10.10.10.2"   #IP address of the sniffer
@@ -331,7 +331,7 @@ class SEWIO:
             # the sniffer is started. Thus, it isn't that useful to us, so we just add the
             # time the packet is received at the host instead.
             #print "\tConverted time:", ntp_to_system_time(ntpsec, ntpnsec)
-            recdtime = datetime.combine(date.today(), (datetime.now()).time()) #TODO address timezones by going to UTC everywhere
+            recdtime = datetime.utcnow()
             #The LQI comes in ZEP, but the RSSI comes in the first byte of the FCS,
             # if the FCS was correct. If the byte is 0xb1, Wireshark appears to do 0xb1-256 = -79 dBm.
             # It appears that if CRC/LQI Mode field == 1, then checksum was bad, so the RSSI isn't
@@ -355,7 +355,7 @@ class SEWIO:
         elif zeptype == 2: #ack
             frame = data[8:]
             (seqnum) = unpack(">I", data[4:8])
-            recdtime = datetime.combine(date.today(), (datetime.now()).time()) #TODO address timezones by going to UTC everywhere
+            recdtime = datetime.utcnow()
             validcrc = (frame[-2:] == makeFCS(frame[:-2]))
             return (frame, None, validcrc, None, None, recdtime)
         return None
@@ -376,7 +376,7 @@ class SEWIO:
         self.handle.settimeout(timeout / 1000000.0) # it takes seconds
 
         frame = None
-        donetime = datetime.now() + timedelta(microseconds=timeout)
+        donetime = datetime.utcnow() + timedelta(microseconds=timeout)
         while True:
             try:
                 data, addr = self.handle.recvfrom(1024)

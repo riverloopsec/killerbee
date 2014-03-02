@@ -49,7 +49,7 @@ class CaptureThread(threading.Thread):
         self.useDBlog = dblog
         self.currentGPS = gps
 
-        timeLabel = datetime.now().strftime('%Y%m%d-%H%M')
+        timeLabel = datetime.utcnow().strftime('%Y%m%d-%H%M')
         fname = 'zb_c%s_%s.pcap' % (channel, timeLabel) #fname is -w equiv
         self.pd = PcapDumper(DLT_IEEE802_15_4, fname, ppi=True)
 
