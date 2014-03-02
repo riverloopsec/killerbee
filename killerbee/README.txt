@@ -2,15 +2,15 @@ This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4
 networks.
 
 Copyright 2009, Joshua Wright <jwright@willhackforsushi.com>
-Copyright 2010-13, Ryan Speers <ryan@rmspeers.com>
-                   Ricky Melgares <rmelgares@dartmouth.edu>
+Copyright 2010-14, Ryan Speers <ryan@riverloopsecurity.com>
+                   Ricky Melgares <ricky@riverloopsecurity.com>
 All Rights Reserved.
 
 Distributed under a BSD license, see LICENSE for details.
 
 
 REQUIREMENTS
-
+================
 KillerBee is developed and tested on Linux systems.  Windows support may be
 added in the future.
 
@@ -41,7 +41,7 @@ this framework.
 
 
 INSTALLATION
-
+================
 KillerBee uses the standard Python 'setup.py' installation file.  Install
 KillerBee with the following command:
 
@@ -49,7 +49,7 @@ KillerBee with the following command:
 
 
 DIRECTORIES
-
+================
 The directory structure for the KillerBee code is described as follows:
 
 doc       - HTML documentation on the KillerBee library, courtesy of epydoc.
@@ -61,7 +61,7 @@ tools     - ZigBee and IEEE 802.15.4 attack tools developed using this
             framework.
 
 REQUIRED HARDWARE
-
+================
 The KillerBee framework is being expanded to support multiple devices.
 Currently there is support for the Atmel RZ RAVEN USB Stick, the MoteIV Tmote
 Sky, and the TelosB mote. Support for Freaklab's Freakduino with added hardware
@@ -116,7 +116,7 @@ and we'll happily flash it for you.
 
 
 TOOLS
-
+================
 KillerBee includes several tools designed to attack ZigBee and IEEE 802.15.4
 networks, built using the KillerBee framework.  Each tool has its own usage
 instructions documented by running the tool with the "-h" argument, and
@@ -182,7 +182,7 @@ Additional tools are coming.  Stay tuned.
 
 
 FRAMEWORK
-
+==============
 KillerBee is designed to simplify the process of sniffing packets from the air
 interface or a supported packet capture file (libpcap or Daintree SNA), and for
 injecting arbitrary packets.  Helper functions including IEEE 802.15.4, ZigBee
@@ -211,12 +211,13 @@ mechanism for generating and transmitting malformed ZigBee data to a target.
 
 
 QUESTIONS/COMMENTS/CONCERNS
-
-Please drop me a note: jwright@willhackforsushi.com
-Bug fixes, updates, etc: ryan@rmspeers.com
+==============
+Please drop us a note: 
+The original version was written by: jwright@willhackforsushi.com
+The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
 
 THANKS
-
+==============
 A word of thanks to several folks who helped out with this project:
 
 Travis Goodspeed

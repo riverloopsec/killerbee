@@ -147,7 +147,7 @@ class KillerBee:
                     elif gfccspi and subtype == 1:
                         from dev_apimote import APIMOTE
                         self.driver = APIMOTE(self.dev, revision=1)
-                    elif gfccspi and subtype == 2:
+                    if gfccspi and subtype == 2:
                         from dev_apimote import APIMOTE
                         self.driver = APIMOTE(self.dev, revision=2)
                     else:
@@ -175,30 +175,6 @@ class KillerBee:
         '''
         if self.dev.idVendor == vendorId and self.dev.idProduct == productId: return True
         else: return False
-
-    #Deprecated in class
-    def __search_usb(self, device, vendor=None, product=None):
-        '''
-        Deprecated in class, use kbutils.search_usb(device, vendor, product) instead of class version.
-        '''
-        raise DeprecationWarning("Use kbutils.search_usb(device, vendor, product) instead of class version.")
-        #return kbutils.search_usb(device, vendor, product)
-
-    #Deprecated in class
-    def __search_usb_bus(self, bus, device, vendor=None, product=None):
-        '''
-        Deprecated in class, use kbutils.search_usb_bus(bus, device, vendor, product) instead of class version.
-        '''
-        raise DeprecationWarning("Use kbutils.search_usb_bus(bus, device, vendor, product) instead of class version.")
-        #return kbutils.search_usb_bus(bus, device, vendor, product)
-
-    #Deprecated in class
-    def dev_list(self, vendor=None, product=None):
-        '''
-        Deprecated in class, use kbutils.devlist() instead.
-        '''
-        raise DeprecationWarning("Use kbutils.devlist(vendor, product) instead of class version.")
-        #return kb_dev_list(vendor, product)
 
     def get_dev_info(self):
         '''
