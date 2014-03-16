@@ -6,13 +6,12 @@ setattr(conf, 'killerbee_channel', DEFAULT_KB_CHANNEL)
 setattr(conf, 'killerbee_device', DEFAULT_KB_DEVICE)
 setattr(conf, 'killerbee_nkey', None)
 from scapy.base_classes import SetGen
-from scapy.packet import Gen,Raw
+from scapy.packet import Gen, Raw
 from scapy.all import *
 
-import os
-import time
-import struct
+import os, time, struct
 from kbutils import randmac
+
 import logging
 log_killerbee = logging.getLogger('scapy.killerbee')
 
