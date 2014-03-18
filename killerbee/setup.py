@@ -1,7 +1,7 @@
 #NOTE: See the README file for a list of dependencies to install.
 
 try:
-    from setuptools import setup
+    from setuptools import setup, Extension
 except ImportError:
     print("No setuptools found, attempting to use distutils instead.")
     from distutils.core import setup, Extension
