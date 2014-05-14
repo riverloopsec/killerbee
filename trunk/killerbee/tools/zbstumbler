@@ -48,13 +48,13 @@ def display_details(routerdata):
         stackprofilestr = "Unknown (%d)"%stackprofile
 
     try:
-        print "\tStack Version: %s"%stackver_map[stackver]
+        print("\tStack Version: {0}".format(stackver_map[stackver]))
         stackverstr = stackver_map[stackprofile]
     except KeyError:
-        print "\tStack Version: Unknown (%d)"%stackver
+        print("\tStack Version: Unknown ({0})".format(stackver))
         stackverstr = "Unknown (%d)"%stackver
 
-    print "\tChannel: %d"%channel
+    print("\tChannel: {0}".format(channel))
 
     if args.csvfile is not None:
         csvfile.write("0x%02X%02X,0x%02X%02X,%s,%s,%s,%d\n"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1]), extpanidstr, stackprofilestr, stackverstr, channel))
@@ -104,7 +104,7 @@ def interrupt(signum, frame):
     if args.csvfile is not None:
         csvfile.close()
     kb.close()
-    print "\n%d packets transmitted, %d responses." % (txcount, rxcount)
+    print("\n{0} packets transmitted, {1} responses.".format(txcount, rxcount))
     sys.exit(0)
 
 if __name__ == '__main__':
@@ -136,9 +136,14 @@ if __name__ == '__main__':
     beaconp1 = beacon[0:2]
     beaconp2 = beacon[3:]
 
-    kb = KillerBee(device=args.devstring)
+    try:
+        kb = KillerBee(device=args.devstring)
+    except KBInterfaceError as e:
+        print("Interface Error: {0}".format(e))
+        sys.exit(-1)
+
     signal.signal(signal.SIGINT, interrupt)
-    print "zbstumbler: Transmitting and receiving on interface \'%s\'" % kb.get_dev_info()[0]
+    print("zbstumbler: Transmitting and receiving on interface \'{0}\'".format(kb.get_dev_info()[0]))
     
     # Sequence number of beacon request frame
     seqnum = 0
@@ -158,18 +163,17 @@ if __name__ == '__main__':
     
         if not args.channel:
             if args.verbose:
-                print "Setting channel to %d"%channel
+                print("Setting channel to {0}.".format(channel))
             try:
                 kb.set_channel(channel)
             except Exception, e:
-                print "ERROR: Failed to set channel to %d"%channel
-                print e
+                print("ERROR: Failed to set channel to {0}. ({1})".format(channel, e))
                 sys.exit(-1)
     
         if args.verbose:
-            print "Transmitting beacon request."
+            print("Transmitting beacon request.")
 
-        beaconinj = ''.join([beaconp1, "%c"%seqnum, beaconp2])
+        beaconinj = ''.join([beaconp1, "%c" % seqnum, beaconp2])
 
         # Process packets for arg_delay seconds looking for the beacon
         # response frame.
@@ -179,8 +183,7 @@ if __name__ == '__main__':
             txcount+=1
             kb.inject(beaconinj)
         except Exception, e:
-            print "ERROR: Unable to inject packet"
-            print e
+            print("ERROR: Unable to inject packet: {0}".format(e))
             sys.exit(-1)
 
         while (start+args.delay > time.time()):
@@ -190,7 +193,7 @@ if __name__ == '__main__':
             if recvpkt != None and recvpkt[1]:
                 rxcount += 1
                 if args.verbose:
-                    print "Received frame."#, time.time()-start
+                    print("Received frame.")#, time.time()-start
                 networkdata = response_handler(stumbled, recvpkt[0], channel) 
 
         kb.sniffer_off()    
