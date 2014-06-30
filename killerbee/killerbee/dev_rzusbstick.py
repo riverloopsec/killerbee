@@ -138,6 +138,12 @@ class RZUSBSTICK:
         self.capabilities = KBCapabilities()
         self.__set_capabilities()
 
+    def __del__(self):
+        try:
+            self.close()
+        except:
+            pass
+
     def __handle_open(self):
         '''
         Opens the device identified as self.dev, populating self.handle.
@@ -194,6 +200,8 @@ class RZUSBSTICK:
         '''
         if USBVER == 0:
             self.handle.releaseInterface()
+        else:
+            usb.util.release_interface(self.dev, 0)
 
     # KillerBee implements these, maybe it shouldn't and instead leave it to the driver as needed.
     def check_capability(self, capab):

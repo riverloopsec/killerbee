@@ -99,7 +99,7 @@ def kbdev():
     show_dev()
 
 @conf.commands.register
-def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, verbose = None, realtime=None):
+def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None, verbose = None, realtime=None):
     """
     Send a packet with KillerBee
     @param channel:  802.15.4 channel to transmit/receive on
@@ -120,7 +120,7 @@ def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, verbose = No
     else:
         kb = iface
     
-    pkts_out = __kb_send(kb, pkt, inter = inter, loop = loop, count = None, verbose = verbose, realtime = realtime)
+    pkts_out = __kb_send(kb, pkt, inter = inter, loop = loop, count = count, verbose = verbose, realtime = realtime)
     print "\nSent %i packets." % pkts_out
 
 @conf.commands.register
