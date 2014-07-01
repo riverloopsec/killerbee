@@ -119,6 +119,10 @@ def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None
         kb.set_channel(channel)
     else:
         kb = iface
+
+    # Make sure the packet has 2 bytes for FCS before TX
+    if not pkt.haslayer(Dot15d4FCS):
+        pkt/=Raw("\x00\x00")
     
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = loop, count = count, verbose = verbose, realtime = realtime)
     print "\nSent %i packets." % pkts_out
@@ -154,6 +158,10 @@ def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, pr
         kb.set_channel(channel)
     else:
         kb = iface
+    
+    # Make sure the packet has an FCS layer before TX
+    if not pkt.haslayer(Dot15d4FCS):
+        pkt/=Raw("\x00\x00")
     
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = 0, count = None, verbose = verbose, realtime = realtime)
     if verbose:
