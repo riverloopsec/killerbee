@@ -80,8 +80,6 @@ def __kb_recv(kb, count = 0, store = 1, prn = None, lfilter = None, stop_filter 
                 lst.append(packet)
             if prn:
                 r = prn(packet)
-                if r is not None:
-                    print r
             if stop_filter and stop_filter(packet):
                 break
             if count > 0 and packetcount >= count:
