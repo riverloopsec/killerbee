@@ -418,7 +418,11 @@ def kbdecrypt(pkt, key = None, verbose = None):
     encrypted = f['data']
 
     sec_ctrl_byte = str(pkt.getlayer(ZigbeeSecurityHeader))[0]
-    nonce = struct.pack('L',f['ext_source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
+
+    # Bug fix thanks to cutaway (https://code.google.com/p/killerbee/issues/detail?id=25):
+    #nonce = struct.pack('L',f['ext_source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
+    nonce = struct.pack('L',f['ext_src'])+struct.pack('I',f['fc']) + sec_ctrl_byte
+
     #nonce = "" # build the nonce
     #nonce += struct.pack(">Q", f['ext_source'])
     #nonce += struct.pack(">I", f['fc'])
