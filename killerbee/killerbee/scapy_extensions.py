@@ -8,6 +8,9 @@ setattr(conf, 'killerbee_nkey', None)
 from scapy.base_classes import SetGen
 from scapy.packet import Gen, Raw
 from scapy.all import *
+# This line will allow KillerBee's pcap reader to overwrite scapy's reader that is imported on the
+# above line, per suggestion from cutaway at https://code.google.com/p/killerbee/issues/detail?id=28:
+from killerbee import *
 
 import os, time, struct
 from kbutils import randmac
