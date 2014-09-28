@@ -11,7 +11,9 @@ except ImportError:
 	from sys import exit
 	exit(-1)
 
-from killerbee import *
+# Per cutaway at https://code.google.com/p/killerbee/issues/detail?id=28, this has been
+# moved to scapy_extensions.py for now. That should allow KillerBee's PCAP reader.
+#from killerbee import *
 from killerbee.scapy_extensions import *	# this is explicit because I didn't want to modify __init__.py
 
 del hexdump
