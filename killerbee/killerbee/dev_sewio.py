@@ -262,7 +262,7 @@ class SEWIO:
     # KillerBee expects the driver to implement this function
     def set_channel(self, channel):
         '''
-        Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
+        Sets the radio interface to the specified channel, and the matching modulation setting.
         @type channel: Integer
         @param channel: Sets the channel, optional
         @rtype: None
