@@ -413,7 +413,12 @@ def kbdecrypt(pkt, key = None, verbose = None):
         log_killerbee.error("Could not import zigbee_crypt extension, cryptographic functionality is not available.")
         return None
 
-    pkt.nwk_seclevel=5
+    #TODO: Investigate and issue a different fix:
+    # https://code.google.com/p/killerbee/issues/detail?id=30
+    # This function destroys the packet, therefore work on a copy - @cutaway
+    pkt = pkt.copy()   #this is hack to fix the below line
+    pkt.nwk_seclevel=5 #the issue appears to be when this is set
+
     #mic = struct.unpack(">I", f['mic'])
     mic = pkt.mic
 

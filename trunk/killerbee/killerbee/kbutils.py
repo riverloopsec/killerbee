@@ -330,7 +330,7 @@ def isgoodfetccspi(serialdev):
         gf.serClose()        
         if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
             return True, 1
-    # Nothing found        
+    # Nothing found
     return False, None
 
 def iszigduino(serialdev):

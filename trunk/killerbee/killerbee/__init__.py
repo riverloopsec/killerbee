@@ -147,7 +147,7 @@ class KillerBee:
                     elif gfccspi and subtype == 1:
                         from dev_apimote import APIMOTE
                         self.driver = APIMOTE(self.dev, revision=1)
-                    if gfccspi and subtype == 2:
+                    elif gfccspi and subtype == 2:
                         from dev_apimote import APIMOTE
                         self.driver = APIMOTE(self.dev, revision=2)
                     else:
@@ -198,9 +198,17 @@ class KillerBee:
         '''
         Uses the specified capability to determine if the opened device
         is supported.  Returns True when supported, else False.
-        @rtype:  Boolean
+        @rtype: Boolean
         '''
         return self.driver.capabilities.check(capab)
+
+    def is_valid_channel(self, channel):
+        '''
+        Use the driver's capabilities class to determine if a requested channel number
+        is within the capabilities of that device.
+        @rtype: Boolean
+        '''
+        return self.driver.capabilities.is_valid_channel(channel)
 
     def get_capabilities(self):
         '''

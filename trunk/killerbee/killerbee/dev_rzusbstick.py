@@ -382,7 +382,7 @@ class RZUSBSTICK:
         if self.__cmdmode != RZ_CMD_MODE_AC:
             self._set_mode(RZ_CMD_MODE_AC)
 
-        if 10 <= channel <= 26:
+        if 11 <= channel <= 26:
             self._channel = channel #update driver's notion of current channel
             self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_SET_CHANNEL, channel])
         else:
