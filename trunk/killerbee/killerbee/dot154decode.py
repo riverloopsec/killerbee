@@ -118,7 +118,7 @@ class Dot154PacketParser:
         plainText = crypt.decrypt(cipherText)[0:len(C)]
         
         # 6. Compute S_0 as E(Key, A[0])
-        crypt = AES.new(key, AES.MODE_CBC)
+        crypt = AES.new(key, AES.MODE_CBC, "\x00"*16)
         S_0 = crypt.encrypt(self.__crypt_A_i[0])
         
         # 7. Compute MIC (T) observed as S_0 XOR U
