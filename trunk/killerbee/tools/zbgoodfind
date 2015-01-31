@@ -1,10 +1,4 @@
-#!/usr/bin/env python
-
-'''
-Search a binary file to identify the encryption key for a given
-SNA or libpcap IEEE 802.15.4 encrypted packet.
-'''
-
+#!/usr/bin/python
 import sys
 import random
 import signal
@@ -59,9 +53,9 @@ def keysearch(packet, searchdata):
         guesses += 1
         if d.decrypt(packet, searchdata[offset:offset+16]) != '':
             print "Key found after %d guesses: " % guesses,
-            for i in xrange(0,16):
-                print "%02x" % ord(searchdata[offset+i]),
-            print
+            for i in xrange(0,15):
+                sys.stdout.write("%02x:" % ord(searchdata[offset+i]))
+            print "%02x" % ord(searchdata[offset+15])
             return True
         else:
             offset+=1
