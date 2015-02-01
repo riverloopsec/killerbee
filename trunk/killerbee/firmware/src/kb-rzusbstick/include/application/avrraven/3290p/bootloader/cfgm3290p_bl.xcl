@@ -1,0 +1,61 @@
+//////////////////////////////////////////////////////////////////////////////
+//
+// Contains resource definitions at Atmel ATmega6490
+//
+// File version: $Revision: 1.9 $
+//
+// The '_..X_' prefix is used by C-SPY as an indication that the label should
+// not be displayed in the dissassembly window.
+//
+
+//////////////////////////////////////////////////////////////////////////////
+// Code (flash) segments
+-D_..X_INTVEC_SIZE=64   // 4 bytes * 25 vectors
+-D_..X_FLASH_NEND=7FFF  // End of near flash memory
+-D_..X_FLASH_END=7FFF   // End of flash memory
+
+//////////////////////////////////////////////////////////////////////////////
+// Data (SRAM, external ROM or external NV RAM) memory
+-D_..X_SRAM_BASE=1FF    // Start of ram memory
+-D_..X_SRAM_TBASE=1FF     // Start of tiny ram memory
+-D_..X_SRAM_TSIZE=21FF     //Size of the tiny ram memory
+-D_..X_SRAM_END=21FF     // End of ram memory
+
+-D_..X_EXT_SRAM_BASE=_..X_SRAM_END     // External memory not possible
+-D_..X_EXT_SRAM_SIZE=0                 // External memory not possible
+-D_..X_EXT_ROM_BASE=_..X_SRAM_END      // External memory not possible
+-D_..X_EXT_ROM_SIZE=0                  // External memory not possible
+-D_..X_EXT_NV_BASE=_..X_SRAM_END       // External memory not possible
+-D_..X_EXT_NV_SIZE=0                   // External memory not possible
+
+//////////////////////////////////////////////////////////////////////////////
+// Internal EEPROM
+-D_..X_EEPROM_END=7FF   // End of eeprom memory
+-D_..X_EEPROM_START=0
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Code (flash) segments
+-Z(CODE)INTVEC=7000-(7000+64)
+-Z(CODE)TINY_F=7064-(7100+FF)
+-Z(CODE)NEAR_F=7064-_..X_FLASH_NEND
+-Z(CODE)CODE=7064-_..X_FLASH_END
+-Z(CODE)FAR_F=[7064-_..X_FLASH_END]/10000
+-Z(CODE)INITTAB=7064-_..X_FLASH_END
+-Z(CODE)HUGE_F=7064-_..X_FLASH_END
+-Z(CODE)TINY_ID=7064-_..X_FLASH_END
+-Z(CODE)NEAR_ID=7064-_..X_FLASH_END
+-Z(CODE)SWITCH=7064-_..X_FLASH_END
+
+//////////////////////////////////////////////////////////////////////////////
+// Data (SRAM, external ROM or external NV RAM) memory
+-Z(DATA)TINY_I,TINY_Z,TINY_N=_..X_SRAM_TBASE:+_..X_SRAM_TSIZE
+-Z(DATA)CSTACK+_..X_CSTACK_SIZE=_..X_SRAM_TBASE:+_..X_SRAM_TSIZE
+-Z(DATA)HEAP+_..X_HEAP_SIZE=_..X_SRAM_TBASE:+_..X_SRAM_TSIZE
+-Z(DATA)IOSTREAM_N#_..X_SRAM_TBASE:+_..X_SRAM_TSIZE
+-Z(DATA)TINY_HEAP+_..X_TINY_HEAP_SIZE=_..X_SRAM_TBASE:+_..X_SRAM_TSIZE
+-Z(DATA)RSTACK+_..X_RSTACK_SIZE=_..X_RSTACK_BASE-_..X_RSTACK_END
+-Z(DATA)NEAR_I,NEAR_Z=_..X_SRAM_BASE-_..X_SRAM_END,_..X_EXT_SRAM_BASE:+_..X_EXT_SRAM_SIZE
+-Z(DATA)NEAR_HEAP+_..X_NEAR_HEAP_SIZE=_..X_SRAM_BASE-_..X_SRAM_END,_..X_EXT_SRAM_BASE:+_..X_EXT_SRAM_SIZE
+-Z(DATA)NEAR_C=_..X_EXT_ROM_BASE:+_..X_EXT_ROM_SIZE
+-Z(DATA)NEAR_N=_..X_EXT_NV_BASE:+_..X_EXT_NV_SIZE
