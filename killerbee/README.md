@@ -26,7 +26,9 @@ cairo   (for use of tools that have GUIs)
 On Ubuntu systems, you can install the needed dependencies with the following
 command line:
 
+```
 # apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
+```
 
 The last two dependencies (python-dev and libgcrypt) are required for the Scapy
 Extension Patch (thanks to Spencer McIntyre for the patch).
@@ -45,20 +47,20 @@ INSTALLATION
 KillerBee uses the standard Python 'setup.py' installation file.  Install
 KillerBee with the following command:
 
+```
 # python setup.py install
-
+```
 
 DIRECTORIES
 ================
 The directory structure for the KillerBee code is described as follows:
 
-doc       - HTML documentation on the KillerBee library, courtesy of epydoc.
-firmware  - Firmware for supported KillerBee hardware devices.
-killerbee - Python library source.
-sample    - Sample packet captures, referenced below.
-scripts   - Shell scripts used in development.
-tools     - ZigBee and IEEE 802.15.4 attack tools developed using this
-            framework.
++ doc       - HTML documentation on the KillerBee library, courtesy of epydoc.
++ firmware  - Firmware for supported KillerBee hardware devices.
++ killerbee - Python library source.
++ sample    - Sample packet captures, referenced below.
++ scripts   - Shell scripts used in development.
++ tools     - ZigBee and IEEE 802.15.4 attack tools developed using this framework.
 
 REQUIRED HARDWARE
 ================
@@ -81,8 +83,9 @@ attack functionality.
 
 The RZ RAVEN USB Stick is available from common electronics resellers for
 approximately $40/USD:
-Mouser: http://bit.ly/vZ2pt
-Digi-Key: http://bit.ly/3T8MaK
+
++ Mouser: http://bit.ly/vZ2pt
++ Digi-Key: http://bit.ly/3T8MaK
 
 The stock firmware shipped with this hardware allows you to leverage the passive
 functionality included in the KillerBee tools and framework (such as receiving
@@ -117,7 +120,9 @@ Connect the AVR Dragon programmer to the ribbon cable, and connect the 100-mm to
 header.  Prepare your terminal to flash the RZ Raven USB stick by entering the following command at a
 command prompt (but don't hit enter yet):
 
+```
 avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-001.hex
+```
 
 Insert the header into the RZ Raven USB Stick with pin 1 closest to the LEDs (farthest from the USB
 connector).  You could solder it in place, but we don't bother.  Just hold it at an angle so all the pins
@@ -168,22 +173,22 @@ instructions documented by running the tool with the "-h" argument, and
 summarized below.
 
 
-zbopenear    -  Assists in data capture where devices are operating on multiple 
++ zbopenear    -  Assists in data capture where devices are operating on multiple 
                 channels or fast-frequency-hopping. It assigns multiple 
                 interfaces sequentially across all channels.
-zbassocflood -  Repeatedly associate to the target PANID in an effort to cause
++ zbassocflood -  Repeatedly associate to the target PANID in an effort to cause
                 the device to crash from too many connected stations.
-zbconvert    -  Convert a packet capture from Libpcap to Daintree SNA format,
++ zbconvert    -  Convert a packet capture from Libpcap to Daintree SNA format,
                 or vice-versa.
-zbdsniff     -  Captures ZigBee traffic, looking for NWK frames and over-the-air
++ zbdsniff     -  Captures ZigBee traffic, looking for NWK frames and over-the-air
                 key provisioning.  When a key is found, zbdsniff prints the
                 key to stdout.  The sample packet capture
                 sample/zigbee-network-key-ota.dcf can be used to demonstrate
                 this functionality.
-zbdump       -  A tcpdump-like took to capture IEEE 802.15.4 frames to a libpcap
++ zbdump       -  A tcpdump-like took to capture IEEE 802.15.4 frames to a libpcap
                 or Daintree SNA packet capture file.  Does not display real-time
                 stats like tcpdump when not writing to a file.
-zbfind       -  A GTK GUI application for tracking the location of an IEEE
++ zbfind       -  A GTK GUI application for tracking the location of an IEEE
                 802.15.4 transmitter by measuring RSSI.  Zbfind can be passive
                 in discovery (only listen for packets) or it can be active by
                 sending Beacon Request frames and recording the responses from
@@ -192,7 +197,7 @@ zbfind       -  A GTK GUI application for tracking the location of an IEEE
                 sure your DISPLAY variable is set properly.  If you know how
                 to catch these errors to display a reasonable error message,
                 please drop me a note.
-zbgoodfind   -  Implements a key search function using an encrypted packet
++ zbgoodfind   -  Implements a key search function using an encrypted packet
                 capture and memory dump from a legitimate ZigBee or IEEE
                 802.15.4 device.  This tool accompanies Travis Goodspeed's
                 GoodFET hardware attack tool, or other binary data that could
@@ -201,23 +206,23 @@ zbgoodfind   -  Implements a key search function using an encrypted packet
                 must be in binary format (obj hexfile's are not supported). To
                 convert from the hexfile format to a binary file, use the
                 objcopy tool: objcopy -I ihex -O binary mem.hex mem.bin
-zbid         -  Identifies available interfaces that can be used by KillerBee
++ zbid         -  Identifies available interfaces that can be used by KillerBee
                 and associated tools.
-zbreplay     -  Implements a replay attack, reading from a specified Daintree
++ zbreplay     -  Implements a replay attack, reading from a specified Daintree
                 DCF or libpcap packet capture file, retransmitting the frames.
                 ACK frames are not retransmitted.
-zbstumbler   -  Active ZigBee and IEEE 802.15.4 network discovery tool.
++ zbstumbler   -  Active ZigBee and IEEE 802.15.4 network discovery tool.
                 Zbstumbler sends beacon request frames out while channel
                 hopping, recording and displaying summarized information about
                 discovered devices.  Can also log results to a CSV file.
-zbwardrive   -	Discovers available interfaces and uses one to inject beacon 
++ zbwardrive   -	Discovers available interfaces and uses one to inject beacon 
                 requests and listen for respones across channels. Once a network
                 is found on a channel, it assigns another device to continuously
                 capture traffic on that channel to a PCAP file. Scapy must be 
                 installed to run this.
-zbscapy      -  Provides an interactive Scapy shell for interacting via a
++ zbscapy      -  Provides an interactive Scapy shell for interacting via a
                 KillerBee interface. Scapy must be installed to run this.
-zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time 
++ zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time 
                 capture and viewing in Wireshark.
 
 Additional tools, that are for special cases or are not stable, are stored in
@@ -263,12 +268,12 @@ THANKS
 ==============
 A word of thanks to several folks who helped out with this project:
 
-Travis Goodspeed
-Mike Kershaw (dragorn)
-Chris Wang (aikiba)
-Nick DePetrillo
-Ed Skoudis
-Matt Carpenter
-Sergey Bratus (research support at Dartmouth)
-Jeff Spielberg
++ Travis Goodspeed
++ Mike Kershaw (dragorn)
++ Chris Wang (aikiba)
++ Nick DePetrillo
++ Ed Skoudis
++ Matt Carpenter
++ Sergey Bratus (research support at Dartmouth)
++ Jeff Spielberg
 
