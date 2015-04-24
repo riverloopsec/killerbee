@@ -2,7 +2,7 @@ This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4
 networks.
 
 Copyright 2009, Joshua Wright <jwright@willhackforsushi.com>
-Copyright 2010-14, Ryan Speers <ryan@riverloopsecurity.com>
+Copyright 2010-15, Ryan Speers <ryan@riverloopsecurity.com>
                    Ricky Melgares <ricky@riverloopsecurity.com>
 All Rights Reserved.
 
@@ -93,25 +93,70 @@ In order to get the full functionality included in KillerBee, the RZ RAVEN USB
 Stick must be flashed with the custom firmware included in the firmware/ 
 directory.  This process requires additional hardware and software:
 
-  + Hardware: Atmel RZ Raven USB Stick
-  + Hardware: Atmel JTAGICE mkII On-Chip Programmer
-  + Software: AVR Studio for Windows (free)
-  + Software: KillerBee Firmware for the RZUSBSTICK (free)
-  + A Windows host for programming the RZ Raven USB Stick (one time operation)
+  + Hardware: Atmel RZ Raven USB Stick (RZUSBSTICK)
+  + Hardware: Atmel AVR Dragon On-Chip Programmer (ATAVRDRAGON)
+  + Hardware: Atmel 100-mm to 50-mm JTAG Standoff Adapter (ATAVR-SOAKIT)
+  + Hardware: 50mm male-to-male header (Digi-Key part S9015E-05)
+  + Hardware: 10-pin (2x5) 100-mm female-to-female ribbon cable (Digi-Key part H3AAH-1018G-ND)
+  + Software: AVRDUDE (http://winavr.sourceforge.net for Windows or http://www.nongnu.org/avrdude for Linux)
+  + Software: KillerBee Firmware for the RZUSBSTICK
+  + A Windows or Linux system for programming the RZ Raven USB Stick (one time operation)
 
-The problematic component in this list of the JTAGICE mkII programmer, as this
-device retails for $300.  While often available in EBay for much less (beware
-imitators, however, as these knock-off programmers may not work properly on all
-Atmel hardware), this device is required to flash the KillerBee firmware onto a
-RZ RAVEN USB Stick using the included 10-pin header interface.
+For Windows users, install the AVR Dragon drivers provided with the libusb-win32 software
+(http://sourceforge.net/projects/libusb-win32).  Download and extract the zip file, then launch the
+libusb-win32 "inf-wizard.exe" executable.  Connect the AVR Dragon to a USB port and click Next in the wizard
+to detect and identify the USB vendor ID and product ID 0x03EB and 0x2107 for the AVRDRAGON.  Complete the
+wizard by clicking Next, then Finish to install the drivers.  When prompted by Windows, click "Install This
+Driver Sofware Anyway".
 
-You can flash the RZ RAVEN USB Stick using the AVR Studio Software (Tools ->
-Program AVR) and the supplied firmware with the JTAGICE mkII programmer.  The
-firmware included in KillerBee should applied to the Flash memory of the RZ USB
-Stick.  See http://bit.ly/3ttLTc for an additional example, or contact the
-author for additional information.
+Download the RZ Raven USB Stick firmware from 
+https://raw.githubusercontent.com/riverloopsec/killerbee/master/killerbee/firmware/kb-rzusbstick-001.hex.
+Copy the firmware file to the directory where you extracted the AVRDUDE software.
 
-If you are able to catch us at a conference, bring your RZ RAVEN USB Stick
+Connect the AVR Dragon programmer to the ribbon cable, and connect the 100-mm to 50-mm adapter with the
+header.  Prepare your terminal to flash the RZ Raven USB stick by entering the following command at a
+command prompt (but don't hit enter yet):
+
+avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-001.hex
+
+Insert the header into the RZ Raven USB Stick with pin 1 closest to the LEDs (farthest from the USB
+connector).  You could solder it in place, but we don't bother.  Just hold it at an angle so all the pins
+make contact and hit enter where you typed the AVRDUDE comand.  You should see output similar to the following:
+
+```
+
+C:\Users\jwright\Downloads>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-001.hex
+
+avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
+avrdude: AVR device initialized and ready to accept instructions
+Reading | #################################################| 100% 0.05s
+avrdude: Device signature = 0x1e9782
+avrdude: NOTE: FLASH memory has been specified, an erase cycle will be performed
+         To disable this feature, specify the -D option.
+avrdude: erasing chip
+avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
+avrdude: reading input file "kb-rzusbstick-001.hex"
+avrdude: input file kb-rzusbstick-001.hex auto detected as Intel Hex
+avrdude: writing flash (26778 bytes):
+Writing | #################################################| 100% 3.44s
+avrdude: 26778 bytes of flash written
+avrdude: verifying flash memory against kb-rzusbstick-001.hex:
+avrdude: load data flash data from input file kb-rzusbstick-001.hex:
+avrdude: input file kb-rzusbstick-001.hex auto detected as Intel Hex
+avrdude: input file kb-rzusbstick-001.hex contains 26778 bytes
+avrdude: reading on-chip flash data:
+Reading | #################################################| 100% 3.79s
+avrdude: verifying ...
+avrdude: 26778 bytes of flash verified
+avrdude: safemode: Fuses OK
+avrdude done.  Thank you.
+
+```
+
+It should only take a few seconds to complete.  For a more detailed, picture-rich set of
+instructions, grab a copy of Hacking Exposed Wireless 3rd Edition (chapter 14).
+
+Alternatively, if you are able to catch us at a conference, bring your RZ RAVEN USB Stick
 and we'll happily flash it for you.
 
 
@@ -177,8 +222,6 @@ zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time
 
 Additional tools, that are for special cases or are not stable, are stored in
     the Api-Do project repository: http://code.google.com/p/zigbee-security/
-
-Additional tools are coming.  Stay tuned.
 
 
 FRAMEWORK
