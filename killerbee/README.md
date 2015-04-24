@@ -1,9 +1,13 @@
+KillerBee
+================
+
 This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4
 networks.
 
-Copyright 2009, Joshua Wright <jwright@willhackforsushi.com>
-Copyright 2010-15, Ryan Speers <ryan@riverloopsecurity.com>
+Copyright 2009, Joshua Wright <jwright@willhackforsushi.com>.
+Copyright 2010-2015, Ryan Speers <ryan@riverloopsecurity.com>
                    Ricky Melgares <ricky@riverloopsecurity.com>
+
 All Rights Reserved.
 
 Distributed under a BSD license, see LICENSE for details.
@@ -159,10 +163,9 @@ avrdude done.  Thank you.
 ```
 
 It should only take a few seconds to complete.  For a more detailed, picture-rich set of
-instructions, grab a copy of Hacking Exposed Wireless 3rd Edition (chapter 14).
-
-Alternatively, if you are able to catch us at a conference, bring your RZ RAVEN USB Stick
-and we'll happily flash it for you.
+instructions, grab a copy of Hacking Exposed Wireless 3rd Edition (chapter 14).  Alternatively,
+if you are able to catch us at a conference, bring your RZ RAVEN USB Stick and we'll happily
+flash it for you.
 
 
 TOOLS
@@ -240,9 +243,12 @@ The KillerBee API is documented in epydoc format, with HTML documentation in
 the doc/ directory of this distribution.  If you have epydoc installed, you can
 also generate a convenient PDF for printing, if desired, as shown:
 
+```
 $ cd killerbee
 $ mkdir pdf
 $ epydoc --pdf -o pdf killerbee/
+```
+
 
 The pdf/ directory will have a file called "api.pdf" which includes the
 framework documentation.
@@ -261,7 +267,9 @@ mechanism for generating and transmitting malformed ZigBee data to a target.
 QUESTIONS/COMMENTS/CONCERNS
 ==============
 Please drop us a note: 
+
 The original version was written by: jwright@willhackforsushi.com
+
 The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
 
 THANKS
