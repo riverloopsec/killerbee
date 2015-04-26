@@ -117,7 +117,7 @@ wizard by clicking Next, then Finish to install the drivers.  When prompted by W
 Driver Sofware Anyway".
 
 Download the RZ Raven USB Stick firmware from 
-https://raw.githubusercontent.com/riverloopsec/killerbee/master/killerbee/firmware/kb-rzusbstick-001.hex.
+https://raw.githubusercontent.com/riverloopsec/killerbee/master/firmware/kb-rzusbstick-001.hex.
 Copy the firmware file to the directory where you extracted the AVRDUDE software.
 
 Connect the AVR Dragon programmer to the ribbon cable, and connect the 100-mm to 50-mm adapter with the
