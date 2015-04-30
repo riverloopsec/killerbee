@@ -83,7 +83,7 @@ while args.count != packetcount:
         # We don't want to replay ACK packets from the capture, typically.
         if not packet_ack(packet):
             packetcount += 1
-            kb.inject(packet)
+            kb.inject(packet[0:-2])
             time.sleep(args.sleep)
     except TypeError:       # raised when pnext returns Null (end of capture)
         break
