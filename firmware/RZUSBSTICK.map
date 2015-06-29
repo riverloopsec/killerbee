@@ -1,0 +1,2102 @@
+Archive member included because of file (symbol)
+
+/usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(exit.o)
+                              /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o (exit)
+/usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
+                              cmd_if.o (memcpy)
+/usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_byte_at90usb1287.o)
+                              eep.o (__eerd_byte_usb1287)
+/usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_at90usb1287.o)
+                              cmd_if.o (__eewr_byte_usb1287)
+/usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
+                              ieee802_15_4_scan.o (__mulsi3)
+/usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
+                              zigbee_data.o (__udivmodhi4)
+/usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+                              /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(exit.o) (_exit)
+/usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
+                              air_capture.o (__do_copy_data)
+/usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
+                              rzusbstick.o (__do_clear_bss)
+/usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_lshrdi3.o)
+                              cmd_if.o (__lshrdi3)
+
+Allocating common symbols
+Common symbol       size              file
+
+mac_pib_macAssociationPermit
+                    0x1               ieee802_15_4_pib.o
+vrt_event_fifo_items_used
+                    0x1               vrt_kernel.o
+mac_pib_macRxOnWhenIdle
+                    0x1               ieee802_15_4_pib.o
+nwkTransactionPersistenceTime
+                    0x2               zigbee_nib.o
+nwkMaxBroadcastRetries
+                    0x1               zigbee_nib.o
+nwkNextAddress      0x2               zigbee_nib.o
+vrt_event_fifo_head
+                    0x1               vrt_kernel.o
+c_skip_parent       0x2               zigbee_nib.o
+mac_param           0xa               ieee802_15_4.o
+mac_i_am_coordinator
+                    0x1               ieee802_15_4_pib.o
+last                0x2               zigbee_neighbor_table.o
+nwkAddressIncrement
+                    0x2               zigbee_nib.o
+nwkRole             0x1               zigbee_nib.o
+nwkExtendedPANID    0x8               zigbee_nib.o
+vrt_time_msw        0x2               vrt_timer_avr.o
+wInterface          0x2               usb_standard_request.o
+mac_pib_macDSN      0x1               ieee802_15_4_pib.o
+nwkUseTreeRouting   0x1               zigbee_nib.o
+mac_pib_macTransactionPersistenceTime
+                    0x2               ieee802_15_4_pib.o
+vrt_event_fifo      0x50              vrt_kernel.o
+nwkStackProfile     0x1               zigbee_nib.o
+mac_pib_current_channel
+                    0x1               ieee802_15_4_pib.o
+nwkAvailableAddresses
+                    0x2               zigbee_nib.o
+nwkCapabilityInformation
+                    0x1               zigbee_nib.o
+mac_pib_macCoordShortAddress
+                    0x2               ieee802_15_4_pib.o
+nwkRouteDiscoveryRetriesPermitted
+                    0x1               zigbee_nib.o
+nwkUseTreeAddrAlloc
+                    0x1               zigbee_nib.o
+mac_pib_macPANId    0x2               ieee802_15_4_pib.o
+nwk_param           0xc               zigbee.o
+nwkProtocolVersion  0x1               zigbee_nib.o
+mac_pib_macExtendedAddress
+                    0x8               ieee802_15_4_pib.o
+vrt_kernel_events_missed
+                    0x1               vrt_kernel.o
+nwkReportConstantCost
+                    0x1               zigbee_nib.o
+nwkShortAddress     0x2               zigbee_nib.o
+nwkNetworkBroadcastDeliveryTime
+                    0x1               zigbee_nib.o
+indication_buffer   0x1e              ieee802_15_4.o
+ep_error            0x1               usb_task.o
+nwkSymLink          0x1               zigbee_nib.o
+mac_pib_macCoordExtendedAddress
+                    0x8               ieee802_15_4_pib.o
+neighbors           0x1               zigbee_neighbor_table.o
+vrt_event_fifo_items_free
+                    0x1               vrt_kernel.o
+first               0x2               zigbee_neighbor_table.o
+usb_configuration_nb
+                    0x1               usb_standard_request.o
+data_to_transfer    0x1               usb_standard_request.o
+pbuffer             0x2               usb_standard_request.o
+mac_pib_macShortAddress
+                    0x2               ieee802_15_4_pib.o
+nwkGroupIDTable     0x1               zigbee_nib.o
+ieee802_15_4_tx_buffer
+                    0x7f              ieee802_15_4.o
+nwkSequenceNumber   0x1               zigbee_nib.o
+nwkPassiveAckTimeout
+                    0x1               zigbee_nib.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+text             0x00000000         0x00020000         xr
+data             0x00800100         0x0000ff00         rw !x
+eeprom           0x00810000         0x00010000         rw !x
+fuse             0x00820000         0x00000400         rw !x
+lock             0x00830000         0x00000400         rw !x
+signature        0x00840000         0x00000400         rw !x
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+Address of section .data set to 0x800100
+LOAD /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o
+LOAD rzusbstick.o
+LOAD air_capture.o
+LOAD cmd_if.o
+LOAD isr.o
+LOAD usb_task.o
+LOAD at24cxx.o
+LOAD eep.o
+LOAD rf230_avr.o
+LOAD usb_descriptors.o
+LOAD usb_drv.o
+LOAD usb_specific_request.o
+LOAD usb_standard_request.o
+LOAD ieee802_15_4_pib.o
+LOAD ieee802_15_4_start.o
+LOAD ieee802_15_4.o
+LOAD ieee802_15_4_associate.o
+LOAD ieee802_15_4_beacon.o
+LOAD ieee802_15_4_cmd.o
+LOAD ieee802_15_4_data.o
+LOAD ieee802_15_4_disassociate.o
+LOAD ieee802_15_4_orphan.o
+LOAD ieee802_15_4_poll.o
+LOAD ieee802_15_4_reset.o
+LOAD ieee802_15_4_rx_enable.o
+LOAD ieee802_15_4_scan.o
+LOAD tat_rf230.o
+LOAD vrt_mem.o
+LOAD vrt_kernel.o
+LOAD zigbee_start_router.o
+LOAD zigbee.o
+LOAD zigbee_data.o
+LOAD zigbee_discovery.o
+LOAD zigbee_formation.o
+LOAD zigbee_join.o
+LOAD zigbee_leave.o
+LOAD zigbee_neighbor_table.o
+LOAD zigbee_nib.o
+LOAD zigbee_permit_joining.o
+LOAD zigbee_poll.o
+LOAD vrt_timer_avr.o
+LOAD /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a
+LOAD /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libm.a
+LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
+LOAD /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a
+LOAD /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a
+
+.hash
+ *(.hash)
+
+.dynsym
+ *(.dynsym)
+
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rel.init
+ *(.rel.init)
+
+.rela.init
+ *(.rela.init)
+
+.rel.text
+ *(.rel.text)
+ *(.rel.text.*)
+ *(.rel.gnu.linkonce.t*)
+
+.rela.text
+ *(.rela.text)
+ *(.rela.text.*)
+ *(.rela.gnu.linkonce.t*)
+
+.rel.fini
+ *(.rel.fini)
+
+.rela.fini
+ *(.rela.fini)
+
+.rel.rodata
+ *(.rel.rodata)
+ *(.rel.rodata.*)
+ *(.rel.gnu.linkonce.r*)
+
+.rela.rodata
+ *(.rela.rodata)
+ *(.rela.rodata.*)
+ *(.rela.gnu.linkonce.r*)
+
+.rel.data
+ *(.rel.data)
+ *(.rel.data.*)
+ *(.rel.gnu.linkonce.d*)
+
+.rela.data
+ *(.rela.data)
+ *(.rela.data.*)
+ *(.rela.gnu.linkonce.d*)
+
+.rel.ctors
+ *(.rel.ctors)
+
+.rela.ctors
+ *(.rela.ctors)
+
+.rel.dtors
+ *(.rel.dtors)
+
+.rela.dtors
+ *(.rela.dtors)
+
+.rel.got
+ *(.rel.got)
+
+.rela.got
+ *(.rela.got)
+
+.rel.bss
+ *(.rel.bss)
+
+.rela.bss
+ *(.rela.bss)
+
+.rel.plt
+ *(.rel.plt)
+
+.rela.plt
+ *(.rela.plt)
+
+.text           0x00000000     0x682c
+ *(.vectors)
+ .vectors       0x00000000       0x98 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o
+                0x00000000                __vectors
+                0x00000000                __vector_default
+ *(.vectors)
+ *(.progmem.gcc*)
+ .progmem.gcc_sw_table
+                0x00000098       0x50 cmd_if.o
+ *(.progmem*)
+ .progmem.data  0x000000e8       0x7f air_capture.o
+                0x00000168                . = ALIGN (0x2)
+ *fill*         0x00000167        0x1 00
+                0x00000168                __trampolines_start = .
+ *(.trampolines)
+ .trampolines   0x00000168        0x0 linker stubs
+ *(.trampolines*)
+                0x00000168                __trampolines_end = .
+ *(.jumptables)
+ *(.jumptables*)
+ *(.lowtext)
+ *(.lowtext*)
+                0x00000168                __ctors_start = .
+ *(.ctors)
+                0x00000168                __ctors_end = .
+                0x00000168                __dtors_start = .
+ *(.dtors)
+                0x00000168                __dtors_end = .
+ SORT(*)(.ctors)
+ SORT(*)(.dtors)
+ *(.init0)
+ .init0         0x00000168        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o
+                0x00000168                __init
+ *(.init0)
+ *(.init1)
+ *(.init1)
+ *(.init2)
+ .init2         0x00000168        0xc /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o
+ *(.init2)
+ *(.init3)
+ *(.init3)
+ *(.init4)
+ .init4         0x00000174       0x1a /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
+                0x00000174                __do_copy_data
+ .init4         0x0000018e       0x10 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
+                0x0000018e                __do_clear_bss
+ *(.init4)
+ *(.init5)
+ *(.init5)
+ *(.init6)
+ *(.init6)
+ *(.init7)
+ *(.init7)
+ *(.init8)
+ *(.init8)
+ *(.init9)
+ .init9         0x0000019e        0x8 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o
+ *(.init9)
+ *(.text)
+ .text          0x000001a6        0x4 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o
+                0x000001a6                __vector_22
+                0x000001a6                __vector_28
+                0x000001a6                __vector_1
+                0x000001a6                __vector_32
+                0x000001a6                __vector_34
+                0x000001a6                __vector_24
+                0x000001a6                __vector_12
+                0x000001a6                __bad_interrupt
+                0x000001a6                __vector_6
+                0x000001a6                __vector_31
+                0x000001a6                __vector_35
+                0x000001a6                __vector_3
+                0x000001a6                __vector_23
+                0x000001a6                __vector_30
+                0x000001a6                __vector_25
+                0x000001a6                __vector_11
+                0x000001a6                __vector_13
+                0x000001a6                __vector_19
+                0x000001a6                __vector_7
+                0x000001a6                __vector_27
+                0x000001a6                __vector_5
+                0x000001a6                __vector_33
+                0x000001a6                __vector_37
+                0x000001a6                __vector_4
+                0x000001a6                __vector_9
+                0x000001a6                __vector_2
+                0x000001a6                __vector_21
+                0x000001a6                __vector_15
+                0x000001a6                __vector_36
+                0x000001a6                __vector_29
+                0x000001a6                __vector_8
+                0x000001a6                __vector_26
+                0x000001a6                __vector_14
+ .text          0x000001aa        0x0 rzusbstick.o
+ .text          0x000001aa        0x0 air_capture.o
+ .text          0x000001aa        0x0 cmd_if.o
+ .text          0x000001aa        0x0 isr.o
+ .text          0x000001aa        0x0 usb_task.o
+ .text          0x000001aa        0x0 at24cxx.o
+ .text          0x000001aa        0x0 eep.o
+ .text          0x000001aa        0x0 rf230_avr.o
+ .text          0x000001aa        0x0 usb_descriptors.o
+ .text          0x000001aa        0x0 usb_drv.o
+ .text          0x000001aa        0x0 usb_specific_request.o
+ .text          0x000001aa        0x0 usb_standard_request.o
+ .text          0x000001aa        0x0 ieee802_15_4_pib.o
+ .text          0x000001aa        0x0 ieee802_15_4_start.o
+ .text          0x000001aa        0x0 ieee802_15_4.o
+ .text          0x000001aa        0x0 ieee802_15_4_associate.o
+ .text          0x000001aa        0x0 ieee802_15_4_beacon.o
+ .text          0x000001aa        0x0 ieee802_15_4_cmd.o
+ .text          0x000001aa        0x0 ieee802_15_4_data.o
+ .text          0x000001aa        0x0 ieee802_15_4_disassociate.o
+ .text          0x000001aa        0x0 ieee802_15_4_orphan.o
+ .text          0x000001aa        0x0 ieee802_15_4_poll.o
+ .text          0x000001aa        0x0 ieee802_15_4_reset.o
+ .text          0x000001aa        0x0 ieee802_15_4_rx_enable.o
+ .text          0x000001aa        0x0 ieee802_15_4_scan.o
+ .text          0x000001aa        0x0 tat_rf230.o
+ .text          0x000001aa        0x0 vrt_mem.o
+ .text          0x000001aa        0x0 vrt_kernel.o
+ .text          0x000001aa        0x0 zigbee_start_router.o
+ .text          0x000001aa        0x0 zigbee.o
+ .text          0x000001aa        0x0 zigbee_data.o
+ .text          0x000001aa        0x0 zigbee_discovery.o
+ .text          0x000001aa        0x0 zigbee_formation.o
+ .text          0x000001aa        0x0 zigbee_join.o
+ .text          0x000001aa        0x0 zigbee_leave.o
+ .text          0x000001aa        0x0 zigbee_neighbor_table.o
+ .text          0x000001aa        0x0 zigbee_nib.o
+ .text          0x000001aa        0x0 zigbee_permit_joining.o
+ .text          0x000001aa        0x0 zigbee_poll.o
+ .text          0x000001aa        0x0 vrt_timer_avr.o
+ .text          0x000001aa        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(exit.o)
+ .text          0x000001aa        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
+ .text          0x000001aa        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_byte_at90usb1287.o)
+ .text          0x000001aa        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_at90usb1287.o)
+ .text          0x000001aa        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
+ .text          0x000001aa        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
+ .text          0x000001aa        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+ .text          0x000001aa        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
+ .text          0x000001aa        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
+ .text          0x000001aa       0xe2 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_lshrdi3.o)
+                0x000001aa                __lshrdi3
+                0x0000028c                . = ALIGN (0x2)
+ *(.text.*)
+ .text.error_handler
+                0x0000028c        0x6 rzusbstick.o
+ .text.avr_init
+                0x00000292       0x78 rzusbstick.o
+                0x00000292                avr_init
+ .text.main     0x0000030a       0x54 rzusbstick.o
+                0x0000030a                main
+ .text.air_capture_scan_callback
+                0x0000035e        0x2 air_capture.o
+ .text.air_capture_transmission_callback
+                0x00000360       0x54 air_capture.o
+ .text.air_capture_callback
+                0x000003b4      0x144 air_capture.o
+ .text.air_capture_init
+                0x000004f8      0x12a air_capture.o
+                0x000004f8                air_capture_init
+ .text.air_capture_deinit
+                0x00000622       0x34 air_capture.o
+                0x00000622                air_capture_deinit
+ .text.air_capture_task
+                0x00000656      0x156 air_capture.o
+                0x00000656                air_capture_task
+ .text.air_capture_set_channel
+                0x000007ac       0x66 air_capture.o
+                0x000007ac                air_capture_set_channel
+ .text.air_capture_open_stream
+                0x00000812       0xae air_capture.o
+                0x00000812                air_capture_open_stream
+ .text.air_capture_close_stream
+                0x000008c0       0x44 air_capture.o
+                0x000008c0                air_capture_close_stream
+ .text.air_capture_start_channel_scan
+                0x00000904       0x10 air_capture.o
+                0x00000904                air_capture_start_channel_scan
+ .text.air_capture_stop_channel_scan
+                0x00000914       0x44 air_capture.o
+                0x00000914                air_capture_stop_channel_scan
+ .text.air_capture_inject_frame
+                0x00000958       0x86 air_capture.o
+                0x00000958                air_capture_inject_frame
+ .text.air_capture_jammer_on
+                0x000009de       0x78 air_capture.o
+                0x000009de                air_capture_jammer_on
+ .text.air_capture_jammer_off
+                0x00000a56       0x22 air_capture.o
+                0x00000a56                air_capture_jammer_off
+ .text.cmd_nwk_data_confirm_callback
+                0x00000a78       0x3a cmd_if.o
+ .text.cmd_nwk_leave_confirm_callback
+                0x00000ab2       0x3a cmd_if.o
+ .text.cmd_nwk_discovery_confirm_callback
+                0x00000aec       0x3e cmd_if.o
+ .text.usb_transaction_done
+                0x00000b2a       0x5c cmd_if.o
+ .text.cmd_nwk_leave_indication
+                0x00000b86       0x8a cmd_if.o
+ .text.cmd_nwk_join_indication
+                0x00000c10       0x92 cmd_if.o
+ .text.cmd_nwk_data_indication
+                0x00000ca2       0xc4 cmd_if.o
+ .text.cmd_nwk_join_confirm_callback
+                0x00000d66       0x44 cmd_if.o
+ .text.cmd_if_dispatch
+                0x00000daa      0x66e cmd_if.o
+ .text.cmd_if_init
+                0x00001418       0xe8 cmd_if.o
+                0x00001418                cmd_if_init
+ .text.cmd_if_deinit
+                0x00001500       0x4a cmd_if.o
+                0x00001500                cmd_if_deinit
+ .text.cmd_if_task
+                0x0000154a      0x130 cmd_if.o
+                0x0000154a                cmd_if_task
+ .text.__vector_16
+                0x0000167a       0x7a isr.o
+                0x0000167a                __vector_16
+ .text.__vector_20
+                0x000016f4       0x2e isr.o
+                0x000016f4                __vector_20
+ .text.__vector_17
+                0x00001722       0xd6 isr.o
+                0x00001722                __vector_17
+ .text.__vector_18
+                0x000017f8       0x42 isr.o
+                0x000017f8                __vector_18
+ .text.usb_task_init
+                0x0000183a       0xfe usb_task.o
+                0x0000183a                usb_task_init
+ .text.usb_task_deinit
+                0x00001938       0x16 usb_task.o
+                0x00001938                usb_task_deinit
+ .text.usb_start_device
+                0x0000194e       0x46 usb_task.o
+                0x0000194e                usb_start_device
+ .text.usb_task
+                0x00001994       0xfa usb_task.o
+                0x00001994                usb_task
+ .text.usb_ep_open
+                0x00001a8e       0x5e usb_task.o
+                0x00001a8e                usb_ep_open
+ .text.usb_ep_close
+                0x00001aec       0x20 usb_task.o
+                0x00001aec                usb_ep_close
+ .text.usb_ep_ack_transaction
+                0x00001b0c       0x2e usb_task.o
+                0x00001b0c                usb_ep_ack_transaction
+ .text.usb_ep_write
+                0x00001b3a       0x92 usb_task.o
+                0x00001b3a                usb_ep_write
+ .text.usb_ep_write_block
+                0x00001bcc       0x78 usb_task.o
+                0x00001bcc                usb_ep_write_block
+ .text.__vector_10
+                0x00001c44      0x12a usb_task.o
+                0x00001c44                __vector_10
+ .text.at24cxx_init
+                0x00001d6e       0x1c at24cxx.o
+                0x00001d6e                at24cxx_init
+ .text.at24cxx_deinit
+                0x00001d8a        0xc at24cxx.o
+                0x00001d8a                at24cxx_deinit
+ .text.at24cxx_write_byte
+                0x00001d96       0xa8 at24cxx.o
+                0x00001d96                at24cxx_write_byte
+ .text.at24cxx_write_continuous
+                0x00001e3e        0x4 at24cxx.o
+                0x00001e3e                at24cxx_write_continuous
+ .text.at24cxx_read_byte
+                0x00001e42      0x11c at24cxx.o
+                0x00001e42                at24cxx_read_byte
+ .text.at24cxx_read_continuous
+                0x00001f5e      0x122 at24cxx.o
+                0x00001f5e                at24cxx_read_continuous
+ .text.eep_init
+                0x00002080       0x68 eep.o
+                0x00002080                eep_init
+ .text.eep_deinit
+                0x000020e8       0x12 eep.o
+                0x000020e8                eep_deinit
+ .text.eep_read_production_day
+                0x000020fa       0x3c eep.o
+                0x000020fa                eep_read_production_day
+ .text.eep_read_production_month
+                0x00002136       0x3a eep.o
+                0x00002136                eep_read_production_month
+ .text.eep_read_production_year
+                0x00002170       0x3c eep.o
+                0x00002170                eep_read_production_year
+ .text.eep_read_ieee_address
+                0x000021ac      0x104 eep.o
+                0x000021ac                eep_read_ieee_address
+ .text.eep_read_cap_array
+                0x000022b0       0x3c eep.o
+                0x000022b0                eep_read_cap_array
+ .text.eep_read_1v1
+                0x000022ec       0x56 eep.o
+                0x000022ec                eep_read_1v1
+ .text.eep_read_hw_revision
+                0x00002342       0x3c eep.o
+                0x00002342                eep_read_hw_revision
+ .text.eep_read
+                0x0000237e       0x60 eep.o
+                0x0000237e                eep_read
+ .text.eep_write
+                0x000023de       0x6e eep.o
+                0x000023de                eep_write
+ .text.rf230_init
+                0x0000244c       0x2e rf230_avr.o
+                0x0000244c                rf230_init
+ .text.rf230_deinit
+                0x0000247a        0xc rf230_avr.o
+                0x0000247a                rf230_deinit
+ .text.rf230_register_read
+                0x00002486       0x36 rf230_avr.o
+                0x00002486                rf230_register_read
+ .text.rf230_register_write
+                0x000024bc       0x36 rf230_avr.o
+                0x000024bc                rf230_register_write
+ .text.rf230_subregister_read
+                0x000024f2       0x2e rf230_avr.o
+                0x000024f2                rf230_subregister_read
+ .text.rf230_subregister_write
+                0x00002520       0x48 rf230_avr.o
+                0x00002520                rf230_subregister_write
+ .text.rf230_frame_write
+                0x00002568       0x4a rf230_avr.o
+                0x00002568                rf230_frame_write
+ .text.rf230_frame_write_P
+                0x000025b2       0x4e rf230_avr.o
+                0x000025b2                rf230_frame_write_P
+ .text.rf230_frame_read
+                0x00002600       0x40 rf230_avr.o
+                0x00002600                rf230_frame_read
+ .text.rf230_set_callback_handler
+                0x00002640       0x24 rf230_avr.o
+                0x00002640                rf230_set_callback_handler
+ .text.rf230_get_callback_handler
+                0x00002664       0x24 rf230_avr.o
+                0x00002664                rf230_get_callback_handler
+ .text.rf230_clear_callback_handler
+                0x00002688       0x24 rf230_avr.o
+                0x00002688                rf230_clear_callback_handler
+ .text.usb_config_ep
+                0x000026ac       0x2c usb_drv.o
+                0x000026ac                usb_config_ep
+ .text.usb_select_enpoint_interrupt
+                0x000026d8       0x20 usb_drv.o
+                0x000026d8                usb_select_enpoint_interrupt
+ .text.usb_send_packet
+                0x000026f8       0x20 usb_drv.o
+                0x000026f8                usb_send_packet
+ .text.usb_read_packet
+                0x00002718       0x20 usb_drv.o
+                0x00002718                usb_read_packet
+ .text.usb_halt_endpoint
+                0x00002738       0x10 usb_drv.o
+                0x00002738                usb_halt_endpoint
+ .text.usb_init_device
+                0x00002748       0x34 usb_drv.o
+                0x00002748                usb_init_device
+ .text.usb_user_read_request
+                0x0000277c        0x4 usb_specific_request.o
+                0x0000277c                usb_user_read_request
+ .text.usb_user_endpoint_init
+                0x00002780       0x32 usb_specific_request.o
+                0x00002780                usb_user_endpoint_init
+ .text.usb_user_get_descriptor
+                0x000027b2       0x58 usb_specific_request.o
+                0x000027b2                usb_user_get_descriptor
+ .text.usb_enum_var_init
+                0x0000280a       0x16 usb_standard_request.o
+                0x0000280a                usb_enum_var_init
+ .text.usb_process_request
+                0x00002820      0x3a2 usb_standard_request.o
+                0x00002820                usb_process_request
+ .text.ieee802_15_4_pib_init
+                0x00002bc2       0x64 ieee802_15_4_pib.o
+                0x00002bc2                ieee802_15_4_pib_init
+ .text.ieee802_15_4_set_pan_id
+                0x00002c26       0x28 ieee802_15_4_pib.o
+                0x00002c26                ieee802_15_4_set_pan_id
+ .text.ieee802_15_4_set_short_address
+                0x00002c4e       0x28 ieee802_15_4_pib.o
+                0x00002c4e                ieee802_15_4_set_short_address
+ .text.ieee802_15_4_set_channel
+                0x00002c76       0x24 ieee802_15_4_pib.o
+                0x00002c76                ieee802_15_4_set_channel
+ .text.ieee802_15_4_start_request
+                0x00002c9a       0x7a ieee802_15_4_start.o
+                0x00002c9a                ieee802_15_4_start_request
+ .text.go_to_rx
+                0x00002d14        0xc ieee802_15_4.o
+ .text.ieee802_15_4_init
+                0x00002d20       0x90 ieee802_15_4.o
+                0x00002d20                ieee802_15_4_init
+ .text.ieee802_15_4_deinit
+                0x00002db0       0x34 ieee802_15_4.o
+                0x00002db0                ieee802_15_4_deinit
+ .text.ieee802_15_4_get_mcps_data_indication
+                0x00002de4        0xa ieee802_15_4.o
+                0x00002de4                ieee802_15_4_get_mcps_data_indication
+ .text.ieee802_15_4_clear_mcps_data_indication
+                0x00002dee       0x24 ieee802_15_4.o
+                0x00002dee                ieee802_15_4_clear_mcps_data_indication
+ .text.ieee802_15_4_set_mcps_data_indication
+                0x00002e12       0x24 ieee802_15_4.o
+                0x00002e12                ieee802_15_4_set_mcps_data_indication
+ .text.ieee802_15_4_get_mlme_associate_indication
+                0x00002e36        0xa ieee802_15_4.o
+                0x00002e36                ieee802_15_4_get_mlme_associate_indication
+ .text.ieee802_15_4_clear_mlme_associate_indication
+                0x00002e40       0x24 ieee802_15_4.o
+                0x00002e40                ieee802_15_4_clear_mlme_associate_indication
+ .text.ieee802_15_4_set_mlme_associate_indication
+                0x00002e64       0x24 ieee802_15_4.o
+                0x00002e64                ieee802_15_4_set_mlme_associate_indication
+ .text.ieee802_15_4_get_mlme_disassociate_indication
+                0x00002e88        0xa ieee802_15_4.o
+                0x00002e88                ieee802_15_4_get_mlme_disassociate_indication
+ .text.ieee802_15_4_clear_mlme_disassociate_indication
+                0x00002e92       0x24 ieee802_15_4.o
+                0x00002e92                ieee802_15_4_clear_mlme_disassociate_indication
+ .text.ieee802_15_4_set_mlme_disassociate_indication
+                0x00002eb6       0x24 ieee802_15_4.o
+                0x00002eb6                ieee802_15_4_set_mlme_disassociate_indication
+ .text.ieee802_15_4_get_mlme_orphan_indication
+                0x00002eda        0xa ieee802_15_4.o
+                0x00002eda                ieee802_15_4_get_mlme_orphan_indication
+ .text.ieee802_15_4_clear_mlme_orphan_indication
+                0x00002ee4       0x24 ieee802_15_4.o
+                0x00002ee4                ieee802_15_4_clear_mlme_orphan_indication
+ .text.ieee802_15_4_set_mlme_orphan_indication
+                0x00002f08       0x24 ieee802_15_4.o
+                0x00002f08                ieee802_15_4_set_mlme_orphan_indication
+ .text.ieee802_15_4_get_mlme_comm_status_indication
+                0x00002f2c        0xa ieee802_15_4.o
+                0x00002f2c                ieee802_15_4_get_mlme_comm_status_indication
+ .text.ieee802_15_4_clear_mlme_comm_status_indication
+                0x00002f36       0x24 ieee802_15_4.o
+                0x00002f36                ieee802_15_4_clear_mlme_comm_status_indication
+ .text.ieee802_15_4_set_mlme_comm_status_indication
+                0x00002f5a       0x24 ieee802_15_4.o
+                0x00002f5a                ieee802_15_4_set_mlme_comm_status_indication
+ .text.ieee802_15_4_get_mlme_beacon_notify_indication
+                0x00002f7e        0xa ieee802_15_4.o
+                0x00002f7e                ieee802_15_4_get_mlme_beacon_notify_indication
+ .text.ieee802_15_4_clear_mlme_beacon_notify_indication
+                0x00002f88       0x24 ieee802_15_4.o
+                0x00002f88                ieee802_15_4_clear_mlme_beacon_notify_indication
+ .text.ieee802_15_4_set_mlme_beacon_notify_indication
+                0x00002fac       0x24 ieee802_15_4.o
+                0x00002fac                ieee802_15_4_set_mlme_beacon_notify_indication
+ .text.ieee802_15_4_pd_data_indication
+                0x00002fd0      0x200 ieee802_15_4.o
+                0x00002fd0                ieee802_15_4_pd_data_indication
+ .text.ieee802_15_4_send
+                0x000031d0       0x32 ieee802_15_4.o
+                0x000031d0                ieee802_15_4_send
+ .text.ieee802_15_4_send_ack_event_handler
+                0x00003202       0x70 ieee802_15_4.o
+                0x00003202                ieee802_15_4_send_ack_event_handler
+ .text.send_comm_status_indication
+                0x00003272       0x46 ieee802_15_4_associate.o
+ .text.ieee802_15_4_associate_request
+                0x000032b8      0x1f8 ieee802_15_4_associate.o
+                0x000032b8                ieee802_15_4_associate_request
+ .text.issue_associate_confirm
+                0x000034b0       0x66 ieee802_15_4_associate.o
+                0x000034b0                issue_associate_confirm
+ .text.ieee802_15_4_associate_process_timeout
+                0x00003516       0xd2 ieee802_15_4_associate.o
+                0x00003516                ieee802_15_4_associate_process_timeout
+ .text.ieee802_15_4_associate_response
+                0x000035e8      0x186 ieee802_15_4_associate.o
+                0x000035e8                ieee802_15_4_associate_response
+ .text.ieee802_15_4_associate_process_ack
+                0x0000376e       0x84 ieee802_15_4_associate.o
+                0x0000376e                ieee802_15_4_associate_process_ack
+ .text.ieee802_15_4_send_association_response
+                0x000037f2       0x5a ieee802_15_4_associate.o
+                0x000037f2                ieee802_15_4_send_association_response
+ .text.ieee802_15_4_associate_response_process_ack
+                0x0000384c       0x20 ieee802_15_4_associate.o
+                0x0000384c                ieee802_15_4_associate_response_process_ack
+ .text.ieee802_15_4_beacon_notify_do_callback
+                0x0000386c       0x20 ieee802_15_4_beacon.o
+                0x0000386c                ieee802_15_4_beacon_notify_do_callback
+ .text.ieee802_15_4_mlme_beacon_indication
+                0x0000388c      0x1ca ieee802_15_4_beacon.o
+                0x0000388c                ieee802_15_4_mlme_beacon_indication
+ .text.ieee802_15_4_send_beacon
+                0x00003a56       0x9a ieee802_15_4_beacon.o
+                0x00003a56                ieee802_15_4_send_beacon
+ .text.ieee802_15_4_process_beacon_ack
+                0x00003af0       0x28 ieee802_15_4_beacon.o
+                0x00003af0                ieee802_15_4_process_beacon_ack
+ .text.goto_rx_aack_on
+                0x00003b18       0x18 ieee802_15_4_cmd.o
+ .text.ieee802_15_4_mlme_cmd_indication
+                0x00003b30      0x288 ieee802_15_4_cmd.o
+                0x00003b30                ieee802_15_4_mlme_cmd_indication
+ .text.ieee802_15_4_data_indication_do_callback
+                0x00003db8       0x44 ieee802_15_4_data.o
+                0x00003db8                ieee802_15_4_data_indication_do_callback
+ .text.ieee802_15_4_data_request
+                0x00003dfc      0x24e ieee802_15_4_data.o
+                0x00003dfc                ieee802_15_4_data_request
+ .text.ieee802_15_4_data_process_ack
+                0x0000404a       0x68 ieee802_15_4_data.o
+                0x0000404a                ieee802_15_4_data_process_ack
+ .text.ieee802_15_4_process_data_indication
+                0x000040b2      0x104 ieee802_15_4_data.o
+                0x000040b2                ieee802_15_4_process_data_indication
+ .text.ieee802_15_4_disassociate_request
+                0x000041b6      0x1ce ieee802_15_4_disassociate.o
+                0x000041b6                ieee802_15_4_disassociate_request
+ .text.ieee802_15_4_disassociate_process_ack
+                0x00004384       0x7e ieee802_15_4_disassociate.o
+                0x00004384                ieee802_15_4_disassociate_process_ack
+ .text.ieee802_15_4_orphan_response
+                0x00004402      0x10a ieee802_15_4_orphan.o
+                0x00004402                ieee802_15_4_orphan_response
+ .text.ieee802_15_4_coord_realign_process_ack
+                0x0000450c       0x60 ieee802_15_4_orphan.o
+                0x0000450c                ieee802_15_4_coord_realign_process_ack
+ .text.ieee802_15_4_reset
+                0x0000456c       0xa0 ieee802_15_4_reset.o
+                0x0000456c                ieee802_15_4_reset
+ .text.ieee802_15_4_rx_enable
+                0x0000460c       0x34 ieee802_15_4_rx_enable.o
+                0x0000460c                ieee802_15_4_rx_enable
+ .text.ieee802_15_4_rx_disable
+                0x00004640       0x16 ieee802_15_4_rx_enable.o
+                0x00004640                ieee802_15_4_rx_disable
+ .text.ieee802_15_4_scan_do_confirm
+                0x00004656       0x48 ieee802_15_4_scan.o
+                0x00004656                ieee802_15_4_scan_do_confirm
+ .text.scan_time_elapsed_callback
+                0x0000469e       0x78 ieee802_15_4_scan.o
+ .text.ieee802_15_4_scan_request
+                0x00004716      0x2b6 ieee802_15_4_scan.o
+                0x00004716                ieee802_15_4_scan_request
+ .text.ieee802_15_4_scan_process_ack
+                0x000049cc       0x3c ieee802_15_4_scan.o
+                0x000049cc                ieee802_15_4_scan_process_ack
+ .text.tat_trx_end_cb
+                0x00004a08      0x194 tat_rf230.o
+ .text.tat_init
+                0x00004b9c       0xde tat_rf230.o
+                0x00004b9c                tat_init
+ .text.tat_go_to_sleep
+                0x00004c7a       0x34 tat_rf230.o
+                0x00004c7a                tat_go_to_sleep
+ .text.tat_deinit
+                0x00004cae        0xe tat_rf230.o
+                0x00004cae                tat_deinit
+ .text.tat_wake_up
+                0x00004cbc       0x30 tat_rf230.o
+                0x00004cbc                tat_wake_up
+ .text.tat_reset
+                0x00004cec       0x28 tat_rf230.o
+                0x00004cec                tat_reset
+ .text.tat_get_pan_id
+                0x00004d14        0x6 tat_rf230.o
+                0x00004d14                tat_get_pan_id
+ .text.tat_set_pan_id
+                0x00004d1a       0x26 tat_rf230.o
+                0x00004d1a                tat_set_pan_id
+ .text.tat_get_short_address
+                0x00004d40        0x6 tat_rf230.o
+                0x00004d40                tat_get_short_address
+ .text.tat_set_short_address
+                0x00004d46       0x26 tat_rf230.o
+                0x00004d46                tat_set_short_address
+ .text.tat_get_ieee_address
+                0x00004d6c       0x12 tat_rf230.o
+                0x00004d6c                tat_get_ieee_address
+ .text.tat_set_ieee_address
+                0x00004d7e       0x90 tat_rf230.o
+                0x00004d7e                tat_set_ieee_address
+ .text.tat_set_pan_coordinator
+                0x00004e0e       0x1c tat_rf230.o
+                0x00004e0e                tat_set_pan_coordinator
+ .text.tat_send_frame
+                0x00004e2a       0x46 tat_rf230.o
+                0x00004e2a                tat_send_frame
+ .text.tat_read_frame
+                0x00004e70       0x1a tat_rf230.o
+                0x00004e70                tat_read_frame
+ .text.tat_get_state
+                0x00004e8a        0xc tat_rf230.o
+                0x00004e8a                tat_get_state
+ .text.tat_set_state
+                0x00004e96       0xe0 tat_rf230.o
+                0x00004e96                tat_set_state
+ .text.tat_get_channel
+                0x00004f76        0x4 tat_rf230.o
+                0x00004f76                tat_get_channel
+ .text.tat_set_channel
+                0x00004f7a       0x2c tat_rf230.o
+                0x00004f7a                tat_set_channel
+ .text.tat_set_tx_callback_handler
+                0x00004fa6       0x24 tat_rf230.o
+                0x00004fa6                tat_set_tx_callback_handler
+ .text.tat_get_tx_callback_handler
+                0x00004fca       0x24 tat_rf230.o
+                0x00004fca                tat_get_tx_callback_handler
+ .text.tat_clear_tx_callback_handler
+                0x00004fee       0x24 tat_rf230.o
+                0x00004fee                tat_clear_tx_callback_handler
+ .text.tat_set_rx_callback_handler
+                0x00005012       0x24 tat_rf230.o
+                0x00005012                tat_set_rx_callback_handler
+ .text.tat_get_rx_callback_handler
+                0x00005036       0x24 tat_rf230.o
+                0x00005036                tat_get_rx_callback_handler
+ .text.tat_clear_rx_callback_handler
+                0x0000505a       0x24 tat_rf230.o
+                0x0000505a                tat_clear_rx_callback_handler
+ .text.vrt_mem_init
+                0x0000507e       0x10 vrt_mem.o
+                0x0000507e                vrt_mem_init
+ .text.vrt_mem_add_partition
+                0x0000508e      0x110 vrt_mem.o
+                0x0000508e                vrt_mem_add_partition
+ .text.vrt_mem_alloc
+                0x0000519e       0x9c vrt_mem.o
+                0x0000519e                vrt_mem_alloc
+ .text.vrt_mem_free
+                0x0000523a       0x84 vrt_mem.o
+                0x0000523a                vrt_mem_free
+ .text.vrt_init
+                0x000052be       0x1c vrt_kernel.o
+                0x000052be                vrt_init
+ .text.vrt_flush_event_queue
+                0x000052da       0x30 vrt_kernel.o
+                0x000052da                vrt_flush_event_queue
+ .text.vrt_post_event
+                0x0000530a       0x6c vrt_kernel.o
+                0x0000530a                vrt_post_event
+ .text.vrt_dispatch_event
+                0x00005376       0x74 vrt_kernel.o
+                0x00005376                vrt_dispatch_event
+ .text.zigbee_start_router_request
+                0x000053ea       0x5c zigbee_start_router.o
+                0x000053ea                zigbee_start_router_request
+ .text.mac_orphan_indication_callback
+                0x00005446        0x2 zigbee.o
+                0x00005446                mac_orphan_indication_callback
+ .text.zigbee_init
+                0x00005448       0xaa zigbee.o
+                0x00005448                zigbee_init
+ .text.zigbee_deinit
+                0x000054f2       0x46 zigbee.o
+                0x000054f2                zigbee_deinit
+ .text.zigbee_get_nlde_data_indication
+                0x00005538        0xa zigbee.o
+                0x00005538                zigbee_get_nlde_data_indication
+ .text.zigbee_clear_nlde_data_indication
+                0x00005542       0x24 zigbee.o
+                0x00005542                zigbee_clear_nlde_data_indication
+ .text.zigbee_set_nlde_data_indication
+                0x00005566       0x24 zigbee.o
+                0x00005566                zigbee_set_nlde_data_indication
+ .text.zigbee_get_nlme_join_indication
+                0x0000558a        0xa zigbee.o
+                0x0000558a                zigbee_get_nlme_join_indication
+ .text.zigbee_clear_nlme_join_indication
+                0x00005594       0x24 zigbee.o
+                0x00005594                zigbee_clear_nlme_join_indication
+ .text.zigbee_set_nlme_join_indication
+                0x000055b8       0x24 zigbee.o
+                0x000055b8                zigbee_set_nlme_join_indication
+ .text.zigbee_get_nlme_leave_indication
+                0x000055dc        0xa zigbee.o
+                0x000055dc                zigbee_get_nlme_leave_indication
+ .text.zigbee_clear_nlme_leave_indication
+                0x000055e6       0x24 zigbee.o
+                0x000055e6                zigbee_clear_nlme_leave_indication
+ .text.zigbee_set_nlme_leave_indication
+                0x0000560a       0x24 zigbee.o
+                0x0000560a                zigbee_set_nlme_leave_indication
+ .text.mac_data_confirm_callback
+                0x0000562e       0x28 zigbee_data.o
+ .text.find_next_address
+                0x00005656       0x9e zigbee_data.o
+ .text.relay_confirm
+                0x000056f4       0x12 zigbee_data.o
+ .text.zigbee_data_indication_do_callback
+                0x00005706       0x24 zigbee_data.o
+                0x00005706                zigbee_data_indication_do_callback
+ .text.zigbee_data_request
+                0x0000572a      0x19e zigbee_data.o
+                0x0000572a                zigbee_data_request
+ .text.mac_data_indication_callback
+                0x000058c8      0x154 zigbee_data.o
+                0x000058c8                mac_data_indication_callback
+ .text.zigbee_network_discovery_confirm_do_callback
+                0x00005a1c       0x10 zigbee_discovery.o
+                0x00005a1c                zigbee_network_discovery_confirm_do_callback
+ .text.mac_beacon_notify_callback
+                0x00005a2c       0xa8 zigbee_discovery.o
+ .text.mac_scan_confirm_callback
+                0x00005ad4       0x62 zigbee_discovery.o
+ .text.zigbee_network_discovery_request
+                0x00005b36       0x7c zigbee_discovery.o
+                0x00005b36                zigbee_network_discovery_request
+ .text.zigbee_formation_request
+                0x00005bb2       0x66 zigbee_formation.o
+                0x00005bb2                zigbee_formation_request
+ .text.zigbee_join_indication_do_callback
+                0x00005c18       0x24 zigbee_join.o
+                0x00005c18                zigbee_join_indication_do_callback
+ .text.mac_associate_confim_callback
+                0x00005c3c       0x96 zigbee_join.o
+ .text.zigbee_join_request
+                0x00005cd2       0xd0 zigbee_join.o
+                0x00005cd2                zigbee_join_request
+ .text.mac_associate_indication_callback
+                0x00005da2       0x9c zigbee_join.o
+                0x00005da2                mac_associate_indication_callback
+ .text.mac_comm_status_indication_callback
+                0x00005e3e       0xa2 zigbee_join.o
+                0x00005e3e                mac_comm_status_indication_callback
+ .text.mac_disassociate_confirm_callback
+                0x00005ee0       0x80 zigbee_leave.o
+ .text.zigbee_leave_request
+                0x00005f60      0x104 zigbee_leave.o
+                0x00005f60                zigbee_leave_request
+ .text.mac_disassociate_indication_callback
+                0x00006064       0x7c zigbee_leave.o
+                0x00006064                mac_disassociate_indication_callback
+ .text.zigbee_neighbor_table_init
+                0x000060e0       0x4c zigbee_neighbor_table.o
+                0x000060e0                zigbee_neighbor_table_init
+ .text.zigbee_neighbor_table_get
+                0x0000612c       0x4a zigbee_neighbor_table.o
+                0x0000612c                zigbee_neighbor_table_get
+ .text.zigbee_neighbor_table_put
+                0x00006176       0x44 zigbee_neighbor_table.o
+                0x00006176                zigbee_neighbor_table_put
+ .text.zigbee_neighbor_table_append
+                0x000061ba       0x64 zigbee_neighbor_table.o
+                0x000061ba                zigbee_neighbor_table_append
+ .text.zigbee_neighbor_table_delete
+                0x0000621e       0x8a zigbee_neighbor_table.o
+                0x0000621e                zigbee_neighbor_table_delete
+ .text.zigbee_neighbor_table_find
+                0x000062a8       0x36 zigbee_neighbor_table.o
+                0x000062a8                zigbee_neighbor_table_find
+ .text.zigbee_neighbor_table_find_long
+                0x000062de       0x60 zigbee_neighbor_table.o
+                0x000062de                zigbee_neighbor_table_find_long
+ .text.zigbee_neighbor_table_add_router
+                0x0000633e       0x88 zigbee_neighbor_table.o
+                0x0000633e                zigbee_neighbor_table_add_router
+ .text.zigbee_neighbor_table_add_device
+                0x000063c6       0x86 zigbee_neighbor_table.o
+                0x000063c6                zigbee_neighbor_table_add_device
+ .text.zigbee_neighbor_table_find_depth
+                0x0000644c        0xc zigbee_neighbor_table.o
+                0x0000644c                zigbee_neighbor_table_find_depth
+ .text.zigbee_nib_init
+                0x00006458       0x8a zigbee_nib.o
+                0x00006458                zigbee_nib_init
+ .text.zigbee_nib_c_skip
+                0x000064e2       0x26 zigbee_nib.o
+                0x000064e2                zigbee_nib_c_skip
+ .text.zigbee_permit_joining
+                0x00006508       0x16 zigbee_permit_joining.o
+                0x00006508                zigbee_permit_joining
+ .text.vrt_timer_init
+                0x0000651e       0x6a vrt_timer_avr.o
+                0x0000651e                vrt_timer_init
+ .text.vrt_timer_deinit
+                0x00006588       0x12 vrt_timer_avr.o
+                0x00006588                vrt_timer_deinit
+ .text.vrt_timer_get_tick_cnt
+                0x0000659a       0x42 vrt_timer_avr.o
+                0x0000659a                vrt_timer_get_tick_cnt
+ .text.vrt_timer_start_high_pri_delay
+                0x000065dc       0xa4 vrt_timer_avr.o
+                0x000065dc                vrt_timer_start_high_pri_delay
+ .text.vrt_timer_stop_high_pri_delay
+                0x00006680       0x2e vrt_timer_avr.o
+                0x00006680                vrt_timer_stop_high_pri_delay
+ .text.vrt_timer_install_tick_handler
+                0x000066ae       0x24 vrt_timer_avr.o
+                0x000066ae                vrt_timer_install_tick_handler
+ .text.vrt_timer_get_tick_handler
+                0x000066d2       0x24 vrt_timer_avr.o
+                0x000066d2                vrt_timer_get_tick_handler
+ .text.vrt_timer_remove_tick_handler
+                0x000066f6       0x24 vrt_timer_avr.o
+                0x000066f6                vrt_timer_remove_tick_handler
+ .text.vrt_timer_task
+                0x0000671a       0x64 vrt_timer_avr.o
+                0x0000671a                vrt_timer_task
+ .text.avr-libc
+                0x0000677e        0x6 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(exit.o)
+                0x0000677e                exit
+ .text.avr-libc
+                0x00006784       0x12 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
+                0x00006784                memcpy
+ .text.avr-libc
+                0x00006796       0x10 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_byte_at90usb1287.o)
+                0x00006796                __eerd_byte_usb1287
+ .text.avr-libc
+                0x000067a6       0x1c /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_at90usb1287.o)
+                0x000067a6                __eewr_byte_usb1287
+                0x000067a8                __eewr_r18_usb1287
+ .text.libgcc   0x000067c2       0x3e /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
+                0x000067c2                __mulsi3
+ .text.libgcc   0x00006800       0x28 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
+                0x00006800                __udivmodhi4
+ .text.libgcc   0x00006828        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+ .text.libgcc   0x00006828        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
+ .text.libgcc   0x00006828        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
+                0x00006828                . = ALIGN (0x2)
+ *(.fini9)
+ .fini9         0x00006828        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+                0x00006828                _exit
+ *(.fini9)
+ *(.fini8)
+ *(.fini8)
+ *(.fini7)
+ *(.fini7)
+ *(.fini6)
+ *(.fini6)
+ *(.fini5)
+ *(.fini5)
+ *(.fini4)
+ *(.fini4)
+ *(.fini3)
+ *(.fini3)
+ *(.fini2)
+ *(.fini2)
+ *(.fini1)
+ *(.fini1)
+ *(.fini0)
+ .fini0         0x00006828        0x4 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+ *(.fini0)
+                0x0000682c                _etext = .
+
+.data           0x00800100       0x96 load address 0x0000682c
+                0x00800100                PROVIDE (__data_start, .)
+ *(.data)
+ .data          0x00800100        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o
+ .data          0x00800100        0x0 rzusbstick.o
+ .data          0x00800100        0x9 air_capture.o
+ .data          0x00800109        0x0 cmd_if.o
+ .data          0x00800109        0x0 isr.o
+ .data          0x00800109        0x0 usb_task.o
+ .data          0x00800109        0x0 at24cxx.o
+ .data          0x00800109        0x0 eep.o
+ .data          0x00800109        0x0 rf230_avr.o
+ .data          0x00800109        0x0 usb_descriptors.o
+ .data          0x00800109        0x0 usb_drv.o
+ .data          0x00800109        0x0 usb_specific_request.o
+ .data          0x00800109        0x0 usb_standard_request.o
+ .data          0x00800109        0x0 ieee802_15_4_pib.o
+ .data          0x00800109        0x0 ieee802_15_4_start.o
+ .data          0x00800109        0x0 ieee802_15_4.o
+ .data          0x00800109        0x0 ieee802_15_4_associate.o
+ .data          0x00800109        0x0 ieee802_15_4_beacon.o
+ .data          0x00800109        0x0 ieee802_15_4_cmd.o
+ .data          0x00800109        0x0 ieee802_15_4_data.o
+ .data          0x00800109        0x0 ieee802_15_4_disassociate.o
+ .data          0x00800109        0x0 ieee802_15_4_orphan.o
+ .data          0x00800109        0x0 ieee802_15_4_poll.o
+ .data          0x00800109        0x0 ieee802_15_4_reset.o
+ .data          0x00800109        0x0 ieee802_15_4_rx_enable.o
+ .data          0x00800109        0x0 ieee802_15_4_scan.o
+ .data          0x00800109        0x0 tat_rf230.o
+ .data          0x00800109        0x0 vrt_mem.o
+ .data          0x00800109        0x0 vrt_kernel.o
+ .data          0x00800109        0x0 zigbee_start_router.o
+ .data          0x00800109        0x0 zigbee.o
+ .data          0x00800109        0x0 zigbee_data.o
+ .data          0x00800109        0x0 zigbee_discovery.o
+ .data          0x00800109        0x0 zigbee_formation.o
+ .data          0x00800109        0x0 zigbee_join.o
+ .data          0x00800109        0x0 zigbee_leave.o
+ .data          0x00800109        0x0 zigbee_neighbor_table.o
+ .data          0x00800109        0x0 zigbee_nib.o
+ .data          0x00800109        0x0 zigbee_permit_joining.o
+ .data          0x00800109        0x0 zigbee_poll.o
+ .data          0x00800109        0x0 vrt_timer_avr.o
+ .data          0x00800109        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(exit.o)
+ .data          0x00800109        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
+ .data          0x00800109        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_byte_at90usb1287.o)
+ .data          0x00800109        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_at90usb1287.o)
+ .data          0x00800109        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
+ .data          0x00800109        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
+ .data          0x00800109        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+ .data          0x00800109        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
+ .data          0x00800109        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
+ .data          0x00800109        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_lshrdi3.o)
+ *(.data*)
+ .data.ac_state
+                0x00800109        0x1 air_capture.o
+ .data.ieee_address
+                0x0080010a        0x8 cmd_if.o
+ .data.usb_dev_desc
+                0x00800112       0x12 usb_descriptors.o
+                0x00800112                usb_dev_desc
+ .data.usb_conf_desc
+                0x00800124       0x27 usb_descriptors.o
+                0x00800124                usb_conf_desc
+ .data.usb_user_manufacturer_string_descriptor
+                0x0080014b        0xc usb_descriptors.o
+                0x0080014b                usb_user_manufacturer_string_descriptor
+ .data.usb_user_product_string_descriptor
+                0x00800157       0x16 usb_descriptors.o
+                0x00800157                usb_user_product_string_descriptor
+ .data.usb_user_serial_number
+                0x0080016d       0x1c usb_descriptors.o
+                0x0080016d                usb_user_serial_number
+ .data.usb_user_language_id
+                0x00800189        0x4 usb_descriptors.o
+                0x00800189                usb_user_language_id
+ .data.ieee802_15_4_state
+                0x0080018d        0x1 ieee802_15_4.o
+                0x0080018d                ieee802_15_4_state
+ .data.transmission_status
+                0x0080018e        0x1 tat_rf230.o
+ .data.nwk_state
+                0x0080018f        0x1 zigbee.o
+                0x0080018f                nwk_state
+ *(.rodata)
+ *(.rodata*)
+ .rodata.CSWTCH.33
+                0x00800190        0x6 ieee802_15_4.o
+ *(.gnu.linkonce.d*)
+                0x00800196                . = ALIGN (0x2)
+                0x00800196                _edata = .
+                0x00800196                PROVIDE (__data_end, .)
+
+.bss            0x00800196     0x10da
+                0x00800196                PROVIDE (__bss_start, .)
+ *(.bss)
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o
+ .bss           0x00800196        0x0 rzusbstick.o
+ .bss           0x00800196        0x0 air_capture.o
+ .bss           0x00800196        0x0 cmd_if.o
+ .bss           0x00800196        0x0 isr.o
+ .bss           0x00800196        0x0 usb_task.o
+ .bss           0x00800196        0x0 at24cxx.o
+ .bss           0x00800196        0x0 eep.o
+ .bss           0x00800196        0x0 rf230_avr.o
+ .bss           0x00800196        0x0 usb_descriptors.o
+ .bss           0x00800196        0x0 usb_drv.o
+ .bss           0x00800196        0x0 usb_specific_request.o
+ .bss           0x00800196        0x0 usb_standard_request.o
+ .bss           0x00800196        0x0 ieee802_15_4_pib.o
+ .bss           0x00800196        0x0 ieee802_15_4_start.o
+ .bss           0x00800196        0x0 ieee802_15_4.o
+ .bss           0x00800196        0x0 ieee802_15_4_associate.o
+ .bss           0x00800196        0x0 ieee802_15_4_beacon.o
+ .bss           0x00800196        0x0 ieee802_15_4_cmd.o
+ .bss           0x00800196        0x0 ieee802_15_4_data.o
+ .bss           0x00800196        0x0 ieee802_15_4_disassociate.o
+ .bss           0x00800196        0x0 ieee802_15_4_orphan.o
+ .bss           0x00800196        0x0 ieee802_15_4_poll.o
+ .bss           0x00800196        0x0 ieee802_15_4_reset.o
+ .bss           0x00800196        0x0 ieee802_15_4_rx_enable.o
+ .bss           0x00800196        0x0 ieee802_15_4_scan.o
+ .bss           0x00800196        0x0 tat_rf230.o
+ .bss           0x00800196        0x0 vrt_mem.o
+ .bss           0x00800196        0x0 vrt_kernel.o
+ .bss           0x00800196        0x0 zigbee_start_router.o
+ .bss           0x00800196        0x0 zigbee.o
+ .bss           0x00800196        0x0 zigbee_data.o
+ .bss           0x00800196        0x0 zigbee_discovery.o
+ .bss           0x00800196        0x0 zigbee_formation.o
+ .bss           0x00800196        0x0 zigbee_join.o
+ .bss           0x00800196        0x0 zigbee_leave.o
+ .bss           0x00800196        0x0 zigbee_neighbor_table.o
+ .bss           0x00800196        0x0 zigbee_nib.o
+ .bss           0x00800196        0x0 zigbee_permit_joining.o
+ .bss           0x00800196        0x0 zigbee_poll.o
+ .bss           0x00800196        0x0 vrt_timer_avr.o
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(exit.o)
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_byte_at90usb1287.o)
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_at90usb1287.o)
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_mulsi3.o)
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_udivmodhi4.o)
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_exit.o)
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_copy_data.o)
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_clear_bss.o)
+ .bss           0x00800196        0x0 /usr/lib/gcc/avr/4.5.3/avr51/libgcc.a(_lshrdi3.o)
+ *(.bss*)
+ .bss.partition_buffer1
+                0x00800196       0xa0 rzusbstick.o
+ .bss.partition1
+                0x00800236        0xc rzusbstick.o
+ .bss.partition_buffer2
+                0x00800242      0x89d rzusbstick.o
+ .bss.partition2
+                0x00800adf        0xc rzusbstick.o
+ .bss.fifo_head
+                0x00800aeb        0x1 air_capture.o
+ .bss.fifo_tail
+                0x00800aec        0x1 air_capture.o
+ .bss.items_used
+                0x00800aed        0x1 air_capture.o
+ .bss.items_free
+                0x00800aee        0x1 air_capture.o
+ .bss.bytes_left
+                0x00800aef        0x1 air_capture.o
+ .bss.packets_left
+                0x00800af0        0x1 air_capture.o
+ .bss.data_ptr  0x00800af1        0x2 air_capture.o
+ .bss.nmbr_of_frames
+                0x00800af3        0x2 air_capture.o
+ .bss.nmbr_of_frames_missed
+                0x00800af5        0x2 air_capture.o
+ .bss.acdu_fifo
+                0x00800af7       0x14 air_capture.o
+ .bss.acdu_rssi
+                0x00800b0b        0x1 air_capture.o
+ .bss.acdu_time_stamp
+                0x00800b0c        0x4 air_capture.o
+ .bss.ac_unknown_isr
+                0x00800b10        0x1 air_capture.o
+ .bss.cmd_if_state
+                0x00800b11        0x1 cmd_if.o
+ .bss.items_used
+                0x00800b12        0x1 cmd_if.o
+ .bss.bytes_left
+                0x00800b13        0x1 cmd_if.o
+ .bss.packets_left
+                0x00800b14        0x1 cmd_if.o
+ .bss.fifo_tail
+                0x00800b15        0x1 cmd_if.o
+ .bss.nwk_event_fifo
+                0x00800b16        0xa cmd_if.o
+ .bss.data_ptr  0x00800b20        0x2 cmd_if.o
+ .bss.items_free
+                0x00800b22        0x1 cmd_if.o
+ .bss.ndr       0x00800b23        0x2 cmd_if.o
+ .bss.nwk_events_missed
+                0x00800b25        0x2 cmd_if.o
+ .bss.fifo_head
+                0x00800b27        0x1 cmd_if.o
+ .bss.njr       0x00800b28        0x2 cmd_if.o
+ .bss.nlr       0x00800b2a        0x2 cmd_if.o
+ .bss.nndr      0x00800b2c        0x2 cmd_if.o
+ .bss.usb_connected
+                0x00800b2e        0x1 usb_task.o
+ .bss.reset_detected
+                0x00800b2f        0x1 usb_task.o
+ .bss.ep_open   0x00800b30        0x1 usb_task.o
+ .bss.trans_data_i
+                0x00800b31        0x2 usb_task.o
+ .bss.open_ep   0x00800b33        0x1 usb_task.o
+ .bss.done_callback
+                0x00800b34        0x2 usb_task.o
+ .bss.usb_configuration_nb
+                0x00800b36        0x1 usb_task.o
+ .bss.transaction_data
+                0x00800b37      0x120 usb_task.o
+ .bss.eep_source
+                0x00800c57        0x1 eep.o
+ .bss.rf230_callback_handler
+                0x00800c58        0x2 rf230_avr.o
+                0x00800c58                rf230_callback_handler
+ .bss.bmRequestType
+                0x00800c5a        0x1 usb_standard_request.o
+ .bss.zlp       0x00800c5b        0x1 usb_standard_request.o
+ .bss.endpoint_status
+                0x00800c5c        0x3 usb_standard_request.o
+ .bss.usb_connected
+                0x00800c5f        0x1 usb_standard_request.o
+ .bss.pd_frame_buffer
+                0x00800c60       0x81 ieee802_15_4.o
+ .bss.frame_info
+                0x00800ce1       0x1d ieee802_15_4.o
+ .bss.mbni      0x00800cfe        0x2 ieee802_15_4.o
+ .bss.mcsi      0x00800d00        0x2 ieee802_15_4.o
+ .bss.moi       0x00800d02        0x2 ieee802_15_4.o
+ .bss.mdi       0x00800d04        0x2 ieee802_15_4.o
+ .bss.mai       0x00800d06        0x2 ieee802_15_4.o
+ .bss.mcdi      0x00800d08        0x2 ieee802_15_4.o
+ .bss.mcsi      0x00800d0a       0x15 ieee802_15_4_associate.o
+ .bss.association_response
+                0x00800d1f       0x1b ieee802_15_4_associate.o
+ .bss.confirm_ptr
+                0x00800d3a        0x2 ieee802_15_4_associate.o
+ .bss.mlme_associate_confirm
+                0x00800d3c        0x2 ieee802_15_4_associate.o
+ .bss.confirm_ptr
+                0x00800d3e        0x2 ieee802_15_4_data.o
+ .bss.mcps_data_confirm
+                0x00800d40        0x2 ieee802_15_4_data.o
+ .bss.original_mac_state
+                0x00800d42        0x1 ieee802_15_4_data.o
+ .bss.mcsi      0x00800d43       0x15 ieee802_15_4_orphan.o
+ .bss.rx_cb     0x00800d58        0x2 tat_rf230.o
+ .bss.tx_cb     0x00800d5a        0x2 tat_rf230.o
+ .bss.waiting_for_ack
+                0x00800d5c        0x1 tat_rf230.o
+ .bss.frame_length
+                0x00800d5d        0x1 tat_rf230.o
+ .bss.nmbr_of_partitions
+                0x00800d5e        0x1 vrt_mem.o
+ .bss.first_partition
+                0x00800d5f        0x2 vrt_mem.o
+ .bss.vrt_event_fifo_tail
+                0x00800d61        0x1 vrt_kernel.o
+ .bss.nli       0x00800d62        0x2 zigbee.o
+ .bss.nji       0x00800d64        0x2 zigbee.o
+ .bss.ndi       0x00800d66        0x2 zigbee.o
+ .bss.relay     0x00800d68        0x2 zigbee_data.o
+ .bss.nlde_callback_data_confirm
+                0x00800d6a        0x2 zigbee_data.o
+ .bss.confirm   0x00800d6c        0x2 zigbee_data.o
+ .bss.devices_joined
+                0x00800d6e        0x1 zigbee_neighbor_table.o
+ .bss.routers_joined
+                0x00800d6f        0x1 zigbee_neighbor_table.o
+ .bss.items_in_free_list
+                0x00800d70        0x1 zigbee_neighbor_table.o
+ .bss.free_list
+                0x00800d71        0x2 zigbee_neighbor_table.o
+ .bss.neighbor_table
+                0x00800d73      0x39d zigbee_neighbor_table.o
+ .bss.high_pri_delay_cb
+                0x00801110        0x2 vrt_timer_avr.o
+                0x00801110                high_pri_delay_cb
+ .bss.high_pri_delay_param
+                0x00801112        0x2 vrt_timer_avr.o
+                0x00801112                high_pri_delay_param
+ .bss.delay_msw
+                0x00801114        0x2 vrt_timer_avr.o
+                0x00801114                delay_msw
+ .bss.delay_lsw
+                0x00801116        0x2 vrt_timer_avr.o
+                0x00801116                delay_lsw
+ .bss.ticks_waiting
+                0x00801118        0x2 vrt_timer_avr.o
+                0x00801118                ticks_waiting
+ .bss.tick_handler
+                0x0080111a        0x2 vrt_timer_avr.o
+ *(COMMON)
+ COMMON         0x0080111c        0x1 usb_task.o
+                0x0080111c                ep_error
+ COMMON         0x0080111d        0x6 usb_standard_request.o
+                0x0080111d                wInterface
+                0x0080111f                usb_configuration_nb
+                0x00801120                data_to_transfer
+                0x00801121                pbuffer
+ COMMON         0x00801123       0x1d ieee802_15_4_pib.o
+                0x00801123                mac_pib_macAssociationPermit
+                0x00801124                mac_pib_macRxOnWhenIdle
+                0x00801125                mac_i_am_coordinator
+                0x00801126                mac_pib_macDSN
+                0x00801127                mac_pib_macTransactionPersistenceTime
+                0x00801129                mac_pib_current_channel
+                0x0080112a                mac_pib_macCoordShortAddress
+                0x0080112c                mac_pib_macPANId
+                0x0080112e                mac_pib_macExtendedAddress
+                0x00801136                mac_pib_macCoordExtendedAddress
+                0x0080113e                mac_pib_macShortAddress
+ COMMON         0x00801140       0xa7 ieee802_15_4.o
+                0x00801140                mac_param
+                0x0080114a                indication_buffer
+                0x00801168                ieee802_15_4_tx_buffer
+ COMMON         0x008011e7       0x54 vrt_kernel.o
+                0x008011e7                vrt_event_fifo_items_used
+                0x008011e8                vrt_event_fifo_head
+                0x008011e9                vrt_event_fifo
+                0x00801239                vrt_kernel_events_missed
+                0x0080123a                vrt_event_fifo_items_free
+ COMMON         0x0080123b        0xc zigbee.o
+                0x0080123b                nwk_param
+ COMMON         0x00801247        0x5 zigbee_neighbor_table.o
+                0x00801247                last
+                0x00801249                neighbors
+                0x0080124a                first
+ COMMON         0x0080124c       0x22 zigbee_nib.o
+                0x0080124c                nwkTransactionPersistenceTime
+                0x0080124e                nwkMaxBroadcastRetries
+                0x0080124f                nwkNextAddress
+                0x00801251                c_skip_parent
+                0x00801253                nwkAddressIncrement
+                0x00801255                nwkRole
+                0x00801256                nwkExtendedPANID
+                0x0080125e                nwkUseTreeRouting
+                0x0080125f                nwkStackProfile
+                0x00801260                nwkAvailableAddresses
+                0x00801262                nwkCapabilityInformation
+                0x00801263                nwkRouteDiscoveryRetriesPermitted
+                0x00801264                nwkUseTreeAddrAlloc
+                0x00801265                nwkProtocolVersion
+                0x00801266                nwkReportConstantCost
+                0x00801267                nwkShortAddress
+                0x00801269                nwkNetworkBroadcastDeliveryTime
+                0x0080126a                nwkSymLink
+                0x0080126b                nwkGroupIDTable
+                0x0080126c                nwkSequenceNumber
+                0x0080126d                nwkPassiveAckTimeout
+ COMMON         0x0080126e        0x2 vrt_timer_avr.o
+                0x0080126e                vrt_time_msw
+                0x00801270                PROVIDE (__bss_end, .)
+                0x0000682c                __data_load_start = LOADADDR (.data)
+                0x000068c2                __data_load_end = (__data_load_start + SIZEOF (.data))
+
+.noinit         0x00801270        0x0
+                0x00801270                PROVIDE (__noinit_start, .)
+ *(.noinit*)
+                0x00801270                PROVIDE (__noinit_end, .)
+                0x00801270                _end = .
+                0x00801270                PROVIDE (__heap_start, .)
+
+.eeprom         0x00810000        0x0
+ *(.eeprom*)
+                0x00810000                __eeprom_end = .
+
+.fuse
+ *(.fuse)
+ *(.lfuse)
+ *(.hfuse)
+ *(.efuse)
+
+.lock
+ *(.lock*)
+
+.signature
+ *(.signature*)
+
+.stab           0x00000000      0x8f4
+ *(.stab)
+ .stab          0x00000000      0x6cc /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o
+ .stab          0x000006cc       0x30 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(exit.o)
+                                 0x3c (size before relaxing)
+ .stab          0x000006fc       0x84 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(memcpy.o)
+                                 0x90 (size before relaxing)
+ .stab          0x00000780       0x90 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eerd_byte_at90usb1287.o)
+                                 0x9c (size before relaxing)
+ .stab          0x00000810       0xe4 /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/libc.a(eewr_byte_at90usb1287.o)
+                                 0xf0 (size before relaxing)
+
+.stabstr        0x00000000      0x10c
+ *(.stabstr)
+ .stabstr       0x00000000      0x10c /usr/lib/gcc/avr/4.5.3/../../../avr/lib/avr51/crtusb1286.o
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x00000000       0x11
+ *(.comment)
+ .comment       0x00000000       0x11 ieee802_15_4_poll.o
+                                 0x12 (size before relaxing)
+ .comment       0x00000000       0x12 zigbee_poll.o
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000      0xa98
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x30 rzusbstick.o
+ .debug_aranges
+                0x00000030       0x88 air_capture.o
+ .debug_aranges
+                0x000000b8       0x78 cmd_if.o
+ .debug_aranges
+                0x00000130       0x38 isr.o
+ .debug_aranges
+                0x00000168       0x68 usb_task.o
+ .debug_aranges
+                0x000001d0       0x48 at24cxx.o
+ .debug_aranges
+                0x00000218       0x70 eep.o
+ .debug_aranges
+                0x00000288       0x78 rf230_avr.o
+ .debug_aranges
+                0x00000300       0x48 usb_drv.o
+ .debug_aranges
+                0x00000348       0x30 usb_specific_request.o
+ .debug_aranges
+                0x00000378       0x28 usb_standard_request.o
+ .debug_aranges
+                0x000003a0       0x38 ieee802_15_4_pib.o
+ .debug_aranges
+                0x000003d8       0x20 ieee802_15_4_start.o
+ .debug_aranges
+                0x000003f8       0xd8 ieee802_15_4.o
+ .debug_aranges
+                0x000004d0       0x58 ieee802_15_4_associate.o
+ .debug_aranges
+                0x00000528       0x38 ieee802_15_4_beacon.o
+ .debug_aranges
+                0x00000560       0x28 ieee802_15_4_cmd.o
+ .debug_aranges
+                0x00000588       0x38 ieee802_15_4_data.o
+ .debug_aranges
+                0x000005c0       0x28 ieee802_15_4_disassociate.o
+ .debug_aranges
+                0x000005e8       0x28 ieee802_15_4_orphan.o
+ .debug_aranges
+                0x00000610       0x20 ieee802_15_4_reset.o
+ .debug_aranges
+                0x00000630       0x28 ieee802_15_4_rx_enable.o
+ .debug_aranges
+                0x00000658       0x38 ieee802_15_4_scan.o
+ .debug_aranges
+                0x00000690       0xe0 tat_rf230.o
+ .debug_aranges
+                0x00000770       0x38 vrt_mem.o
+ .debug_aranges
+                0x000007a8       0x38 vrt_kernel.o
+ .debug_aranges
+                0x000007e0       0x20 zigbee_start_router.o
+ .debug_aranges
+                0x00000800       0x78 zigbee.o
+ .debug_aranges
+                0x00000878       0x48 zigbee_data.o
+ .debug_aranges
+                0x000008c0       0x38 zigbee_discovery.o
+ .debug_aranges
+                0x000008f8       0x20 zigbee_formation.o
+ .debug_aranges
+                0x00000918       0x40 zigbee_join.o
+ .debug_aranges
+                0x00000958       0x30 zigbee_leave.o
+ .debug_aranges
+                0x00000988       0x68 zigbee_neighbor_table.o
+ .debug_aranges
+                0x000009f0       0x28 zigbee_nib.o
+ .debug_aranges
+                0x00000a18       0x20 zigbee_permit_joining.o
+ .debug_aranges
+                0x00000a38       0x60 vrt_timer_avr.o
+
+.debug_pubnames
+                0x00000000     0x1f74
+ *(.debug_pubnames)
+ .debug_pubnames
+                0x00000000       0x28 rzusbstick.o
+ .debug_pubnames
+                0x00000028      0x13f air_capture.o
+ .debug_pubnames
+                0x00000167       0x44 cmd_if.o
+ .debug_pubnames
+                0x000001ab       0x52 isr.o
+ .debug_pubnames
+                0x000001fd       0xdb usb_task.o
+ .debug_pubnames
+                0x000002d8       0x9c at24cxx.o
+ .debug_pubnames
+                0x00000374       0xfb eep.o
+ .debug_pubnames
+                0x0000046f      0x157 rf230_avr.o
+ .debug_pubnames
+                0x000005c6       0xbc usb_descriptors.o
+ .debug_pubnames
+                0x00000682       0x97 usb_drv.o
+ .debug_pubnames
+                0x00000719       0x63 usb_specific_request.o
+ .debug_pubnames
+                0x0000077c       0x89 usb_standard_request.o
+ .debug_pubnames
+                0x00000805      0x1cc ieee802_15_4_pib.o
+ .debug_pubnames
+                0x000009d1       0x31 ieee802_15_4_start.o
+ .debug_pubnames
+                0x00000a02      0x455 ieee802_15_4.o
+ .debug_pubnames
+                0x00000e57      0x122 ieee802_15_4_associate.o
+ .debug_pubnames
+                0x00000f79       0xa6 ieee802_15_4_beacon.o
+ .debug_pubnames
+                0x0000101f       0x37 ieee802_15_4_cmd.o
+ .debug_pubnames
+                0x00001056       0xa8 ieee802_15_4_data.o
+ .debug_pubnames
+                0x000010fe       0x62 ieee802_15_4_disassociate.o
+ .debug_pubnames
+                0x00001160       0x5e ieee802_15_4_orphan.o
+ .debug_pubnames
+                0x000011be       0x29 ieee802_15_4_reset.o
+ .debug_pubnames
+                0x000011e7       0x49 ieee802_15_4_rx_enable.o
+ .debug_pubnames
+                0x00001230       0x73 ieee802_15_4_scan.o
+ .debug_pubnames
+                0x000012a3      0x23e tat_rf230.o
+ .debug_pubnames
+                0x000014e1       0x60 vrt_mem.o
+ .debug_pubnames
+                0x00001541       0xe7 vrt_kernel.o
+ .debug_pubnames
+                0x00001628       0x32 zigbee_start_router.o
+ .debug_pubnames
+                0x0000165a      0x1c0 zigbee.o
+ .debug_pubnames
+                0x0000181a       0x72 zigbee_data.o
+ .debug_pubnames
+                0x0000188c       0x68 zigbee_discovery.o
+ .debug_pubnames
+                0x000018f4       0x2f zigbee_formation.o
+ .debug_pubnames
+                0x00001923       0x9f zigbee_join.o
+ .debug_pubnames
+                0x000019c2       0x54 zigbee_leave.o
+ .debug_pubnames
+                0x00001a16      0x182 zigbee_neighbor_table.o
+ .debug_pubnames
+                0x00001b98      0x231 zigbee_nib.o
+ .debug_pubnames
+                0x00001dc9       0x2c zigbee_permit_joining.o
+ .debug_pubnames
+                0x00001df5      0x17f vrt_timer_avr.o
+
+.debug_info     0x00000000     0xd383
+ *(.debug_info)
+ .debug_info    0x00000000      0x1ac rzusbstick.o
+ .debug_info    0x000001ac      0xa7e air_capture.o
+ .debug_info    0x00000c2a     0x18b1 cmd_if.o
+ .debug_info    0x000024db      0x1e1 isr.o
+ .debug_info    0x000026bc      0x501 usb_task.o
+ .debug_info    0x00002bbd      0x2ba at24cxx.o
+ .debug_info    0x00002e77      0x36f eep.o
+ .debug_info    0x000031e6      0x3fc rf230_avr.o
+ .debug_info    0x000035e2      0x517 usb_descriptors.o
+ .debug_info    0x00003af9      0x1dd usb_drv.o
+ .debug_info    0x00003cd6      0x2dc usb_specific_request.o
+ .debug_info    0x00003fb2      0x6f6 usb_standard_request.o
+ .debug_info    0x000046a8      0x2a8 ieee802_15_4_pib.o
+ .debug_info    0x00004950      0x1bc ieee802_15_4_start.o
+ .debug_info    0x00004b0c      0xc37 ieee802_15_4.o
+ .debug_info    0x00005743      0x892 ieee802_15_4_associate.o
+ .debug_info    0x00005fd5      0x6fa ieee802_15_4_beacon.o
+ .debug_info    0x000066cf      0x7f4 ieee802_15_4_cmd.o
+ .debug_info    0x00006ec3      0x695 ieee802_15_4_data.o
+ .debug_info    0x00007558      0x5b0 ieee802_15_4_disassociate.o
+ .debug_info    0x00007b08      0x40a ieee802_15_4_orphan.o
+ .debug_info    0x00007f12      0x1e1 ieee802_15_4_reset.o
+ .debug_info    0x000080f3      0x169 ieee802_15_4_rx_enable.o
+ .debug_info    0x0000825c      0x7fd ieee802_15_4_scan.o
+ .debug_info    0x00008a59      0xa2e tat_rf230.o
+ .debug_info    0x00009487      0x334 vrt_mem.o
+ .debug_info    0x000097bb      0x270 vrt_kernel.o
+ .debug_info    0x00009a2b      0x1f8 zigbee_start_router.o
+ .debug_info    0x00009c23      0x73e zigbee.o
+ .debug_info    0x0000a361      0x68c zigbee_data.o
+ .debug_info    0x0000a9ed      0x804 zigbee_discovery.o
+ .debug_info    0x0000b1f1      0x1fa zigbee_formation.o
+ .debug_info    0x0000b3eb      0x9e1 zigbee_join.o
+ .debug_info    0x0000bdcc      0x794 zigbee_leave.o
+ .debug_info    0x0000c560      0x645 zigbee_neighbor_table.o
+ .debug_info    0x0000cba5      0x35e zigbee_nib.o
+ .debug_info    0x0000cf03      0x10c zigbee_permit_joining.o
+ .debug_info    0x0000d00f      0x374 vrt_timer_avr.o
+ *(.gnu.linkonce.wi.*)
+
+.debug_abbrev   0x00000000     0x3863
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000       0xbb rzusbstick.o
+ .debug_abbrev  0x000000bb      0x287 air_capture.o
+ .debug_abbrev  0x00000342      0x2e8 cmd_if.o
+ .debug_abbrev  0x0000062a       0xb5 isr.o
+ .debug_abbrev  0x000006df      0x248 usb_task.o
+ .debug_abbrev  0x00000927      0x12f at24cxx.o
+ .debug_abbrev  0x00000a56       0xe6 eep.o
+ .debug_abbrev  0x00000b3c      0x121 rf230_avr.o
+ .debug_abbrev  0x00000c5d       0xbf usb_descriptors.o
+ .debug_abbrev  0x00000d1c       0xb6 usb_drv.o
+ .debug_abbrev  0x00000dd2       0xf6 usb_specific_request.o
+ .debug_abbrev  0x00000ec8      0x192 usb_standard_request.o
+ .debug_abbrev  0x0000105a       0xa7 ieee802_15_4_pib.o
+ .debug_abbrev  0x00001101       0xd4 ieee802_15_4_start.o
+ .debug_abbrev  0x000011d5      0x2ad ieee802_15_4.o
+ .debug_abbrev  0x00001482      0x297 ieee802_15_4_associate.o
+ .debug_abbrev  0x00001719      0x1cd ieee802_15_4_beacon.o
+ .debug_abbrev  0x000018e6      0x251 ieee802_15_4_cmd.o
+ .debug_abbrev  0x00001b37      0x263 ieee802_15_4_data.o
+ .debug_abbrev  0x00001d9a      0x1f7 ieee802_15_4_disassociate.o
+ .debug_abbrev  0x00001f91      0x186 ieee802_15_4_orphan.o
+ .debug_abbrev  0x00002117       0xc7 ieee802_15_4_reset.o
+ .debug_abbrev  0x000021de       0xbf ieee802_15_4_rx_enable.o
+ .debug_abbrev  0x0000229d      0x295 ieee802_15_4_scan.o
+ .debug_abbrev  0x00002532      0x279 tat_rf230.o
+ .debug_abbrev  0x000027ab      0x114 vrt_mem.o
+ .debug_abbrev  0x000028bf      0x135 vrt_kernel.o
+ .debug_abbrev  0x000029f4       0xa0 zigbee_start_router.o
+ .debug_abbrev  0x00002a94      0x1cc zigbee.o
+ .debug_abbrev  0x00002c60      0x1cc zigbee_data.o
+ .debug_abbrev  0x00002e2c      0x1de zigbee_discovery.o
+ .debug_abbrev  0x0000300a       0xd4 zigbee_formation.o
+ .debug_abbrev  0x000030de      0x1c6 zigbee_join.o
+ .debug_abbrev  0x000032a4      0x1a3 zigbee_leave.o
+ .debug_abbrev  0x00003447      0x191 zigbee_neighbor_table.o
+ .debug_abbrev  0x000035d8       0xbd zigbee_nib.o
+ .debug_abbrev  0x00003695       0x8a zigbee_permit_joining.o
+ .debug_abbrev  0x0000371f      0x144 vrt_timer_avr.o
+
+.debug_line     0x00000000     0x9827
+ *(.debug_line)
+ .debug_line    0x00000000      0x1e8 rzusbstick.o
+ .debug_line    0x000001e8      0xa7f air_capture.o
+ .debug_line    0x00000c67      0xd80 cmd_if.o
+ .debug_line    0x000019e7      0x1bb isr.o
+ .debug_line    0x00001ba2      0x773 usb_task.o
+ .debug_line    0x00002315      0x655 at24cxx.o
+ .debug_line    0x0000296a      0x4d4 eep.o
+ .debug_line    0x00002e3e      0x4dc rf230_avr.o
+ .debug_line    0x0000331a       0xe4 usb_descriptors.o
+ .debug_line    0x000033fe      0x242 usb_drv.o
+ .debug_line    0x00003640      0x1b7 usb_specific_request.o
+ .debug_line    0x000037f7      0x4e7 usb_standard_request.o
+ .debug_line    0x00003cde      0x200 ieee802_15_4_pib.o
+ .debug_line    0x00003ede      0x173 ieee802_15_4_start.o
+ .debug_line    0x00004051      0x79e ieee802_15_4.o
+ .debug_line    0x000047ef      0x605 ieee802_15_4_associate.o
+ .debug_line    0x00004df4      0x35a ieee802_15_4_beacon.o
+ .debug_line    0x0000514e      0x3e4 ieee802_15_4_cmd.o
+ .debug_line    0x00005532      0x519 ieee802_15_4_data.o
+ .debug_line    0x00005a4b      0x27b ieee802_15_4_disassociate.o
+ .debug_line    0x00005cc6      0x27e ieee802_15_4_orphan.o
+ .debug_line    0x00005f44        0x0 ieee802_15_4_poll.o
+ .debug_line    0x00005f44      0x193 ieee802_15_4_reset.o
+ .debug_line    0x000060d7      0x181 ieee802_15_4_rx_enable.o
+ .debug_line    0x00006258      0x43a ieee802_15_4_scan.o
+ .debug_line    0x00006692      0x9c3 tat_rf230.o
+ .debug_line    0x00007055      0x3a0 vrt_mem.o
+ .debug_line    0x000073f5      0x26d vrt_kernel.o
+ .debug_line    0x00007662      0x181 zigbee_start_router.o
+ .debug_line    0x000077e3      0x3a0 zigbee.o
+ .debug_line    0x00007b83      0x4f2 zigbee_data.o
+ .debug_line    0x00008075      0x351 zigbee_discovery.o
+ .debug_line    0x000083c6      0x183 zigbee_formation.o
+ .debug_line    0x00008549      0x45d zigbee_join.o
+ .debug_line    0x000089a6      0x315 zigbee_leave.o
+ .debug_line    0x00008cbb      0x55c zigbee_neighbor_table.o
+ .debug_line    0x00009217      0x198 zigbee_nib.o
+ .debug_line    0x000093af       0xff zigbee_permit_joining.o
+ .debug_line    0x000094ae        0x0 zigbee_poll.o
+ .debug_line    0x000094ae      0x379 vrt_timer_avr.o
+
+.debug_frame    0x00000000     0x1090
+ *(.debug_frame)
+ .debug_frame   0x00000000       0x40 rzusbstick.o
+ .debug_frame   0x00000040       0xf0 air_capture.o
+ .debug_frame   0x00000130       0xd0 cmd_if.o
+ .debug_frame   0x00000200       0x50 isr.o
+ .debug_frame   0x00000250       0xb0 usb_task.o
+ .debug_frame   0x00000300       0x70 at24cxx.o
+ .debug_frame   0x00000370       0xc0 eep.o
+ .debug_frame   0x00000430       0xd0 rf230_avr.o
+ .debug_frame   0x00000500       0x70 usb_drv.o
+ .debug_frame   0x00000570       0x40 usb_specific_request.o
+ .debug_frame   0x000005b0       0x30 usb_standard_request.o
+ .debug_frame   0x000005e0       0x50 ieee802_15_4_pib.o
+ .debug_frame   0x00000630       0x20 ieee802_15_4_start.o
+ .debug_frame   0x00000650      0x190 ieee802_15_4.o
+ .debug_frame   0x000007e0       0x90 ieee802_15_4_associate.o
+ .debug_frame   0x00000870       0x50 ieee802_15_4_beacon.o
+ .debug_frame   0x000008c0       0x30 ieee802_15_4_cmd.o
+ .debug_frame   0x000008f0       0x50 ieee802_15_4_data.o
+ .debug_frame   0x00000940       0x30 ieee802_15_4_disassociate.o
+ .debug_frame   0x00000970       0x30 ieee802_15_4_orphan.o
+ .debug_frame   0x000009a0       0x20 ieee802_15_4_reset.o
+ .debug_frame   0x000009c0       0x30 ieee802_15_4_rx_enable.o
+ .debug_frame   0x000009f0       0x50 ieee802_15_4_scan.o
+ .debug_frame   0x00000a40      0x1a0 tat_rf230.o
+ .debug_frame   0x00000be0       0x50 vrt_mem.o
+ .debug_frame   0x00000c30       0x50 vrt_kernel.o
+ .debug_frame   0x00000c80       0x20 zigbee_start_router.o
+ .debug_frame   0x00000ca0       0xd0 zigbee.o
+ .debug_frame   0x00000d70       0x70 zigbee_data.o
+ .debug_frame   0x00000de0       0x50 zigbee_discovery.o
+ .debug_frame   0x00000e30       0x20 zigbee_formation.o
+ .debug_frame   0x00000e50       0x60 zigbee_join.o
+ .debug_frame   0x00000eb0       0x40 zigbee_leave.o
+ .debug_frame   0x00000ef0       0xb0 zigbee_neighbor_table.o
+ .debug_frame   0x00000fa0       0x30 zigbee_nib.o
+ .debug_frame   0x00000fd0       0x20 zigbee_permit_joining.o
+ .debug_frame   0x00000ff0       0xa0 vrt_timer_avr.o
+
+.debug_str      0x00000000     0x46ef
+ *(.debug_str)
+ .debug_str     0x00000000      0x19b rzusbstick.o
+                                0x1e5 (size before relaxing)
+ .debug_str     0x0000019b      0x4c3 air_capture.o
+                                0x603 (size before relaxing)
+ .debug_str     0x0000065e      0xce5 cmd_if.o
+                                0xf92 (size before relaxing)
+ .debug_str     0x00001343       0xc0 isr.o
+                                0x1bd (size before relaxing)
+ .debug_str     0x00001403      0x1c8 usb_task.o
+                                0x3a4 (size before relaxing)
+ .debug_str     0x000015cb      0x208 at24cxx.o
+                                0x2f2 (size before relaxing)
+ .debug_str     0x000017d3      0x1c9 eep.o
+                                0x2c9 (size before relaxing)
+ .debug_str     0x0000199c      0x144 rf230_avr.o
+                                0x292 (size before relaxing)
+ .debug_str     0x00001ae0      0x325 usb_descriptors.o
+                                0x443 (size before relaxing)
+ .debug_str     0x00001e05       0xd8 usb_drv.o
+                                0x1a2 (size before relaxing)
+ .debug_str     0x00001edd       0x88 usb_specific_request.o
+                                0x27f (size before relaxing)
+ .debug_str     0x00001f65      0x16a usb_standard_request.o
+                                0x4e7 (size before relaxing)
+ .debug_str     0x000020cf      0x1b7 ieee802_15_4_pib.o
+                                0x2e1 (size before relaxing)
+ .debug_str     0x00002286      0x27d ieee802_15_4_start.o
+                                0x3ad (size before relaxing)
+ .debug_str     0x00002503      0x73b ieee802_15_4.o
+                                0xcb8 (size before relaxing)
+ .debug_str     0x00002c3e      0x309 ieee802_15_4_associate.o
+                                0x8d4 (size before relaxing)
+ .debug_str     0x00002f47      0x103 ieee802_15_4_beacon.o
+                                0x7c0 (size before relaxing)
+ .debug_str     0x0000304a       0x8c ieee802_15_4_cmd.o
+                                0x938 (size before relaxing)
+ .debug_str     0x000030d6       0xf8 ieee802_15_4_data.o
+                                0x680 (size before relaxing)
+ .debug_str     0x000031ce       0x99 ieee802_15_4_disassociate.o
+                                0x772 (size before relaxing)
+ .debug_str     0x00003267       0xbf ieee802_15_4_orphan.o
+                                0x63a (size before relaxing)
+ .debug_str     0x00003326        0x0 ieee802_15_4_poll.o
+ .debug_str     0x00003326       0x58 ieee802_15_4_reset.o
+                                0x3ca (size before relaxing)
+ .debug_str     0x0000337e       0x6c ieee802_15_4_rx_enable.o
+                                0x37d (size before relaxing)
+ .debug_str     0x000033ea      0x1e6 ieee802_15_4_scan.o
+                                0x785 (size before relaxing)
+ .debug_str     0x000035d0      0x272 tat_rf230.o
+                                0x628 (size before relaxing)
+ .debug_str     0x00003842       0xc0 vrt_mem.o
+                                0x253 (size before relaxing)
+ .debug_str     0x00003902       0x7b vrt_kernel.o
+                                0x22b (size before relaxing)
+ .debug_str     0x0000397d      0x160 zigbee_start_router.o
+                                0x2a4 (size before relaxing)
+ .debug_str     0x00003add      0x25d zigbee.o
+                                0x64e (size before relaxing)
+ .debug_str     0x00003d3a      0x13d zigbee_data.o
+                                0x4e0 (size before relaxing)
+ .debug_str     0x00003e77      0x1c8 zigbee_discovery.o
+                                0x755 (size before relaxing)
+ .debug_str     0x0000403f       0x49 zigbee_formation.o
+                                0x279 (size before relaxing)
+ .debug_str     0x00004088       0xeb zigbee_join.o
+                                0x887 (size before relaxing)
+ .debug_str     0x00004173       0x8d zigbee_leave.o
+                                0x70a (size before relaxing)
+ .debug_str     0x00004200      0x1e6 zigbee_neighbor_table.o
+                                0x554 (size before relaxing)
+ .debug_str     0x000043e6      0x191 zigbee_nib.o
+                                0x328 (size before relaxing)
+ .debug_str     0x00004577       0x3b zigbee_permit_joining.o
+                                0x1c4 (size before relaxing)
+ .debug_str     0x000045b2        0x0 zigbee_poll.o
+ .debug_str     0x000045b2      0x13d vrt_timer_avr.o
+                                0x2aa (size before relaxing)
+
+.debug_loc      0x00000000     0x5c6d
+ *(.debug_loc)
+ .debug_loc     0x00000000      0x682 air_capture.o
+ .debug_loc     0x00000682      0x7df cmd_if.o
+ .debug_loc     0x00000e61       0x2a isr.o
+ .debug_loc     0x00000e8b      0x471 usb_task.o
+ .debug_loc     0x000012fc      0x38d at24cxx.o
+ .debug_loc     0x00001689      0x1f9 eep.o
+ .debug_loc     0x00001882      0x3a6 rf230_avr.o
+ .debug_loc     0x00001c28      0x1c0 usb_drv.o
+ .debug_loc     0x00001de8       0x5d usb_specific_request.o
+ .debug_loc     0x00001e45      0x221 usb_standard_request.o
+ .debug_loc     0x00002066      0x119 ieee802_15_4_pib.o
+ .debug_loc     0x0000217f       0x84 ieee802_15_4_start.o
+ .debug_loc     0x00002203      0x50a ieee802_15_4.o
+ .debug_loc     0x0000270d      0x5f6 ieee802_15_4_associate.o
+ .debug_loc     0x00002d03      0x2b6 ieee802_15_4_beacon.o
+ .debug_loc     0x00002fb9      0x30a ieee802_15_4_cmd.o
+ .debug_loc     0x000032c3      0x30d ieee802_15_4_data.o
+ .debug_loc     0x000035d0      0x1d9 ieee802_15_4_disassociate.o
+ .debug_loc     0x000037a9      0x207 ieee802_15_4_orphan.o
+ .debug_loc     0x000039b0       0x5c ieee802_15_4_reset.o
+ .debug_loc     0x00003a0c       0x22 ieee802_15_4_rx_enable.o
+ .debug_loc     0x00003a2e      0x377 ieee802_15_4_scan.o
+ .debug_loc     0x00003da5      0x8b2 tat_rf230.o
+ .debug_loc     0x00004657      0x46c vrt_mem.o
+ .debug_loc     0x00004ac3       0xd7 vrt_kernel.o
+ .debug_loc     0x00004b9a       0x57 zigbee_start_router.o
+ .debug_loc     0x00004bf1      0x171 zigbee.o
+ .debug_loc     0x00004d62      0x305 zigbee_data.o
+ .debug_loc     0x00005067      0x197 zigbee_discovery.o
+ .debug_loc     0x000051fe       0x6c zigbee_formation.o
+ .debug_loc     0x0000526a      0x2be zigbee_join.o
+ .debug_loc     0x00005528      0x121 zigbee_leave.o
+ .debug_loc     0x00005649      0x427 zigbee_neighbor_table.o
+ .debug_loc     0x00005a70       0x37 zigbee_nib.o
+ .debug_loc     0x00005aa7       0x1e zigbee_permit_joining.o
+ .debug_loc     0x00005ac5      0x1a8 vrt_timer_avr.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+OUTPUT(RZUSBSTICK.elf elf32-avr)
+LOAD linker stubs
+
+.debug_pubtypes
+                0x00000000     0x2ceb
+ .debug_pubtypes
+                0x00000000       0x6a rzusbstick.o
+ .debug_pubtypes
+                0x0000006a       0x6e air_capture.o
+ .debug_pubtypes
+                0x000000d8      0x609 cmd_if.o
+ .debug_pubtypes
+                0x000006e1       0x55 isr.o
+ .debug_pubtypes
+                0x00000736       0xc1 usb_task.o
+ .debug_pubtypes
+                0x000007f7       0x46 at24cxx.o
+ .debug_pubtypes
+                0x0000083d       0x6f eep.o
+ .debug_pubtypes
+                0x000008ac       0x42 rf230_avr.o
+ .debug_pubtypes
+                0x000008ee      0x14a usb_descriptors.o
+ .debug_pubtypes
+                0x00000a38       0x1e usb_drv.o
+ .debug_pubtypes
+                0x00000a56       0xa6 usb_specific_request.o
+ .debug_pubtypes
+                0x00000afc       0xcf usb_standard_request.o
+ .debug_pubtypes
+                0x00000bcb       0x38 ieee802_15_4_pib.o
+ .debug_pubtypes
+                0x00000c03       0x64 ieee802_15_4_start.o
+ .debug_pubtypes
+                0x00000c67      0x3df ieee802_15_4.o
+ .debug_pubtypes
+                0x00001046      0x199 ieee802_15_4_associate.o
+ .debug_pubtypes
+                0x000011df      0x204 ieee802_15_4_beacon.o
+ .debug_pubtypes
+                0x000013e3      0x2c9 ieee802_15_4_cmd.o
+ .debug_pubtypes
+                0x000016ac      0x169 ieee802_15_4_data.o
+ .debug_pubtypes
+                0x00001815      0x1a7 ieee802_15_4_disassociate.o
+ .debug_pubtypes
+                0x000019bc      0x11c ieee802_15_4_orphan.o
+ .debug_pubtypes
+                0x00001ad8       0x71 ieee802_15_4_reset.o
+ .debug_pubtypes
+                0x00001b49       0x57 ieee802_15_4_rx_enable.o
+ .debug_pubtypes
+                0x00001ba0      0x1d6 ieee802_15_4_scan.o
+ .debug_pubtypes
+                0x00001d76       0xb2 tat_rf230.o
+ .debug_pubtypes
+                0x00001e28       0x6a vrt_mem.o
+ .debug_pubtypes
+                0x00001e92       0x76 vrt_kernel.o
+ .debug_pubtypes
+                0x00001f08       0x74 zigbee_start_router.o
+ .debug_pubtypes
+                0x00001f7c      0x1eb zigbee.o
+ .debug_pubtypes
+                0x00002167      0x147 zigbee_data.o
+ .debug_pubtypes
+                0x000022ae      0x26b zigbee_discovery.o
+ .debug_pubtypes
+                0x00002519       0x8d zigbee_formation.o
+ .debug_pubtypes
+                0x000025a6      0x2e7 zigbee_join.o
+ .debug_pubtypes
+                0x0000288d      0x28e zigbee_leave.o
+ .debug_pubtypes
+                0x00002b1b       0xd5 zigbee_neighbor_table.o
+ .debug_pubtypes
+                0x00002bf0       0x4c zigbee_nib.o
+ .debug_pubtypes
+                0x00002c3c       0x47 zigbee_permit_joining.o
+ .debug_pubtypes
+                0x00002c83       0x68 vrt_timer_avr.o
+
+.debug_ranges   0x00000000      0x8d8
+ .debug_ranges  0x00000000       0x20 rzusbstick.o
+ .debug_ranges  0x00000020       0x78 air_capture.o
+ .debug_ranges  0x00000098       0x68 cmd_if.o
+ .debug_ranges  0x00000100       0x28 isr.o
+ .debug_ranges  0x00000128       0x70 usb_task.o
+ .debug_ranges  0x00000198       0x38 at24cxx.o
+ .debug_ranges  0x000001d0       0x60 eep.o
+ .debug_ranges  0x00000230       0x68 rf230_avr.o
+ .debug_ranges  0x00000298       0x38 usb_drv.o
+ .debug_ranges  0x000002d0       0x20 usb_specific_request.o
+ .debug_ranges  0x000002f0       0x18 usb_standard_request.o
+ .debug_ranges  0x00000308       0x28 ieee802_15_4_pib.o
+ .debug_ranges  0x00000330       0x10 ieee802_15_4_start.o
+ .debug_ranges  0x00000340       0xc8 ieee802_15_4.o
+ .debug_ranges  0x00000408       0x60 ieee802_15_4_associate.o
+ .debug_ranges  0x00000468       0x40 ieee802_15_4_beacon.o
+ .debug_ranges  0x000004a8       0x18 ieee802_15_4_cmd.o
+ .debug_ranges  0x000004c0       0x28 ieee802_15_4_data.o
+ .debug_ranges  0x000004e8       0x18 ieee802_15_4_disassociate.o
+ .debug_ranges  0x00000500       0x18 ieee802_15_4_orphan.o
+ .debug_ranges  0x00000518       0x10 ieee802_15_4_reset.o
+ .debug_ranges  0x00000528       0x18 ieee802_15_4_rx_enable.o
+ .debug_ranges  0x00000540       0x28 ieee802_15_4_scan.o
+ .debug_ranges  0x00000568       0xd0 tat_rf230.o
+ .debug_ranges  0x00000638       0x28 vrt_mem.o
+ .debug_ranges  0x00000660       0x28 vrt_kernel.o
+ .debug_ranges  0x00000688       0x10 zigbee_start_router.o
+ .debug_ranges  0x00000698       0x68 zigbee.o
+ .debug_ranges  0x00000700       0x50 zigbee_data.o
+ .debug_ranges  0x00000750       0x28 zigbee_discovery.o
+ .debug_ranges  0x00000778       0x10 zigbee_formation.o
+ .debug_ranges  0x00000788       0x30 zigbee_join.o
+ .debug_ranges  0x000007b8       0x20 zigbee_leave.o
+ .debug_ranges  0x000007d8       0x88 zigbee_neighbor_table.o
+ .debug_ranges  0x00000860       0x18 zigbee_nib.o
+ .debug_ranges  0x00000878       0x10 zigbee_permit_joining.o
+ .debug_ranges  0x00000888       0x50 vrt_timer_avr.o
