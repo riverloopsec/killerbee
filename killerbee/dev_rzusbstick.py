@@ -442,7 +442,7 @@ class RZUSBSTICK:
         pdata = None
         if USBVER == 0:
             try:
-                pdata = self.handle.bulkRead(RZ_USB_PACKET_EP, timeout)
+                pdata = self.handle.bulkRead(RZ_USB_PACKET_EP, 150, timeout=timeout)
             except usb.USBError, e:
                 if e.args != ('No error',): # http://bugs.debian.org/476796
                     if e.args[0] != "Connection timed out": # USB timeout issue
