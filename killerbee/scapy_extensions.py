@@ -1,6 +1,16 @@
 DEFAULT_KB_CHANNEL = 11
 DEFAULT_KB_DEVICE = None
 
+try:
+    scapy.layers.dot15d4
+except:
+    print """Having scapy-com installed is required to use scapy-extensions.py.
+\tscapy-com can be found at http://bb.secdev.org/scapy-com"
+\tTry: $ hg clone https://bitbucket.org/secdev/scapy-com
+\t     $ cd scapy-com/
+\t     $ sudo python setup.py install"""
+    sys.exit(-1)
+
 from scapy.config import conf
 setattr(conf, 'killerbee_channel', DEFAULT_KB_CHANNEL)
 setattr(conf, 'killerbee_device', DEFAULT_KB_DEVICE)
