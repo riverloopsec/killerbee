@@ -21,11 +21,11 @@ added in the future.
 We have striven to use a minimum number of software dependencies, however, it
 is necessary to install the following Python modules before installation:
 
-serial
-usb
-crypto  (for some functions)
-pygtk   (for use of tools that have GUIs)
-cairo   (for use of tools that have GUIs)
++ serial
++ usb
++ crypto  (for some functions)
++ pygtk   (for use of tools that have GUIs)
++ cairo   (for use of tools that have GUIs)
 
 On Ubuntu systems, you can install the needed dependencies with the following
 command line:
@@ -117,8 +117,9 @@ wizard by clicking Next, then Finish to install the drivers.  When prompted by W
 Driver Sofware Anyway".
 
 Download the RZ Raven USB Stick firmware from 
-https://raw.githubusercontent.com/riverloopsec/killerbee/master/firmware/kb-rzusbstick-001.hex.
+https://raw.githubusercontent.com/riverloopsec/killerbee/master/firmware/kb-rzusbstick-002.hex.
 Copy the firmware file to the directory where you extracted the AVRDUDE software.
+Note: We are suggesting the -002 version now as some people report that -001 does not work on newer RZUSBSTICK versions. Change the filenames in the example commands below.
 
 Connect the AVR Dragon programmer to the ribbon cable, and connect the 100-mm to 50-mm adapter with the
 header.  Prepare your terminal to flash the RZ Raven USB stick by entering the following command at a
@@ -134,7 +135,7 @@ make contact and hit enter where you typed the AVRDUDE comand.  You should see o
 
 ```
 
-C:\Users\jwright\Downloads>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-001.hex
+C:\avrdude>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-001.hex
 
 avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
 avrdude: AVR device initialized and ready to accept instructions

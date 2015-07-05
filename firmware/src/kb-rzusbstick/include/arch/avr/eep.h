@@ -40,7 +40,7 @@
  *
  * \note The user should not use internal EEPROM addresses below EE_LAST_ADR.
  */
-#define EE_MAGIC            0x42
+#define EE_MAGIC            0xFF
 
 #define EE_MAGIC_ADR        0
 #define EE_MAGIC_SIZE       1

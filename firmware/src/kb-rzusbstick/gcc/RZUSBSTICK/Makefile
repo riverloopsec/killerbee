@@ -37,7 +37,7 @@ HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0 --no-change-warnings
 
 
 ## Include Directories
-INCLUDES = -I"C:\dev\KillerBee-Firmware\gcc\..\configure\arch\avr\dev" -I"C:\dev\KillerBee-Firmware\gcc\..\configure" -I"C:\dev\KillerBee-Firmware\gcc\..\configure\ieee802_15_4" -I"C:\dev\KillerBee-Firmware\gcc\..\configure\tat" -I"C:\dev\KillerBee-Firmware\gcc\..\configure\vrt" -I"C:\dev\KillerBee-Firmware\gcc\..\configure\zigbee" -I"C:\dev\KillerBee-Firmware\gcc\..\include" -I"C:\dev\KillerBee-Firmware\gcc\..\include\application\rzusbstick" -I"C:\dev\KillerBee-Firmware\gcc\..\include\arch" -I"C:\dev\KillerBee-Firmware\gcc\..\include\arch\avr" -I"C:\dev\KillerBee-Firmware\gcc\..\include\ieee802_15_4" -I"C:\dev\KillerBee-Firmware\gcc\..\include\tat" -I"C:\dev\KillerBee-Firmware\gcc\..\include\vrt" -I"C:\dev\KillerBee-Firmware\gcc\..\include\zigbee" -I"C:\dev\KillerBee-Firmware\gcc\..\board" 
+INCLUDES = -I"../../configure/arch/avr/dev" -I"../../configure" -I"../../configure/ieee802_15_4" -I"../../configure/tat" -I"../../configure/vrt" -I"../../configure/zigbee" -I"../../include" -I"../../include/application/rzusbstick" -I"../../include/arch" -I"../../include/arch/avr" -I"../../include/ieee802_15_4" -I"../../include/tat" -I"../../include/vrt" -I"../../include/zigbee" -I"../../board" 
 
 ## Libraries
 LIBS = -lc -lm 
