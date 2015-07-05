@@ -1,6 +1,8 @@
-== FIRMWARE ==
+Firmware
+================
 
-=== RZUSBSTICK ===
+RZUSBSTICK
+==================
 
 This needs to be flashed using external tools. Compiled firmware is:
 - kb-rzusbstick-001.hex: Initial version
@@ -8,7 +10,8 @@ This needs to be flashed using external tools. Compiled firmware is:
 
 The source is included in src/kb-rzusbstick/ folder. It should build on Windows and Ubuntu.
 
-=== APIMOTE ===
+ApiMote
+==================
 
 The firmware for this is mainained and built using the GoodFET repository.
 
