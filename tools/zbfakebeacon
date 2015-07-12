@@ -1,0 +1,108 @@
+#!/usr/bin/env python
+import pdb
+import sys
+import argparse
+from time import sleep
+
+import logging
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR) # suppress annoying Scapy IPv6 warning
+from killerbee import *
+from scapy.all import *
+
+# Jacked from killerbee project.
+def randmac(length=8):
+    '''
+    Returns a random MAC address using a list valid OUI's from ZigBee device
+    manufacturers.  Data is returned in air-format byte order (LSB first).
+    @type length: String
+    @param length: Optional length of MAC address, def=8.
+        Minimum address return length is 3 bytes for the valid OUI.
+    @rtype: String
+    @returns: A randomized MAC address in a little-endian byte string.
+    '''
+    # Valid OUI prefixes for MAC addresses
+    prefixes = [ "\x00\x0d\x6f",    # Ember
+                "\x00\x12\x4b",     # TI
+                "\x00\x04\xa3",     # Microchip
+                "\x00\x04\x25",     # Atmel
+                "\x00\x11\x7d",     # ZMD
+                "\x00\x13\xa2",     # MaxStream
+                "\x00\x30\x66",     # Cirronet
+                "\x00\x0b\x57",     # Silicon Laboratories
+                "\x00\x04\x9f",     # Freescale Semiconductor
+                "\x00\x21\xed",     # Telegesis
+                "\x00\xa0\x50"      # Cypress
+                ]
+
+    prefix = random.choice(prefixes)
+    suffix = randbytes(length-3)
+    # Reverse the address for use in a packet
+    return ''.join([prefix, suffix])[::-1]
+
+
+def create_beacon(panid, coordinator, epanid):
+    # oooh, baby I like it RAWWWWWWWWWWWW
+    beacon = [
+        # FRAME CONTROL
+        "\x00", # FCF for beacon 0x00
+        "\x80", # src addressing mode: short/16-bit 0x0002 (this is the only FCF flag marked)
+        "\xd8", # Sequence number for 802.15.4 layer
+
+        str(struct.pack("H",panid)), # 2-byte shortcode of panid
+        #str(struct.pack("H",coordinator)[0]), # only some implementations make it 0000 "\x00\x00", # Source address 0
+        "\x00\x00",
+        # SUPERFRAME
+        "\xff\xcf", # beacon interval, superframe interval, final cap slot, jbattery extension, pan coordinator (true!), association permit (true)
+        # GTS
+        "\x00",
+        #Pending addresses
+        "\x00",
+        # bullshit zigbee layer packet
+        "\x00\x22\x8c",
+        # Extended PAN ID (Zigbee NWK layer)
+        str(struct.pack("L",epanid)),
+        "\xff\xff\xff\x00"
+    ]
+    return ''.join(beacon)
+
+def response_handler(packet, channel):
+    if packet[7] == '\x07': # is it a beacon request?
+        sp = create_beacon(spanid, args.coordinator, args.epanid) # respond to the beacon request.
+        kb.sniffer_off()
+        kb.inject(sp)
+        kb.sniffer_on()
+    return True
+
+
+if __name__ == '__main__':
+    # Command-line arguments
+    parser = argparse.ArgumentParser()
+    tohex = lambda s: int(s.replace(':', ''), 16)
+
+    parser.add_argument('-f', '--channel', '-c', action='store', dest='channel', required=True, type=int, default=11)
+    parser.add_argument('-i', '--interface', action='store', dest='devstring')
+    parser.add_argument('-p', '--panid', action='store', required=True, type=tohex)
+    parser.add_argument('-e', '--epanid', action='store', required=True, type=tohex)
+    parser.add_argument('-s', '--source', action='store', required=True, type=tohex)
+    parser.add_argument('--numloops', action='store', default=1, type=int)
+    args = parser.parse_args()
+
+    kb = KillerBee(device=args.devstring)
+    kb.set_channel(args.channel)
+
+    coordinator = struct.pack('>H',args.coordinator)
+    spanid = args.panid
+
+    # listen in on the channel
+    gotpanid = False
+    kb.sniffer_on()
+    while True:
+        print ".",
+        # Does not block
+        recvpkt = kb.pnext()
+        # Check for empty packet (timeout) and valid FCS
+        if recvpkt != None and recvpkt[1]:
+            spanid = response_handler(recvpkt[0], args.channel)
+            if spanid != None:
+                # OK we got a packet, lets go back up and send out a beacon for that one...
+                print "Got beacon Packet and Sent Response"
