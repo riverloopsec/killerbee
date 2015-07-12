@@ -7,6 +7,7 @@ networks.
 Copyright 2009, Joshua Wright <jwright@willhackforsushi.com>.
 Copyright 2010-2015, Ryan Speers <ryan@riverloopsecurity.com>
                    Ricky Melgares <ricky@riverloopsecurity.com>
+Copyright 2015, Bryan Halfpap <Bryanhalf@gmail.com>
 
 All Rights Reserved.
 
@@ -26,15 +27,19 @@ is necessary to install the following Python modules before installation:
 + crypto  (for some functions)
 + pygtk   (for use of tools that have GUIs)
 + cairo   (for use of tools that have GUIs)
++ scapy-com (for some tools which utilize 802.15.4 Scapy extensions)
 
 On Ubuntu systems, you can install the needed dependencies with the following
-command line:
+commands:
 
 ```
 # apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
+# git clone https://bitbucket.org/secdev/scapy-com
+# cd scapy-com
+# python setup.py install
 ```
 
-The last two dependencies (python-dev and libgcrypt) are required for the Scapy
+The python-dev and libgcrypt are required for the Scapy
 Extension Patch (thanks to Spencer McIntyre for the patch).
 
 Also note that this is a fairly advanced and un-friendly attack platform.  This
@@ -177,6 +182,23 @@ instructions documented by running the tool with the "-h" argument, and
 summarized below.
 
 
++ zbpanidconflictflood  -  *Requires two killerbee interfaces* one killerbee interface
+                listens for packets and marks their PAN ID.  The other interface
+                constantly sends out beacon packets with found PAN ID's.  The
+                beacon packets with the same PAN ID cause the PAN coordinator to
+                believe that there is a PAN ID conflict, and the coordinator begins
+                the process of realigning the network on a new PAN ID.  The process
+                repeats ad nauseum.  Typically, network devices can't keep up with
+                the rapid change and after several seconds the network falls apart.
+                -  *NO TARGETING BUILT IN* This may *destroy* all zigbee networks
+                within range on the channel you are performing the attack on. Use
+                with caution.
++ zborphannotify  -  Spoofs an orphan notification packet from the target device to
+                a PAN Coordinator to test Coordinator behavior.
++ zbrealign     -  Spoofs an 802.15.4 PAN Realignment frame from the coordinator to
+                a target device.  May be able to reset the device's PAN ID or Channel
++ zbfakebeacon  -  Spoofs beacon frames, either spamming them or on response to seeing
+                a beacon request come through.
 + zbopenear    -  Assists in data capture where devices are operating on multiple 
                 channels or fast-frequency-hopping. It assigns multiple 
                 interfaces sequentially across all channels.
@@ -270,8 +292,8 @@ QUESTIONS/COMMENTS/CONCERNS
 Please drop us a note: 
 
 The original version was written by: jwright@willhackforsushi.com
-
 The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
+Additional Tools/Fixes by: bryanhalf@gmail.com
 
 THANKS
 ==============
