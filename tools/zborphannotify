@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import pdb
 import binascii
 import sys
 import argparse
@@ -21,61 +20,10 @@ def create_orphan_mac(panid, devleave, coordinator, device, seqnum):
     b.fcf_ackreq = 1 # shall be set to one
     b.seqnum = seqnum
     b.dest_panid = panid # PAN to which to disassociate
-    b.cmd_id = 6 # Disassociation notification
-    #if devleave:
-    #    b.disassociation_reason = 0x1 # The device wishes to leave the PAN
+    b.cmd_id = 6 # Orphan Notification
     b.dest_addr = coordinator
     b.src_addr = device
-    #else:
-    #    b.disassociation_reason = 0x02 # The coordinator wishes the device to leave the PAN
-    #    # If coordinator wants an associated device to leave the PAN, ...
-    #b.dest_addr = coordinator # extended address of the device being removed from the PAN.
-    #    # If an associated device wants to leave the PAN, then the Destination Address field shall contain the coordinator address.
-    #b.src_panid = hex(255) #\xff\xff #: Source PAN Identifier shall be omitted
-    #b.src_addr = coordinator # coordinator or end device
     return b
-
-#def create_disassoc_nwk(panid, devleave, coordinator, deviceshort, device, seqnum, seqnumzb):
-#    '''ZigBee Leave Command Frame'''
-#    z = Dot15d4()/Dot15d4Data()/ZigbeeNWK()/ZigbeeNWKCommandPayload()
-#    # Dot15d4
-#    z.fcf_panidcompress = 1 # TODO ?
-#    z.fcf_ackreq = 1 # Acknowledgement shall be requested
-#    z.fcf_frametype = 1 # "Data"
-#    #z.fcf_srcaddrmode = 3 # "Long"
-#    z.fcf_srcaddrmode = 2
-#    #z.fcf_destaddrmode = 3 # "Long"
-#    z.fcf_destaddrmode = 2
-#    z.seqnum = seqnum
-#    # Dot15d4Data
-#    z.dest_panid = panid # PAN to which to disassociate
-#    # ZigbeeNWK
-#    z.frametype = 1 # command frame
-#    z.flags = "extended_dst+extended_src"
-#    z.radius = 1 # the radius field shall be set to 1
-#    z.getlayer(ZigbeeNWK).fields['seqnum'] = seqnumzb # TODO
-#    # ZigbeeNWKCommandPayload
-#    z.cmd_identifier = "leave"
-#    # Request Sub-Field
-#    # 1: the leave command frame is a request for another device to leave the network.
-#    # 0: the leave command frame is an indication that the sending device plans to leave the network.
-#    if devleave:
-#        z.src_addr  = deviceshort # device originates
-#        z.dest_addr = 0x0000
-#        z.source    = deviceshort
-#        z.destination = 0x0000
-#        z.ext_src = device
-#        z.ext_dst = coordinator
-#        z.request = 0
-#    else:   # The coordinator is booting the device from the network
-#        z.src_addr   = 0x0000 # coordinator originates
-#        z.dest_addr  = deviceshort
-#        z.source     = 0x0000
-#        z.destination = deviceshort
-#        z.ext_src = coordinator
-#        z.ext_dst = device
-#        z.request = 1
-#    return z
 
 if __name__ == '__main__':
     # Command-line arguments
