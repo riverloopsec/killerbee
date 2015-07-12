@@ -193,7 +193,7 @@ summarized below.
                 repeats ad nauseum.  Typically, network devices can't keep up with
                 the rapid change and after several seconds the network falls apart.
 
-                -  _NO TARGETING BUILT IN_ This may *destroy* all zigbee networks
+                _NO TARGETING BUILT IN_ This may *destroy* all zigbee networks
                 within range on the channel you are performing the attack on. Use
                 with caution.
 + zborphannotify  -  Spoofs an orphan notification packet from the target device to
