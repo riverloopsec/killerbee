@@ -5,8 +5,10 @@ This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4
 networks.
 
 Copyright 2009, Joshua Wright <jwright@willhackforsushi.com>.
+
 Copyright 2010-2015, Ryan Speers <ryan@riverloopsecurity.com>
                    Ricky Melgares <ricky@riverloopsecurity.com>
+
 Copyright 2015, Bryan Halfpap <Bryanhalf@gmail.com>
 
 All Rights Reserved.
@@ -182,7 +184,7 @@ instructions documented by running the tool with the "-h" argument, and
 summarized below.
 
 
-+ zbpanidconflictflood  -  *Requires two killerbee interfaces* one killerbee interface
++ zbpanidconflictflood  -  _Requires two killerbee interfaces_ one killerbee interface
                 listens for packets and marks their PAN ID.  The other interface
                 constantly sends out beacon packets with found PAN ID's.  The
                 beacon packets with the same PAN ID cause the PAN coordinator to
@@ -190,7 +192,8 @@ summarized below.
                 the process of realigning the network on a new PAN ID.  The process
                 repeats ad nauseum.  Typically, network devices can't keep up with
                 the rapid change and after several seconds the network falls apart.
-                -  *NO TARGETING BUILT IN* This may *destroy* all zigbee networks
+
+                -  _NO TARGETING BUILT IN_ This may *destroy* all zigbee networks
                 within range on the channel you are performing the attack on. Use
                 with caution.
 + zborphannotify  -  Spoofs an orphan notification packet from the target device to
