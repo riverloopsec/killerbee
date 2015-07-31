@@ -175,7 +175,7 @@ class PcapDumper:
 
             #PPI-GEOLOCATION if information available
             if location is not None:
-                pph_len += 20 #geolocation header and data length
+                pph_len += 24 #geolocation header and data length
                 (lon, lat, alt) = location
                 # Sanity checking on values of location data:
                 if lat > -180.00000005 and lat < 180.00000005:
