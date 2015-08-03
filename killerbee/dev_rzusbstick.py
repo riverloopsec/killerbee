@@ -272,7 +272,7 @@ class RZUSBSTICK:
             if len(data) != res:
                 raise Exception("Issue writing USB data {0} to endpoint {1}, got a return of {2}.".format(data, endpoint, res))
             try:
-                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, 0, 500)
+                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, timeout=500)
                 response = response.pop()
             except usb.core.USBError as e:
                 if e.errno != 110: #Not Operation timed out
@@ -450,7 +450,7 @@ class RZUSBSTICK:
                         raise e
         else: # pyUSB 1.x
             try:
-                pdata = self.dev.read(RZ_USB_PACKET_EP, self.dev.bMaxPacketSize0)#1, 0, 100)
+                pdata = self.dev.read(RZ_USB_PACKET_EP, self.dev.bMaxPacketSize0, timeout=timeout)
             except usb.core.USBError as e:
                 if e.errno != 110: #Operation timed out
                     print "Error args:", e.args
