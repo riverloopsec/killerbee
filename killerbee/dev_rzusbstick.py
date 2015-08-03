@@ -241,8 +241,8 @@ class RZUSBSTICK:
             return [''.join([self.__bus.dirname, ":", self.dev.filename]), self.dev.open().getString(self.dev.iProduct, 50), self.dev.open().getString(self.dev.iSerialNumber, 12)]
         elif USBVER == 1:
             return ["{0}:{1}".format(self.dev.bus, self.dev.address),         \
-                    usb.util.get_string(self.dev, 50, self.dev.iProduct),     \
-                    usb.util.get_string(self.dev, 50, self.dev.iSerialNumber) ]
+                    usb.util.get_string(self.dev, self.dev.iProduct),     \
+                    usb.util.get_string(self.dev, self.dev.iSerialNumber) ]
 
     def __usb_write(self, endpoint, data):
         '''
@@ -272,7 +272,7 @@ class RZUSBSTICK:
             if len(data) != res:
                 raise Exception("Issue writing USB data {0} to endpoint {1}, got a return of {2}.".format(data, endpoint, res))
             try:
-                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, 0, 500)
+                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0) #, 0, 500)
                 response = response.pop()
             except usb.core.USBError as e:
                 if e.errno != 110: #Not Operation timed out
