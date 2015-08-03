@@ -241,8 +241,8 @@ class RZUSBSTICK:
             return [''.join([self.__bus.dirname, ":", self.dev.filename]), self.dev.open().getString(self.dev.iProduct, 50), self.dev.open().getString(self.dev.iSerialNumber, 12)]
         elif USBVER == 1:
             return ["{0}:{1}".format(self.dev.bus, self.dev.address),         \
-                    usb.util.get_string(self.dev, 50, self.dev.iProduct),     \
-                    usb.util.get_string(self.dev, 50, self.dev.iSerialNumber) ]
+                    usb.util.get_string(self.dev, self.dev.iProduct),     \
+                    usb.util.get_string(self.dev, self.dev.iSerialNumber) ]
 
     def __usb_write(self, endpoint, data):
         '''
