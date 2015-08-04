@@ -49,8 +49,8 @@ def create_beacon(panid, coordinator, epanid):
         "\xd8", # Sequence number for 802.15.4 layer
 
         str(struct.pack("H",panid)), # 2-byte shortcode of panid
-        #str(struct.pack("H",coordinator)[0]), # only some implementations make it 0000 "\x00\x00", # Source address 0
-        "\x00\x00",
+        str(struct.pack("H",coordinator)), # only some implementations make it 0000 "\x00\x00", # Source address 0
+        #"\x11\x11",
         # SUPERFRAME
         "\xff\xcf", # beacon interval, superframe interval, final cap slot, jbattery extension, pan coordinator (true!), association permit (true)
         # GTS
@@ -83,26 +83,32 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--interface', action='store', dest='devstring')
     parser.add_argument('-p', '--panid', action='store', required=True, type=tohex)
     parser.add_argument('-e', '--epanid', action='store', required=True, type=tohex)
-    parser.add_argument('-s', '--source', action='store', required=True, type=tohex)
+    parser.add_argument('-s', '--coordinator', action='store', required=False, default=0x0000, type=tohex)
+    parser.add_argument('-g', '--go', action='store_true', required=False, default=False, help="Spam Beacons, don't wait for requests")
     parser.add_argument('--numloops', action='store', default=1, type=int)
     args = parser.parse_args()
 
     kb = KillerBee(device=args.devstring)
     kb.set_channel(args.channel)
 
-    coordinator = struct.pack('>H',args.coordinator)
+    #coordinator = struct.pack('>H',args.coordinator)
     spanid = args.panid
 
     # listen in on the channel
-    gotpanid = False
-    kb.sniffer_on()
-    while True:
-        print ".",
-        # Does not block
-        recvpkt = kb.pnext()
-        # Check for empty packet (timeout) and valid FCS
-        if recvpkt != None and recvpkt[1]:
-            spanid = response_handler(recvpkt[0], args.channel)
+    if not args.go:
+        kb.sniffer_on()
+        while True:
+            print ".",
+            # Does not block
+            recvpkt = kb.pnext()
+            # Check for empty packet (timeout) and valid FCS
+            if recvpkt != None and recvpkt[1]:
+                spanid = response_handler(recvpkt[0], args.channel)
             if spanid != None:
-                # OK we got a packet, lets go back up and send out a beacon for that one...
-                print "Got beacon Packet and Sent Response"
+                    # OK we got a packet, lets go back up and send out a beacon for that one...
+                    print "Got beacon Packet and Sent Response"
+
+    else:
+        while True:
+            beacon = create_beacon(args.panid, args.coordinator, args.epanid)
+            kb.inject(beacon)
