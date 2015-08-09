@@ -284,7 +284,7 @@ class KillerBee:
         @type timeout: Integer
         @param timeout: Timeout to wait for packet reception in usec
         @rtype: List
-        @return: Returns None is timeout expires and no packet received.  When a packet is received, a list is returned, in the form [ String: packet contents | Bool: Valid CRC | Int: Unscaled RSSI ]
+        @return: Returns None is timeout expires and no packet received.  When a packet is received, a dictionary is returned { 0: (str) packet contents | 1: (bool) Valid CRC | 2: (int) Unscaled RSSI }
         '''
         return self.driver.pnext(timeout)
 

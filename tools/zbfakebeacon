@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2015
+
 import sys
 import argparse
 from time import sleep
@@ -7,15 +10,14 @@ import logging
 from killerbee import *
 
 def create_beacon(panid, coordinator, epanid):
-    # oooh, baby I like it RAWWWWWWWWWWWW
+    '''Doing a raw packet creation.'''
     beacon = [
         # FRAME CONTROL
         "\x00", # FCF for beacon 0x00
         "\x80", # src addressing mode: short/16-bit 0x0002 (this is the only FCF flag marked)
         "\xd8", # Sequence number for 802.15.4 layer
-
-        str(struct.pack("H",panid)), # 2-byte shortcode of panid
-        str(struct.pack("H",coordinator)), # only some implementations make it 0000 "\x00\x00", # Source address 0
+        str(struct.pack("H", panid)), # 2-byte shortcode of panid
+        str(struct.pack("H", coordinator)), # only some implementations make it 0000 "\x00\x00", # Source address 0
         #"\x11\x11",
         # SUPERFRAME
         "\xff\xcf", # beacon interval, superframe interval, final cap slot, jbattery extension, pan coordinator (true!), association permit (true)
@@ -26,7 +28,7 @@ def create_beacon(panid, coordinator, epanid):
         # bullshit zigbee layer packet
         "\x00\x22\x8c",
         # Extended PAN ID (Zigbee NWK layer)
-        str(struct.pack("L",epanid)),
+        str(struct.pack("L", epanid)),
         "\xff\xff\xff\x00"
     ]
     return ''.join(beacon)
@@ -39,12 +41,11 @@ def response_handler(packet, channel):
         kb.sniffer_on()
     return True
 
-
 if __name__ == '__main__':
     # Command-line arguments
-    parser = argparse.ArgumentParser()
     tohex = lambda s: int(s.replace(':', ''), 16)
 
+    parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--channel', '-c', action='store', dest='channel', required=True, type=int, default=11)
     parser.add_argument('-i', '--interface', action='store', dest='devstring')
     parser.add_argument('-p', '--panid', action='store', required=True, type=tohex)
@@ -57,7 +58,6 @@ if __name__ == '__main__':
     kb = KillerBee(device=args.devstring)
     kb.set_channel(args.channel)
 
-    #coordinator = struct.pack('>H',args.coordinator)
     spanid = args.panid
 
     # listen in on the channel
@@ -71,10 +71,10 @@ if __name__ == '__main__':
             if recvpkt != None and recvpkt[1]:
                 spanid = response_handler(recvpkt[0], args.channel)
             if spanid != None:
-                    # OK we got a packet, lets go back up and send out a beacon for that one...
-                    print "Got beacon Packet and Sent Response"
-
+                # OK we got a packet, lets go back up and send out a beacon for that one...
+                print "Got beacon Packet and Sent Response"
     else:
         while True:
             beacon = create_beacon(args.panid, args.coordinator, args.epanid)
             kb.inject(beacon)
+
