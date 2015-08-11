@@ -11,8 +11,6 @@ from killerbee import KillerBee, kbutils
 from db import ZBScanDB
 from scanning import doScan
 
-GPS_FREQUENCY=3 #in seconds
-
 # GPS Poller
 def gpsdPoller(currentGPS):
     '''
@@ -42,7 +40,6 @@ def gpsdPoller(currentGPS):
             else:
                 print "Waiting for a GPS fix."
                 #TODO timeout lat/lng/alt values if too old...?
-            sleep(GPS_FREQUENCY)
     except KeyboardInterrupt:
         print "Got KeyboardInterrupt in gpsdPoller, returning."
         return
