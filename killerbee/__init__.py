@@ -256,13 +256,6 @@ class KillerBee:
             self.dblog.set_channel(channel)
         self.driver.set_channel(channel)
 
-    def is_valid_channel(self, channel):
-        '''
-        Based on sniffer capabilities, return if this is an OK channel number.
-        @rtype: Boolean
-        '''
-        return self.driver.capabilities.is_valid_channel(channel)
-
     def inject(self, packet, channel=None, count=1, delay=0):
         '''
         Injects the specified packet contents.
