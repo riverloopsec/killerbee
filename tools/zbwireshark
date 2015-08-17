@@ -13,7 +13,8 @@ import subprocess
 from killerbee import *
 
 
-def main():
+def parse_args():
+    global args
 
     # Command-line arguments
     parser = argparse.ArgumentParser(description=__doc__)
@@ -27,6 +28,10 @@ def main():
     parser.add_argument('-D', action='store_true', dest='showdev',
             help='Show device info and exit')
     args = parser.parse_args()
+
+
+def main():
+    parse_args()
 
     if args.showdev:
         show_dev()
