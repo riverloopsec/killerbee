@@ -259,6 +259,8 @@ class KillerBee:
         @param channel: Sets the channel, optional
         @rtype: None
         '''
+        if not self.is_valid_channel(channel):
+            raise ValueError('Invalid channel ({0}) for this device'.format(channel))
         if hasattr(self, "dblog"):
             self.dblog.set_channel(channel)
         self.driver.set_channel(channel)
