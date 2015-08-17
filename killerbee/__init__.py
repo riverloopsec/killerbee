@@ -165,6 +165,13 @@ class KillerBee:
                 warn("Error initializing DBLogger (%s)." % e)
                 datasource = None   #give up nicely if error connecting, etc.
 
+    # Allow 'with KillerBee(...) as kb:' syntax
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exinfo):
+        self.close()
+
     def __device_is(self, vendorId, productId):
         '''
         Compares KillerBee class' device data to a known USB vendorId and productId

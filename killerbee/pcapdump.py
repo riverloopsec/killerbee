@@ -126,6 +126,12 @@ class PcapDumper:
             struct.pack("I", DLT_PPI if self.ppi else self.datalink)
             ]))
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exinfo):
+        self.close()
+
     def pcap_dump(self, packet, ts_sec=None, ts_usec=None, orig_len=None, 
                   freq_mhz = None, ant_dbm = None, location = None):
         '''
@@ -249,8 +255,6 @@ class PcapDumper:
             self.__fh.flush()
         except IOError, e:
             raise e
-
-        return
 
 
     def close(self):
