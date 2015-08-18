@@ -41,9 +41,10 @@ def show_dev(vendor=None, product=None, gps=None, include=None):
     @param include: Provide device names in this argument if you would like only
         these to be enumerated. Aka, include only these items.
     '''
-    print("{: >14} {: <20} {: >10}".format("Dev", "Product String", "Serial Number"))
+    fmt = "{: >14} {: <20} {: >10}"
+    print(fmt.format("Dev", "Product String", "Serial Number"))
     for dev in kbutils.devlist(vendor=vendor, product=product, gps=gps, include=include):
-        print("{0: >14} {1: <20} {2: >10}".format(dev[0], dev[1], dev[2]))
+        print(fmt.format(dev[0], dev[1], dev[2]))
 
 # KillerBee Class
 class KillerBee:
