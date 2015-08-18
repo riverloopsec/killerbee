@@ -12,6 +12,10 @@ import subprocess
 
 from killerbee import *
 
+class ShowDevAction(argparse.Action):
+    def __call__(self, *a, **kw):
+        show_dev()
+        sys.exit(0)
 
 def parse_args():
     global args
@@ -25,17 +29,13 @@ def parse_args():
             help='Channel on which to sniff')
     parser.add_argument('-n', '--count', action='store', type=int, default=None,
             metavar='COUNT', help='Limit capture to COUNT packets')
-    parser.add_argument('-D', action='store_true', dest='showdev',
+    parser.add_argument('-D', action = ShowDevAction, nargs=0,
             help='Show device info and exit')
     args = parser.parse_args()
 
 
 def main():
     parse_args()
-
-    if args.showdev:
-        show_dev()
-        sys.exit(0)
 
     # Start KillerBee
     with KillerBee(device=args.devstring) as kb:
