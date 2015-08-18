@@ -110,6 +110,8 @@ class PcapDumper:
         @param datalink: Datalink type, one of DLT_* defined in pcap-bpf.h
         @type savefile: String or file-like object
         @param savefile: Output libpcap filename to open, or file-like object
+        @type ppi: Boolean
+        @param ppi: Include CACE Per-Packet Information (defaults to False)
         @rtype: None
         '''
         if ppi: from killerbee.pcapdlt import DLT_PPI

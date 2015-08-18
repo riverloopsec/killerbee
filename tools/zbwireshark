@@ -24,7 +24,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring',
             help='Device to use for sniffing')
-    parser.add_argument('-p', '--ppi', action='store_true')
+    parser.add_argument('-p', '--ppi', action='store_true',
+            help='Include CACE Per-Packet Information in PCAP')
     parser.add_argument('-c', '-f', '--channel', action='store', type=int, required=True,
             help='Channel on which to sniff')
     parser.add_argument('-n', '--count', action='store', type=int, default=None,
