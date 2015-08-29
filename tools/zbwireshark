@@ -34,6 +34,23 @@ def parse_args():
             help='Show device info and exit')
     args = parser.parse_args()
 
+def start_wireshark():
+    spargs = dict(
+        args = ['wireshark','-k','-i','-'],    # Read packets from stdin immediately
+        stdin = subprocess.PIPE,
+        stderr = open(os.devnull, 'w'),
+    )
+
+    # Put Wireshark in its own process group.
+    # On *nix, this is necessary to keep Wireshark open after this script exists.
+    # It doesn't appear to be necessary on Windows to accomplish the same,
+    # but seems like a good idea to take the equivalent action on both platforms..
+    if os.name == 'posix':
+        spargs['preexec_fn'] = os.setpgrp
+    elif os.name == 'nt':
+        spargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+
+    return subprocess.Popen(**spargs)
 
 def main():
     parse_args()
@@ -49,12 +66,7 @@ def main():
         kb.sniffer_on()
 
         # Start Wireshark
-        wireshark_proc = subprocess.Popen(
-                ['wireshark','-k','-i','-'],    # Read packets from stdin immediately
-                stdin = subprocess.PIPE,
-                stderr = open(os.devnull, 'w'),
-                preexec_fn = os.setpgrp,        # Own process group; stay open after we exit
-                )
+        wireshark_proc = start_wireshark()
 
         # Create a PCAP dumper to write packets to wireshark
         with PcapDumper(DLT_IEEE802_15_4, wireshark_proc.stdin, ppi=args.ppi) as pd:
