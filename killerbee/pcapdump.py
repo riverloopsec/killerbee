@@ -108,13 +108,22 @@ class PcapDumper:
         Creates a libpcap file using the specified datalink type.
         @type datalink: Integer
         @param datalink: Datalink type, one of DLT_* defined in pcap-bpf.h
-        @type savefile: String
-        @param savefile: Output libpcap filename to open
+        @type savefile: String or file-like object
+        @param savefile: Output libpcap filename to open, or file-like object
+        @type ppi: Boolean
+        @param ppi: Include CACE Per-Packet Information (defaults to False)
         @rtype: None
         '''
         if ppi: from killerbee.pcapdlt import DLT_PPI
         self.ppi = ppi
-        self.__fh = open(savefile, mode='wb')
+
+        if isinstance(savefile, basestring):
+            self.__fh = open(savefile, mode='wb')
+        elif hasattr(savefile, 'write'):
+            self.__fh = savefile
+        else:
+            raise ValueError("Unsupported type for 'savefile' argument")
+
         self.datalink = datalink
         self.__fh.write(''.join([
             struct.pack("I", PCAPH_MAGIC_NUM), 
@@ -125,6 +134,12 @@ class PcapDumper:
             struct.pack("I", PCAPH_SNAPLEN),
             struct.pack("I", DLT_PPI if self.ppi else self.datalink)
             ]))
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exinfo):
+        self.close()
 
     def pcap_dump(self, packet, ts_sec=None, ts_usec=None, orig_len=None, 
                   freq_mhz = None, ant_dbm = None, location = None):
@@ -249,8 +264,6 @@ class PcapDumper:
             self.__fh.flush()
         except IOError, e:
             raise e
-
-        return
 
 
     def close(self):

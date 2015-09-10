@@ -78,9 +78,9 @@ class KBCapabilities:
         Based on sniffer capabilities, return if this is an OK channel number.
         @rtype: Boolean
         '''
-        if (channel >= 11 or channel <= 26) and self.check(self.FREQ_2400):
+        if (channel >= 11 and channel <= 26) and self.check(self.FREQ_2400):
             return True
-        elif (channel >= 1 or channel <= 10) and self.check(self.FREQ_900):
+        elif (channel >= 1 and channel <= 10) and self.check(self.FREQ_900):
             return True
         return False
 
