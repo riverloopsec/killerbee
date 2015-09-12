@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import pdb
 '''
 This tool sends beacon request frames, similar to zbstumbler, as it cycles
 through the 802.15.4 channels, and uses the responses and other observed 
@@ -930,7 +930,22 @@ class ZBPoller(Thread):
                 self.startinjtime = time.time()
                 self.kb.sniffer_on()
 
-            packetlist = self.kb.pnext()
+            try:
+                packetlist = self.kb.pnext()
+                if packetlist == None:
+                    thresh += 1
+                else:
+                    thresh = 0
+                if thresh > 15:
+                    self.kb.sniffer_off()
+                    self.kb.sniffer_on()
+                    print "we may have crashed -- i toggled the interface"
+            except Exception,e:
+                traceback.print_exc()
+                print 'oops'
+
+                continue
+
 
             # Ignore empty return, timeout with no frame
             if not packetlist:
@@ -940,9 +955,17 @@ class ZBPoller(Thread):
             if packetlist[1] == False:
                 continue
 
+            print ".",
+
             # Convert to dBm per AT86RF230 data sheet, figure 5.5:  y=mx+b, b=-91,m=3
             rssi = (3*packetlist[2])-91
-            packet = d154.pktchop(packetlist[0])
+            try:
+                packet = d154.pktchop(packetlist[0])
+            except Exception,e:
+                traceback.print_exc()
+                print "bad packetchop!!"
+                continue
+
 
             # Decode Frame Control field
             fc = struct.unpack("<H", packet[0])[0]
@@ -961,17 +984,23 @@ class ZBPoller(Thread):
             if fc_frametype == DOT154_FCF_TYPE_MACCMD and packet[2] == "\xff\xff" and packet[3] == "\xff\xff":
                 continue
 
+
             # devid is a UID for the device Source Address and SPAN combination, concatenated
             # If this is a beacon frame, we use the sa and spanid.  If this is anything else (excluding ACK),
             # we use the sa and dpanid.  The dpanid of other frames should match the spanid of beacon frames.
-            if fc_frametype == DOT154_FCF_TYPE_BEACON: 
+            if fc_frametype == DOT154_FCF_TYPE_BEACON:
                 devid = "%02x%02x%02x%02x" % (ord(packet[4][0]), ord(packet[4][1]),
                         ord(packet[5][0]), ord(packet[5][1]))
                 dstpan = "0x%02x%02x" % (ord(packet[4][0]), ord(packet[4][1]))
 
             else:
-                devid = "%02x%02x%02x%02x" % (ord(packet[2][0]), ord(packet[2][1]),
-                        ord(packet[5][0]), ord(packet[5][1]))
+                if packet[5] != "":
+                    devid = "%02x%02x%02x%02x" % (ord(packet[2][0]), ord(packet[2][1]),
+                            ord(packet[5][0]), ord(packet[5][1]))
+                else:
+                    devid = "%02x%02x%02x%02x" % (ord(packet[2][0]), ord(packet[2][1]),
+                            ord('A'), ord('B'))
+                    
                 dstpan = ""
                 if packet[2] != "":
                     dstpan = "0x%02x%02x" % (ord(packet[2][0]), ord(packet[2][1]))
@@ -1035,6 +1064,7 @@ class ZBPoller(Thread):
             
             self.ui.update_row(dstpan, dst, src, self.zb_distance(rssi), rssi, details)
             continue
+        print "exited the loop-----------------------------------------------------------"
 
     def stackverstr(self, packet):
         stackprofilever = packet[6][4]
@@ -1085,14 +1115,25 @@ if __name__ == "__main__":
 
         gtk.gdk.threads_init()
     
+        print "init gdk threads done"
+
+        print "start ZBFindUI"
         ui = ZBFindUI()
+        print "ZBFindUI started"
+
+        print "init zbpoller"
         zbpoll = ZBPoller(ui)
         zbpoll.start()
-    
+        print "zbpoller started"
+
+        print "Starting gtkmain"    
         gtk.main()
-   
+        print "gtkmain started"
+
+        print "stopandjoin zbpoll"
         zbpoll.stop()
         zbpoll.join()
+        print "we done"
 
     except Exception,e:
         traceback.print_exc()
