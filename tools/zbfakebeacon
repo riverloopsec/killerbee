@@ -32,12 +32,16 @@ def create_beacon(panid, coordinator, epanid):
     return ''.join(beacon)
 
 def response_handler(packet, channel):
-    if packet[7] == '\x07': # is it a beacon request?
-        sp = create_beacon(spanid, args.coordinator, args.epanid) # respond to the beacon request.
-        kb.sniffer_off()
-        kb.inject(sp)
-        kb.sniffer_on()
-    return True
+    if len(packet) > 7:
+        if packet[7] == '\x07': # is it a beacon request?
+            sp = create_beacon(spanid, args.coordinator, args.epanid) # respond to the beacon request.
+            kb.sniffer_off()
+            kb.inject(sp)
+            print "Got beacon Packet and Sent Response"
+            kb.sniffer_on()
+        return True
+    else:
+        return False
 
 
 if __name__ == '__main__':
@@ -64,15 +68,11 @@ if __name__ == '__main__':
     if not args.go:
         kb.sniffer_on()
         while True:
-            print ".",
             # Does not block
             recvpkt = kb.pnext()
             # Check for empty packet (timeout) and valid FCS
             if recvpkt != None and recvpkt[1]:
-                spanid = response_handler(recvpkt[0], args.channel)
-            if spanid != None:
-                    # OK we got a packet, lets go back up and send out a beacon for that one...
-                    print "Got beacon Packet and Sent Response"
+                response_handler(recvpkt[0], args.channel)
 
     else:
         while True:
