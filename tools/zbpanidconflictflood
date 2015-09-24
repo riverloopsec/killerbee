@@ -39,6 +39,8 @@ def create_beacon(panid, coordinator, epanid):
 
 # Thread 1: Sniffs and extracts Source PAN ID
 def get_spanids():
+    signal.signal(signal.SIGINT, handle_exit)
+
     spanid = threading.spanid
     canidate = 0
     restart_threshold = 0
@@ -75,6 +77,7 @@ def get_spanids():
     
 # Thread 2: Injects beacons
 def inject():
+    signal.signal(signal.SIGINT, handle_exit)
     while True:
         sp = create_beacon(threading.spanid, args.coordinator, args.epanid) 
         #TODO: Is there any need for: args.devleave, args.coordinator, args.device)
@@ -83,6 +86,7 @@ def inject():
 
 
 def handle_exit(signal, frame):
+
     print("Exiting")
     sys.exit()
 
@@ -100,7 +104,6 @@ if __name__ == '__main__':
     #parser.add_argument('--numloops', action='store', default=1, type=int)
     args = parser.parse_args()
 
-    signal.signal(signal.SIGINT, handle_exit)
 
 
     # Can't get the device to like context switching between listen and inject, so we have to have a workaround.......
