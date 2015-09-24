@@ -41,9 +41,10 @@ def show_dev(vendor=None, product=None, gps=None, include=None):
     @param include: Provide device names in this argument if you would like only
         these to be enumerated. Aka, include only these items.
     '''
-    print("{: >14} {: <20} {: >10}".format("Dev", "Product String", "Serial Number"))
+    fmt = "{: >14} {: <20} {: >10}"
+    print(fmt.format("Dev", "Product String", "Serial Number"))
     for dev in kbutils.devlist(vendor=vendor, product=product, gps=gps, include=include):
-        print("{0: >14} {1: <20} {2: >10}".format(dev[0], dev[1], dev[2]))
+        print(fmt.format(dev[0], dev[1], dev[2]))
 
 # KillerBee Class
 class KillerBee:
@@ -165,6 +166,13 @@ class KillerBee:
                 warn("Error initializing DBLogger (%s)." % e)
                 datasource = None   #give up nicely if error connecting, etc.
 
+    # Allow 'with KillerBee(...) as kb:' syntax
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exinfo):
+        self.close()
+
     def __device_is(self, vendorId, productId):
         '''
         Compares KillerBee class' device data to a known USB vendorId and productId
@@ -252,16 +260,11 @@ class KillerBee:
         @param channel: Sets the channel, optional
         @rtype: None
         '''
+        if not self.is_valid_channel(channel):
+            raise ValueError('Invalid channel ({0}) for this device'.format(channel))
         if hasattr(self, "dblog"):
             self.dblog.set_channel(channel)
         self.driver.set_channel(channel)
-
-    def is_valid_channel(self, channel):
-        '''
-        Based on sniffer capabilities, return if this is an OK channel number.
-        @rtype: Boolean
-        '''
-        return self.driver.capabilities.is_valid_channel(channel)
 
     def inject(self, packet, channel=None, count=1, delay=0):
         '''

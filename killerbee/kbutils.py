@@ -14,6 +14,7 @@ import serial
 import os, glob
 import time
 import random
+import inspect
 from struct import pack
 
 from config import *       #to get DEV_ENABLE_* variables
@@ -77,9 +78,9 @@ class KBCapabilities:
         Based on sniffer capabilities, return if this is an OK channel number.
         @rtype: Boolean
         '''
-        if (channel >= 11 or channel <= 26) and self.check(self.FREQ_2400):
+        if (channel >= 11 and channel <= 26) and self.check(self.FREQ_2400):
             return True
-        elif (channel >= 1 or channel <= 10) and self.check(self.FREQ_900):
+        elif (channel >= 1 and channel <= 10) and self.check(self.FREQ_900):
             return True
         return False
 
@@ -138,8 +139,8 @@ def devlist_usb_v1x(vendor=None, product=None):
             # Note, can use "{0:03d}:{1:03d}" to get the old format,
             # but have decided to move to the new, shorter format.
             devlist.append(["{0}:{1}".format(dev.bus, dev.address),         \
-                            usb.util.get_string(dev, 50, dev.iProduct),     \
-                            usb.util.get_string(dev, 50, dev.iSerialNumber)])
+                            usb.util.get_string(dev, dev.iProduct),     \
+                            usb.util.get_string(dev, dev.iSerialNumber)])
     except usb.core.USBError as e:
         if e.errno == 13: #usb.core.USBError: [Errno 13] Access denied (insufficient permissions)
             raise Exception("Unable to open device. " +
@@ -505,3 +506,22 @@ class KBInterfaceError(KBException):
     '''
     pass
 
+
+def pyusb_1x_patch():
+    '''Monkey-patch pyusb 1.x for API compatibility
+    '''
+
+    '''
+    In pyusb v1.0.0b2 (git dac78933), they removed the "length" parameter
+    to usb.util.get_string(). We'll monkey-patch older versions so we don't
+    have to ever pass this argument.
+    '''
+    if 'length' in inspect.getargspec(usb.util.get_string).args:
+        print 'Monkey-patching usb.util.get_string()'
+        def get_string(dev, index, langid = None):
+            return usb.util.zzz__get_string(dev, 255, index, langid)
+        usb.util.zzz__get_string = usb.util.get_string
+        usb.util.get_string = get_string
+
+if USBVER == 1:
+    pyusb_1x_patch()
