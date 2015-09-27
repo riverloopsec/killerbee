@@ -4,12 +4,24 @@
 # rmspeers 2010-13
 # ZigBee/802.15.4 WarDriving Platform
 
+
+import logging
+from subprocess import call
 from time import sleep
 from usb import USBError
 
 from killerbee import KillerBee, kbutils
-from db import ZBScanDB
 from scanning import doScan
+
+
+def goodLat(lat):
+    return lat > -180.00000005 and lat < 180.00000005
+
+def goodLng(lng):
+    return goodLat(lng)
+
+def goodAlt(alt):
+    alt > -180000.00005 and alt < 180000.00005
 
 # GPS Poller
 def gpsdPoller(currentGPS):
@@ -17,8 +29,10 @@ def gpsdPoller(currentGPS):
     @type currentGPS multiprocessing.Manager dict manager
     @arg currentGPS store relavent pieces of up-to-date GPS info
     '''
-    import gps
-    gpsd = gps.gps()
+    import killerbee.zbwardrive.gps
+    import socket
+
+    gpsd = killerbee.zbwardrive.gps.gps()
     gpsd.poll()
     gpsd.stream()
 
@@ -29,46 +43,73 @@ def gpsdPoller(currentGPS):
                 lat = gpsd.fix.latitude
                 lng = gpsd.fix.longitude
                 alt = gpsd.fix.altitude
-                #print 'latitude    ' , lat
-                #print 'longitude   ' , lng
-                #TODO do we want to use the GPS time in any way?
+                eph = gpsd.fix.epx
+                epv = gpsd.fix.epv
+                ept = gpsd.fix.ept
+                gpt = gpsd.fix.time
                 #print 'time utc    ' , gpsd.utc,' + ', gpsd.fix.time
-                #print 'altitude (m)' , alt
                 currentGPS['lat'] = lat
                 currentGPS['lng'] = lng
                 currentGPS['alt'] = alt
+                log_message = "GPS: {}, {}, {}\n     {} epx:{} epv:{} ept:{}".format(lat, lng, alt, gpt, eph, epv, ept)
+                print log_message
+                logging.debug(log_message)
             else:
-                print "Waiting for a GPS fix."
+                log_message = "No GPS fix"
+                logging.info(log_message)
                 #TODO timeout lat/lng/alt values if too old...?
     except KeyboardInterrupt:
-        print "Got KeyboardInterrupt in gpsdPoller, returning."
+        log_message = "Got KeyboardInterrupt in gpsdPoller, returning." 
+        print log_message
+        logging.debug(log_message)
         return
 
 # startScan
 # Detects attached interfaces
 # Initiates scanning using doScan()
-def startScan(zbdb, currentGPS, verbose=False, dblog=False, agressive=False, include=[], ignore=None):
+def startScan(currentGPS, verbose=False, include=[], 
+              ignore=None, output='.',
+              scanning_time=5, capture_time=2):
+
     try:
         kb = KillerBee()
     except USBError, e:
         if e.args[0].find('Operation not permitted') >= 0:
-            print 'Error: Permissions error, try running using sudo.'
+            log_message = 'Error: Permissions error, try running using sudo.'
+            logging.error(log_message)
+            print log_message
         else:
-            print 'Error: USBError:', e
+            log_message = 'Error: USBError: {}'.format(e)
+            logging.error(log_message)
+            print log_message
         return False
     except Exception, e:
-        #print 'Error: Missing KillerBee USB hardware:', e
-        print 'Error: Issue starting KillerBee instance:', e
+        log_message = 'Error: Issue starting KillerBee instance: {}'.format(e)
+        logging.error(log_message)
+        print log_message
         return False
-    for kbdev in kbutils.devlist(gps=ignore, include=include):
-        print 'Found device at %s: \'%s\'' % (kbdev[0], kbdev[1])
-        zbdb.store_devices(
-            kbdev[0], #devid
-            kbdev[1], #devstr
-            kbdev[2]) #devserial
+
+    log_message = "gps: {}".format(ignore)
+    if verbose:
+        print log_message
+    logging.info(log_message)
+
+    devices = kbutils.devlist(gps=ignore, include=include)
+
+    for kbdev in devices:
+        log_message = 'Found device at %s: \'%s\'' % (kbdev[0], kbdev[1])
+        logging.info(log_message)
+        if verbose:
+            print log_message
+
+    log_message = "Sending output to {}".format(output)
+    if verbose:
+        print log_message
+    logging.info(log_message)
+
     kb.close()
-    doScan(zbdb, currentGPS, verbose=verbose, dblog=dblog, agressive=agressive)
+    doScan(
+        devices, currentGPS, verbose=verbose, 
+        output=output, scanning_time=scanning_time, 
+        capture_time=capture_time)
     return True
-
-
-

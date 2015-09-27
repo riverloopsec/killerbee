@@ -1,3 +1,6 @@
+import logging
+import math
+import os
 import struct
 import time
 
@@ -103,27 +106,24 @@ class PcapReader:
 
 
 class PcapDumper:
-    def __init__(self, datalink, savefile, ppi = False):
+    def __init__(self, datalink, savefile, ppi = False, folder='.'):
         '''
         Creates a libpcap file using the specified datalink type.
         @type datalink: Integer
         @param datalink: Datalink type, one of DLT_* defined in pcap-bpf.h
-        @type savefile: String or file-like object
-        @param savefile: Output libpcap filename to open, or file-like object
-        @type ppi: Boolean
-        @param ppi: Include CACE Per-Packet Information (defaults to False)
+        @type savefile: String
+        @param savefile: Output libpcap filename to open
         @rtype: None
         '''
         if ppi: from killerbee.pcapdlt import DLT_PPI
-        self.ppi = ppi
-
-        if isinstance(savefile, basestring):
-            self.__fh = open(savefile, mode='wb')
-        elif hasattr(savefile, 'write'):
-            self.__fh = savefile
-        else:
-            raise ValueError("Unsupported type for 'savefile' argument")
-
+        self.ppi = ppi        
+        if folder[-1] == "/":
+            folder = folder[:-1]
+        if not os.path.exists(folder+"/pcap"):
+            log_message = "PcapDump: Creating directory to store results"
+            logging.debug(log_message)
+            os.makedirs(folder+"/pcap")
+        self.__fh = open(folder+"/pcap"+savefile, mode='wb')
         self.datalink = datalink
         self.__fh.write(''.join([
             struct.pack("I", PCAPH_MAGIC_NUM), 
@@ -134,12 +134,6 @@ class PcapDumper:
             struct.pack("I", PCAPH_SNAPLEN),
             struct.pack("I", DLT_PPI if self.ppi else self.datalink)
             ]))
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *exinfo):
-        self.close()
 
     def pcap_dump(self, packet, ts_sec=None, ts_usec=None, orig_len=None, 
                   freq_mhz = None, ant_dbm = None, location = None):
@@ -203,8 +197,10 @@ class PcapDumper:
                     raise Exception("Longitude value is out of expected range: %.8f" % lon)
                 if alt > -180000.00005 and alt < 180000.00005:
                     alt_i = int(round((alt + 180000.0) * 1e4))
+                elif math.isnan(alt):
+                    alt_i = 4294967295 
                 else:
-                    raise Exception("Altitude value is out of expected range: %.8f" % lon)
+                    raise Exception("Altitude value is out of expected range: %.8f" % alt)
                 # Build Geolocation PPI Header
                 caceppi_fgeolocation = ''.join([
                     struct.pack("<H", GPS_TAG),  #2 = Field Type 802.11-Common
@@ -253,17 +249,14 @@ class PcapDumper:
         output_list.append(packet)
         output = ''.join(output_list)
 
-        #DEBUG Output:
-        #print "Pcap:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in output])
-        #print "PPI:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in (caceppi_hdr + caceppi_f80211common)])
-        #print "802154:", packet.encode("hex")
-
         self.__fh.write(output)
         # Specially for handling FIFO needs:
         try:
             self.__fh.flush()
         except IOError, e:
             raise e
+
+        return
 
 
     def close(self):

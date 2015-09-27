@@ -2,6 +2,7 @@
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 import time, socket, sys, select
+import logging
 
 if sys.hexversion >= 0x2060000:
     import json			# For Python 2.6
@@ -31,7 +32,9 @@ class gpscommon:
                 host, port = host[:i], host[i+1:]
             try: port = int(port)
             except ValueError:
-                raise socket.error, "nonnumeric port"
+                log_message = "nonnumeric port: {}".format(socket.error)
+                logging.warning(log_message)
+                raise socket.error, "nonnumeric port" 
         #if self.verbose > 0:
         #    print 'connect:', (host, port)
         msg = "getaddrinfo returns an empty list"
@@ -43,6 +46,8 @@ class gpscommon:
                 #if self.debuglevel > 0: print 'connect:', (host, port)
                 self.sock.connect(sa)
             except socket.error, msg:
+                log_message = "Connect fail: {},{}".format(host, port)
+                logging.warning(log_message)
                 #if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
                 continue

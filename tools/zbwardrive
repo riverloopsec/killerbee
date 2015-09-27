@@ -9,8 +9,9 @@ it is selected as 'of interest' which can change based on the -a flag.
 
 import argparse
 from multiprocessing import Process, Manager
+import logging
 
-from killerbee.zbwardrive import *
+import killerbee.zbwardrive as wd
 
 # Command line main function
 if __name__=='__main__':
@@ -18,19 +19,38 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                         help='Produce more output, for debugging')
-    parser.add_argument('-d', '--db', dest='dblog', action='store_true',
-                        help='Enable KillerBee\'s log-to-database functionality')
-    parser.add_argument('-a', '--agressive', dest='agressive', action='store_true',
-                        help='Initiate capture on channels where packets were seen, even if no beacon response was received')
+    #parser.add_argument('-d', '--db', dest='dblog', action='store_true',
+    #                    help='Enable KillerBee\'s log-to-database functionality')
+    #parser.add_argument('-a', '--agressive', dest='agressive', action='store_true',
+    #                    help='Initiate capture on channels where packets were seen, even if no beacon response was received')
     parser.add_argument('-g', '--gps', dest='gps', action='store_true',
                         help='Connect to gpsd and grab location data as available to enhance PCAPs')
+    parser.add_argument('-f', '--fake', dest='fake_gps', action='store_true',
+                        help='Fakes a gps device for testing')
     parser.add_argument('-i', '--iface', '--dev', action='append', dest='include')
     #TODO make it be able to ignore a list!
-    parser.add_argument('--ignore', action='store', dest='ignore', default=None)
+    parser.add_argument('--ignore', action='store', dest='ignore', default=None,
+                        help='Device to skip. Used as GPS if -g flag is set')
+    parser.add_argument('-o', '--out', action='store', dest='output', default='.',
+                        help='Where to write any output files')
+    parser.add_argument('-s', '--scanningtime', action='store', dest='scanning_time', default=5,
+                        help='Amount of time to wait on a channel to see if it\'s used')
+    parser.add_argument('-c', '--capturetime', action='store', dest='capture_time', default=3,
+                        help='Amount of time to capture packets on a channel')
+    parser.add_argument('-l', '--log', action='store', dest='logger', default=None,
+                        help='File to save logging to. Defualt is none')
     args = parser.parse_args()
 
+    # TODO: make logging and logging location a flag
+    if args.logger:
+        logging.basicConfig(format = '%(asctime)s %(levelname)s: %(message)s',
+                            datefmt='%m/%d/%Y %I:%M:%S %p', 
+                            filename=args.logger, level=logging.DEBUG)
+    else:
+        logger = logging.getLogger()
+        logger.disabled = True
+    
     # try-except block to catch keyboard interrupt.
-    zbdb = None
     gpsp = None
     try:
         # Some shared state for multiprocessing use
@@ -39,16 +59,23 @@ if __name__=='__main__':
         currentGPS = None
         if args.gps:
             currentGPS = manager.dict()
-            gpsp = Process(target=gpsdPoller, args=(currentGPS, ))
+            gpsp = Process(target=wd.zbwardrive.gpsdPoller, args=(currentGPS, ))
             gpsp.start()
+        elif args.fake_gps:
+            currentGPS = manager.dict()
+            currentGPS['lng'] = 90.0
+            currentGPS['lat'] = 90.0
+            currentGPS['alt'] = 90.0
 
-        zbdb = ZBScanDB()
-        #TODO check return value from startScan
-        startScan(zbdb, currentGPS, verbose=args.verbose, dblog=args.dblog, 
-            agressive=args.agressive, ignore=args.ignore, include=args.include)
-        zbdb.close()
+        # TODO: check return value from startScan 
+        wd.zbwardrive.startScan(
+            currentGPS, verbose=args.verbose, ignore=args.ignore, 
+            include=args.include, output=args.output,
+            scanning_time=int(args.scanning_time), 
+            capture_time=int(args.capture_time))
 
     except KeyboardInterrupt:
-        print 'Shutting down'
-        if zbdb != None: zbdb.close()
+        if args.verbose:
+            print 'Sutting down'
+        logging.info('Shutting down')
         if gpsp != None: gpsp.terminate()
