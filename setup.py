@@ -43,6 +43,13 @@ try:
 except ImportError:
     err += "serial (apt-get install python-serial)\n"
 
+# Dot15d4 is a dep of some of the newer tools
+try:
+    from scapy.all import Dot15d4
+except ImportError:
+    err += "Scapy-com 802.15.4 (git clone https://bitbucket.org/secdev/scapy-com)"
+
+
 if err != "":
     print >>sys.stderr, """
 Library requirements not met.  Install the following libraries, then re-run
@@ -60,17 +67,18 @@ zigbee_crypt = Extension('zigbee_crypt',
     
 
 setup  (name        = 'killerbee',
-        version     = '2.5.0',
+        version     = '2.6.0',
         description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
-        author = 'Joshua Wright, Ryan Speers, Ricky Melgares',
-        author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
+        author = 'Joshua Wright, Ryan Speers, Ricky Melgares, Bryan Halfpap',
+        author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com, bryanhalf@gmail.om',
         license   = 'LICENSE.txt',
         packages  = ['killerbee', 'killerbee.openear', 'killerbee.zbwardrive'],
         requires = ['Crypto', 'usb', 'gtk', 'cairo'], # Not causing setup to fail, not sure why
         scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 
                    'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 
                    'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey', 
-                    'tools/zbwardrive', 'tools/zbopenear'],
+                    'tools/zbwardrive', 'tools/zbopenear', 'tools/zbfakebeacon', 
+                    'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign'],
         install_requires=['pyserial', 'pyusb', 'crypto'],
         ext_modules = [ zigbee_crypt ],
         )

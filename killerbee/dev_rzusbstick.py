@@ -163,11 +163,11 @@ class RZUSBSTICK:
             # See http://pyusb.sourceforge.net/docs/1.0/tutorial.html for reference
             try:
                 self.dev.set_configuration()
+                self.dev.reset()
             except usb.core.USBError:
                 raise Exception("Unable to open device. " +
                             "Ensure the device is free and plugged-in. You may need sudo.")
 
-            #self.dev.reset()
             #self.dev.set_configuration(1) # could also provide no config number
             #self.dev.set_interface_altsetting(interface = 0, alternate_setting = 0)
             #TODO alternative setup code:
@@ -459,7 +459,7 @@ class RZUSBSTICK:
 
         # PyUSB returns an empty tuple occasionally, handle as "no data"
         #TODO added len(pdata) check as some arrays were failing
-        if pdata == None or pdata == () or len(pdata)==0:
+        if pdata == None or pdata == () or len(pdata)==0 or len(pdata)<=6:
             return None
 
         if pdata[0] == RZ_EVENT_STREAM_AC_DATA:
