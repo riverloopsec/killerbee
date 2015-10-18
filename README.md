@@ -4,13 +4,23 @@ KillerBee
 This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4
 networks.
 
-Copyright 2009, Joshua Wright <jwright@willhackforsushi.com>.
-Copyright 2010-2015, Ryan Speers <ryan@riverloopsecurity.com>
-                   Ricky Melgares <ricky@riverloopsecurity.com>
 
-All Rights Reserved.
+MAINTAINERS/LICENSE
+================
 
 Distributed under a BSD license, see LICENSE for details.
+All Rights Reserved.
+
+The main toolkit was/is authored by:
++ 2009, Joshua Wright <jwright@willhackforsushi.com>
++ 2010-2015, Ryan Speers <ryan@riverloopsecurity.com>
++ 2010-2011, Ricky Melgares <ricky@riverloopsecurity.com>
+
+We appreciate the many contributers to the framework, including the following who have contributed
+capabilities:
++ Anonymous Contributor
++ Spencer McIntyre (scapy extension)
++ Bryan Halfpap <Bryanhalf@gmail.com> (additional tools)
 
 
 REQUIREMENTS
@@ -26,16 +36,19 @@ is necessary to install the following Python modules before installation:
 + crypto  (for some functions)
 + pygtk   (for use of tools that have GUIs)
 + cairo   (for use of tools that have GUIs)
++ scapy-com (for some tools which utilize 802.15.4 Scapy extensions)
 
 On Ubuntu systems, you can install the needed dependencies with the following
-command line:
+commands:
 
 ```
 # apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
+# git clone https://bitbucket.org/secdev/scapy-com
+# cd scapy-com
+# python setup.py install
 ```
 
-The last two dependencies (python-dev and libgcrypt) are required for the Scapy
-Extension Patch (thanks to Spencer McIntyre for the patch).
+The python-dev and libgcrypt are required for the Scapy Extension Patch.
 
 Also note that this is a fairly advanced and un-friendly attack platform.  This
 is not Cain & Abel.  It is intended for developers and advanced analysts who are
@@ -69,14 +82,20 @@ The directory structure for the KillerBee code is described as follows:
 REQUIRED HARDWARE
 ================
 The KillerBee framework is being expanded to support multiple devices.
-Currently there is support for the Atmel RZ RAVEN USB Stick, the MoteIV Tmote
-Sky, and the TelosB mote. Support for Freaklab's Freakduino with added hardware
+Currently there is support for the River Loop ApiMote,
+Atmel RZ RAVEN USB Stick, MoteIV Tmote Sky, TelosB mote, and Sewino Sniffer.
+
+Support for Freaklab's Freakduino with added hardware
 and the Dartmouth arduino sketch as well as for the Zena Packet Analyzer board
 are in development.
 
+For the ApiMote v3 and v4beta:
+The devices typically come preloaded and do not need to be reflashed for basic
+use.
+
 For the MoteIV Tmote Sky or TelosB mode:
 This device can be loaded with firmware via USB. Attach the device, and then
-within killerbee/firmware, run: ./goodfet.bsl --telosb -e -p gf-telosb-001.hex
+within killerbee/firmware, run: ./flash\_goodfet.sh
 
 For the Atmel RZ RAVEN USB Stick:
 (http://www.atmel.com/dyn/products/tools_card.asp?tool_id=4396).  This hardware 
@@ -177,6 +196,38 @@ instructions documented by running the tool with the "-h" argument, and
 summarized below.
 
 
++ zbid         -  Identifies available interfaces that can be used by KillerBee
+                and associated tools.
++ zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time 
+                capture and viewing in Wireshark.
++ zbdump       -  A tcpdump-like took to capture IEEE 802.15.4 frames to a libpcap
+                or Daintree SNA packet capture file.  Does not display real-time
+                stats like tcpdump when not writing to a file.
++ zbreplay     -  Implements a replay attack, reading from a specified Daintree
+                DCF or libpcap packet capture file, retransmitting the frames.
+                ACK frames are not retransmitted.
++ zbstumbler   -  Active ZigBee and IEEE 802.15.4 network discovery tool.
+                Zbstumbler sends beacon request frames out while channel
+                hopping, recording and displaying summarized information about
+                discovered devices.  Can also log results to a CSV file.
++ zbpanidconflictflood  -  _Requires two killerbee interfaces_ one killerbee interface
+                listens for packets and marks their PAN ID.  The other interface
+                constantly sends out beacon packets with found PAN ID's.  The
+                beacon packets with the same PAN ID cause the PAN coordinator to
+                believe that there is a PAN ID conflict, and the coordinator begins
+                the process of realigning the network on a new PAN ID.  The process
+                repeats ad nauseum.  Typically, network devices can't keep up with
+                the rapid change and after several seconds the network falls apart.
+
+                _NO TARGETING BUILT IN_ This may *destroy* all zigbee networks
+                within range on the channel you are performing the attack on. Use
+                with caution.
++ zborphannotify  -  Spoofs an orphan notification packet from the target device to
+                a PAN Coordinator to test Coordinator behavior.
++ zbrealign     -  Spoofs an 802.15.4 PAN Realignment frame from the coordinator to
+                a target device.  May be able to reset the device's PAN ID or Channel
++ zbfakebeacon  -  Spoofs beacon frames, either spamming them or on response to seeing
+                a beacon request come through.
 + zbopenear    -  Assists in data capture where devices are operating on multiple 
                 channels or fast-frequency-hopping. It assigns multiple 
                 interfaces sequentially across all channels.
@@ -189,9 +240,6 @@ summarized below.
                 key to stdout.  The sample packet capture
                 sample/zigbee-network-key-ota.dcf can be used to demonstrate
                 this functionality.
-+ zbdump       -  A tcpdump-like took to capture IEEE 802.15.4 frames to a libpcap
-                or Daintree SNA packet capture file.  Does not display real-time
-                stats like tcpdump when not writing to a file.
 + zbfind       -  A GTK GUI application for tracking the location of an IEEE
                 802.15.4 transmitter by measuring RSSI.  Zbfind can be passive
                 in discovery (only listen for packets) or it can be active by
@@ -210,15 +258,6 @@ summarized below.
                 must be in binary format (obj hexfile's are not supported). To
                 convert from the hexfile format to a binary file, use the
                 objcopy tool: objcopy -I ihex -O binary mem.hex mem.bin
-+ zbid         -  Identifies available interfaces that can be used by KillerBee
-                and associated tools.
-+ zbreplay     -  Implements a replay attack, reading from a specified Daintree
-                DCF or libpcap packet capture file, retransmitting the frames.
-                ACK frames are not retransmitted.
-+ zbstumbler   -  Active ZigBee and IEEE 802.15.4 network discovery tool.
-                Zbstumbler sends beacon request frames out while channel
-                hopping, recording and displaying summarized information about
-                discovered devices.  Can also log results to a CSV file.
 + zbwardrive   -	Discovers available interfaces and uses one to inject beacon 
                 requests and listen for respones across channels. Once a network
                 is found on a channel, it assigns another device to continuously
@@ -226,8 +265,6 @@ summarized below.
                 installed to run this.
 + zbscapy      -  Provides an interactive Scapy shell for interacting via a
                 KillerBee interface. Scapy must be installed to run this.
-+ zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time 
-                capture and viewing in Wireshark.
 
 Additional tools, that are for special cases or are not stable, are stored in
     the Api-Do project repository: http://code.google.com/p/zigbee-security/
@@ -250,7 +287,6 @@ $ mkdir pdf
 $ epydoc --pdf -o pdf killerbee/
 ```
 
-
 The pdf/ directory will have a file called "api.pdf" which includes the
 framework documentation.
 
@@ -270,8 +306,8 @@ QUESTIONS/COMMENTS/CONCERNS
 Please drop us a note: 
 
 The original version was written by: jwright@willhackforsushi.com
-
 The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
+Additional Tools/Fixes by: bryanhalf@gmail.com
 
 THANKS
 ==============
