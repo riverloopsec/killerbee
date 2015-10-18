@@ -83,6 +83,10 @@ def getnetworkkey(packet):
         for x in networkkey[0:15]:
             sys.stdout.write("%02x:"%ord(x))
         print "%02x" % ord(networkkey[15])
+        print "      (Wireshark): ",
+        for x in zapspayload[2:17]:
+            sys.stdout.write("%02x:"%ord(x))
+        print "%02x" % ord(zapspayload[17])
 
         print "  Destination MAC Address: ",
         for x in destaddr[0:7]:
