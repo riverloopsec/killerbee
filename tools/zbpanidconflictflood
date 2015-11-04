@@ -3,7 +3,6 @@
 # Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2015
 
 #TODO: Reduce the usage of globals
-import signal
 import sys
 import argparse
 import threading
@@ -39,8 +38,6 @@ def create_beacon(panid, coordinator, epanid):
 
 # Thread 1: Sniffs and extracts Source PAN ID
 def get_spanids():
-    signal.signal(signal.SIGINT, handle_exit)
-
     spanid = threading.spanid
     canidate = 0
     restart_threshold = 0
@@ -77,18 +74,16 @@ def get_spanids():
     
 # Thread 2: Injects beacons
 def inject():
-    signal.signal(signal.SIGINT, handle_exit)
     while True:
+        sleep(args.sleep) # Added sleep as it seems we were overwhelming USB lib.
         sp = create_beacon(threading.spanid, args.coordinator, args.epanid) 
         #TODO: Is there any need for: args.devleave, args.coordinator, args.device)
-        kb.inject(sp) #create_beacon returns a string
+        try:
+            kb.inject(sp) #create_beacon returns a string
+        except:
+            print "! - Injection Error, try slowing the rate of broadcast",
+            pass
     pass
-
-
-def handle_exit(signal, frame):
-
-    print("Exiting")
-    sys.exit()
 
 if __name__ == '__main__':
     tohex = lambda s: int(s.replace(':', ''), 16)
@@ -101,10 +96,9 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--panid', action='store', required=True, type=tohex)
     parser.add_argument('-e', '--epanid', help="Extended PAN ID", action='store', required=True, type=tohex)
     parser.add_argument('-s', '--coordinator', action='store', required=True, type=tohex)
+    parser.add_argument('-w','--sleep', action='store', type=float, required=False, default=0.01)
     #parser.add_argument('--numloops', action='store', default=1, type=int)
     args = parser.parse_args()
-
-
 
     # Can't get the device to like context switching between listen and inject, so we have to have a workaround.......
     kb = KillerBee(device=args.devstring)
