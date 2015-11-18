@@ -183,7 +183,7 @@ avrdude done.  Thank you.
 ```
 
 It should only take a few seconds to complete.  For a more detailed, picture-rich set of
-instructions, grab a copy of Hacking Exposed Wireless 3rd Edition (chapter 14).  Alternatively,
+instructions, grab a copy of Hacking Exposed Wireless 3rd Edition (chapter 13).  Alternatively,
 if you are able to catch us at a conference, bring your RZ RAVEN USB Stick and we'll happily
 flash it for you.
 
