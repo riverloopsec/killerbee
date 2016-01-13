@@ -43,7 +43,7 @@ commands:
 
 ```
 # apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
-# git clone https://bitbucket.org/secdev/scapy-com
+# hg clone https://bitbucket.org/secdev/scapy-com
 # cd scapy-com
 # python setup.py install
 ```
