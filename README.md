@@ -97,7 +97,10 @@ use.
 MoteIV Tmote Sky or TelosB mode:
 ----------------
 This device can be loaded with firmware via USB. Attach the device, and then
-within killerbee/firmware, run: ./flash\_goodfet.sh
+within killerbee/firmware, run:
+```
+$ ./flash_telosb.sh
+```
 
 Atmel RZ RAVEN USB Stick:
 ----------------
