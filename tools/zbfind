@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import pdb
 '''
 This tool sends beacon request frames, similar to zbstumbler, as it cycles
 through the 802.15.4 channels, and uses the responses and other observed
@@ -25,6 +24,7 @@ import math
 import time
 import random
 import os
+import threading
 from threading import Thread, Event
 from gtk import gdk
 import cairo
@@ -916,6 +916,7 @@ class ZBPoller(Thread):
         except:
             sys.stderr.write("Error initializing KillerBee Sniffer")
             return
+
         thresh = 0
         while not self.stopthread.isSet():
             # Used to populate details for the device
@@ -943,8 +944,6 @@ class ZBPoller(Thread):
                     thresh = 0
             except Exception,e:
                 traceback.print_exc()
-                print 'oops'
-
                 continue
 
 
@@ -955,8 +954,6 @@ class ZBPoller(Thread):
             # Ignore bad FCS
             if packetlist[1] == False:
                 continue
-
-            print ".",
 
             # Convert to dBm per AT86RF230 data sheet, figure 5.5:  y=mx+b, b=-91,m=3
             rssi = (3*packetlist[2])-91
@@ -1065,7 +1062,6 @@ class ZBPoller(Thread):
 
             self.ui.update_row(dstpan, dst, src, self.zb_distance(rssi), rssi, details)
             continue
-        print "exited the loop-----------------------------------------------------------"
 
     def stackverstr(self, packet):
         stackprofilever = packet[6][4]
@@ -1106,35 +1102,28 @@ class ZBPoller(Thread):
 
     def stop(self):
         try:
+            self.stopthread.set()
             sys.exit(0)
         except Exception, e:
             traceback.print_exc()
             sys.exit(1)
 
 if __name__ == "__main__":
-    try:
-
+    try:    
         gtk.gdk.threads_init()
-
-        print "init gdk threads done"
-
-        print "start ZBFindUI"
         ui = ZBFindUI()
-        print "ZBFindUI started"
-
-        print "init zbpoller"
         zbpoll = ZBPoller(ui)
         zbpoll.start()
-        print "zbpoller started"
 
-        print "Starting gtkmain"
-        gtk.main()
-        print "gtkmain started"
-
-        print "stopandjoin zbpoll"
+        try:
+            gtk.main()        
+        except (KeyboardInterrupt, SystemExit):
+            zbpoll.stop()
+            zbpoll.join()
+            sys.exit()
+        
         zbpoll.stop()
         zbpoll.join()
-        print "we done"
-
+        
     except Exception,e:
         traceback.print_exc()
