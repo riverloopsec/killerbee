@@ -8,17 +8,18 @@ except ImportError:
 import sys
 
 err = ""
+warn = ""
 
-#TODO consider making gtk, cairo into optional libraries
+# We have made gtk, cairo, scapy-com into optional libraries
 try:
     import gtk
 except ImportError:
-    err += "gtk (apt-get install python-gtk2)\n"
+    warn += "gtk (apt-get install python-gtk2)\n"
 
 try:
     import cairo
 except ImportError:
-    err += "cairo (apt-get install python-cairo)\n"
+    warn += "cairo (apt-get install python-cairo)\n"
 
 try:
     import Crypto
@@ -36,7 +37,7 @@ try:
     import usb.core
     #print("Warning: You are using pyUSB 1.x, support is in beta.")
 except ImportError:
-    print("Note: You are using pyUSB 0.x. Consider upgrading to pyUSB 1.x.")
+    warn += "You are using pyUSB 0.x. Consider upgrading to pyUSB 1.x."
 
 try:
     import serial
@@ -47,7 +48,7 @@ except ImportError:
 try:
     from scapy.all import Dot15d4
 except ImportError:
-    err += "Scapy-com 802.15.4 (git clone https://bitbucket.org/secdev/scapy-com)"
+    warn += "Scapy-com 802.15.4 (git clone https://bitbucket.org/secdev/scapy-com)"
 
 
 if err != "":
@@ -58,19 +59,26 @@ the setup script.
     """, err
     sys.exit(1)
 
+if warn != "":
+    print >>sys.stderr, """
+Library recommendations not met. For full support, install the following libraries,
+then re-run the setup script.
+
+    """, warn
+#TODO: Offer the user to type y/n to continue or cancel at this point
+
 zigbee_crypt = Extension('zigbee_crypt',
                     sources = ['zigbee_crypt/zigbee_crypt.c'],
                     libraries = ['gcrypt'],
                     include_dirs = ['/usr/local/include', '/usr/include', '/sw/include/', 'zigbee_crypt'],
                     library_dirs = ['/usr/local/lib', '/usr/lib','/sw/var/lib/']
                     )
-    
 
 setup  (name        = 'killerbee',
         version     = '2.6.0',
         description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
-        author = 'Joshua Wright, Ryan Speers, Ricky Melgares, Bryan Halfpap',
-        author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com, bryanhalf@gmail.om',
+        author = 'Joshua Wright, Ryan Speers',
+        author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
         license   = 'LICENSE.txt',
         packages  = ['killerbee', 'killerbee.openear', 'killerbee.zbwardrive'],
         requires = ['Crypto', 'usb', 'gtk', 'cairo'], # Not causing setup to fail, not sure why
