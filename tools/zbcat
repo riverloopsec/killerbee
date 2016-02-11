@@ -4,7 +4,6 @@
 import sys
 import argparse
 from time import sleep
-from bitstring import BitString as BS
 import logging
 from killerbee import *
 
