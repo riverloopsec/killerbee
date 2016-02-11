@@ -937,10 +937,11 @@ class ZBPoller(Thread):
                     thresh += 1
                 else:
                     thresh = 0
-                if thresh > 25:
+                if thresh > 25:  # thresh helps handle a bug in killerbee firmware for rzusbstick which makes the stick need to be reset.
                     self.kb.sniffer_off()
                     self.kb.sniffer_on()
-                    print "we may have crashed -- i toggled the interface"
+                    # TODO: Add debug message mode in case users want these otherwise-useless debug msgs
+                    #print "we may have crashed -- i toggled the interface"
                     thresh = 0
             except Exception,e:
                 traceback.print_exc()
