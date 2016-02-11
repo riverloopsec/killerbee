@@ -16,6 +16,7 @@ http://code.google.com/p/zigbee-security/wiki/PapersAndCoverage
 import pygtk
 pygtk.require('2.0')
 
+import argparse
 import sys
 import gobject
 import pango
@@ -903,11 +904,8 @@ class ZBPoller(Thread):
     def run(self):
         d154 = Dot154PacketParser()
 
-        try:
-            if (sys.argv[1] != None):
-                channel = int(sys.argv[1])
-        except:
-                channel = 26
+        # TODO: hop channels, don't bother setting this.
+        channel = args.channel
 
         try:
             self.kb = KillerBee()
@@ -1110,6 +1108,10 @@ class ZBPoller(Thread):
             sys.exit(1)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--channel', action='store', dest='channel', required=True, type=int, default=26)
+    args = parser.parse_args()
+
     try:    
         gtk.gdk.threads_init()
         ui = ZBFindUI()
