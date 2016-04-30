@@ -43,7 +43,7 @@ commands:
 
 ```
 # apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
-# git clone https://bitbucket.org/secdev/scapy-com
+# hg clone https://bitbucket.org/secdev/scapy-com
 # cd scapy-com
 # python setup.py install
 ```
@@ -89,15 +89,21 @@ Support for Freaklab's Freakduino with added hardware
 and the Dartmouth arduino sketch as well as for the Zena Packet Analyzer board
 are in development.
 
-For the ApiMote v3 and v4beta:
+ApiMote v3 and v4beta:
+----------------
 The devices typically come preloaded and do not need to be reflashed for basic
 use.
 
-For the MoteIV Tmote Sky or TelosB mode:
+MoteIV Tmote Sky or TelosB mode:
+----------------
 This device can be loaded with firmware via USB. Attach the device, and then
-within killerbee/firmware, run: ./flash\_goodfet.sh
+within killerbee/firmware, run:
+```
+$ ./flash_telosb.sh
+```
 
-For the Atmel RZ RAVEN USB Stick:
+Atmel RZ RAVEN USB Stick:
+----------------
 (http://www.atmel.com/dyn/products/tools_card.asp?tool_id=4396).  This hardware 
 is convenient as the base firmware is open source with a freely-available IDE.
 The KillerBee firmware for the RZ RAVEN included in the firmware/ directory is
