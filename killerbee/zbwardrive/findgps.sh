@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Helpful script to find where the gps is
+# Tested with Atmel RZ RAVEN USB Stick and ApiMote
 
 for sysdevpath in $(find /sys/bus/usb/devices/usb*/ -name dev); do
     (

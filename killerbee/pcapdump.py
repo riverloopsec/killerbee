@@ -119,11 +119,11 @@ class PcapDumper:
         self.ppi = ppi        
         if folder[-1] == "/":
             folder = folder[:-1]
-        if not os.path.exists(folder+"/pcap"):
+        if not os.path.exists(folder):
             log_message = "PcapDump: Creating directory to store results"
             logging.debug(log_message)
-            os.makedirs(folder+"/pcap")
-        self.__fh = open(folder+"/pcap"+savefile, mode='wb')
+            os.makedirs(folder)
+        self.__fh = open(folder+savefile, mode='wb')
         self.datalink = datalink
         self.__fh.write(''.join([
             struct.pack("I", PCAPH_MAGIC_NUM), 
