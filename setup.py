@@ -80,7 +80,7 @@ setup  (name        = 'killerbee',
         author = 'Joshua Wright, Ryan Speers',
         author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
         license   = 'LICENSE.txt',
-        packages  = ['killerbee', 'killerbee.openear', 'killerbee.zbwardrive'],
+        packages  = ['killerbee', 'killerbee.openear', 'killerbee.zbwardrive', 'killerbee.zbwardrive.gps'],
         requires = ['Crypto', 'usb', 'gtk', 'cairo'], # Not causing setup to fail, not sure why
         scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 
                    'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 

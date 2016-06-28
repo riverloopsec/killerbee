@@ -1,5 +1,5 @@
 # Basic execution, saving resulting files to PCAPs.
-run : __init__.py scanning.py db.py
+run : __init__.py scanning.py
 	clear
 	sudo python __init__.py
 
