@@ -5,9 +5,9 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, cStringIO, struct, glob, os;
+import sys, time, string, io, struct, glob, os;
 
-from GoodFET import GoodFET;
+from .GoodFET import GoodFET;
 
 class GoodFETCCSPI(GoodFET):
     CCSPIAPP=0x51;
@@ -79,8 +79,8 @@ class GoodFETCCSPI(GoodFET):
         try:
             toret=( ord(self.data[2]) + (ord(self.data[1])<<8) );
         except Exception as e:
-            print "issue in peeking for a register"
-            print e
+            print("issue in peeking for a register")
+            print(e)
             toret=( (ord(self.data[1])<<8) );
         return toret;
     def poke(self,reg,val,bytes=2):
@@ -88,10 +88,10 @@ class GoodFETCCSPI(GoodFET):
         data=[reg,(val>>8)&0xFF,val&0xFF];
         self.writecmd(self.CCSPIAPP,0x03,len(data),data);
         if self.peek(reg,bytes)!=val and reg!=0x18:
-            print "Warning, failed to set r%02x=0x%04x, got %02x." %(
+            print("Warning, failed to set r%02x=0x%04x, got %02x." %(
                 reg,
                 val,
-                self.peek(reg,bytes));
+                self.peek(reg,bytes)));
             return False;
         return True;
     
@@ -135,12 +135,12 @@ class GoodFETCCSPI(GoodFET):
     
     def RF_setkey(self,key):
         """Sets the first key for encryption to the given argument."""
-        print "ERROR: Forgot to set the key.";
+        print("ERROR: Forgot to set the key.");
         
         return;
     def RF_setnonce(self,key):
         """Sets the first key for encryption to the given argument."""
-        print "ERROR: Forgot to set the nonce.";
+        print("ERROR: Forgot to set the nonce.");
         
         return;
     
@@ -163,7 +163,7 @@ class GoodFETCCSPI(GoodFET):
     def RF_setchan(self,channel):
         """Set the ZigBee/802.15.4 channel number."""
         if channel < 11 or channel > 26:
-            print "Only 802.15.4 channels 11 to 26 are currently supported.";
+            print("Only 802.15.4 channels 11 to 26 are currently supported.");
         else:
             self.RF_setfreq( ( (channel-11)*5 + 2405 ) * 1000000 );
     def RF_getsmac(self):
@@ -197,7 +197,7 @@ class GoodFETCCSPI(GoodFET):
         self.writecmd(self.CCSPIAPP,0x85,len(data),data);
         return;
     
-    lastpacket=range(0,0xff);
+    lastpacket=list(range(0,0xff));
     def RF_rxpacket(self):
         """Get a packet from the radio.  Returns None if none is
         waiting."""
@@ -253,7 +253,7 @@ class GoodFETCCSPI(GoodFET):
            and that also sends a forged ACK if needed."""
         data = "";
         self.writecmd(self.CCSPIAPP,0xA1,len(data),data);
-        print "Got:", data, "and", self.data
+        print("Got:", data, "and", self.data)
         return;
 
     def RF_modulated_spectrum(self):
@@ -366,7 +366,7 @@ class GoodFETCCSPI(GoodFET):
         self.poke(0x03,choice);
         self.maclen=len;
     def printpacket(self,packet,prefix="#"):
-        print self.packet2str(packet,prefix);
+        print(self.packet2str(packet,prefix));
     def packet2str(self,packet,prefix="#"):
         s="";
         i=0;
@@ -378,9 +378,9 @@ class GoodFETCCSPI(GoodFET):
         try:
             from scapy.all import Dot15d4
         except ImportError:
-            print "To use packet disection, Scapy must be installed and have the Dot15d4 extension present."
-            print "try: hg clone http://hg.secdev.org/scapy-com";
-            print "     sudo ./setup.py install";
+            print("To use packet disection, Scapy must be installed and have the Dot15d4 extension present.")
+            print("try: hg clone http://hg.secdev.org/scapy-com");
+            print("     sudo ./setup.py install");
         self.printpacket(packet);
         try:
             scapyd = Dot15d4(packet[1:]);
