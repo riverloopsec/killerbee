@@ -25,6 +25,7 @@ try:
     import Crypto
 except ImportError:
     err += "crypto (apt-get install python-crypto)\n"
+    #pip install pycrypto
 
 # Ensure we have either pyUSB 0.x or pyUSB 1.x, but we now
 #  prefer pyUSB 1.x moving forward. Support for 0.x may be deprecated.
@@ -32,6 +33,7 @@ try:
     import usb
 except ImportError:
     err += "usb (apt-get install python-usb)\n"
+    #pip install pyusb
 
 try:
     import usb.core
@@ -52,19 +54,19 @@ except ImportError:
 
 
 if err != "":
-    print >>sys.stderr, """
+    print("""
 Library requirements not met.  Install the following libraries, then re-run
 the setup script.
 
-    """, err
+    """, err, file=sys.stderr)
     sys.exit(1)
 
 if warn != "":
-    print >>sys.stderr, """
+    print("""
 Library recommendations not met. For full support, install the following libraries,
 then re-run the setup script.
 
-    """, warn
+    """, warn, file=sys.stderr)
 #TODO: Offer the user to type y/n to continue or cancel at this point
 
 zigbee_crypt = Extension('zigbee_crypt',

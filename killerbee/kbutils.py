@@ -17,7 +17,7 @@ import random
 import inspect
 from struct import pack
 
-from config import *       #to get DEV_ENABLE_* variables
+from .config import *       #to get DEV_ENABLE_* variables
 
 # Known devices by USB ID:
 RZ_USB_VEND_ID      = 0x03EB
@@ -213,7 +213,7 @@ def devlist(vendor=None, product=None, gps=None, include=None):
 
     for serialdev in get_serial_ports(include=include):
         if serialdev == gps_devstring:
-            print("kbutils.devlist is skipping ignored/GPS device string {0}".format(serialdev)) #TODO remove debugging print
+            print(("kbutils.devlist is skipping ignored/GPS device string {0}".format(serialdev))) #TODO remove debugging print
             continue
         elif (DEV_ENABLE_ZIGDUINO and iszigduino(serialdev)):
             devlist.append([serialdev, "Zigduino", ""])
@@ -229,17 +229,17 @@ def devlist(vendor=None, product=None, gps=None, include=None):
             elif gfccspi and subtype == 2:
                 devlist.append([serialdev, "GoodFET Api-Mote v2", ""])
             elif gfccspi:
-                print("kbutils.devlist has an unknown type of GoodFET CCSPI device ({0}).".format(serialdev))
+                print(("kbutils.devlist has an unknown type of GoodFET CCSPI device ({0}).".format(serialdev)))
 
     if include is not None:
         # Ugly nested load, so we don't load this class when unneeded!
-        import dev_sewio #use isSewio, getFirmwareVersion
+        from . import dev_sewio #use isSewio, getFirmwareVersion
         for ipaddr in filter(isIpAddr, include):
             if dev_sewio.isSewio(ipaddr):
                 devlist.append([ipaddr, "Sewio Open-Sniffer v{0}".format(dev_sewio.getFirmwareVersion(ipaddr)), dev_sewio.getMacAddr(ipaddr)])
             #NOTE: Enumerations of other IP connected sniffers go here.
             else:
-                print("kbutils.devlist has an unknown type of IP sniffer device ({0}).".format(ipaddr))
+                print(("kbutils.devlist has an unknown type of IP sniffer device ({0}).".format(ipaddr)))
     
     return devlist
 
@@ -280,7 +280,7 @@ def isgoodfetccspi(serialdev):
                 is the subtype, and is 0 for telosb devices and 1 for apimote devices.
     '''
     #TODO reduce code, perhaps into loop iterating over board configs
-    from GoodFETCCSPI import GoodFETCCSPI
+    from .GoodFETCCSPI import GoodFETCCSPI
     os.environ["platform"] = ""
     # First try tmote detection
     os.environ["board"] = "telosb" #set enviroment variable for GoodFET code to use
@@ -344,7 +344,7 @@ def iszigduino(serialdev):
     @returns: Boolean with the fist element==True if it is a goodfet atmel128 device.
     '''
     # TODO why does this only work every-other time zbid is invoked?
-    from GoodFETatmel128 import GoodFETatmel128rfa1
+    from .GoodFETatmel128 import GoodFETatmel128rfa1
     os.environ["platform"] = "zigduino"
     gf = GoodFETatmel128rfa1()
     try:
@@ -394,7 +394,7 @@ def search_usb(device):
     else:
         if ':' not in device:
             raise KBInterfaceError("USB device format expects <BusNumber>:<DeviceNumber>, but got {0} instead.".format(device))
-        busNum, devNum = map(int, device.split(':', 1))
+        busNum, devNum = list(map(int, device.split(':', 1)))
     if USBVER == 0:
         busses = usb.busses()
         for bus in busses:
@@ -431,7 +431,7 @@ def hexdump(src, length=16):
     '''
     FILTER = ''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
     result = []
-    for i in xrange(0, len(src), length):
+    for i in range(0, len(src), length):
        chars = src[i:i+length]
        hex = ' '.join(["%02x" % ord(x) for x in chars])
        printable = ''.join(["%s" % ((ord(x) <= 127 and FILTER[ord(x)]) or '.') for x in chars])
@@ -445,7 +445,7 @@ def randbytes(size):
     @param size: Length of random data to return.
     @rtype: String
     '''
-    return ''.join(chr(random.randrange(0,256)) for i in xrange(size))
+    return ''.join(chr(random.randrange(0,256)) for i in range(size))
 
 def randmac(length=8):
     '''
@@ -486,7 +486,7 @@ def makeFCS(data):
         little-endian order.
     '''
     crc = 0
-    for i in xrange(len(data)):
+    for i in range(len(data)):
         c = ord(data[i])
 		#if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
         q = (crc ^ c) & 15				#Do low-order 4 bits
@@ -517,7 +517,7 @@ def pyusb_1x_patch():
     have to ever pass this argument.
     '''
     if 'length' in inspect.getargspec(usb.util.get_string).args:
-        print 'Monkey-patching usb.util.get_string()'
+        print('Monkey-patching usb.util.get_string()')
         def get_string(dev, index, langid = None):
             return usb.util.zzz__get_string(dev, 255, index, langid)
         usb.util.zzz__get_string = usb.util.get_string

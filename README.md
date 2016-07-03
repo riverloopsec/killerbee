@@ -48,6 +48,12 @@ commands:
 # python setup.py install
 ```
 
+On Mac OSX systems, you can install with the following:
+```
+$ brew install libgcrypt libusb
+$ pip install pyusb pycrypto
+```
+
 The python-dev and libgcrypt are required for the Scapy Extension Patch.
 
 Also note that this is a fairly advanced and un-friendly attack platform.  This
@@ -82,7 +88,7 @@ The directory structure for the KillerBee code is described as follows:
 REQUIRED HARDWARE
 ================
 The KillerBee framework is being expanded to support multiple devices.
-Currently there is support for the River Loop ApiMote,
+Currently there is support for River Loop Security's ApiMote,
 Atmel RZ RAVEN USB Stick, MoteIV Tmote Sky, TelosB mote, and Sewino Sniffer.
 
 Support for Freaklab's Freakduino with added hardware
