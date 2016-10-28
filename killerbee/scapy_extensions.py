@@ -43,6 +43,9 @@ def __kb_send(kb, x, channel = None, inter = 0, loop = 0, count = None, verbose 
                             time.sleep(st)
                     else:
                         dt0 = ct-p.time
+                # Make sure the packet has 2 bytes for FCS before TX
+                if not p.haslayer(Dot15d4FCS):
+                    p/=Raw("\x00\x00")
                 kb.inject(p.do_build()[:-2], channel = None, count = 1, delay = 0)  # [:-2] because the firmware adds the FCS
                 n += 1
                 if verbose:
@@ -122,11 +125,12 @@ def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None
         kb = iface
 
     # Make sure the packet has 2 bytes for FCS before TX
-    if not pkt.haslayer(Dot15d4FCS):
-        pkt/=Raw("\x00\x00")
+    # if not pkt.haslayer(Dot15d4FCS):
+    #     pkt/=Raw("\x00\x00")
 
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = loop, count = count, verbose = verbose, realtime = realtime)
-    print "\nSent %i packets." % pkts_out
+    if verbose:
+        print "\nSent %i packets." % pkts_out
 
 @conf.commands.register
 def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
@@ -160,9 +164,9 @@ def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, pr
     else:
         kb = iface
 
-    # Make sure the packet has an FCS layer before TX
-    if not pkt.haslayer(Dot15d4FCS):
-        pkt/=Raw("\x00\x00")
+    # # Make sure the packet has an FCS layer before TX
+    # if not pkt.haslayer(Dot15d4FCS):
+    #     pkt/=Raw("\x00\x00")
 
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = 0, count = None, verbose = verbose, realtime = realtime)
     if verbose:
@@ -429,7 +433,8 @@ def kbdecrypt(pkt, key = None, verbose = None):
 
     # Bug fix thanks to cutaway (https://code.google.com/p/killerbee/issues/detail?id=25):
     #nonce = struct.pack('L',f['ext_source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
-    nonce = struct.pack('L',f['source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
+    # nonce = struct.pack('L',f['source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
+    nonce = struct.pack('Q',f['source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
 
     #nonce = "" # build the nonce
     #nonce += struct.pack(">Q", f['ext_source'])
