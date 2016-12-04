@@ -97,7 +97,7 @@ class GoodFETatmel128rfa1(GoodFETAVR):
                         break
             if self.verbose:
                 print "Connected after %02i attempts." % attempts;
-            self.serialport.setTimeout(12);
+            self.serialport.timeout = 12;
 
     def serClose(self):
         self.connected = 0
