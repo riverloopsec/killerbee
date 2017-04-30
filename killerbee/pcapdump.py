@@ -111,19 +111,29 @@ class PcapDumper:
         Creates a libpcap file using the specified datalink type.
         @type datalink: Integer
         @param datalink: Datalink type, one of DLT_* defined in pcap-bpf.h
-        @type savefile: String
-        @param savefile: Output libpcap filename to open
+        @type savefile: String file-like object
+        @param savefile: Output libpcap filename to open, or file-like object
+        @type ppi: Boolean
+        @param ppi: Include CACE Per-Packet Information (defaults to False)
         @rtype: None
+
+
         '''
         if ppi: from killerbee.pcapdlt import DLT_PPI
         self.ppi = ppi        
-        if folder[-1] == "/":
-            folder = folder[:-1]
-        if not os.path.exists(folder):
-            log_message = "PcapDump: Creating directory to store results"
-            logging.debug(log_message)
-            os.makedirs(folder)
-        self.__fh = open(folder+savefile, mode='wb')
+
+        if isinstance(savefile, basestring):
+            dirname = os.path.dirname(savefile) 
+            if not os.path.exists(dirname):
+                log_message = "PcapDump: Creating directory to store results"
+                logging.debug(log_message)
+                os.makedirs(dirname)
+            self.__fh = open(savefile, mode='wb')
+        elif hasattr(savefile, 'write'):
+            self.__fh = savefile
+        else:
+            raise ValueError("Unsupported type for 'savefile' argument")
+
         self.datalink = datalink
         self.__fh.write(''.join([
             struct.pack("I", PCAPH_MAGIC_NUM), 
@@ -134,6 +144,12 @@ class PcapDumper:
             struct.pack("I", PCAPH_SNAPLEN),
             struct.pack("I", DLT_PPI if self.ppi else self.datalink)
             ]))
+
+    def _enter__(self):
+        return self
+
+    def __exit__(self):
+        self.close()
 
     def pcap_dump(self, packet, ts_sec=None, ts_usec=None, orig_len=None, 
                   freq_mhz = None, ant_dbm = None, location = None):

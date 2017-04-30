@@ -161,8 +161,8 @@ class Scanner(multiprocessing.Process):
     def create_pcapdump(self):
         # Prep the pcap file
         time_label = datetime.datetime.utcnow().strftime('%Y%m%d-%H%M%S') 
-        fname = '/zb_c%s_%s.pcap' % (self.channel.value, time_label) #fname is -w equiv
-        return PcapDumper(DLT_IEEE802_15_4, fname, ppi=True, folder=self.output)
+        fname = self.output + '/zb_c%s_%s.pcap' % (self.channel.value, time_label) 
+        return PcapDumper(DLT_IEEE802_15_4, fname, ppi=True)
 
     
     def dump_packet(self, pdump, packet):
