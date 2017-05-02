@@ -17,7 +17,6 @@ try:
     from scapy.all import Dot15d4, Dot15d4Beacon
 except ImportError:
     log_message = 'This Requires Scapy (Dot15d4) To Be Installed.'
-    print log_message
     logging.error(log_message)
     from sys import exit
     exit(-1)
@@ -175,7 +174,8 @@ class Scanner(multiprocessing.Process):
                              location=(self.currentGPS['lng'], self.currentGPS['lat'], 
                                        self.currentGPS['alt']))
             else:
-                print "GSP: {} {}".format((self.currentGPS != None), ('lat' in self.currentGPS))
+                if self.verbose:
+                    print "GSP: {} {}".format((self.currentGPS != None), ('lat' in self.currentGPS))
                 pdump.pcap_dump(packet[0], freq_mhz=rf_freq_mhz, ant_dbm=packet['dbm'])
         except IOError as e:
             log_message = "%s: Unable to write pcap (%s)." % (

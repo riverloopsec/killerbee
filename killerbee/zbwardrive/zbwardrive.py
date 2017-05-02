@@ -47,12 +47,10 @@ def gpsdPoller(currentGPS):
                 epv = gpsd.fix.epv
                 ept = gpsd.fix.ept
                 gpt = gpsd.fix.time
-                #print 'time utc    ' , gpsd.utc,' + ', gpsd.fix.time
                 currentGPS['lat'] = lat
                 currentGPS['lng'] = lng
                 currentGPS['alt'] = alt
                 log_message = "GPS: {}, {}, {}\n     {} epx:{} epv:{} ept:{}".format(lat, lng, alt, gpt, eph, epv, ept)
-                print log_message
                 logging.debug(log_message)
             else:
                 log_message = "No GPS fix"
@@ -60,7 +58,6 @@ def gpsdPoller(currentGPS):
                 #TODO timeout lat/lng/alt values if too old...?
     except KeyboardInterrupt:
         log_message = "Got KeyboardInterrupt in gpsdPoller, returning." 
-        print log_message
         logging.debug(log_message)
         return
 
@@ -77,16 +74,13 @@ def startScan(currentGPS, verbose=False, include=[],
         if e.args[0].find('Operation not permitted') >= 0:
             log_message = 'Error: Permissions error, try running using sudo.'
             logging.error(log_message)
-            print log_message
         else:
             log_message = 'Error: USBError: {}'.format(e)
             logging.error(log_message)
-            print log_message
         return False
     except Exception, e:
         log_message = 'Error: Issue starting KillerBee instance: {}'.format(e)
         logging.error(log_message)
-        print log_message
         return False
 
     log_message = "gps: {}".format(ignore)
