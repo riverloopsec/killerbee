@@ -111,6 +111,12 @@ class KillerBee:
                     self.driver = RZUSBSTICK(self.dev, self.__bus)
                 elif self.__device_is(ZN_USB_VEND_ID, ZN_USB_PROD_ID):
                     raise KBInterfaceError("Zena firmware not yet implemented.")
+                elif self.__device_is(CC2530_USB_VEND_ID, CC2530_USB_PROD_ID):
+                    from dev_cc253x import CC253x
+                    self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2530)
+                elif self.__device_is(CC2531_USB_VEND_ID, CC2531_USB_PROD_ID):
+                    from dev_cc253x import CC253x
+                    self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2531)
                 else:
                     raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x.".format(self.dev.idVendor, self.dev.idProduct))
 
