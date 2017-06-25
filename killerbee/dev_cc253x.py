@@ -48,7 +48,6 @@ class CC253x:
             self._data_ep = CC253x.USB_CC2531_DATA_EP
         self._channel = None
         self.dev = dev
-        self.name = "<unknown>"
 
         self.__stream_open = False
         self.capabilities = KBCapabilities()
@@ -69,6 +68,8 @@ class CC253x:
 
 
     def close(self):
+        if self.__stream_open == True:
+            self.sniffer_off()
         pass
 
     def check_capability(self, capab):
@@ -97,6 +98,7 @@ class CC253x:
         @rtype: List
         @return: List of 3 strings identifying device.
         '''
+        # TODO Determine if there is a way to get a unique ID from the device
         return [self.name, "CC253x", ""]
 
     # KillerBee expects the driver to implement this function
@@ -123,9 +125,8 @@ class CC253x:
                 break
             time.sleep(0.1)
 
-        # Set channel
-        self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_CHAN, wIndex = 0, data_or_wLength = [self._channel])
-        self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_CHAN, wIndex = 1, data_or_wLength = [0x00])
+        # Set the channel in the hardware now the radio is powered up
+        self._do_set_channel()
 
         # Start capture
         self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_START)
@@ -139,8 +140,16 @@ class CC253x:
         close().
         @rtype: None
         '''
-        self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_STOP)
-        self.__stream_open = False
+        if self.__stream_open == True:
+            # TODO Here, and in other places, add error handling for ctrl_transfer failure
+            self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_STOP)
+            self.__stream_open = False
+
+    def _do_set_channel(self):
+        # Internal function to unconditionally set the channel in the hardware
+        # For some CC253x dongles, this can only be done when the radio is powered up.
+        self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_CHAN, wIndex = 0, data_or_wLength = [self._channel])
+        self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_CHAN, wIndex = 1, data_or_wLength = [0x00])
 
     # KillerBee expects the driver to implement this function
     def set_channel(self, channel):
@@ -154,6 +163,10 @@ class CC253x:
 
         if channel >= 11 or channel <= 26:
             self._channel = channel
+            if self.__stream_open == True:
+                self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_STOP)
+                self._do_set_channel()
+                self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_START)
         else:
             raise Exception('Invalid channel')
 
