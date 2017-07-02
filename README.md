@@ -25,8 +25,8 @@ capabilities:
 
 REQUIREMENTS
 ================
-KillerBee is developed and tested on Linux systems.  Windows support may be
-added in the future.
+KillerBee is developed and tested on Linux systems. Some users also run on OSX.
+Windows support may be added in the future.
 
 We have striven to use a minimum number of software dependencies, however, it
 is necessary to install the following Python modules before installation:
@@ -67,6 +67,29 @@ KillerBee with the following command:
 ```
 # python setup.py install
 ```
+
+RUNNING IN DOCKER
+================
+
+An alternative to the above installation steps is to run in a docker container.
+
+To make an instance, run the following in the KillerBee directory where there is
+a Dockerfile to base from:
+```
+$ docker build -t killerbee .
+```
+
+To use the image, run the following. If you wish to use a device, you must first
+know the path of any USB dongles which you want to expose into the docker image.
+```
+$ docker run -i -t killerbee
+```
+
+It is often helpful to also mount the current directory where you are working:
+```
+$ docker run -v "`pwd`":/root -i -t killerbee
+```
+
 
 DIRECTORIES
 ================
