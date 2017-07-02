@@ -185,7 +185,7 @@ def kbsniff(channel = None, count = 0, iface = None, store = 1, prn = None, lfil
     @param channel:  802.15.4 channel to transmit/receive on
     @param count:    number of packets to capture. 0 means infinity
     @param iface:    KillerBee interface to use, or KillerBee() class instance
-    @param store:    wether to store sniffed packets or discard them
+    @param store:    whether to store sniffed packets or discard them
     @param prn:      function to apply to each packet. If something is returned,
                       it is displayed. Ex:
                       ex: prn = lambda x: x.summary()
@@ -250,7 +250,7 @@ def kbwrpcap(save_file, pkts):
 @conf.commands.register
 def kbrddain(filename, count = -1, skip = 0):
     """
-    Read a dain tree file with the KillerBee library
+    Read a daintree file with the KillerBee library
     Wraps the DainTreeReader to return scapy packet object from daintree files.
     """
     cap = DainTreeReader(filename)

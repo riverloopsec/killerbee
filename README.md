@@ -1,9 +1,7 @@
 KillerBee
 ================
 
-This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4
-networks.
-
+This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4 networks.
 
 MAINTAINERS/LICENSE
 ================
@@ -13,7 +11,7 @@ All Rights Reserved.
 
 The main toolkit was/is authored by:
 + 2009, Joshua Wright <jwright@willhackforsushi.com>
-+ 2010-2015, Ryan Speers <ryan@riverloopsecurity.com>
++ 2010-2017, Ryan Speers <ryan@riverloopsecurity.com>
 + 2010-2011, Ricky Melgares <ricky@riverloopsecurity.com>
 
 We appreciate the many contributers to the framework, including the following who have contributed
@@ -21,7 +19,6 @@ capabilities:
 + Anonymous Contributor
 + Spencer McIntyre (scapy extension)
 + Bryan Halfpap <Bryanhalf@gmail.com> (additional tools)
-
 
 REQUIREMENTS
 ================
@@ -86,13 +83,29 @@ Currently there is support for the River Loop ApiMote,
 Atmel RZ RAVEN USB Stick, MoteIV Tmote Sky, TelosB mote, and Sewino Sniffer.
 
 Support for Freaklab's Freakduino with added hardware
-and the Dartmouth arduino sketch as well as for the Zena Packet Analyzer board
-are in development.
+and the Dartmouth arduino sketch, Zigduino, and Sewio Sniffer board
+is available but are not listed below as they are not maintained.
 
-ApiMote v3 and v4beta:
+ApiMote v4beta (and v3):
 ----------------
 The devices typically come preloaded and do not need to be reflashed for basic
 use.
+
+The hardware is open-source at https://github.com/riverloopsec/apimote.
+It is available assembled by contacting team at riverloopsecurity dot com.
+
+_This is currently supported for beta, and supports sniffing, injection, and jamming._
+
+Texas Instruments CC2530/1 EMK:
+----------------
+
+This USB dongle is produced by Texas Instruments and is sold as an evaluation
+kit for their CC2530 or CC2531 integrated circuit.
+
+It can be purchased from electronics distributors, or directly from them
+[here](http://www.ti.com/tool/cc2531emk).
+
+_This is currently supported for beta, and supports sniffing only._
 
 MoteIV Tmote Sky or TelosB mode:
 ----------------
@@ -101,6 +114,12 @@ within killerbee/firmware, run:
 ```
 $ ./flash_telosb.sh
 ```
+
+These boards can be obtained via multiple distributors, however
+[this vendor](https://www.advanticsys.com/shop/mtmcm5000msp-p-14.html) has
+stated that their "clone" of the original hardware is compatible.
+We have not tested nor do we endorse any specific "clone".
+
 
 Atmel RZ RAVEN USB Stick:
 ----------------
@@ -151,16 +170,17 @@ header.  Prepare your terminal to flash the RZ Raven USB stick by entering the f
 command prompt (but don't hit enter yet):
 
 ```
-avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-001.hex
+avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-002.hex
 ```
+
+> On "older" RZUSBSTICKs, use the file `kb-rzusbstick-001.hex` instead.
 
 Insert the header into the RZ Raven USB Stick with pin 1 closest to the LEDs (farthest from the USB
 connector).  You could solder it in place, but we don't bother.  Just hold it at an angle so all the pins
 make contact and hit enter where you typed the AVRDUDE comand.  You should see output similar to the following:
 
 ```
-
-C:\avrdude>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-001.hex
+C:\avrdude>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-002.hex
 
 avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
 avrdude: AVR device initialized and ready to accept instructions
@@ -185,7 +205,6 @@ avrdude: verifying ...
 avrdude: 26778 bytes of flash verified
 avrdude: safemode: Fuses OK
 avrdude done.  Thank you.
-
 ```
 
 It should only take a few seconds to complete.  For a more detailed, picture-rich set of
@@ -274,6 +293,7 @@ summarized below.
 
 Additional tools, that are for special cases or are not stable, are stored in
     the Api-Do project repository: http://code.google.com/p/zigbee-security/
+    and at https://github.com/riverloopsec/beekeeperwids.
 
 
 FRAMEWORK
@@ -309,7 +329,7 @@ mechanism for generating and transmitting malformed ZigBee data to a target.
 
 QUESTIONS/COMMENTS/CONCERNS
 ==============
-Please drop us a note: 
+Please us the ticketing system at https://github.com/riverloopsec/killerbee/issues.
 
 The original version was written by: jwright@willhackforsushi.com
 The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
@@ -327,4 +347,4 @@ A word of thanks to several folks who helped out with this project:
 + Matt Carpenter
 + Sergey Bratus (research support at Dartmouth)
 + Jeff Spielberg
-
++ Scytmo (bug fixes and CC2530/1 EMK board support)
