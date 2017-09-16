@@ -72,7 +72,7 @@ References:
 + [JTAG debugging with Bus pirate and OpenOCD](https://research.kudelskisecurity.com/2014/05/01/jtag-debugging-made-easy-with-bus-pirate-and-openocd/)
 + [Utilisation d’OpenOCD pour programmer une clé RZUSBstick avec l’interface Bus Pirate](http://esver.free.fr/blog/?p=637)
 
-### (Windows)
+### AVR Wireless Software (Windows)
 
 _Although we have not tested this, jrussell88 developed this techniques and reports it as working._
 
