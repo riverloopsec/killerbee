@@ -142,7 +142,52 @@ devices on the network.
 
 In order to get the full functionality included in KillerBee, the RZ RAVEN USB
 Stick must be flashed with the custom firmware included in the firmware/ 
-directory.  This process requires additional hardware and software:
+directory. This process requires additional hardware and software and two methods are offered:
+
+### OpenOCD and buspirate (Linux users only)
+
+  + Hardware: Atmel RZ Raven USB Stick (RZUSBSTICK)
+  + Hardware: Dangerous Prototypes Bus Pirate (http://dangerousprototypes.com/docs/Bus_Pirate)
+  + Hardware: Six male-to-female Dupont wires
+  + Software: OpenOCD (http://www.openocd.net/)
+  + Software: KillerBee Firmware for the RZUSBSTICK
+
+1. Download OpenOCD and compile it with the support for the DP buspirate.
+
+```
+sudo apt-get install git
+git clone git://git.code.sf.net/p/openocd/code
+sudo apt-get install libtool autoconf texinfo libusb-dev libftdi-dev
+git clone git://git.code.sf.net/p/openocd/code
+cd code
+./bootstrap
+./configure --enable-maintainer-mode --disable-werror --enable-buspirate
+make
+sudo make install
+```
+
+2. Download the RZ Raven USB Stick firmware from [here](https://raw.githubusercontent.com/riverloopsec/killerbee/master/firmware/kb-rzusbstick-002.hex).
+Copy the firmware file into your Downloads directory.
+
+3. Download the configuration file for OpenOCD and the DP buspirate form [here](https://gist.githubusercontent.com/mertenats/5150ce65a358cb91919fc3013ce81ab3/raw/3c17361366219f14805ac855540e30cfc4efac0e/openOCD_buspirate_rzusbstick.cfg) and edit the variable `_FIRMWARE_LOCATION`.
+
+Example:
+```
+set  _FIRMWARE_LOCATION /home/samuel/Downloads/killerbee/firmware/kb-rzusbstick-002.hex
+```
+
+4. Connect the buspirate to the RZ Raven USB stick with the following connections: GND to GND (RZ Raven USB stick to buspirate), TCK to CLK, TDO to MISO, TMS to CS, TDI to MOSI and SRST to AUX (pins layouts available [here](http://esver.free.fr/upload/RZUSBstick-JTAG.png) and [here](http://esver.free.fr/upload/Bp-cable-color-hk.png))
+
+5. Execute the flashing process with OpenOCD.
+```
+openocd -f openocd_bp.cfg
+```
+
+Sources:
+  + [JTAG debugging with Bus pirate and OpenOCD](https://research.kudelskisecurity.com/2014/05/01/jtag-debugging-made-easy-with-bus-pirate-and-openocd/)
+  + [Utilisation d’OpenOCD pour programmer une clé RZUSBstick avec l’interface Bus Pirate](http://esver.free.fr/blog/?p=637)
+
+### AVRDUDE and Atmel AVR Dragon
 
   + Hardware: Atmel RZ Raven USB Stick (RZUSBSTICK)
   + Hardware: Atmel AVR Dragon On-Chip Programmer (ATAVRDRAGON)
