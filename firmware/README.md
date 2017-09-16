@@ -25,6 +25,8 @@ This process requires additional hardware and software and multiple methods are 
 
 ### OpenOCD and buspirate (Linux)
 
+_Although we have not tested this, the submitter assures us it is working._
+
 #### Pre-requisites
 
 + Hardware: Atmel RZ Raven USB Stick (RZUSBSTICK)
@@ -76,24 +78,57 @@ _Although we have not tested this, jrussell88 developed this techniques and repo
 
 #### Pre-requisites
 
-+ Windows 7 VirtualBox VM (tested under Ubuntu 17.04)
++ Software: Windows 7 (tested in a VirtualBox VM under Ubuntu 17.04)
 + [Atmel AVR Wireless Services AVR2017_RZRAVEN_Firmware.zip](http://www.atmel.com/tools/rzusbstick.aspx) where it is described as: "AVR2017: RZRAVEN Firmware (72585516, updated May 2008)"
 
 #### Procedure
 
-* Ensure the Windows 7 VM is up to date
-* Plug in the RZUSBSTICK and add a USB filter in the VirtualBox Manager for the Windows VM by selecting RZUSBSTICK from the list under the VM's Settings > USB tab.
-* In the Windows VM, unzip `AVR2017_RZRAVEN_Firmware.zip` and install `AVRWirelessSetup.exe`.
+* Ensure Windows is up to date
+* If in a VM such as VirtualBox: Plug in the RZUSBSTICK and add a USB filter in the VirtualBox Manager for the Windows VM by selecting RZUSBSTICK from the list under the VM's Settings > USB tab.
+* In Windows, unzip `AVR2017_RZRAVEN_Firmware.zip` and install `AVRWirelessSetup.exe`.
 * If this has installed correctly, Computer Management - Device Management should show an entry for Jungo, under which is Windriver whose properties show the `windrv6.sys` driver.
 * The program should have installed to `C:\Program Files (x86)\Atmel\AVR Tools\AVR Wireless Services`.
 * Replace the firmware `RFUSBSTICK-10_10.hex` in this folder with the new firmware (from KillerBee `firmware/`.
 * Run Atmel - AVR Wireless Services from the Start Menu.
 * From the Tools menu run "Upgrade usb stick"
 * The dialog box offers IP address and port options which can be used to connect to a remote usb stick. However, the defaults should be fine.
-* Press the "Upgrade" button
+* Click "Upgrade"
 * It will generate an error message but should then say it has completed successfully
 * The LED on the USB stick turns amber
 * Firmware can be verified after installing KillerBee on Linux by running `sudo zbid`
+
+### Atmel-ICE Basic (Windows)
+
+_Although we have not tested this, the submitter assures us it is working._
+
+#### Pre-requisities
+
++ Software: Windows
++ Software: AtmelStudio
++ Hardware: [Atmel-ICE Basic](http://www.atmel.com/tools/atatmel-ice.aspx) ([docs](http://www.atmel.com/Images/Atmel-42330-Atmel-ICE_UserGuide.pdf))
+
+#### Procedure
+
+* Install AtmelStudio and run it
+* Connect Atmel-ICE Basic to USB port 
+* Connect 10-pin connector to RZUSBstick and the other end to the AVR slot
+* Connect RZUSBstick to the USB port
+* In AtmelStudio go to Tools > Device Programming
+* Choose these options:
+ * Tools: Atmel-ICE
+ * Device: AT90USB1287
+ * Interface: JTAG
+* Click "Apply"
+* In the Device Signature press Read. If an error appears, you need to turn the 10 pin connector in the RZUSBstick the other way.
+* Select "Memories"
+* In the flash menu click "Read" and save a backup of the firmware
+* Select the file with the new firmware (from KillerBee `firmware/`) and select "Erase device before programming" and "Verify Flash after programming"
+* Press Program and this should appear in the status box:
+```
+Erasing device... OK
+Programming Flash...OK
+Verifying Flash...OK
+```
 
 ### AVRDUDE and Atmel AVR Dragon (Windows / Linux)
 
