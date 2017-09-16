@@ -3,6 +3,7 @@ MAINTAINER rmspeers
 
 RUN apt-get update
 RUN apt-get install -y python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev mercurial
+
 RUN hg clone https://bitbucket.org/secdev/scapy-com
 RUN cd scapy-com && python setup.py install
 
