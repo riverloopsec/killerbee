@@ -39,7 +39,7 @@ _Although we have not tested this, the submitter assures us it is working._
 
 1. Download OpenOCD and compile it with the support for the DP Bus Pirate.
 
-```
+```bash
 sudo apt-get install git
 git clone git://git.code.sf.net/p/openocd/code
 sudo apt-get install libtool autoconf texinfo libusb-dev libftdi-dev
@@ -115,9 +115,9 @@ _Although we have not tested this, the submitter assures us it is working._
 * Connect RZUSBstick to the USB port
 * In AtmelStudio go to Tools > Device Programming
 * Choose these options:
-** Tools: Atmel-ICE
-** Device: AT90USB1287
-** Interface: JTAG
+  * Tools: Atmel-ICE
+  * Device: AT90USB1287
+  * Interface: JTAG
 * Click "Apply"
 * In the Device Signature press Read. If an error appears, you need to turn the 10 pin connector in the RZUSBstick the other way.
 * Select "Memories"
@@ -145,14 +145,14 @@ Verifying Flash...OK
 #### Procedure
 
 * For Windows users, install the AVR Dragon drivers provided with [the libusb-win32 software](http://sourceforge.net/projects/libusb-win32).
-** Download and extract the zip file, then launch the
+  * Download and extract the zip file, then launch the
 libusb-win32 `inf-wizard.exe` executable.
-** Connect the AVR Dragon to a USB port and click Next in the wizard to detect and identify the USB vendor ID and product ID 0x03EB and 0x2107 for the AVRDRAGON.
-** Complete the wizard by clicking Next, then Finish to install the drivers.
-** When prompted by Windows, click "Install This Driver Sofware Anyway".
+  * Connect the AVR Dragon to a USB port and click Next in the wizard to detect and identify the USB vendor ID and product ID 0x03EB and 0x2107 for the AVRDRAGON.
+  * Complete the wizard by clicking Next, then Finish to install the drivers.
+  * When prompted by Windows, click "Install This Driver Sofware Anyway".
 
 * Copy the RZUSBSTICK firmware from `firmware/kb-rzusbstick-002.hex` to the directory where you extracted the AVRDUDE software.
-** Note: We are suggesting the -002 version now as some people report that -001 does not work on newer RZUSBSTICK versions. Change the filenames in the example commands below.
+  * Note: We are suggesting the `-002` version now as some people report that `-001` does not work on newer RZUSBSTICK versions. Change the filenames in the example commands below.
 
 * Connect the AVR Dragon programmer to the ribbon cable, and connect the 100-mm to 50-mm adapter with the header.
 * Prepare your terminal to flash the RZUSBSTICK by entering the following command at a
@@ -160,15 +160,15 @@ command prompt (but _do not_ hit enter yet):
 ```
 avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-002.hex
 ```
-** On "older" RZUSBSTICKs, use the file `kb-rzusbstick-001.hex` instead.
+  * On "older" RZUSBSTICKs, use the file `kb-rzusbstick-001.hex` instead.
 
 * Insert the header into the RZUSBSTICK with pin 1 closest to the LEDs (farthest from the USB
 connector).
-** You could solder it in place, but we don't bother. Just hold it at an angle so all the pins
+  * You could solder it in place, but we don't bother. Just hold it at an angle so all the pins
 make contact.
 * Hit enter where you typed the AVRDUDE comand. You should see output similar to the following:
 
-```
+```bat
 C:\avrdude>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-002.hex
 
 avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
