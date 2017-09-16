@@ -23,7 +23,7 @@ The source is included in `src/kb-rzusbstick/` folder. It should build on Window
 As described in the main `README.md`, you need to update the default firmware to support injection.
 This process requires additional hardware and software and multiple methods are offered:
 
-### OpenOCD and buspirate (Linux users only)
+### OpenOCD and buspirate (Linux)
 
 #### Pre-requisites
 
@@ -69,6 +69,31 @@ openocd -f openocd_bp.cfg
 References:
 + [JTAG debugging with Bus pirate and OpenOCD](https://research.kudelskisecurity.com/2014/05/01/jtag-debugging-made-easy-with-bus-pirate-and-openocd/)
 + [Utilisation d’OpenOCD pour programmer une clé RZUSBstick avec l’interface Bus Pirate](http://esver.free.fr/blog/?p=637)
+
+### (Windows)
+
+_Although we have not tested this, jrussell88 developed this techniques and reports it as working._
+
+#### Pre-requisites
+
++ Windows 7 VirtualBox VM (tested under Ubuntu 17.04)
++ [Atmel AVR Wireless Services AVR2017_RZRAVEN_Firmware.zip](http://www.atmel.com/tools/rzusbstick.aspx) where it is described as: "AVR2017: RZRAVEN Firmware (72585516, updated May 2008)"
+
+#### Procedure
+
+* Ensure the Windows 7 VM is up to date
+* Plug in the RZUSBSTICK and add a USB filter in the VirtualBox Manager for the Windows VM by selecting RZUSBSTICK from the list under the VM's Settings > USB tab.
+* In the Windows VM, unzip `AVR2017_RZRAVEN_Firmware.zip` and install `AVRWirelessSetup.exe`.
+* If this has installed correctly, Computer Management - Device Management should show an entry for Jungo, under which is Windriver whose properties show the `windrv6.sys` driver.
+* The program should have installed to `C:\Program Files (x86)\Atmel\AVR Tools\AVR Wireless Services`.
+* Replace the firmware `RFUSBSTICK-10_10.hex` in this folder with the new firmware (from KillerBee `firmware/`.
+* Run Atmel - AVR Wireless Services from the Start Menu.
+* From the Tools menu run "Upgrade usb stick"
+* The dialog box offers IP address and port options which can be used to connect to a remote usb stick. However, the defaults should be fine.
+* Press the "Upgrade" button
+* It will generate an error message but should then say it has completed successfully
+* The LED on the USB stick turns amber
+* Firmware can be verified after installing KillerBee on Linux by running `sudo zbid`
 
 ### AVRDUDE and Atmel AVR Dragon (Windows / Linux)
 
