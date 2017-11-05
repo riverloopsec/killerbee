@@ -42,7 +42,7 @@ _Although we have not tested this, the submitter assures us it is working._
 ```bash
 sudo apt-get install git
 git clone git://git.code.sf.net/p/openocd/code
-sudo apt-get install libtool autoconf texinfo libusb-dev libftdi-dev
+sudo apt-get install libtool autoconf texinfo libusb-dev libftdi-dev pkg-config libusb-1.0.0
 git clone git://git.code.sf.net/p/openocd/code
 cd code
 ./bootstrap
