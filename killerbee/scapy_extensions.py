@@ -392,7 +392,7 @@ def kbrandmac(length = 8):
     return randmac(length)
 
 @conf.commands.register
-def kbdecrypt(pkt, key = None, verbose = None):
+def kbdecrypt(pkt, key = None, verbose = None, doMicCheck = False):
     """Decrypt Zigbee frames using AES CCM* with 32-bit MIC"""
     if verbose is None:
         verbose = conf.verb
@@ -418,6 +418,16 @@ def kbdecrypt(pkt, key = None, verbose = None):
     # This function destroys the packet, therefore work on a copy - @cutaway
     pkt = pkt.copy()   #this is hack to fix the below line
     pkt.nwk_seclevel=5 #the issue appears to be when this is set
+    # Now recreate 'pkt' by rebuilding the raw data and creating a new scapy Packet, because
+    # scapy splits the data/mic according to the nwk_seclevel in the ZigbeeSecurityHeader when
+    # the scapy Packet is created.  The value of nwk_seclevel in the ZigbeeSecurityHeader does
+    # not have to be accurate in the transmitted frame: the Zigbee NWK standard states that
+    # the nwk_seclevel should be overwritten in the received frame with the value that is being
+    # used by all nodes in the Zigbee network - this is to ensure that unencrypted frames can't be
+    # maliciously injected.  i.e. the receiver shouldn't trust the received nwk_seclevel.
+    newpkt = pkt.build()
+    if pkt.haslayer(Dot15d4FCS): pkt = Dot15d4FCS(newpkt)
+    else:                        pkt = Dot15d4(newpkt)
 
     #mic = struct.unpack(">I", f['mic'])
     mic = pkt.mic
@@ -444,7 +454,11 @@ def kbdecrypt(pkt, key = None, verbose = None):
         print "\tMic:            " + mic.encode('hex')
         print "\tEncrypted Data: " + encrypted.encode('hex')
 
-    crop_size = 4 + 2 + len(pkt.getlayer(ZigbeeSecurityHeader).fields['data'])  # the size of all the zigbee crap, minus the length of the encrypted data, mic and FCS
+    # For zigbeeData, we need the entire zigbee packet, minus the encrypted data and mic (4 bytes).
+    # So calculate an amount to crop, equal to the size of the encrypted data and mic.  Note that
+    # if there was an FCS, scapy will have already stripped it, so it will not returned by the
+    # do_build() call below (and hence doesn't need to be taken into account in crop_size).
+    crop_size = 4 + len(pkt.getlayer(ZigbeeSecurityHeader).fields['data'])
 
     # the Security Control Field flags have to be adjusted before this is calculated, so we store their original values so we can reset them later
     #reserved2 = pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2']
@@ -459,16 +473,18 @@ def kbdecrypt(pkt, key = None, verbose = None):
         print "\tDecrypted Data: " + payload.encode('hex')
 
     frametype = pkt.getlayer(ZigbeeNWK).fields['frametype']
-    if frametype == 0:
+    if frametype == 0 and micCheck == 1:
         payload = ZigbeeAppDataPayload(payload)
-    elif frametype == 1:
+    elif frametype == 1 and micCheck == 1:
         payload = ZigbeeNWKCommandPayload(payload)
     else:
         payload = Raw(payload)
 
-    return payload
-    #if micCheck == 1: return (payload, True)
-    #else:             return (payload, False)
+    if doMicCheck == False:
+        return payload
+    else:
+        if micCheck == 1: return (payload, True)
+        else:             return (payload, False)
 
 @conf.commands.register
 def kbencrypt(pkt, data, key = None, verbose = None):
