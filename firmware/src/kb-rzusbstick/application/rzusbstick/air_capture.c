@@ -265,6 +265,7 @@ void air_capture_task(void) {
             } else if (1 == packets_left) {
                 /* Send Zero Length Packet and then update tail pointer. */
                 UEINTX &= ~(1 << FIFOCON);
+                packets_left = 0;
                 
                 /* Update FIFO tail. */
                 ENTER_CRITICAL_REGION();
