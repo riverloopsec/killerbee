@@ -17,6 +17,7 @@ RZUSBSTICK
 This needs to be flashed using external tools. Compiled firmware is:
 - `kb-rzusbstick-001.hex`: Initial version
 - `kb-rzusbstick-002.hex`: Newer version with EEMAGIC=0xFF, reported to be needed on newer models
+- `kb-rzusbstick-003.hex`: Newer version built by Scytmo with fix for stalling on 64-byte packets
 
 The source is included in `src/kb-rzusbstick/` folder. It should build on Windows and Ubuntu.
 
