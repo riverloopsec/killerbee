@@ -79,8 +79,8 @@ _Although we have not tested this, jrussell88 developed this techniques and repo
 
 #### Pre-requisites
 
-+ Software: Windows 7 (tested in a VirtualBox VM under Ubuntu 17.04)
-+ [Atmel AVR Wireless Services AVR2017_RZRAVEN_Firmware.zip](http://www.atmel.com/tools/rzusbstick.aspx) where it is described as: "AVR2017: RZRAVEN Firmware (72585516, updated May 2008)"
++ Software: Windows 7 x86 (can't flash firmware with 64-bit drivers or OS) (tested in a VirtualBox VM under Ubuntu 17.04) 
++ [Atmel AVR Wireless Services AVR2017_RZRAVEN_Firmware.zip](http://palmtree.beeroclock.net/~karlp/AVR2017_RZRAVEN_Firmware.zip) where it is described as: "AVR2017: RZRAVEN Firmware (72585516, updated May 2008)"
 
 #### Procedure
 
