@@ -437,54 +437,77 @@ class RZUSBSTICK:
             # Turn the sniffer on
             self.sniffer_on()
 
-        # The RZ_USB_PACKET_EP doesn't return error codes like the standard
-        # RZ_USB_RESPONSE_EP does, so we don't use __usb_read() here.
-        pdata = None
-        if USBVER == 0:
-            try:
-                pdata = self.handle.bulkRead(RZ_USB_PACKET_EP, timeout)
-            except usb.USBError, e:
-                if e.args != ('No error',): # http://bugs.debian.org/476796
-                    if e.args[0] != "Connection timed out": # USB timeout issue
+        ret = None
+        framedata = []
+        explen = 0 # expected remaining packet length
+        while True:
+            # The RZ_USB_PACKET_EP doesn't return error codes like the standard
+            # RZ_USB_RESPONSE_EP does, so we don't use __usb_read() here.
+            pdata = None
+            if USBVER == 0:
+                try:
+                    pdata = self.handle.bulkRead(RZ_USB_PACKET_EP, timeout)
+                except usb.USBError, e:
+                    if e.args != ('No error',): # http://bugs.debian.org/476796
+                        if e.args[0] != "Connection timed out": # USB timeout issue
+                            print "Error args:", e.args
+                            raise e
+                        else:
+                            return None
+            else: # pyUSB 1.x
+                try:
+                    pdata = self.dev.read(RZ_USB_PACKET_EP, self.dev.bMaxPacketSize0, timeout=timeout)
+                except usb.core.USBError as e:
+                    if e.errno != 110: #Operation timed out
                         print "Error args:", e.args
                         raise e
-        else: # pyUSB 1.x
-            try:
-                pdata = self.dev.read(RZ_USB_PACKET_EP, self.dev.bMaxPacketSize0, timeout=timeout)
-            except usb.core.USBError as e:
-                if e.errno != 110: #Operation timed out
-                    print "Error args:", e.args
-                    raise e
-                    #TODO error handling enhancements for USB 1.0
+                        #TODO error handling enhancements for USB 1.0
+                    else:
+                        return None
 
-        # PyUSB returns an empty tuple occasionally, handle as "no data"
-        #TODO added len(pdata) check as some arrays were failing
-        if pdata == None or pdata == () or len(pdata)==0:
-            return None
+            # PyUSB returns an empty tuple occasionally, handle as "no data"
+            #TODO added len(pdata) check as some arrays were failing
+            if pdata == None or pdata == () or len(pdata)==0:
+                return None
 
-        if pdata[0] == RZ_EVENT_STREAM_AC_DATA:
-            rssi = int(pdata[6])
-            validcrc = True if (pdata[7] == 1) else False
-            frame = pdata[9:]
-            # Convert the tuple response data to a string (by way of a list)
-            framedata = []
-            for byteval in frame:
-                framedata.append(struct.pack("B", byteval))
-            # Bugfix rmspeers 12.17.2010
-            # Remove the junk \xff byte at the end, instead of overwriting it in zbdump with a \x00 byte
-            framedata = ''.join(framedata[:-1])
-            #Return in a nicer dictionary format, so we don't have to reference by number indicies.
-            #Note that 0,1,2 indicies inserted twice for backwards compatibility.
-            return {0:framedata, 1:validcrc, 2:rssi, \
-                    'bytes':framedata, 'validcrc':validcrc, 'rssi':rssi, \
-                    'dbm':rssi,'datetime':datetime.utcnow()}
-            #TODO calculate dbm based on RSSI conversion formula for the chip
-        else:
-            return None
-            #raise Exception("Unrecognized AirCapture Data Response: 0x%02x" % pdata[0])
- 
-    def ping(self, da, panid, sa, channel=None):
-        '''
+            if pdata[0] == RZ_EVENT_STREAM_AC_DATA and ret is None:
+                explen = pdata[1]
+                rssi = int(pdata[6])
+                validcrc = True if (pdata[7] == 1) else False
+                frame = pdata[9:]
+                # Accumulate the tuple response data in a list
+                for byteval in frame:
+                    framedata.append(struct.pack("B", byteval))
+                #Return in a nicer dictionary format, so we don't have to reference by number indicies.
+                #Note that 0,1,2 indicies inserted twice for backwards compatibility.
+                ret = {1:validcrc, 2:rssi, \
+                        'validcrc':validcrc, 'rssi':rssi, \
+                        'dbm':rssi,'datetime':datetime.utcnow()}
+                #TODO calculate dbm based on RSSI conversion formula for the chip
+            else:
+                if ret is not None:
+                    # This is a continuation of a long AC packet, so append frame data
+                    for byteval in pdata:
+                        framedata.append(struct.pack("B", byteval))
+                else:
+                    # raise Exception("Unrecognized AirCapture Data Response: 0x%02x" % pdata[0])
+                    return None
+
+            # We will only get to this point if we received valid data.
+            # If we've now received the whole frame, return it.
+            if explen == len(pdata):
+                # The last byte of frame data is the link quality indicator
+                ret['lqi'] = framedata[-1]
+                # Convert the framedata to a string for the return value
+                ret[0] = ''.join(framedata[:-1])
+                ret['bytes'] = ret[0]
+                return ret
+            else:
+                # ...otherwise we're expecting a continuation in the next USB read
+                explen = explen - len(pdata)
+     
+        def ping(self, da, panid, sa, channel=None):
+            '''
         Not yet implemented.
         @return: None
         @rtype: None

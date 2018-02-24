@@ -24,13 +24,17 @@ RZ_USB_VEND_ID      = 0x03EB
 RZ_USB_PROD_ID      = 0x210A
 ZN_USB_VEND_ID      = 0x04D8
 ZN_USB_PROD_ID      = 0x000E
+CC2530_USB_VEND_ID  = 0x11A0
+CC2530_USB_PROD_ID  = 0xEB20
+CC2531_USB_VEND_ID  = 0x0451
+CC2531_USB_PROD_ID  = 0x16AE
 #FTDI_USB_VEND_ID      = 0x0403
 #FTDI_USB_PROD_ID      = 0x6001 #this is also used by FDTI cables used to attach gps
 FTDI_X_USB_VEND_ID  = 0x0403
 FTDI_X_USB_PROD_ID  = 0x6015    #api-mote FTDI chip
 
-usbVendorList  = [RZ_USB_VEND_ID, ZN_USB_VEND_ID]
-usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID]
+usbVendorList  = [RZ_USB_VEND_ID, ZN_USB_VEND_ID, CC2530_USB_VEND_ID, CC2531_USB_VEND_ID]
+usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID, CC2530_USB_PROD_ID, CC2531_USB_PROD_ID]
 
 # Global variables
 gps_devstring = None

@@ -1,9 +1,7 @@
 KillerBee
 ================
 
-This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4
-networks.
-
+This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4 networks.
 
 MAINTAINERS/LICENSE
 ================
@@ -13,20 +11,19 @@ All Rights Reserved.
 
 The main toolkit was/is authored by:
 + 2009, Joshua Wright <jwright@willhackforsushi.com>
-+ 2010-2015, Ryan Speers <ryan@riverloopsecurity.com>
++ 2010-2017, Ryan Speers <ryan@riverloopsecurity.com>
 + 2010-2011, Ricky Melgares <ricky@riverloopsecurity.com>
 
-We appreciate the many contributers to the framework, including the following who have contributed
-capabilities:
-+ Anonymous Contributor
+We appreciate the many contributers to the framework, including the following who have contributed capabilities:
++ Anonymous Contributors
 + Spencer McIntyre (scapy extension)
 + Bryan Halfpap <Bryanhalf@gmail.com> (additional tools)
 
-
 REQUIREMENTS
 ================
-KillerBee is developed and tested on Linux systems.  Windows support may be
-added in the future.
+
+KillerBee is developed and tested on Linux systems.
+OS X usage is possible but not supported.
 
 We have striven to use a minimum number of software dependencies, however, it
 is necessary to install the following Python modules before installation:
@@ -59,16 +56,16 @@ The python-dev and libgcrypt are required for the Scapy Extension Patch.
 Also note that this is a fairly advanced and un-friendly attack platform.  This
 is not Cain & Abel.  It is intended for developers and advanced analysts who are
 attacking ZigBee and IEEE 802.15.4 networks.  I recommend you gain some
-understanding of the ZigBee protocol (the book ZigBee Wireless Networks and
-Transceivers by Shahin Farahani at http://bit.ly/2I5ppI is reasonable, though
+understanding of the ZigBee protocol (the book [ZigBee Wireless Networks and
+Transceivers by Shahin Farahani](http://bit.ly/2I5ppI) is reasonable, though
 still not great) and familiarity with the Python language before digging into
 this framework.
 
 
 INSTALLATION
 ================
-KillerBee uses the standard Python 'setup.py' installation file.  Install
-KillerBee with the following command:
+KillerBee uses the standard Python 'setup.py' installation file.
+Install KillerBee with the following command:
 
 ```
 # python setup.py install
@@ -92,13 +89,29 @@ Currently there is support for River Loop Security's ApiMote,
 Atmel RZ RAVEN USB Stick, MoteIV Tmote Sky, TelosB mote, and Sewino Sniffer.
 
 Support for Freaklab's Freakduino with added hardware
-and the Dartmouth arduino sketch as well as for the Zena Packet Analyzer board
-are in development.
+and the Dartmouth arduino sketch, Zigduino, and Sewio Sniffer board
+is available but are not listed below as they are not maintained.
 
-ApiMote v3 and v4beta:
+ApiMote v4beta (and v3):
 ----------------
 The devices typically come preloaded and do not need to be reflashed for basic
 use.
+
+The hardware is open-source at https://github.com/riverloopsec/apimote.
+It is available assembled by contacting team at riverloopsecurity dot com.
+
+_This is currently supported for beta, and supports sniffing, injection, and jamming._
+
+Texas Instruments CC2530/1 EMK:
+----------------
+
+This USB dongle is produced by Texas Instruments and is sold as an evaluation
+kit for their CC2530 or CC2531 integrated circuit.
+
+It can be purchased from electronics distributors, or directly from them
+[here](http://www.ti.com/tool/cc2531emk).
+
+_This is currently supported for beta, and supports sniffing only._
 
 MoteIV Tmote Sky or TelosB mode:
 ----------------
@@ -108,11 +121,18 @@ within killerbee/firmware, run:
 $ ./flash_telosb.sh
 ```
 
+These boards can be obtained via multiple distributors, however
+[this vendor](https://www.advanticsys.com/shop/mtmcm5000msp-p-14.html) has
+stated that their "clone" of the original hardware is compatible.
+We have not tested nor do we endorse any specific "clone".
+
+
 Atmel RZ RAVEN USB Stick:
 ----------------
-(http://www.atmel.com/dyn/products/tools_card.asp?tool_id=4396).  This hardware 
+See http://www.atmel.com/tools/RZUSBSTICK.aspx.
+This hardware 
 is convenient as the base firmware is open source with a freely-available IDE.
-The KillerBee firmware for the RZ RAVEN included in the firmware/ directory is
+The KillerBee firmware for the RZ RAVEN included in the `firmware/` directory is
 a modified version of the stock firmware distributed by Atmel to include
 attack functionality.
 
@@ -128,77 +148,8 @@ frames), but does not allow you to do packet injection, or to impersonate
 devices on the network.
 
 In order to get the full functionality included in KillerBee, the RZ RAVEN USB
-Stick must be flashed with the custom firmware included in the firmware/ 
-directory.  This process requires additional hardware and software:
-
-  + Hardware: Atmel RZ Raven USB Stick (RZUSBSTICK)
-  + Hardware: Atmel AVR Dragon On-Chip Programmer (ATAVRDRAGON)
-  + Hardware: Atmel 100-mm to 50-mm JTAG Standoff Adapter (ATAVR-SOAKIT)
-  + Hardware: 50mm male-to-male header (Digi-Key part S9015E-05)
-  + Hardware: 10-pin (2x5) 100-mm female-to-female ribbon cable (Digi-Key part H3AAH-1018G-ND)
-  + Software: AVRDUDE (http://winavr.sourceforge.net for Windows or http://www.nongnu.org/avrdude for Linux)
-  + Software: KillerBee Firmware for the RZUSBSTICK
-  + A Windows or Linux system for programming the RZ Raven USB Stick (one time operation)
-
-For Windows users, install the AVR Dragon drivers provided with the libusb-win32 software
-(http://sourceforge.net/projects/libusb-win32).  Download and extract the zip file, then launch the
-libusb-win32 "inf-wizard.exe" executable.  Connect the AVR Dragon to a USB port and click Next in the wizard
-to detect and identify the USB vendor ID and product ID 0x03EB and 0x2107 for the AVRDRAGON.  Complete the
-wizard by clicking Next, then Finish to install the drivers.  When prompted by Windows, click "Install This
-Driver Sofware Anyway".
-
-Download the RZ Raven USB Stick firmware from 
-https://raw.githubusercontent.com/riverloopsec/killerbee/master/firmware/kb-rzusbstick-002.hex.
-Copy the firmware file to the directory where you extracted the AVRDUDE software.
-Note: We are suggesting the -002 version now as some people report that -001 does not work on newer RZUSBSTICK versions. Change the filenames in the example commands below.
-
-Connect the AVR Dragon programmer to the ribbon cable, and connect the 100-mm to 50-mm adapter with the
-header.  Prepare your terminal to flash the RZ Raven USB stick by entering the following command at a
-command prompt (but don't hit enter yet):
-
-```
-avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-001.hex
-```
-
-Insert the header into the RZ Raven USB Stick with pin 1 closest to the LEDs (farthest from the USB
-connector).  You could solder it in place, but we don't bother.  Just hold it at an angle so all the pins
-make contact and hit enter where you typed the AVRDUDE comand.  You should see output similar to the following:
-
-```
-
-C:\avrdude>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-001.hex
-
-avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
-avrdude: AVR device initialized and ready to accept instructions
-Reading | #################################################| 100% 0.05s
-avrdude: Device signature = 0x1e9782
-avrdude: NOTE: FLASH memory has been specified, an erase cycle will be performed
-         To disable this feature, specify the -D option.
-avrdude: erasing chip
-avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
-avrdude: reading input file "kb-rzusbstick-001.hex"
-avrdude: input file kb-rzusbstick-001.hex auto detected as Intel Hex
-avrdude: writing flash (26778 bytes):
-Writing | #################################################| 100% 3.44s
-avrdude: 26778 bytes of flash written
-avrdude: verifying flash memory against kb-rzusbstick-001.hex:
-avrdude: load data flash data from input file kb-rzusbstick-001.hex:
-avrdude: input file kb-rzusbstick-001.hex auto detected as Intel Hex
-avrdude: input file kb-rzusbstick-001.hex contains 26778 bytes
-avrdude: reading on-chip flash data:
-Reading | #################################################| 100% 3.79s
-avrdude: verifying ...
-avrdude: 26778 bytes of flash verified
-avrdude: safemode: Fuses OK
-avrdude done.  Thank you.
-
-```
-
-It should only take a few seconds to complete.  For a more detailed, picture-rich set of
-instructions, grab a copy of Hacking Exposed Wireless 3rd Edition (chapter 13).  Alternatively,
-if you are able to catch us at a conference, bring your RZ RAVEN USB Stick and we'll happily
-flash it for you.
-
+Stick must be flashed with the custom firmware included in the `firmware/ `
+directory. _See `firmware/README.md` for details._
 
 TOOLS
 ================
@@ -280,6 +231,7 @@ summarized below.
 
 Additional tools, that are for special cases or are not stable, are stored in
     the Api-Do project repository: http://code.google.com/p/zigbee-security/
+    and at https://github.com/riverloopsec/beekeeperwids.
 
 
 FRAMEWORK
@@ -315,7 +267,7 @@ mechanism for generating and transmitting malformed ZigBee data to a target.
 
 QUESTIONS/COMMENTS/CONCERNS
 ==============
-Please drop us a note: 
+Please us the ticketing system at https://github.com/riverloopsec/killerbee/issues.
 
 The original version was written by: jwright@willhackforsushi.com
 The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
@@ -333,4 +285,4 @@ A word of thanks to several folks who helped out with this project:
 + Matt Carpenter
 + Sergey Bratus (research support at Dartmouth)
 + Jeff Spielberg
-
++ Scytmo (bug fixes and CC2530/1 EMK board support)

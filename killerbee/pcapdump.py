@@ -1,5 +1,6 @@
 import struct
 import time
+from datetime import datetime
 
 PCAPH_MAGIC_NUM = 0xa1b2c3d4
 PCAPH_VER_MAJOR = 2
@@ -226,11 +227,10 @@ class PcapDumper:
                 struct.pack("<I", self.datalink) #Field
                 ])
 
-        if ts_sec == None or ts_usec == None:
-            # There must be a better way here that I don't know -JW
-            s_sec, s_usec = str(time.time()).split(".")
-            ts_sec = int(s_sec)
-            ts_usec = int(s_usec)
+        if ts_sec == None or ts_usec == None: 
+            dt = datetime.now() 
+            ts_sec = int(dt.strftime('%s')) 
+            ts_usec = dt.microsecond
 
         plen = len(packet)
         if orig_len == None:
