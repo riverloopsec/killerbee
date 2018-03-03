@@ -1,4 +1,5 @@
 #NOTE: See the README file for a list of dependencies to install.
+from __future__ import print_function  # needed for py2.7 to use print() as called below
 
 try:
     from setuptools import setup, Extension
@@ -6,6 +7,7 @@ except ImportError:
     print("No setuptools found, attempting to use distutils instead.")
     from distutils.core import setup, Extension
 import sys
+
 
 err = []
 warn = []

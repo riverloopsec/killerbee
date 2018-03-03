@@ -17,4 +17,7 @@ DB_PASS             = ""
 # Useful for disabling uncommon devices.
 DEV_ENABLE_FREAKDUINO = False
 DEV_ENABLE_ZIGDUINO = False
+DEV_ENABLE_TELOSB = False
+DEV_ENABLE_APIMOTE2 = True
+DEV_ENABLE_APIMOTE1 = False
 
