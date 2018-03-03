@@ -7,16 +7,16 @@ try:
     import usb.core
     import usb.util
     import sys
-    print >>sys.stderr, "Warning: You are using pyUSB 1.x, support is in beta."
+    print("Warning: You are using pyUSB 1.x, support is in beta.", file=sys.stderr)
 except ImportError:
     import usb
-    print >>sys.stderr, "Error: You are using pyUSB 0.x, not supported for CC253x."
+    print("Error: You are using pyUSB 0.x, not supported for CC253x.", file=sys.stderr)
     sys.exit()
 
 import struct
 import time
 from datetime import datetime
-from kbutils import KBCapabilities
+from .kbutils import KBCapabilities
 
 
 class CC253x:
@@ -208,8 +208,8 @@ class CC253x:
                 pdata = self.dev.read(self._data_ep, self._maxPacketSize, timeout=timeout)
             except usb.core.USBError as e:
                 if e.errno != 110: #Operation timed out
-                    print "Error args:", e.args
-                    raise e
+                    print(("Error args:", e.args))
+                    return None #raise e
                     #TODO error handling enhancements for USB 1.0
                 else:
                     return None

@@ -3,4 +3,5 @@ build/
 dist/
 .DS_Store
 *.egg-info/
+.idea/
 

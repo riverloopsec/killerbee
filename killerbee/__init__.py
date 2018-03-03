@@ -41,10 +41,10 @@ def show_dev(vendor=None, product=None, gps=None, include=None):
     @param include: Provide device names in this argument if you would like only
         these to be enumerated. Aka, include only these items.
     '''
-    fmt = "{: >14} {: <20} {: >10}"
-    print((fmt.format("Dev", "Product String", "Serial Number")))
+    fmt_str = "{: >14} {: <20} {: >10}"
+    print(fmt_str.format("Dev", "Product String", "Serial Number"))
     for dev in kbutils.devlist(vendor=vendor, product=product, gps=gps, include=include):
-        print((fmt.format(dev[0], dev[1], dev[2])))
+        print(fmt_str.format(dev[0], dev[1], dev[2] if dev[2] is not None else ""))
 
 # KillerBee Class
 class KillerBee:
@@ -112,10 +112,10 @@ class KillerBee:
                 elif self.__device_is(ZN_USB_VEND_ID, ZN_USB_PROD_ID):
                     raise KBInterfaceError("Zena firmware not yet implemented.")
                 elif self.__device_is(CC2530_USB_VEND_ID, CC2530_USB_PROD_ID):
-                    from dev_cc253x import CC253x
+                    from .dev_cc253x import CC253x
                     self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2530)
                 elif self.__device_is(CC2531_USB_VEND_ID, CC2531_USB_PROD_ID):
-                    from dev_cc253x import CC253x
+                    from .dev_cc253x import CC253x
                     self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2531)
                 else:
                     raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x.".format(self.dev.idVendor, self.dev.idProduct))
