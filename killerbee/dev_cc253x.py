@@ -259,8 +259,9 @@ class CC253x:
                 # Convert the framedata to a string for the return value, and replace the TI FCS with a real FCS
                 # if the radio told us that the FCS had passed validation.
                 if validcrc:
-                    payload = payload[:-2] + makeFCS(payload[:-2])
-                ret[0] = ''.join(payload)
+                    ret[0] = ''.join(payload[:-2]) + makeFCS(payload[:-2])
+                else:
+                    ret[0] = ''.join(payload)
                 ret['bytes'] = ret[0]
                 return ret
 
