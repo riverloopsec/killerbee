@@ -80,7 +80,7 @@ class APIMOTE:
 
     # KillerBee expects the driver to implement this function
     def get_dev_info(self):
-	'''
+        '''
         Returns device information in a list identifying the device.
         @rtype: List
         @return: List of 3 strings identifying device.
@@ -99,13 +99,13 @@ class APIMOTE:
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
 
-        self.handle.RF_promiscuity(1);
-        self.handle.RF_autocrc(0);
+        self.handle.RF_promiscuity(1)
+        self.handle.RF_autocrc(0)
 
         if channel != None:
             self.set_channel(channel)
         
-        self.handle.CC_RFST_RX();
+        self.handle.CC_RFST_RX()
         #print "Sniffer started (listening as %010x on %i MHz)" % (self.handle.RF_getsmac(), self.handle.RF_getfreq()/10**6);
 
         self.__stream_open = True
@@ -178,9 +178,9 @@ class APIMOTE:
         @return: Returns None is timeout expires and no packet received.  When a packet is received, a dictionary is returned with the keys bytes (string of packet bytes), validcrc (boolean if a vaid CRC), rssi (unscaled RSSI), and location (may be set to None). For backwards compatibility, keys for 0,1,2 are provided such that it can be treated as if a list is returned, in the form [ String: packet contents | Bool: Valid CRC | Int: Unscaled RSSI ]
         '''
         if self.__stream_open == False:
-            self.sniffer_on() #start sniffing
+            self.sniffer_on()
 
-        packet = None;
+        packet = None
         start = datetime.utcnow()
 
         while (packet is None and (start + timedelta(microseconds=timeout) > datetime.utcnow())):
@@ -191,8 +191,9 @@ class APIMOTE:
             return None
 
         frame = packet[1:]
-        if frame[-2:] == makeFCS(frame[:-2]): validcrc = True
-        else: validcrc = False
+        validcrc = False
+        if frame[-2:] == makeFCS(frame[:-2]):
+            validcrc = True
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
         result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'location':None}

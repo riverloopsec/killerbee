@@ -492,7 +492,7 @@ def makeFCS(data):
     crc = 0
     for i in xrange(len(data)):
         c = ord(data[i])
-		#if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
+        #if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
         q = (crc ^ c) & 15				#Do low-order 4 bits
         crc = (crc // 16) ^ (q * 4225)
         q = (crc ^ (c // 16)) & 15		#And high 4 bits
