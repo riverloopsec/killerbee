@@ -3,4 +3,4 @@ build/
 dist/
 .DS_Store
 *.egg-info/
-
+db/database
