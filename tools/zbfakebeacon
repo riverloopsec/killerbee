@@ -54,6 +54,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--epanid', action='store', required=True, type=tohex)
     parser.add_argument('-s', '--coordinator', action='store', required=False, default=0x0000, type=tohex)
     parser.add_argument('-g', '--go', action='store_true', required=False, default=False, help="Spam Beacons, don't wait for requests")
+    parser.add_argument('-r', '--rate', action='store', required=False, default=100, help="Packets per second to spam" type=int)
     parser.add_argument('--numloops', action='store', default=1, type=int)
     args = parser.parse_args()
 
@@ -61,6 +62,7 @@ if __name__ == '__main__':
     kb.set_channel(args.channel)
 
     spanid = args.panid
+    rate = 1/args.rate
 
     # listen in on the channel
     if not args.go:
@@ -75,4 +77,9 @@ if __name__ == '__main__':
     else:
         while True:
             beacon = create_beacon(args.panid, args.coordinator, args.epanid)
-            kb.inject(beacon)
+            try:
+                time.sleep(rate)
+                kb.inject(beacon)
+            except:
+                print "write error - backing off"
+                time.sleep(rate*10)

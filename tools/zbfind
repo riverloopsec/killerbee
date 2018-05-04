@@ -1,15 +1,14 @@
 #!/usr/bin/env python
-
 '''
 This tool sends beacon request frames, similar to zbstumbler, as it cycles
-through the 802.15.4 channels, and uses the responses and other observed 
+through the 802.15.4 channels, and uses the responses and other observed
 packets to display RSSI values to the user for different devices "seen."
 
 This is intended to be used as a tool to locate devices via manual direction-
 finding.
 
 zbstumbler will be more actively maintained for eliciting beacon responses,
-and more recent work has been completed demonstrating the ability to 
+and more recent work has been completed demonstrating the ability to
 use captures to automatically triangulate locations of devices. See:
 http://code.google.com/p/zigbee-security/wiki/PapersAndCoverage
 '''
@@ -17,6 +16,7 @@ http://code.google.com/p/zigbee-security/wiki/PapersAndCoverage
 import pygtk
 pygtk.require('2.0')
 
+import argparse
 import sys
 import gobject
 import pango
@@ -25,6 +25,7 @@ import math
 import time
 import random
 import os
+import threading
 from threading import Thread, Event
 from gtk import gdk
 import cairo
@@ -102,7 +103,7 @@ class PySpeedoWidget(gtk.Widget):
 
     def get_pointer(self):
         return self.pointer
-                                           
+
     def do_realize(self):
         self.set_flags(self.flags() | gtk.REALIZED)
         self.window = gdk.Window(self.get_parent_window(),
@@ -150,7 +151,7 @@ class PySpeedoWidget(gtk.Widget):
         self.arcvmax = self.arcvmax * 0.85
 
     def _expose_gdk(self, event):
-        # pango_size = font_size_pix * PANGO_SCALE * 72 / fontconfig_dpi; 
+        # pango_size = font_size_pix * PANGO_SCALE * 72 / fontconfig_dpi;
         x, y, w, h = self.allocation
         self.layout = self.create_pango_layout('no cairo')
         fontw, fonth = self.layout.get_pixel_size()
@@ -231,7 +232,7 @@ class PySpeedoWidget(gtk.Widget):
 
             xt = w/2 + (tr * math.cos(larc - math.pi))
             yt = h - hofft + (tr * math.sin(larc - math.pi))
-        
+
             fontw, fonth = self.arcvpango[l].get_pixel_size()
             cr.move_to(xt - (fontw / 2), yt - (fonth/2))
             cr.update_layout(self.arcvpango[l])
@@ -271,7 +272,7 @@ class PySpeedoWidget(gtk.Widget):
             cr.line_to(w/2, (h/2) - r)
             cr.line_to(w/2 + (arcwidth / 2), h/2)
             cr.line_to(w/2, h/2 + (arcwidth * 0.75))
-            cr.set_source_rgb(0.1, 0.1, 0.1) 
+            cr.set_source_rgb(0.1, 0.1, 0.1)
             cr.fill()
 
             cr.set_source_rgb(0.9, 0.9, 0.9)
@@ -316,9 +317,9 @@ class PyGrapherWidget(gtk.Widget):
         self.font = "sans serif"
 
         self.maxsamples = 50
-        
+
         self.linecolor = (1, 0, 0)
-        
+
         self.samples = []
 
         self.minval = None
@@ -374,7 +375,7 @@ class PyGrapherWidget(gtk.Widget):
     def set_line(self, linecolor, linethickness):
         self.linecolor = linecolor
         self.linethickness = linethickness
-                                           
+
     def do_realize(self):
         self.set_flags(self.flags() | gtk.REALIZED)
         self.window = gdk.Window(self.get_parent_window(),
@@ -494,7 +495,7 @@ class PyGrapherWidget(gtk.Widget):
             cr.move_to(graphx - 2, yline)
             cr.line_to(graphx, yline)
             cr.stroke()
-    
+
             cr.move_to(graphx, yline)
             cr.line_to(graphx + graphw, yline)
             cr.stroke()
@@ -556,9 +557,9 @@ class ZBFindUI:
             # Overall vbox holds the menu and other panels
             bigvbox = gtk.VBox(homogeneous = False, spacing = 1)
             bigvbox.set_border_width(1)
-    
+
             self.win.add(bigvbox)
-    
+
             # Menus
             self.menu_ui = '''
                 <ui>
@@ -573,32 +574,32 @@ class ZBFindUI:
                 </menubar>
                 </ui>
             '''
-    
+
             uimanager = gtk.UIManager()
             accelgroup = uimanager.get_accel_group()
             self.win.add_accel_group(accelgroup)
-    
+
             actiongroup = gtk.ActionGroup('zbfind')
             self.actiongroup = actiongroup
-    
+
             actiongroup.add_actions([('Quit', gtk.STOCK_QUIT, '_Quit', None,
                                       'Quit zbfind', gtk.main_quit),
                                      ('File', None, '_File'),
                                      ('Mode', None, '_Mode')])
             actiongroup.get_action('Quit').set_property('short-label', '_Quit')
-    
+
             actiongroup.add_radio_actions([('PassiveDiscovery', None, '_Passive Discovery',
                                             '<Control>p','Passive Discovery', 0),
                                            ('ActiveDiscovery', None, '_Active Discovery',
                                             '<Control>a','Active Discovery', 1),
                                           ], 0, self.modediscovery_cb)
-    
+
             uimanager.insert_action_group(actiongroup, 0)
-    
+
             uimanager.add_ui_from_string(self.menu_ui)
-    
+
             menubar = uimanager.get_widget('/MenuBar')
-    
+
             # VPane box holds the device list and the graphics
             pvbox = gtk.VPaned()
             self.vpane_button_state = 0
@@ -606,10 +607,10 @@ class ZBFindUI:
             pvbox.connect('button-press-event', self.vpane_buttonpress)
             pvbox.connect('button-release-event', self.vpane_buttonrelease)
             pvbox.connect('motion-notify-event', self.vpane_motion)
-    
+
             bigvbox.pack_start(menubar, expand = False, fill = False, padding = 0)
             bigvbox.pack_end(pvbox, expand = True, fill = True, padding = 0)
-    
+
             # Make the speedo and graph widgets
             self.speedo = PySpeedoWidget()
             self.speedo.set_drawbg(0)
@@ -620,69 +621,69 @@ class ZBFindUI:
                 [ (1, 0, 0), (1, 0, 0), (1, 0, 0),
                   (1, 1, 0), (1, 1, 0), (1, 1, 0),
                   (0, 1, 0), (0, 1, 0), (0, 1, 0) ] )
-    
+
             self.graph = PyGrapherWidget()
             self.graph.set_drawbg(0)
             self.graph.set_maxsamples(200)
             self.graph.set_initrange(self.mingraphval, -40)
-    
+
             # Pack the speedo and graph into their own vbox
             graphvbox = gtk.VBox(homogeneous = False, spacing = 0)
-    
+
             graphvbox.pack_start(self.speedo, expand = True, fill = True, padding = 0)
             graphvbox.pack_end(self.graph, expand = True, fill = True, padding = 0)
-    
+
             # Build the devlist tree store
             self.devliststore = gtk.ListStore(str, str, str, str, int, int)
             self.devlistview = gtk.TreeView(model = self.devliststore)
-    
+
             # Build the cell renderers
             cell = gtk.CellRendererText()
             pacolumn = gtk.TreeViewColumn('Dest PAN', cell)
             pacolumn.set_cell_data_func(cell, self.table_pacolumn)
             self.devlistview.append_column(pacolumn)
-            
+
             cell = gtk.CellRendererText()
             dacolumn = gtk.TreeViewColumn('Dest Addr', cell)
             dacolumn.set_cell_data_func(cell, self.table_dacolumn)
             self.devlistview.append_column(dacolumn)
-            
+
             cell = gtk.CellRendererText()
             sacolumn = gtk.TreeViewColumn('Src Addr', cell)
             sacolumn.set_cell_data_func(cell, self.table_sacolumn)
             self.devlistview.append_column(sacolumn)
-            
+
             cell = gtk.CellRendererText()
             dscolumn = gtk.TreeViewColumn('Distance', cell)
             dscolumn.set_cell_data_func(cell, self.table_dscolumn)
             dscolumn.set_sort_column_id(3)
             self.devlistview.append_column(dscolumn)
-            
+
             cell = gtk.CellRendererText()
             smcolumn = gtk.TreeViewColumn('Samples', cell)
             smcolumn.set_cell_data_func(cell, self.table_smcolumn)
             smcolumn.set_sort_column_id(4)
             self.devlistview.append_column(smcolumn)
-            
+
             cell = gtk.CellRendererText()
             sgcolumn = gtk.TreeViewColumn('Signal', cell)
             sgcolumn.set_cell_data_func(cell, self.table_sgcolumn)
             sgcolumn.set_sort_column_id(5)
             self.devlistview.append_column(sgcolumn)
-            
+
             self.devlistview.add_events(gtk.gdk.BUTTON_PRESS_MASK)
             self.devlistview.connect('cursor-changed', self.devlistselect)
-    
+
             # Put it in a scrolling pane
             scrollwin = gtk.ScrolledWindow()
             scrollwin.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
             scrollwin.add_with_viewport(self.devlistview)
-            
+
             scrollwin.set_size_request(-1, 250)
-    
+
             # Pack the device list into the upper half of the pane
             pvbox.pack1(scrollwin, resize = True, shrink = True)
-    
+
             # Make the details store, tree, and window
             self.detailstore = gtk.TreeStore(str)
             self.detailview = gtk.TreeView(self.detailstore)
@@ -692,29 +693,29 @@ class ZBFindUI:
             cell = gtk.CellRendererText()
             self.detailcolumn.pack_start(cell, True)
             self.detailcolumn.add_attribute(cell, 'text', 0)
-    
+
             scrollwin = gtk.ScrolledWindow()
             scrollwin.set_policy(gtk.POLICY_NEVER, gtk.POLICY_ALWAYS)
             scrollwin.add_with_viewport(self.detailview)
             scrollwin.set_size_request(500, -1)
-    
+
             # Pack the lower half of the window in a hbox
             hbox = gtk.HBox(homogeneous = False, spacing = 0)
             hbox.pack_start(graphvbox, expand = True, fill = True, padding = 0)
             hbox.pack_end(scrollwin, expand = True, fill = True, padding = 0)
-    
+
             # Pack the lower half into the adjustable vbox
             pvbox.pack2(hbox, resize = True, shrink = True)
-    
+
             self.win.set_gravity(gtk.gdk.GRAVITY_SOUTH_WEST)
             self.win.move(0, 0)
             self.win.set_geometry_hints(min_width = 800, min_height = 460, max_width = 800, max_height = 480)
             self.win.show_all()
-    
+
             self.dev_id = 0
-    
+
             self.details = { }
-    
+
             self.updatelist = [ ]
 
         except Exception, e:
@@ -734,7 +735,7 @@ class ZBFindUI:
             else:
                 widget.set_position(self.vpane_size)
                 self.vpane_size = -1
-    
+
     def vpane_motion(self, widget, data = None):
         self.vpane_button_state = 2
 
@@ -751,16 +752,16 @@ class ZBFindUI:
 
             match = False
             for dev in self.devliststore:
-                if dev[0] == udev[0]:
+                if dev[2] == udev[2]:
                     dev[3] = udev[3]
                     dev[4] = dev[4] + udev[4]
                     dev[5] = udev[5]
                     match = True
                     break
-        
+
             if match == False:
                 self.devliststore.append(udev[0:6])
-        
+
             self.details[udev[0]] = udev[6]
 
         self.updatelist = [ ]
@@ -796,7 +797,7 @@ class ZBFindUI:
         #get data from highlighted selection
         treeselection = self.devlistview.get_selection()
         (model, iter) = treeselection.get_selected()
-    
+
         if iter:
             self.dpan = self.devliststore.get_value(iter, 0)
             self.src = self.devliststore.get_value(iter, 2)
@@ -824,27 +825,27 @@ class ZBFindUI:
     def table_pacolumn(self, column, cell, model, iter):
         cell.set_property('text', model.get_value(iter, 0))
         return
-    
+
     # Dst Address
     def table_dacolumn(self, column, cell, model, iter):
         cell.set_property('text', model.get_value(iter, 1))
         return
-    
+
     # Src Address
     def table_sacolumn(self, column, cell, model, iter):
         cell.set_property('text', model.get_value(iter, 2))
         return
-    
+
     # Distance
     def table_dscolumn(self, column, cell, model, iter):
         cell.set_property('text', model.get_value(iter, 3))
         return
-    
+
     # Age
     def table_smcolumn(self, column, cell, model, iter):
         cell.set_property('text', "%d" % model.get_value(iter, 4))
         return
-    
+
     # Signal
     def table_sgcolumn(self, column, cell, model, iter):
         cell.set_property('text', "%d" % model.get_value(iter, 5))
@@ -871,7 +872,7 @@ class ZBPoller(Thread):
         self.startinjtime = 0
 
         self.stopthread = Event()
-        self.ZB_MACFC_FRAMETYPES = ["Beacon", "Data", "ACK", "MAC-Command"] 
+        self.ZB_MACFC_FRAMETYPES = ["Beacon", "Data", "ACK", "MAC-Command"]
 
     def zb_distance(self, rssi):
         propconst = 3 # Propagation Constant, 2-4
@@ -889,7 +890,7 @@ class ZBPoller(Thread):
         # Immutable strings - split beacon around sequence number field
         beaconp1 = beacon[0:2]
         beaconp2 = beacon[3:]
-        
+
         beaconinj = ''.join([beaconp1, "%c"%self.seq, beaconp2])
         try:
             self.kb.inject(beaconinj)
@@ -903,12 +904,9 @@ class ZBPoller(Thread):
     def run(self):
         d154 = Dot154PacketParser()
 
-        try:
-            if (sys.argv[1] != None):
-                channel = int(sys.argv[1])
-        except:
-                channel = 26
-        
+        # TODO: hop channels, don't bother setting this.
+        channel = args.channel
+
         try:
             self.kb = KillerBee()
             self.kb.set_channel(channel)
@@ -916,7 +914,8 @@ class ZBPoller(Thread):
         except:
             sys.stderr.write("Error initializing KillerBee Sniffer")
             return
-        
+
+        thresh = 0
         while not self.stopthread.isSet():
             # Used to populate details for the device
             details = []
@@ -930,7 +929,22 @@ class ZBPoller(Thread):
                 self.startinjtime = time.time()
                 self.kb.sniffer_on()
 
-            packetlist = self.kb.pnext()
+            try:
+                packetlist = self.kb.pnext()
+                if packetlist == None:
+                    thresh += 1
+                else:
+                    thresh = 0
+                if thresh > 25:  # thresh helps handle a bug in killerbee firmware for rzusbstick which makes the stick need to be reset.
+                    self.kb.sniffer_off()
+                    self.kb.sniffer_on()
+                    # TODO: Add debug message mode in case users want these otherwise-useless debug msgs
+                    #print "we may have crashed -- i toggled the interface"
+                    thresh = 0
+            except Exception,e:
+                traceback.print_exc()
+                continue
+
 
             # Ignore empty return, timeout with no frame
             if not packetlist:
@@ -942,7 +956,13 @@ class ZBPoller(Thread):
 
             # Convert to dBm per AT86RF230 data sheet, figure 5.5:  y=mx+b, b=-91,m=3
             rssi = (3*packetlist[2])-91
-            packet = d154.pktchop(packetlist[0])
+            try:
+                packet = d154.pktchop(packetlist[0])
+            except Exception,e:
+                traceback.print_exc()
+                print "bad packetchop!!"
+                continue
+
 
             # Decode Frame Control field
             fc = struct.unpack("<H", packet[0])[0]
@@ -961,17 +981,23 @@ class ZBPoller(Thread):
             if fc_frametype == DOT154_FCF_TYPE_MACCMD and packet[2] == "\xff\xff" and packet[3] == "\xff\xff":
                 continue
 
+
             # devid is a UID for the device Source Address and SPAN combination, concatenated
             # If this is a beacon frame, we use the sa and spanid.  If this is anything else (excluding ACK),
             # we use the sa and dpanid.  The dpanid of other frames should match the spanid of beacon frames.
-            if fc_frametype == DOT154_FCF_TYPE_BEACON: 
+            if fc_frametype == DOT154_FCF_TYPE_BEACON:
                 devid = "%02x%02x%02x%02x" % (ord(packet[4][0]), ord(packet[4][1]),
                         ord(packet[5][0]), ord(packet[5][1]))
                 dstpan = "0x%02x%02x" % (ord(packet[4][0]), ord(packet[4][1]))
 
             else:
-                devid = "%02x%02x%02x%02x" % (ord(packet[2][0]), ord(packet[2][1]),
-                        ord(packet[5][0]), ord(packet[5][1]))
+                if packet[5] != "":
+                    devid = "%02x%02x%02x%02x" % (ord(packet[2][0]), ord(packet[2][1]),
+                            ord(packet[5][0]), ord(packet[5][1]))
+                else:
+                    devid = "%02x%02x%02x%02x" % (ord(packet[2][0]), ord(packet[2][1]),
+                            ord('A'), ord('B'))
+
                 dstpan = ""
                 if packet[2] != "":
                     dstpan = "0x%02x%02x" % (ord(packet[2][0]), ord(packet[2][1]))
@@ -1002,12 +1028,12 @@ class ZBPoller(Thread):
                     if (details[0][4].find(self.ZB_MACFC_FRAMETYPES[fc_frametype]) == -1):
                         details[0][4] + " " + self.ZB_MACFC_FRAMETYPES[fc_frametype]
                     # We only add these details once and do not update
-                    if fc_frametype == DOT154_FCF_TYPE_BEACON and details[0][5] == "": 
+                    if fc_frametype == DOT154_FCF_TYPE_BEACON and details[0][5] == "":
                         details[0][5] = self.stackverstr(packet)
                         details[0][6] = self.stackprofilestr(packet)
                         details[0][7] = self.extpanidstr(packet)
                     break
-    
+
             if match == False:
                 # Add this entry to the list
                 nowstr = str(datetime.datetime.now())
@@ -1019,7 +1045,7 @@ class ZBPoller(Thread):
                     details[0].append("Security: Not In Use")
                 details[0].append("Last Seq Num: " + seq)
                 details[0].append("Frame Types: " + self.ZB_MACFC_FRAMETYPES[fc_frametype])
-                if fc_frametype == DOT154_FCF_TYPE_BEACON: 
+                if fc_frametype == DOT154_FCF_TYPE_BEACON:
                     details[0].append(self.stackverstr(packet))
                     details[0].append(self.stackprofilestr(packet))
                     details[0].append(self.extpanidstr(packet))
@@ -1032,7 +1058,7 @@ class ZBPoller(Thread):
 
             idev.append(details)
             self.devlist.append(idev)
-            
+
             self.ui.update_row(dstpan, dst, src, self.zb_distance(rssi), rssi, details)
             continue
 
@@ -1075,25 +1101,32 @@ class ZBPoller(Thread):
 
     def stop(self):
         try:
+            self.stopthread.set()
             sys.exit(0)
         except Exception, e:
             traceback.print_exc()
             sys.exit(1)
 
 if __name__ == "__main__":
-    try:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--channel', action='store', dest='channel', required=True, type=int, default=26)
+    args = parser.parse_args()
 
+    try:    
         gtk.gdk.threads_init()
-    
         ui = ZBFindUI()
         zbpoll = ZBPoller(ui)
         zbpoll.start()
-    
-        gtk.main()
-   
+
+        try:
+            gtk.main()        
+        except (KeyboardInterrupt, SystemExit):
+            zbpoll.stop()
+            zbpoll.join()
+            sys.exit()
+        
         zbpoll.stop()
         zbpoll.join()
-
+        
     except Exception,e:
         traceback.print_exc()
-

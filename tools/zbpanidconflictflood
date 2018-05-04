@@ -3,10 +3,11 @@
 # Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2015
 
 #TODO: Reduce the usage of globals
-
+import signal
 import sys
 import argparse
 import threading
+from threading import Event
 import logging
 from time import sleep
 
@@ -42,7 +43,7 @@ def get_spanids():
     spanid = threading.spanid
     canidate = 0
     restart_threshold = 0
-    while True:
+    while not continue_execution.isSet():
         try:
             recvpkt = listen.pnext()
         except:
@@ -75,10 +76,15 @@ def get_spanids():
     
 # Thread 2: Injects beacons
 def inject():
-    while True:
+    while not continue_execution.isSet():
+        sleep(args.sleep) # Added sleep as it seems we were overwhelming USB lib.
         sp = create_beacon(threading.spanid, args.coordinator, args.epanid) 
         #TODO: Is there any need for: args.devleave, args.coordinator, args.device)
-        kb.inject(sp) #create_beacon returns a string
+        try:
+            kb.inject(sp) #create_beacon returns a string
+        except:
+            print "! - Injection Error, try slowing the rate of broadcast",
+            pass
     pass
 
 if __name__ == '__main__':
@@ -92,6 +98,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--panid', action='store', required=True, type=tohex)
     parser.add_argument('-e', '--epanid', help="Extended PAN ID", action='store', required=True, type=tohex)
     parser.add_argument('-s', '--coordinator', action='store', required=True, type=tohex)
+    parser.add_argument('-w','--sleep', action='store', type=float, required=False, default=0.01)
     #parser.add_argument('--numloops', action='store', default=1, type=int)
     args = parser.parse_args()
 
@@ -108,9 +115,29 @@ if __name__ == '__main__':
     # I'm committing a sin by using the threading module to hold a shared state variable
     threading.spanid = args.panid
 
+    continue_execution = Event()
+
     getem1 = threading.Thread(target=get_spanids)
     getem2 = threading.Thread(target=inject)
+
+    getem1.daemon = True
+    getem2.daemon = True
+
     getem2.start()
     getem1.start()
-    getem1.join()
 
+    #import pdb;pdb.set_trace()
+
+    #def signal_handler(signal, frame):
+    #    continue_execution.set()
+    #    import pdb;pdb.set_trace()
+
+    #signal.signal(signal.SIGINT, signal_handler)
+
+    while not continue_execution.isSet():
+        try:
+            getem2.join(timeout=1)
+        except KeyboardInterrupt:
+            continue_execution.set()
+            
+    # cleanup (not yet required since Killerbee() re-initializes interface for rzusbsticks) 

@@ -1,0 +1,132 @@
+#!/usr/bin/env python
+
+# Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2016
+import sys
+import argparse
+from time import sleep
+import logging
+from killerbee import *
+
+"""
+====================================
+ZBCAT - The 802.15.4 packet pusher!
+====================================
+Pushes 802.15.4 DATA packets onto the specified channel, to the specified PAN and Destination address from the defined source address.
+Can be configured to respond to DATA REQUEST packets (--respond) or it can just spew packets out to a target (maybe it wasn't requesting, but is still accepting)
+Written to help facilitate these situations due to a Wireless Village Wireless Capture-the-Flag at Shmoocon 2016 by @redbarondefcoin
+"""
+
+def create_packet(panid, source, dest, data, extsource=False, ack=False, shortaddress=True, seq=0):
+    if extsource == False:
+        extsource = ''
+
+    if shortaddress:
+        mode = 0b10
+    else:
+        mode = 0b11
+
+    # bit manipulating the FCS was the quickest way, but here I break down the bytes in the order they are pushed (starting with the left-most bit)
+    # source addressing flag 2 bits
+    fcs = mode
+
+    # frame version flag (2 bits)
+    fcs = fcs << 2
+    frameversion = 0
+    fcs = fcs ^ frameversion
+
+    # destination addressing mode (2 bits)
+    fcs = fcs << 2
+    fcs = fcs ^ mode
+
+    # pad three bits which aren't used in the frameversion
+    if frameversion == 0:
+        fcs = fcs << 3
+    else:
+        print "NOT IMPLEMENTED YET"
+
+    # intra-pan (one bit)
+    fcs = fcs << 1
+    fcs = fcs ^ 1
+
+    # acknowledge request (send ack yes/no one bit)
+    fcs = fcs << 1
+    fcs = fcs ^ int(ack)
+
+    # frame pending - default no, one bit
+    fcs = fcs << 1
+    fcs = fcs ^ 0
+
+    # security enabled? one bit
+    fcs = fcs << 1
+    fcs = fcs ^ 0 # TODO: eventually support encryption.
+
+    # data type - hardlocked for this app at "data" type -- three bits
+    fcs = fcs << 3
+    fcs = fcs ^ 1 # 0b001
+
+    framecontrol = struct.pack('<H',fcs)
+    mypacket = [
+        framecontrol, #better way?
+        struct.pack('<b',seq), #convert sequence num from dec to hex
+        struct.pack('<H',panid),            # you best have this correct
+        struct.pack('<H',dest),             # " "
+        struct.pack('<H',source),           # " "
+        #hex(extsource),       # " "
+        data.decode('hex')              # hex
+    ]
+    return ''.join(mypacket)
+
+if __name__ == '__main__':
+    # Command-line arguments
+    parser = argparse.ArgumentParser()
+    tohex = lambda s: int(s.replace(':', ''), 16)
+    parser.add_argument('-f', '--channel', '-c', action='store', dest='channel', required=True, type=int, default=11)
+    parser.add_argument('-i', '--interface', action='store', dest='devstring')
+    parser.add_argument('-p', '--panid', action='store', required=True, type=tohex)
+    parser.add_argument('-s', '--source', action='store', required=True, type=tohex)
+    parser.add_argument('-d', '--dest', action='store', required=True, type=tohex)
+    parser.add_argument('-e', '--extsource', action='store', required=False, type=tohex)
+    parser.add_argument('--data', action='store', required=True, type=str)
+    parser.add_argument('-a', '--ack', default=False, action='store_true', required=False)
+    parser.add_argument('-l', '--shortaddress', default=True, action='store_true', required=False)
+    parser.add_argument('-n', '--seqnum', default=1, action='store', required=False, type=int)
+    parser.add_argument('-r', '--respond', default=False, action='store_true', required=False)
+    parser.add_argument('--numloops', action='store', default=1, type=int)
+
+    args = parser.parse_args()
+    kb = KillerBee(device=args.devstring)
+    kb.set_channel(args.channel)
+
+    # TODO: not sure if this accounts for long address addressing schemes in 802.15.4
+    def response_handler(packet):
+        if len(packet) > 7:
+            if packet[9] == '\x04': # is it a data request?
+                sp = create_packet(args.panid, args.source, args.dest, args.data, args.extsource, args.ack, args.shortaddress, args.seqnum)
+                kb.sniffer_off()
+                kb.inject(sp)
+                print "DATA REQUEST recieved -- Sent Response"
+                kb.sniffer_on()
+            return True
+        else:
+            return False
+
+    # The respond option lets you automatically respond to a DATA REQUEST packet type with the arbitrary value you defined in --data
+    # This is optional, since this tool is designed to spew data packets ad nauseum in addition to this in order to solve a Wireless Village CTF challenge from Shmoocon 2016 (greetz @redbarondefcoin)
+    if args.respond == True:
+        kb.sniffer_on()
+        while True:
+            # Does not block
+            recvpkt = kb.pnext()
+            # Check for empty packet (timeout) and valid FCS
+            if recvpkt != None and recvpkt[1]:
+                response_handler(recvpkt[0])
+
+    # Logic to just spew packets regardless of a recieved data request packet
+    else:
+        i = 0
+        while i < args.numloops:
+            i += 1
+            data_packet = create_packet(args.panid, args.source, args.dest, args.data, args.extsource, args.ack, args.shortaddress, args.seqnum)
+            #pdb.set_trace()
+            kb.inject(data_packet)
+            time.sleep(.1)
