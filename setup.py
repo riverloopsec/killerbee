@@ -75,7 +75,7 @@ zigbee_crypt = Extension('zigbee_crypt',
                     )
 
 setup  (name        = 'killerbee',
-        version     = '2.6.0',
+        version     = '2.6.1',
         description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
         author = 'Joshua Wright, Ryan Speers',
         author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
