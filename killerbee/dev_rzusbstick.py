@@ -506,7 +506,7 @@ class RZUSBSTICK:
                 # ...otherwise we're expecting a continuation in the next USB read
                 explen = explen - len(pdata)
 
-   def ping(self, da, panid, sa, channel=None):
+    def ping(self, da, panid, sa, channel=None):
         '''
         Not yet implemented.
         @return: None
