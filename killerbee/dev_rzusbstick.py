@@ -466,8 +466,8 @@ class RZUSBSTICK:
                         return None
 
             # PyUSB returns an empty tuple occasionally, handle as "no data"
-            # NOTE: added len(pdata) check as some arrays were failing
-            if pdata == None or pdata == () or len(pdata)==0:
+            # TODO added len(pdata) check as some arrays were failing
+            if pdata == None or pdata == () or len(pdata) == 0 or len(pdata) <= 10:
                 return None
 
             if pdata[0] == RZ_EVENT_STREAM_AC_DATA and ret is None:
@@ -505,11 +505,11 @@ class RZUSBSTICK:
             else:
                 # ...otherwise we're expecting a continuation in the next USB read
                 explen = explen - len(pdata)
-     
-        def ping(self, da, panid, sa, channel=None):
-            '''
-            Not yet implemented.
-            @return: None
-            @rtype: None
-            '''
-            raise Exception('Not yet implemented')
+
+    def ping(self, da, panid, sa, channel=None):
+        '''
+        Not yet implemented.
+        @return: None
+        @rtype: None
+        '''
+        raise Exception('Not yet implemented')
