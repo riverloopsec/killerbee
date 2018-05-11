@@ -483,7 +483,7 @@ class RZUSBSTICK:
                 ret = {1:validcrc, 2:rssi,
                         'validcrc':validcrc, 'rssi':rssi,
                         'dbm':rssi,'datetime':datetime.utcnow()}
-                #TODO calculate dbm based on RSSI conversion formula for the chip
+                # TODO: calculate dbm based on RSSI conversion formula for the chip
             else:
                 if ret is not None:
                     # This is a continuation of a long AC packet, so append frame data
