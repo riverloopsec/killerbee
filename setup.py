@@ -75,7 +75,7 @@ zigbee_crypt = Extension('zigbee_crypt',
                     )
 
 setup  (name        = 'killerbee',
-        version     = '2.6.0',
+        version     = '2.6.1',
         description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
         author = 'Joshua Wright, Ryan Speers',
         author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
@@ -86,7 +86,7 @@ setup  (name        = 'killerbee',
                    'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 
                    'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey', 
                     'tools/zbwardrive', 'tools/zbopenear', 'tools/zbfakebeacon', 
-                    'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign'],
+                    'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign', 'tools/zbcat'],
         install_requires=['pyserial>=2.0', 'pyusb', 'crypto'],
         ext_modules = [ zigbee_crypt ],
         )

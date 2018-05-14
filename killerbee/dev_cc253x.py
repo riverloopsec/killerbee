@@ -16,7 +16,7 @@ except ImportError:
 import struct
 import time
 from datetime import datetime
-from kbutils import KBCapabilities
+from kbutils import KBCapabilities, makeFCS
 
 
 class CC253x:
@@ -237,11 +237,11 @@ class CC253x:
                 payload = framedata[8:]
 
                 if len(payload) != payloadlen:
-                    #print "ERROR: Bad payload length"
+                    # TODO: Log "ERROR: Bad payload length"
                     return None
 
                 # See TI Smart RF User Guide for usage of 'CC24XX' format FCS fields
-                # in last two bytes of framedata
+                # in last two bytes of framedata. Note that we remove these before return of the frame.
 
                 # RSSI is signed value, offset by 73 (see CC2530 data sheet for offset)
                 rssi = struct.unpack("b", framedata[-2])[0] - 73
@@ -252,12 +252,16 @@ class CC253x:
                 # correlation value is bits 0-6 in fcsx
                 correlation = fcsx & 0x7f
 
-                ret = {1:validcrc, 2:rssi, \
-                        'validcrc':validcrc, 'rssi':rssi, 'lqi':correlation,\
+                ret = {1:validcrc, 2:rssi,
+                        'validcrc':validcrc, 'rssi':rssi, 'lqi':correlation,
                         'dbm':rssi,'datetime':datetime.utcnow()}
 
-                # Convert the framedata to a string for the return value
-                ret[0] = ''.join(payload)
+                # Convert the framedata to a string for the return value, and replace the TI FCS with a real FCS
+                # if the radio told us that the FCS had passed validation.
+                if validcrc:
+                    ret[0] = ''.join(payload[:-2]) + makeFCS(payload[:-2])
+                else:
+                    ret[0] = ''.join(payload)
                 ret['bytes'] = ret[0]
                 return ret
 

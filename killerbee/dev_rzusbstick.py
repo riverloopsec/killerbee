@@ -447,10 +447,10 @@ class RZUSBSTICK:
             if USBVER == 0:
                 try:
                     pdata = self.handle.bulkRead(RZ_USB_PACKET_EP, timeout)
-                except usb.USBError, e:
+                except usb.USBError as e:
                     if e.args != ('No error',): # http://bugs.debian.org/476796
                         if e.args[0] != "Connection timed out": # USB timeout issue
-                            print "Error args:", e.args
+                            print("Error args: {}".format(e.args))
                             raise e
                         else:
                             return None
@@ -459,15 +459,15 @@ class RZUSBSTICK:
                     pdata = self.dev.read(RZ_USB_PACKET_EP, self.dev.bMaxPacketSize0, timeout=timeout)
                 except usb.core.USBError as e:
                     if e.errno != 110: #Operation timed out
-                        print "Error args:", e.args
+                        print("Error args: {}".format(e.args))
                         raise e
                         #TODO error handling enhancements for USB 1.0
                     else:
                         return None
 
             # PyUSB returns an empty tuple occasionally, handle as "no data"
-            #TODO added len(pdata) check as some arrays were failing
-            if pdata == None or pdata == () or len(pdata)==0:
+            # TODO added len(pdata) check as some arrays were failing
+            if pdata == None or pdata == () or len(pdata) == 0 or len(pdata) <= 10:
                 return None
 
             if pdata[0] == RZ_EVENT_STREAM_AC_DATA and ret is None:
@@ -480,10 +480,10 @@ class RZUSBSTICK:
                     framedata.append(struct.pack("B", byteval))
                 #Return in a nicer dictionary format, so we don't have to reference by number indicies.
                 #Note that 0,1,2 indicies inserted twice for backwards compatibility.
-                ret = {1:validcrc, 2:rssi, \
-                        'validcrc':validcrc, 'rssi':rssi, \
+                ret = {1:validcrc, 2:rssi,
+                        'validcrc':validcrc, 'rssi':rssi,
                         'dbm':rssi,'datetime':datetime.utcnow()}
-                #TODO calculate dbm based on RSSI conversion formula for the chip
+                # TODO: calculate dbm based on RSSI conversion formula for the chip
             else:
                 if ret is not None:
                     # This is a continuation of a long AC packet, so append frame data
@@ -505,12 +505,11 @@ class RZUSBSTICK:
             else:
                 # ...otherwise we're expecting a continuation in the next USB read
                 explen = explen - len(pdata)
-     
-        def ping(self, da, panid, sa, channel=None):
-            '''
+
+    def ping(self, da, panid, sa, channel=None):
+        '''
         Not yet implemented.
         @return: None
         @rtype: None
         '''
         raise Exception('Not yet implemented')
-
