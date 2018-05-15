@@ -159,6 +159,8 @@ class SEWIO:
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_900, True)
+        if (self.__revision_num == "0.9.0"):
+            self.capabilities.setcapab(KBCapabilities.INJECT, True)
         #TODO: Add jamming in newer firmware based on self.__revision_num.
         #TODO: Add injection capability in newer firmware.
         return
