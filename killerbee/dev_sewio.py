@@ -162,7 +162,6 @@ class SEWIO:
         if ( self.__revision_num == "0.9.0" ):
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
         #TODO: Add jamming in newer firmware based on self.__revision_num.
-        #TODO: Add injection capability in newer firmware.
         return
 
     # KillerBee expects the driver to implement this function
