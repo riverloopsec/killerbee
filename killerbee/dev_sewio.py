@@ -6,7 +6,7 @@
 # (C) 2013 Ryan Speers <ryan at riverloopsecurity.com>
 #
 # For documentation from the vendor, visit:
-#   http://www.sniffer.wislab.cz/sniffer-configuration/
+#   https://www.sewio.net/open-sniffer/
 #
 
 import os
@@ -44,19 +44,36 @@ Similar code from Wireshark source:
 '''
 def ntp_to_system_time(secs, msecs):
     """convert a NTP time to system time"""
-    print "Secs:", secs, msecs
-    print "\tUTC:", datetime.utcfromtimestamp(secs - 2208988800)
+    #print "Secs:", secs, msecs
+    #print "\tUTC:", datetime.utcfromtimestamp(secs - 2208988800)
     return datetime.utcfromtimestamp(secs - 2208988800)
+
 
 def getFirmwareVersion(ip):
     try:
-        html = urllib2.urlopen("http://{0}/".format(ip))
-        fw = re.search(r'Firmware version ([0-9.]+)', html.read())
+        #TODO: Have timeout handled sooner
+        html = urllib2.urlopen("http://{0}/".format(ip), timeout=1)
+        data = html.read()
+        # First try for the "old" web UI parsing:
+        fw = re.search(r'Firmware version ([0-9.]+)', data)
         if fw is not None:
             return fw.group(1)
+        else:
+            # Detect using the new method, credit to the opensniffer python code
+            # Find index of slave IP address
+            index = data.find(ip)
+            # Find index of parenthesis
+            indexEnd = data.find(')', index) - 1
+            # Find index of comma before parenthesis
+            indexBeg = data[:indexEnd].rindex(',') + 1
+            # Parse FW version out
+            fw = data[indexBeg:indexEnd]
+            if fw is not None:
+                return fw
     except Exception as e:
         print("Unable to connect to IP {0} (error: {1}).".format(ip, e))
     return None
+
 
 def getMacAddr(ip):
     '''
@@ -74,8 +91,10 @@ def getMacAddr(ip):
         print("Unable to connect to IP {0} (error: {1}).".format(ip, e))
     return None
 
+
 def isSewio(dev):
     return ( isIpAddr(dev) and getFirmwareVersion(dev) != None )
+
 
 class SEWIO:
     def __init__(self, dev=DEFAULT_IP, recvport=DEFAULT_UDP, recvip=DEFAULT_GW):
@@ -103,10 +122,11 @@ class SEWIO:
 
         self.__revision_num = getFirmwareVersion(self.dev)
         if self.__revision_num not in TESTED_FW_VERS:
-            print("Warning: Firmware revision {0} reported by the sniffer is not currently supported. Errors may occur and dev_sewio.py may need updating.".format(self.__revision_num))
+            print("WARNING: Firmware revision {0} reported by the sniffer is not currently supported. Errors may occur and dev_sewio.py may need updating.".format(self.__revision_num))
 
         self.handle = socket(AF_INET, SOCK_DGRAM)
         self.handle.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        print("Attempting to bind on UDP {}:{}.".format(self.udp_recv_ip, self.udp_recv_port))
         self.handle.bind((self.udp_recv_ip, self.udp_recv_port))
 
         self.__stream_open = False
@@ -121,8 +141,10 @@ class SEWIO:
 
     def check_capability(self, capab):
         return self.capabilities.check(capab)
+
     def get_capabilities(self):
         return self.capabilities.getlist()
+
     def __set_capabilities(self):
         '''
         Sets the capability information appropriate for the client and firmware version.
@@ -133,6 +155,7 @@ class SEWIO:
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_900, True)
+        #TODO: Add jamming in newer firmware based on self.__revision_num.
         return
 
     # KillerBee expects the driver to implement this function
@@ -145,12 +168,12 @@ class SEWIO:
         return [self.dev, "Sewio Open-Sniffer v{0}".format(self.__revision_num), getMacAddr(self.dev)]
 
     def __make_rest_call(self, path, fetch=True):
-        '''
+        """
         Wrapper to the sniffer's RESTful services.
         Reports URL/HTTP errors as KBInterfaceErrors.
         @rtype: If fetch==True, returns a String of the page. Otherwise, it
             returns True if an HTTP 200 code was received.
-        '''
+        """
         try:
             html = urllib2.urlopen("http://{0}/{1}".format(self.dev, path))
             if fetch:
@@ -173,6 +196,7 @@ class SEWIO:
         if res is None:
             raise KBInterfaceError("Unable to parse the sniffer's current status.")
         # RUNNING means it's sniffing, STOPPED means it's not.
+        print("STATUS REGEX:", res.groups())
         return (res.group(1) == "RUNNING")
 
     def __sync_status(self):
@@ -222,7 +246,7 @@ class SEWIO:
             self.__sync_status()
             if not self.__stream_open:
                 raise KBInterfaceError("Sniffer did not turn on capture.")
-                
+
     # KillerBee expects the driver to implement this function
     def sniffer_off(self):
         '''

@@ -24,7 +24,7 @@ def getKillerBee(channel):
         raise Exception("Failed to create a KillerBee instance.")
     try:
         kb.set_channel(channel)
-    except Exception, e:
+    except Exception as e:
         raise Exception('Error: Failed to set channel to %d' % channel, e)
     return kb
 
@@ -32,19 +32,21 @@ def kb_dev_list(vendor=None, product=None):
     '''Deprecated. Use show_dev or call kbutils.devlist.'''
     return kbutils.devlist(vendor=None, product=None)
 
+
 def show_dev(vendor=None, product=None, gps=None, include=None):
-    '''
+    """
     A basic function to output the device listing.
     Placed here for reuse, as many tool scripts were implementing it.
     @param gps: Provide device names in this argument (previously known as
         'gps') which you wish to not be enumerated. Aka, exclude these items.
     @param include: Provide device names in this argument if you would like only
         these to be enumerated. Aka, include only these items.
-    '''
-    fmt = "{: >14} {: <20} {: >10}"
+    """
+    fmt = "{: >14} {: <30} {: >10}"
     print(fmt.format("Dev", "Product String", "Serial Number"))
     for dev in kbutils.devlist(vendor=vendor, product=product, gps=gps, include=include):
         print(fmt.format(dev[0], dev[1], dev[2]))
+
 
 # KillerBee Class
 class KillerBee:

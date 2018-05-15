@@ -39,10 +39,11 @@ usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID, CC2530_USB_PROD_ID, CC2531_USB
 # Global variables
 gps_devstring = None
 
+
 class KBCapabilities:
-    '''
+    """
     Class to store and report on the capabilities of a specific KillerBee device.
-    '''
+    """
     NONE               = 0x00 #: Capabilities Flag: No Capabilities
     SNIFF              = 0x01 #: Capabilities Flag: Can Sniff
     SETCHAN            = 0x02 #: Capabilities Flag: Can Set the Channel
@@ -88,6 +89,7 @@ class KBCapabilities:
             return True
         return False
 
+
 class findFromList(object):
     '''
     Custom matching function for pyUSB 1.x.
@@ -106,6 +108,7 @@ class findFromList(object):
            (device.idProduct in self._products):
             return True
         return False
+
 
 class findFromListAndBusDevId(findFromList):
     '''
@@ -127,6 +130,7 @@ class findFromListAndBusDevId(findFromList):
            (self._devNum == None or device.address == self._devNum)     :
             return True
         return False
+
 
 def devlist_usb_v1x(vendor=None, product=None):
     '''
@@ -154,6 +158,7 @@ def devlist_usb_v1x(vendor=None, product=None):
 
     return devlist
 
+
 def devlist_usb_v0x(vendor=None, product=None):
     '''
     Private function. Do not call from tools/scripts/etc.
@@ -169,6 +174,7 @@ def devlist_usb_v0x(vendor=None, product=None):
                                   dev.open().getString(dev.iProduct, 50),    \
                                   dev.open().getString(dev.iSerialNumber, 12)])
     return devlist
+
 
 def isIpAddr(ip):
     '''Return True if the given string is a valid IPv4 or IPv6 address.'''
@@ -186,6 +192,7 @@ def isIpAddr(ip):
         except socket.error:    return False
         return True
     return ( is_valid_ipv6_address(ip) or is_valid_ipv4_address(ip) )
+
 
 def devlist(vendor=None, product=None, gps=None, include=None):
     '''
@@ -247,12 +254,15 @@ def devlist(vendor=None, product=None, gps=None, include=None):
     
     return devlist
 
+
 def get_serial_devs(seriallist):
     global DEV_ENABLE_FREAKDUINO, DEV_ENABLE_ZIGDUINO
     #TODO Continue moving code from line 163:181 here, yielding results
 
+
 def isSerialDeviceString(s):
     return ( ( s.count('/') + s.count('tty') ) > 0 )
+
 
 def get_serial_ports(include=None):
     '''
@@ -272,6 +282,7 @@ def get_serial_ports(include=None):
     if include is not None:
         seriallist = list( set(seriallist).union(set(filter(isSerialDeviceString, include))) )
     return seriallist
+
 
 def isgoodfetccspi(serialdev):
     '''
@@ -338,6 +349,7 @@ def isgoodfetccspi(serialdev):
     # Nothing found
     return False, None
 
+
 def iszigduino(serialdev):
     '''
     Determine if a given serial device is running the GoodFET firmware with the atmel_radio application.
@@ -361,7 +373,8 @@ def iszigduino(serialdev):
         if (gf.app == gf.ATMELRADIOAPP) and (gf.verb == 0x10): #check if ATMELRADIOAPP exists           
             return True
     return False
-    
+
+
 def isfreakduino(serialdev):
     '''
     Determine if a given serial device is a Freakduino attached with the right sketch loaded.
@@ -383,6 +396,7 @@ def isfreakduino(serialdev):
     else: version = None
     s.close()
     return (version is not None)
+
 
 def search_usb(device):
     '''
@@ -411,6 +425,7 @@ def search_usb(device):
     else:
         raise Exception("USB version expected to be 0.x or 1.x.")
 
+
 def search_usb_bus_v0x(bus, busNum, devNum):
     '''Helper function for USB enumeration in pyUSB 0.x enviroments.'''
     devices = bus.devices
@@ -423,6 +438,7 @@ def search_usb_bus_v0x(bus, busNum, devNum):
                 #print "Choose device", bus.dirname, dev.filename, "to initialize KillerBee instance on."
                 return dev
     return None
+
 
 def hexdump(src, length=16):
     '''
@@ -442,6 +458,7 @@ def hexdump(src, length=16):
        result.append("%04x:  %-*s  %s\n" % (i, length*3, hex, printable))
     return ''.join(result)
 
+
 def randbytes(size):
     '''
     Returns a random string of size bytes.  Not cryptographically safe.
@@ -450,6 +467,7 @@ def randbytes(size):
     @rtype: String
     '''
     return ''.join(chr(random.randrange(0,256)) for i in xrange(size))
+
 
 def randmac(length=8):
     '''
@@ -480,46 +498,50 @@ def randmac(length=8):
     # Reverse the address for use in a packet
     return ''.join([prefix, suffix])[::-1]
 
+
 def makeFCS(data):
-    '''
+    """
     Do a CRC-CCITT Kermit 16bit on the data given
     Implemented using pseudocode from: June 1986, Kermit Protocol Manual
     See also: http://regregex.bbcmicro.net/crc-catalogue.htm#crc.cat.kermit
 
     @return: a CRC that is the FCS for the frame, as two hex bytes in
         little-endian order.
-    '''
+    """
     crc = 0
     for i in xrange(len(data)):
         c = ord(data[i])
-        #if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
+        # if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
         q = (crc ^ c) & 15				#Do low-order 4 bits
         crc = (crc // 16) ^ (q * 4225)
         q = (crc ^ (c // 16)) & 15		#And high 4 bits
         crc = (crc // 16) ^ (q * 4225)
     return pack('<H', crc) #return as bytes in little endian order
 
+
 class KBException(Exception):
-    '''Base class for all KillerBee specific exceptions.'''
+    """
+    Base class for all KillerBee specific exceptions.
+    """
     pass
 
+
 class KBInterfaceError(KBException):
-    '''
+    """
     Custom exception for KillerBee having issues communicating
     with an interface, such as opening a port, syncing with the firmware, etc.
-    '''
+    """
     pass
 
 
 def pyusb_1x_patch():
-    '''Monkey-patch pyusb 1.x for API compatibility
-    '''
+    """
+    Monkey-patch pyusb 1.x for API compatibility
 
-    '''
     In pyusb v1.0.0b2 (git dac78933), they removed the "length" parameter
     to usb.util.get_string(). We'll monkey-patch older versions so we don't
     have to ever pass this argument.
-    '''
+    """
     if 'length' in inspect.getargspec(usb.util.get_string).args:
         print 'Monkey-patching usb.util.get_string()'
         def get_string(dev, index, langid = None):
