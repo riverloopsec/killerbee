@@ -24,7 +24,7 @@ from kbutils import KBCapabilities, makeFCS, isIpAddr, KBInterfaceError
 DEFAULT_IP = "10.10.10.2"   #IP address of the sniffer
 DEFAULT_GW = "10.10.10.1"   #IP address of the default gateway
 DEFAULT_UDP = 17754         #"Remote UDP Port"
-TESTED_FW_VERS = ["0.5"]    #Firmware versions tested with the current version of this client device connector
+TESTED_FW_VERS = ["0.5", "0.9.0"]  #Firmware versions tested with the current version of this client device connector
 
 NTP_DELTA = 70*365*24*60*60 #datetime(1970, 1, 1, 0, 0, 0) - datetime(1900, 1, 1, 0, 0, 0)
 
