@@ -126,8 +126,12 @@ class SEWIO:
 
         self.handle = socket(AF_INET, SOCK_DGRAM)
         self.handle.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        print("Attempting to bind on UDP {}:{}.".format(self.udp_recv_ip, self.udp_recv_port))
-        self.handle.bind((self.udp_recv_ip, self.udp_recv_port))
+        try:
+            self.handle.bind((self.udp_recv_ip, self.udp_recv_port))
+        except Exception as e:
+            print(e)
+            print("ERROR: Attempted to bind on UDP {}:{}, but failed.".format(self.udp_recv_ip, self.udp_recv_port))
+            print("ERROR: Is that a correct local IP in your environment? Is the port free?")
 
         self.__stream_open = False
         self.capabilities = KBCapabilities()
@@ -156,6 +160,7 @@ class SEWIO:
         self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_900, True)
         #TODO: Add jamming in newer firmware based on self.__revision_num.
+        #TODO: Add injection capability in newer firmware.
         return
 
     # KillerBee expects the driver to implement this function
@@ -196,7 +201,7 @@ class SEWIO:
         if res is None:
             raise KBInterfaceError("Unable to parse the sniffer's current status.")
         # RUNNING means it's sniffing, STOPPED means it's not.
-        print("STATUS REGEX:", res.groups())
+        print("INFO: Status detected as {}".format(res.groups()))
         return (res.group(1) == "RUNNING")
 
     def __sync_status(self):
