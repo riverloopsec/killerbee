@@ -161,7 +161,7 @@ class SEWIO:
         self.capabilities.setcapab(KBCapabilities.FREQ_900, True)
         if ( self.__revision_num == "0.9.0" ):
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
-            #TODO: Add jamming in newer firmware based on self.__revision_num.
+            self.capabilities.setcapab(KBCapabilities.PHYJAM True)
         return
 
     # KillerBee expects the driver to implement this function
@@ -475,12 +475,45 @@ class SEWIO:
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
+        
+        if channel != None:
+            self.set_channel(channel)
+
+        # Parameter enumeration
+        # http://10.10.10.2/test.cgi?chn=15&mode=1&module=0&txlevel=0
+        #
+        # mode
+        #   1 - PRBS: AAAA...
+        #   2 - PRBS: 0000...
+        #   3 - PRBS: FFFF...
+        #   4 - Fc - 0.5 MHz
+        #   5 - Fc + 0.5 MHz
+        #
+        # txlevel
+        #   0 - 3.0 dBm
+        #   2 - 2.3 dBm
+        #   4 - 1.3 dBm
+        #   6 - 0.0 dBm
+        #   9 - -3.0 dBm
+        #   c - -7.0 dBm
+        #   f - -17.0 dBm        
+    
+        if not self.__make_rest_call("test.cgi?chn={0}&mode=1&module=0&txlevel=0".format(self._channel), fetch=False):
+            raise KBInterfaceError("Error instructing sniffer to start jamming.")
 
     def jammer_off(self, channel=None):
         '''
         Not yet implemented.
-        @return: None
+        @type channel: Integer
+        @param channel: Sets the channel, optional
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
+        
+        if channel != None:
+            self.set_channel(channel)
+
+        if not self.__make_rest_call("status.cgi?p=4"):
+            raise KBInterfaceError("Error instructing sniffer to stop jamming.")
+        
 
