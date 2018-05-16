@@ -161,7 +161,7 @@ class SEWIO:
         self.capabilities.setcapab(KBCapabilities.FREQ_900, True)
         if ( self.__revision_num == "0.9.0" ):
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
-        #TODO: Add jamming in newer firmware based on self.__revision_num.
+            #TODO: Add jamming in newer firmware based on self.__revision_num.
         return
 
     # KillerBee expects the driver to implement this function
@@ -321,9 +321,35 @@ class SEWIO:
     # KillerBee expects the driver to implement this function
     def inject(self, packet, channel=None, count=1, delay=0):
         '''
-        Not implemented.
+        Injects the specified packet contents.
+        @type packet: String
+        @param packet: Packet contents to transmit, without FCS.
+        @type channel: Integer
+        @param channel: Sets the channel, optional
+        @type count: Integer
+        @param count: Transmits a specified number of frames, def=1
+        @type delay: Float
+        @param delay: Delay between each frame, def=0
+        @rtype: None
         '''
         self.capabilities.require(KBCapabilities.INJECT)
+	
+        if len(packet) < 1:
+            raise Exception('Empty packet')
+        if len(packet) > 125:                # 127 -2 to accommodate FCS
+            raise Exception('Packet too long')
+
+        if channel != None:
+            self.set_channel(channel)
+
+        # Example of packet injection:
+        #   Auto CRC ON
+        # http://10.10.10.2/inject.cgi?chn=15&modul=0&txlevel=0&rxen=0&nrepeat=1&tspace=1&autocrc=1&spayload=010203&len=3
+        
+        packet = packet.encode('hex')        # API accepts string hex payload
+        packet_length = len(packet) / 2   
+         
+        self.__make_rest_call("inject.cgi?chn={0}&modul=0&txlevel=0&rxen=1&nrepeat={1}&tspace={2}&autocrc=1&spayload={3}&len={4}".format(self._channel, count, delay, packet, packet_length))
 
     @staticmethod
     def __parse_zep_v2(data):
