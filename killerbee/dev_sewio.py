@@ -161,7 +161,7 @@ class SEWIO:
         self.capabilities.setcapab(KBCapabilities.FREQ_900, True)
         if ( self.__revision_num == "0.9.0" ):
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
-            self.capabilities.setcapab(KBCapabilities.PHYJAM True)
+            self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
         return
 
     # KillerBee expects the driver to implement this function
