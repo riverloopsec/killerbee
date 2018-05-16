@@ -349,7 +349,11 @@ class SEWIO:
         packet = packet.encode('hex')        # API accepts string hex payload
         packet_length = len(packet) / 2   
          
-        self.__make_rest_call("inject.cgi?chn={0}&modul=0&txlevel=0&rxen=1&nrepeat={1}&tspace={2}&autocrc=1&spayload={3}&len={4}".format(self._channel, count, delay, packet, packet_length))
+        self.__make_rest_call(
+            "inject.cgi?chn={0}&modul=0&txlevel=0&rxen=1&nrepeat={1}&tspace={2}&autocrc=1&spayload={3}&len={4}".format(
+                self._channel, count, delay, packet, packet_length
+            )
+        )
 
     @staticmethod
     def __parse_zep_v2(data):
