@@ -76,7 +76,7 @@ class ZigBeeNWKPacketParser:
             pktchop.append("")
 
         # Check if the SA bit is set in the frame control field
-        if (fc &fc & ZBEE_NWK_FCF_EXT_SOURCE) != 0:
+        if (fc & ZBEE_NWK_FCF_EXT_SOURCE) != 0:
             pktchop.append(packet[offset:offset+8])
             offset+=8
         else:
