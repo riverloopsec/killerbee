@@ -404,8 +404,11 @@ def kbdecrypt(pkt, key = None, verbose = None, doMicCheck = False):
     if len(key) != 16:
         log_killerbee.error("Invalid decryption key, must be a 16 byte string.")
         return None
-    elif not pkt.haslayer(ZigbeeSecurityHeader) or not pkt.haslayer(ZigbeeNWK):
+    if not pkt.haslayer(ZigbeeSecurityHeader):
         log_killerbee.error("Cannot decrypt frame without a ZigbeeSecurityHeader.")
+        return None
+    if not pkt.haslayer(ZigbeeNWK):
+        log_killerbee.error("Cannot decrypt frame without a ZigbeeNWK.")
         return None
     try:
         import zigbee_crypt
