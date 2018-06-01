@@ -128,6 +128,7 @@ def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = loop, count = count, verbose = verbose, realtime = realtime)
     if verbose:
         print "\nSent %i packets." % pkts_out
+    kb.close()
 
 @conf.commands.register
 def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
@@ -433,22 +434,13 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
     if pkt.haslayer(Dot15d4FCS): pkt = Dot15d4FCS(newpkt)
     else:                        pkt = Dot15d4(newpkt)
 
-    #mic = struct.unpack(">I", f['mic'])
     mic = pkt.mic
 
-    f = pkt.getlayer(ZigbeeSecurityHeader).fields
-    encrypted = f['data']
+    encrypted = pkt[ZigbeeSecurityHeader].data
 
     # Bug fix thanks to cutaway (https://code.google.com/p/killerbee/issues/detail?id=25):
-    sec_ctrl_byte = str(pkt.getlayer(ZigbeeSecurityHeader))[0]
-    #nonce = struct.pack('L',f['ext_source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
-    nonce = struct.pack('L',f['source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
-
-    #nonce = "" # build the nonce
-    #nonce += struct.pack(">Q", f['ext_source'])
-    #nonce += struct.pack(">I", f['fc'])
-    #fc = (f['reserved1'] << 6) | (f['extended_nonce'] << 5) | (f['key_type'] << 3) | f['reserved2']
-    #nonce += chr(fc | 0x05)
+    sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
+    nonce = struct.pack('L',pkt[ZigbeeSecurityHeader].source)+struct.pack('I',pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
 
     if verbose > 2:
         print "Decrypt Details:"
@@ -461,21 +453,18 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
     # So calculate an amount to crop, equal to the size of the encrypted data and mic.  Note that
     # if there was an FCS, scapy will have already stripped it, so it will not returned by the
     # do_build() call below (and hence doesn't need to be taken into account in crop_size).
-    crop_size = 4 + len(pkt.getlayer(ZigbeeSecurityHeader).fields['data'])
+    crop_size = len(mic) + len(pkt[ZigbeeSecurityHeader].data)
 
     # the Security Control Field flags have to be adjusted before this is calculated, so we store their original values so we can reset them later
-    #reserved2 = pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2']
-    #pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] = (pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] | 0x05)
-    zigbeeData = pkt.getlayer(ZigbeeNWK).do_build()
+    zigbeeData = pkt[ZigbeeNWK].do_build()
     zigbeeData = zigbeeData[:-crop_size]
-    #pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] = reserved2
 
     (payload, micCheck) = zigbee_crypt.decrypt_ccm(key, nonce, mic, encrypted, zigbeeData)
 
     if verbose > 2:
         print "\tDecrypted Data: " + payload.encode('hex')
 
-    frametype = pkt.getlayer(ZigbeeNWK).fields['frametype']
+    frametype = pkt[ZigbeeNWK].frametype
     if frametype == 0 and micCheck == 1:
         payload = ZigbeeAppDataPayload(payload)
     elif frametype == 1 and micCheck == 1:
@@ -517,7 +506,7 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
     #TODO: Investigate and issue a different fix:
     # https://code.google.com/p/killerbee/issues/detail?id=30
     # This function destroys the packet, therefore work on a copy - @cutaway
-    nwk_seclevel = source_pkt.getlayer(ZigbeeSecurityHeader).fields['nwk_seclevel']
+    nwk_seclevel = source_pkt.nwk_seclevel
     pkt = source_pkt.copy()   #this is hack to fix the below line
     pkt.nwk_seclevel=5 #the issue appears to be when this is set
     # Now recreate 'pkt' by rebuilding the raw data and creating a new scapy Packet, because
@@ -531,21 +520,15 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
     if pkt.haslayer(Dot15d4FCS): pkt = Dot15d4FCS(newpkt)
     else:                        pkt = Dot15d4(newpkt)
 
-    f = pkt.getlayer(ZigbeeSecurityHeader).fields
-    f['data'] = ''  # explicitly clear it out, this should go without say
+    pkt[ZigbeeSecurityHeader].data = ''
 
     if isinstance(data, Packet):
         decrypted = data.do_build()
     else:
         decrypted = data
 
-    #nonce = ""  # build the nonce
-    #nonce += struct.pack(">Q", f['source'])
-    #nonce += struct.pack(">I", f['fc'])
-    #fc = (f['reserved1'] << 6) | (f['extended_nonce'] << 5) | (f['key_type'] << 3) | f['nwk_seclevel']
-    #nonce += chr(fc | 0x05)
-    sec_ctrl_byte = str(pkt.getlayer(ZigbeeSecurityHeader))[0]
-    nonce = struct.pack('L',f['source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
+    sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
+    nonce = struct.pack('L',pkt[ZigbeeSecurityHeader].source)+struct.pack('I',pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
 
     if verbose > 2:
         print "Encrypt Details:"
@@ -553,14 +536,13 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
         print "\tNonce:          " + nonce.encode('hex')
         print "\tDecrypted Data: " + decrypted.encode('hex')
 
-    #crop_size = 4 + 2 # the size of all the zigbee crap, minus the length of the mic and FCS
-    crop_size = 4 + len(pkt.getlayer(ZigbeeSecurityHeader).fields['data'])
+    crop_size = 4 + len(pkt[ZigbeeSecurityHeader].data)
 
     # the Security Control Field flags have to be adjusted before this is calculated, so we store their original values so we can reset them later
-    pkt.getlayer(ZigbeeSecurityHeader).fields['nwk_seclevel'] = (pkt.getlayer(ZigbeeSecurityHeader).fields['nwk_seclevel'] | 0x05)
-    zigbeeData = pkt.getlayer(ZigbeeNWK).do_build()
+    pkt[ZigbeeSecurityHeader].nwk_seclevel = (pkt[ZigbeeSecurityHeader].nwk_seclevel | 0x05)
+    zigbeeData = pkt[ZigbeeNWK].do_build()
     zigbeeData = zigbeeData[:-crop_size]
-    pkt.getlayer(ZigbeeSecurityHeader).fields['nwk_seclevel'] = nwk_seclevel
+    pkt[ZigbeeSecurityHeader].nwk_seclevel = nwk_seclevel
 
     (payload, mic) = zigbee_crypt.encrypt_ccm(key, nonce, 4, decrypted, zigbeeData)
 
@@ -571,8 +553,7 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
     # Set pkt's values to reflect the encrypted ones to it's ready to be sent
     # note that calculated mic is for the encrypted sublayer, not the enclosing packet
     # TODO: calculate mic for overall packet if required
-    f['data'] = payload + mic
-    f['mic'] = ''
-    #f['mic'] = struct.unpack(">I", mic)[0]
+    pkt[ZigbeeSecurityHeader].data = payload + mic
+    pkt[ZigbeeSecurityHeader].mic = ''
     return pkt
 
