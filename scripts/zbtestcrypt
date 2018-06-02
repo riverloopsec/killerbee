@@ -1,0 +1,133 @@
+#! /usr/bin/env python
+
+#  zbtestcrypt - test encryption by decrypting and re-encrypting
+# 
+#  Adam Laurie <adam@aperturelabs.com>
+#  http://www.aperturelabs.com
+# 
+
+import sys
+import argparse
+
+from scapy.all import *
+from killerbee import *
+from killerbee.scapy_extensions import *
+
+if __name__ == '__main__':
+    # Command-line arguments
+    parser = argparse.ArgumentParser(description="zbtestcrypt: \
+        Decrypt, re-encrypt and optionally transmit packets for testing and tool development.")
+    parser.add_argument('-c', '--channel', action='store', type=int, default=11,
+        help='tx/rx on given channel (default 11)')
+    parser.add_argument('-D', action='store_true', dest='showdev',
+        help='list KillerBee devices')
+    parser.add_argument('-i', '--interface', action='store', type=str, default=None,
+        help='provide the USB ID or Serial Device Path to use that device')
+    parser.add_argument('-k', '--network_key', action='store', type=str, default=None,
+        help='provide the NWK_KEY in HEX')
+    parser.add_argument('-l', '--link_key', action='store', type=str, default=None,
+        help='provide the LINK_KEY in HEX (APS layer not yet implemented!)')
+    parser.add_argument('-r', '--pcapfile', action='store', default=None,
+        help='pcap file to test')
+    parser.add_argument('-R', '--dsnafile', action='store', default=None,
+        help='Daintree SNA file to test')
+    parser.add_argument('-s', '--sleep', action='store', type=float, default=1.0,
+        help='if tx, wait given seconds between packet injections (default 1.0)')
+    parser.add_argument('-t', '--transmit_both', action='store_true', dest='transmit_both',
+        help='Transmit original and re-encrypted packets for independant capture/analysis')
+    parser.add_argument('-T', '--transmit_crypted', action='store_true', dest='transmit_crypted',
+        help='Transmit only re-encrypted packets for independant capture/analysis')
+    args = parser.parse_args()
+
+    if args.showdev:
+        show_dev()
+        exit(False)
+
+    if args.channel == None:
+        print >>sys.stderr, "ERROR: Must specify a channel."
+        exit(True)
+
+    if args.pcapfile == None and args.dsnafile == None:
+        print >>sys.stderr, "ERROR: Must specify a capture file using -r (libpcap) or -R (Daintree SNA)"
+        exit(True)
+
+    if args.pcapfile != None and args.dsnafile != None:
+        print >>sys.stderr, "ERROR: Must specify only one of -r (libpcap) or -R (Daintree SNA)"
+        exit(True)
+
+    if args.pcapfile is not None:
+        data= kbrdpcap(args.pcapfile)
+
+    if args.dsnafile is not None:
+        data= kbrddain(args.dsnafile)
+
+    if not args.network_key or len(args.network_key) != 32:
+        print >>sys.stderr, "ERROR: Must specify 16 byte NWK_KEY in HEX"
+        exit(True)
+    try:
+        nwk_key= args.network_key.decode('hex')
+    except:
+        print >>sys.stderr, "ERROR: Invalid NWK_KEY"
+        exit(True)
+
+    if args.link_key and len(args.link_key) != 32:
+        print >>sys.stderr, "ERROR: Must specify 16 byte LINK_KEY in HEX"
+        exit(True)
+    if args.link_key:
+        try:
+            link_key= args.link_key.decode('hex')
+            print >>sys.stderr, "WARNING: APS Layer crypto net yet implemented!"
+        except:
+            print >>sys.stderr, "ERROR: Invalid LINK_KEY"
+            exit(True)
+
+    print
+    print '%d packets read' % len(data)
+
+    count= 0
+    testcount= 0
+    failed= 0
+    passed= 0
+
+    for packet in data:
+        count += 1
+        print
+        print 'Packet:', count
+        print '  ', packet.summary()
+        # ignore frames with no encrypted payload
+        if not packet.haslayer(ZigbeeNWK) or not packet.haslayer(ZigbeeSecurityHeader):
+            print '    no payload - skipping!'
+            continue
+        if packet.haslayer(ZigbeeSecurityHeader):
+            print '   decrypting...'
+            decrypted= kbdecrypt(packet, nwk_key)
+            print '     ', decrypted.summary()
+            print '      encrypting...'
+            newpkt= kbencrypt(packet, decrypted, nwk_key)
+            if newpkt == packet:
+                print '        Packet match: OK'
+                passed += 1
+            else:
+                print '        Packet match: FAILED!'
+                failed += 1
+        if args.transmit_both:
+            print '      transmitting ORIGINAL'
+            try:
+                kbsendp(packet, channel=args.channel, inter=args.sleep)
+                print '        OK'
+            except:
+                print '        FAILED!'
+        if args.transmit_crypted or args.transmit_both:
+            print '      transmitting RE-ENCRYPTED'
+            try:
+                kbsendp(newpkt, channel=args.channel, inter=args.sleep)
+                print '        OK'
+            except:
+                print '        FAILED!'
+        testcount += 1
+
+    print
+    print '%d of %d packets tested' % (testcount, len(data))
+    print 'crypto passed:', passed
+    print 'crypto failed:', failed
+    exit(False)
