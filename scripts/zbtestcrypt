@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # Command-line arguments
     parser = argparse.ArgumentParser(description="zbtestcrypt: \
         Decrypt, re-encrypt and optionally transmit packets for testing and tool development.")
-    parser.add_argument('-c', '--channel', action='store', type=int, default=11,
+    parser.add_argument('-c', '--channel', action='store', type=int, default=11, required=True,
         help='tx/rx on given channel (default 11)')
     parser.add_argument('-D', action='store_true', dest='showdev',
         help='list KillerBee devices')
@@ -42,10 +42,6 @@ if __name__ == '__main__':
     if args.showdev:
         show_dev()
         exit(False)
-
-    if args.channel == None:
-        print >>sys.stderr, "ERROR: Must specify a channel."
-        exit(True)
 
     if args.pcapfile == None and args.dsnafile == None:
         print >>sys.stderr, "ERROR: Must specify a capture file using -r (libpcap) or -R (Daintree SNA)"
