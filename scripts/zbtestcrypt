@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # Command-line arguments
     parser = argparse.ArgumentParser(description="zbtestcrypt: \
         Decrypt, re-encrypt and optionally transmit packets for testing and tool development.")
-    parser.add_argument('-c', '--channel', action='store', type=int, default=11, required=True,
+    parser.add_argument('-c', '--channel', action='store', type=int, default=11,
         help='tx/rx on given channel (default 11)')
     parser.add_argument('-D', action='store_true', dest='showdev',
         help='list KillerBee devices')
@@ -37,6 +37,8 @@ if __name__ == '__main__':
         help='Transmit original and re-encrypted packets for independant capture/analysis')
     parser.add_argument('-T', '--transmit_crypted', action='store_true', dest='transmit_crypted',
         help='Transmit only re-encrypted packets for independant capture/analysis')
+    parser.add_argument('-v', '--verbose', action='store', type=int, default=0,
+        help='tx/rx on given channel (default 11)')
     args = parser.parse_args()
 
     if args.showdev:
@@ -50,12 +52,6 @@ if __name__ == '__main__':
     if args.pcapfile != None and args.dsnafile != None:
         print >>sys.stderr, "ERROR: Must specify only one of -r (libpcap) or -R (Daintree SNA)"
         exit(True)
-
-    if args.pcapfile is not None:
-        data= kbrdpcap(args.pcapfile)
-
-    if args.dsnafile is not None:
-        data= kbrddain(args.dsnafile)
 
     if not args.network_key or len(args.network_key) != 32:
         print >>sys.stderr, "ERROR: Must specify 16 byte NWK_KEY in HEX"
@@ -77,6 +73,12 @@ if __name__ == '__main__':
             print >>sys.stderr, "ERROR: Invalid LINK_KEY"
             exit(True)
 
+    if args.pcapfile is not None:
+        data= kbrdpcap(args.pcapfile)
+
+    if args.dsnafile is not None:
+        data= kbrddain(args.dsnafile)
+
     print
     print '%d packets read' % len(data)
 
@@ -90,16 +92,22 @@ if __name__ == '__main__':
         print
         print 'Packet:', count
         print '  ', packet.summary()
+        if args.verbose:
+            print '  ', repr(packet)
         # ignore frames with no encrypted payload
         if not packet.haslayer(ZigbeeNWK) or not packet.haslayer(ZigbeeSecurityHeader):
             print '    no payload - skipping!'
             continue
         if packet.haslayer(ZigbeeSecurityHeader):
             print '   decrypting...'
-            decrypted= kbdecrypt(packet, nwk_key)
+            decrypted= kbdecrypt(packet, nwk_key, verbose= args.verbose)
             print '     ', decrypted.summary()
+            if args.verbose:
+                print '     ', repr(decrypted)
             print '      encrypting...'
-            newpkt= kbencrypt(packet, decrypted, nwk_key)
+            newpkt= kbencrypt(packet, decrypted, nwk_key, verbose= args.verbose)
+            if args.verbose:
+                print '  ', repr(newpkt)
             if newpkt == packet:
                 print '        Packet match: OK'
                 passed += 1
