@@ -320,6 +320,12 @@ class ZigBeeAPSPacketParser:
         
         plen += 1 # APS Counter
 
+        # fragmentation + packet number if true
+        if ord(fc) & ZBEE_APS_FCF_EXT_HEADER:
+            if packet[plen] != 0x00:
+                plen += 1
+            plen += 1
+
         return plen
 
     def payloadlen(self, packet):

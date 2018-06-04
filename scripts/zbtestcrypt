@@ -13,6 +13,27 @@ from scapy.all import *
 from killerbee import *
 from killerbee.scapy_extensions import *
 
+# encrypt/decrypt packet with appropriate key
+def crypt(packet, data= None, encrypt= False):
+    global link_key
+    global nwk_key
+
+    if packet[ZigbeeSecurityHeader].key_type == 0:
+        if link_key == None:
+            return False, 'FAILED: No LINK_KEY provided'
+        key= link_key
+    elif packet[ZigbeeSecurityHeader].key_type == 1:
+        if nwk_key == None:
+            return False, 'FAILED: No NWK_KEY provided'
+        key= nwk_key
+    else:
+        return False, 'Unknown KEY type'
+
+    if encrypt:
+        return True, kbencrypt(packet, data, key, verbose= args.verbose)
+    else:
+        return True, kbdecrypt(packet, key, verbose= args.verbose)
+
 if __name__ == '__main__':
     # Command-line arguments
     parser = argparse.ArgumentParser(description="zbtestcrypt: \
@@ -53,14 +74,15 @@ if __name__ == '__main__':
         print >>sys.stderr, "ERROR: Must specify only one of -r (libpcap) or -R (Daintree SNA)"
         exit(True)
 
-    if not args.network_key or len(args.network_key) != 32:
+    if args.network_key and len(args.network_key) != 32:
         print >>sys.stderr, "ERROR: Must specify 16 byte NWK_KEY in HEX"
         exit(True)
-    try:
-        nwk_key= args.network_key.decode('hex')
-    except:
-        print >>sys.stderr, "ERROR: Invalid NWK_KEY"
-        exit(True)
+    if args.network_key:
+        try:
+            nwk_key= args.network_key.decode('hex')
+        except:
+            print >>sys.stderr, "ERROR: Invalid NWK_KEY"
+            exit(True)
 
     if args.link_key and len(args.link_key) != 32:
         print >>sys.stderr, "ERROR: Must specify 16 byte LINK_KEY in HEX"
@@ -94,26 +116,49 @@ if __name__ == '__main__':
         print '  ', packet.summary()
         if args.verbose:
             print '  ', repr(packet)
+
         # ignore frames with no encrypted payload
         if not packet.haslayer(ZigbeeNWK) or not packet.haslayer(ZigbeeSecurityHeader):
             print '    no payload - skipping!'
             continue
+
         if packet.haslayer(ZigbeeSecurityHeader):
             print '   decrypting...'
-            decrypted= kbdecrypt(packet, nwk_key, verbose= args.verbose)
-            print '     ', decrypted.summary()
-            if args.verbose:
-                print '     ', repr(decrypted)
+            stat, decrypted = crypt(packet)
+            if stat:
+                print '     ', decrypted.summary()
+                if args.verbose:
+                    print '     ', repr(decrypted)
+            else:
+                print '     ', decrypted
+            # If APS layer build new packet with ZigbeeNWK so we can decrypt it
+            if decrypted.haslayer(ZigbeeAppDataPayload):
+                aps_encrypted = decrypted[ZigbeeAppDataPayload]
+                tmppkt = copy.copy(packet)
+                tmppkt[ZigbeeNWK].remove_payload()
+                tmppkt /= aps_encrypted
+                print '      decrypting APS...'
+                stat, app_decrypt= crypt(tmppkt)
+                if stat:
+                    print '          ', app_decrypt.summary()
+                    if args.verbose:
+                        print '          ', repr(app_decrypt)
+                else:
+                    print '          ', app_decrypt
             print '      encrypting...'
-            newpkt= kbencrypt(packet, decrypted, nwk_key, verbose= args.verbose)
-            if args.verbose:
-                print '  ', repr(newpkt)
+            stat, newpkt= crypt(packet, data= decrypted, encrypt= True)
+            if stat:
+                if args.verbose:
+                    print '  ', repr(newpkt)
+            else:
+                print '     ', newpkt
             if newpkt == packet:
                 print '        Packet match: OK'
                 passed += 1
             else:
                 print '        Packet match: FAILED!'
                 failed += 1
+
         if args.transmit_both:
             print '      transmitting ORIGINAL'
             try:
