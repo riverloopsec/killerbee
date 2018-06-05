@@ -161,6 +161,7 @@ if __name__ == '__main__':
                 stat, recrypt = crypt(tmppkt, data= app_decrypt, encrypt= True)
                 if stat:
                     decrypted.data= recrypt.data
+                    decrypted.mic= recrypt.mic
                     if args.verbose:
                         print '          ', repr(decrypted)
                 else:
