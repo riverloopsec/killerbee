@@ -55,11 +55,11 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--sleep', action='store', type=float, default=1.0,
         help='if tx, wait given seconds between packet injections (default 1.0)')
     parser.add_argument('-t', '--transmit_both', action='store_true', dest='transmit_both',
-        help='Transmit original and re-encrypted packets for independant capture/analysis')
+        help='transmit original and re-encrypted packets for independant capture/analysis')
     parser.add_argument('-T', '--transmit_crypted', action='store_true', dest='transmit_crypted',
-        help='Transmit only re-encrypted packets for independant capture/analysis')
+        help='transmit only re-encrypted packets for independant capture/analysis')
     parser.add_argument('-v', '--verbose', action='store', type=int, default=0,
-        help='tx/rx on given channel (default 11)')
+        help='set debug verbosity')
     args = parser.parse_args()
 
     if args.showdev:
