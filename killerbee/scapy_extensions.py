@@ -547,9 +547,9 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
 
     # According to comments in e.g. https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-zbee-aps.c nwk_seclevel is not used any more but
     # we should reconstruct and return what was asked for anyway.
-    pkt.nwk_seclevel = source_pkt.nwk_seclevel
     pkt.data = payload + mic
-    ota_miclen= kbgetmiclen(source_pkt.nwk_seclevel)
+    pkt.nwk_seclevel = source_pkt.nwk_seclevel
+    ota_miclen= kbgetmiclen(pkt.nwk_seclevel)
     if ota_miclen > 0:
         pkt.mic = pkt.data[-ota_miclen:]
         pkt.data = pkt.data[:-ota_miclen]

@@ -47,7 +47,7 @@ if __name__ == '__main__':
     parser.add_argument('-k', '--network_key', action='store', type=str, default=None,
         help='provide the NWK_KEY in HEX')
     parser.add_argument('-l', '--link_key', action='store', type=str, default=None,
-        help='provide the LINK_KEY in HEX (APS layer not yet implemented!)')
+        help='provide the LINK_KEY in HEX')
     parser.add_argument('-r', '--pcapfile', action='store', default=None,
         help='pcap file to test')
     parser.add_argument('-R', '--dsnafile', action='store', default=None,
@@ -90,7 +90,6 @@ if __name__ == '__main__':
     if args.link_key:
         try:
             link_key= args.link_key.decode('hex')
-            print >>sys.stderr, "WARNING: APS Layer crypto net yet implemented!"
         except:
             print >>sys.stderr, "ERROR: Invalid LINK_KEY"
             exit(True)
@@ -142,16 +141,16 @@ if __name__ == '__main__':
                 tmppkt /= aps_encrypted
                 print '      decrypting APS...'
                 if args.verbose:
-                    print '          ', repr(tmppkt)
+                    print '        ', repr(tmppkt)
                 stat, app_decrypt= crypt(tmppkt)
                 if stat:
                     aps_passed += 1
-                    print '          ', app_decrypt.summary()
+                    print '        ', app_decrypt.summary()
                     if args.verbose:
-                        print '          ', repr(app_decrypt)
+                        print '        ', repr(app_decrypt)
                 else:
                     aps_failed += 1
-                    print '          ', app_decrypt
+                    print '        ', app_decrypt
 
                 print '      encrypting APS...'
                 tmppkt = copy.copy(packet)
@@ -167,7 +166,7 @@ if __name__ == '__main__':
                 else:
                     print '          ', recrypt
 
-            print '      encrypting NWK...'
+            print '   encrypting NWK...'
             stat, newpkt= crypt(packet, data= decrypted, encrypt= True)
             if stat:
                 if args.verbose:
@@ -175,10 +174,10 @@ if __name__ == '__main__':
             else:
                 print '     ', newpkt
             if newpkt == packet:
-                print '        Packet match: OK'
+                print '   Packet match: OK'
                 passed += 1
             else:
-                print '        Packet match: FAILED!'
+                print '   Packet match: FAILED!'
                 failed += 1
 
         if args.transmit_both:
