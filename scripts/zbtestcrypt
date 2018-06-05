@@ -108,6 +108,8 @@ if __name__ == '__main__':
     testcount= 0
     failed= 0
     passed= 0
+    aps_failed= 0
+    aps_passed= 0
 
     for packet in data:
         count += 1
@@ -123,7 +125,7 @@ if __name__ == '__main__':
             continue
 
         if packet.haslayer(ZigbeeSecurityHeader):
-            print '   decrypting...'
+            print '   decrypting NWK...'
             stat, decrypted = crypt(packet)
             if stat:
                 print '     ', decrypted.summary()
@@ -131,21 +133,41 @@ if __name__ == '__main__':
                     print '     ', repr(decrypted)
             else:
                 print '     ', decrypted
-            # If APS layer build new packet with ZigbeeNWK so we can decrypt it
+
+            # If we have an APS layer, build new packet with ZigbeeNWK so we can decrypt it
             if decrypted.haslayer(ZigbeeAppDataPayload):
-                aps_encrypted = decrypted[ZigbeeAppDataPayload]
                 tmppkt = copy.copy(packet)
                 tmppkt[ZigbeeNWK].remove_payload()
+                aps_encrypted = decrypted[ZigbeeAppDataPayload]
                 tmppkt /= aps_encrypted
                 print '      decrypting APS...'
+                if args.verbose:
+                    print '          ', repr(tmppkt)
                 stat, app_decrypt= crypt(tmppkt)
                 if stat:
+                    aps_passed += 1
                     print '          ', app_decrypt.summary()
                     if args.verbose:
                         print '          ', repr(app_decrypt)
                 else:
+                    aps_failed += 1
                     print '          ', app_decrypt
-            print '      encrypting...'
+
+                print '      encrypting APS...'
+                tmppkt = copy.copy(packet)
+                tmppkt[ZigbeeNWK].remove_payload()
+                tmppkt /= decrypted[ZigbeeAppDataPayload]
+                if args.verbose:
+                    print '          ', repr(tmppkt)
+                stat, recrypt = crypt(tmppkt, data= app_decrypt, encrypt= True)
+                if stat:
+                    decrypted.data= recrypt.data
+                    if args.verbose:
+                        print '          ', repr(decrypted)
+                else:
+                    print '          ', recrypt
+
+            print '      encrypting NWK...'
             stat, newpkt= crypt(packet, data= decrypted, encrypt= True)
             if stat:
                 if args.verbose:
@@ -177,6 +199,8 @@ if __name__ == '__main__':
 
     print
     print '%d of %d packets tested' % (testcount, len(data))
-    print 'crypto passed:', passed
-    print 'crypto failed:', failed
+    print '  NWK crypto passed:', passed
+    print '  NWK crypto failed:', failed
+    print '    APS crypto passed:', aps_passed
+    print '    APS crypto failed:', aps_failed
     exit(False)

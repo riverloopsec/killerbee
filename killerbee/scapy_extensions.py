@@ -419,49 +419,47 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
         return None
 
     # This function destroys the packet, therefore work on a copy - @cutaway
-    pkt = source_pkt.copy()   #this is hack to fix the below line
-    pkt.nwk_seclevel = 5 #the issue appears to be when this is set
-    # Now recreate 'pkt' by rebuilding the raw data and mic to match seclevel 5
+    pkt = source_pkt.copy()
+
+    # DOT154_CRYPT_ENC_MIC32 is always used regardless of what is claimed in OTA packet, so we will force it here.
     # This is done because the value of nwk_seclevel in the ZigbeeSecurityHeader does
     # not have to be accurate in the transmitted frame: the Zigbee NWK standard states that
     # the nwk_seclevel should be overwritten in the received frame with the value that is being
     # used by all nodes in the Zigbee network - this is to ensure that unencrypted frames can't be
     # maliciously injected.  i.e. the receiver shouldn't trust the received nwk_seclevel.
+    # Recreate 'pkt' by rebuilding the raw data and mic to match:
+    pkt.nwk_seclevel = DOT154_CRYPT_ENC_MIC32
     pkt.data += pkt.mic
     pkt.mic = pkt.data[-4:]
     pkt.data = pkt.data[:-4]
 
     encrypted = pkt.data
-
-    # Bug fix thanks to cutaway (https://code.google.com/p/killerbee/issues/detail?id=25):
-    sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
-    # network and link keys use different addresses for the nonce calculation
-    if pkt.key_type == 0:
-        nonce = struct.pack('L',pkt[ZigbeeNWK].ext_src)+struct.pack('I',pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
-    else:
-        nonce = struct.pack('L',pkt[ZigbeeSecurityHeader].source)+struct.pack('I',pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
-
-    if verbose > 2:
-        print "Decrypt Details:"
-        print "\tKey:            " + key.encode('hex')
-        print "\tNonce:          " + nonce.encode('hex')
-        print "\tMic:            " + pkt.mic.encode('hex')
-        print "\tEncrypted Data: " + encrypted.encode('hex')
-
-    # For zigbeeData, we need the entire zigbee packet, minus the encrypted data and mic (4 bytes).
     # So calculate an amount to crop, equal to the size of the encrypted data and mic.  Note that
     # if there was an FCS, scapy will have already stripped it, so it will not returned by the
     # do_build() call below (and hence doesn't need to be taken into account in crop_size).
     crop_size = len(pkt.mic) + len(pkt[ZigbeeSecurityHeader].data)
 
-    # the Security Control Field flags have to be adjusted before this is calculated, so we store their original values so we can reset them later
-    zigbeeData = pkt[ZigbeeNWK].do_build()
+    # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
+    sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
+    if pkt.haslayer(ZigbeeAppDataPayload):
+        nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
+        zigbeeData = pkt[ZigbeeAppDataPayload].do_build()
+    else:
+        nonce = struct.pack('L',source_pkt[ZigbeeSecurityHeader].source)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
+        zigbeeData = pkt[ZigbeeNWK].do_build()
+    # For zigbeeData, we need the entire zigbee packet, minus the encrypted data and mic (4 bytes).
     zigbeeData = zigbeeData[:-crop_size]
 
     (payload, micCheck) = zigbee_crypt.decrypt_ccm(key, nonce, pkt.mic, encrypted, zigbeeData)
 
     if verbose > 2:
+        print "Decrypt Details:"
+        print "\tKey:            " + key.encode('hex')
+        print "\tNonce:          " + nonce.encode('hex')
+        print "\tZigbeeData:     " + zigbeeData.encode('hex')
         print "\tDecrypted Data: " + payload.encode('hex')
+        print "\tEncrypted Data: " + encrypted.encode('hex')
+        print "\tMic:            " + pkt.mic.encode('hex')
 
     frametype = pkt[ZigbeeNWK].frametype
     if frametype == 0 and micCheck == 1:
@@ -502,57 +500,64 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
         log_killerbee.error("Could not import zigbee_crypt extension, cryptographic functionality is not available.")
         return None
 
-    #TODO: Investigate and issue a different fix:
-    # https://code.google.com/p/killerbee/issues/detail?id=30
     # This function destroys the packet, therefore work on a copy - @cutaway
-    nwk_seclevel = source_pkt.nwk_seclevel
-    pkt = source_pkt.copy()   #this is hack to fix the below line
-    pkt.nwk_seclevel=5 #the issue appears to be when this is set
-    # Now recreate 'pkt' by rebuilding the raw data and creating a new scapy Packet, because
-    # scapy splits the data/mic according to the nwk_seclevel in the ZigbeeSecurityHeader when
-    # the scapy Packet is created.  The value of nwk_seclevel in the ZigbeeSecurityHeader does
+    pkt = source_pkt.copy()
+
+    # DOT154_CRYPT_ENC_MIC32 is always used regardless of what is claimed in OTA packet, so we will force it here.
+    # This is done because the value of nwk_seclevel in the ZigbeeSecurityHeader does
     # not have to be accurate in the transmitted frame: the Zigbee NWK standard states that
     # the nwk_seclevel should be overwritten in the received frame with the value that is being
     # used by all nodes in the Zigbee network - this is to ensure that unencrypted frames can't be
     # maliciously injected.  i.e. the receiver shouldn't trust the received nwk_seclevel.
-    newpkt = pkt.build()
-    if pkt.haslayer(Dot15d4FCS): pkt = Dot15d4FCS(newpkt)
-    else:                        pkt = Dot15d4(newpkt)
+    pkt.nwk_seclevel = DOT154_CRYPT_ENC_MIC32
 
+    # clear data and mic as we are about to create them
     pkt[ZigbeeSecurityHeader].data = ''
+    pkt[ZigbeeSecurityHeader].mic = ''
 
     if isinstance(data, Packet):
         decrypted = data.do_build()
     else:
         decrypted = data
 
+    # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
     sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
-    nonce = struct.pack('L',pkt[ZigbeeSecurityHeader].source)+struct.pack('I',pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
+    if pkt.haslayer(ZigbeeAppDataPayload):
+        nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
+        zigbeeData = pkt[ZigbeeAppDataPayload].do_build()
+    else:
+        nonce = struct.pack('L',source_pkt[ZigbeeSecurityHeader].source)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
+        zigbeeData = pkt[ZigbeeNWK].do_build()
+
+    # minimum security level is DOT154_CRYPT_ENC_MIC32 but provide more if requested
+    miclen= kbgetmiclen(source_pkt.nwk_seclevel)
+    if miclen < 4:
+        miclen= 4
+
+    (payload, mic) = zigbee_crypt.encrypt_ccm(key, nonce, miclen, decrypted, zigbeeData)
 
     if verbose > 2:
         print "Encrypt Details:"
         print "\tKey:            " + key.encode('hex')
         print "\tNonce:          " + nonce.encode('hex')
+        print "\tZigbeeData:     " + zigbeeData.encode('hex')
         print "\tDecrypted Data: " + decrypted.encode('hex')
-
-    crop_size = 4 + len(pkt[ZigbeeSecurityHeader].data)
-
-    # the Security Control Field flags have to be adjusted before this is calculated, so we store their original values so we can reset them later
-    pkt[ZigbeeSecurityHeader].nwk_seclevel = (pkt[ZigbeeSecurityHeader].nwk_seclevel | 0x05)
-    zigbeeData = pkt[ZigbeeNWK].do_build()
-    zigbeeData = zigbeeData[:-crop_size]
-    pkt[ZigbeeSecurityHeader].nwk_seclevel = nwk_seclevel
-
-    (payload, mic) = zigbee_crypt.encrypt_ccm(key, nonce, 4, decrypted, zigbeeData)
-
-    if verbose > 2:
         print "\tEncrypted Data: " + payload.encode('hex')
         print "\tMic:            " + mic.encode('hex')
 
-    # Set pkt's values to reflect the encrypted ones to it's ready to be sent
-    # note that calculated mic is for the encrypted sublayer, not the enclosing packet
-    # TODO: calculate mic for overall packet if required
+    # According to comments in e.g. https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-zbee-aps.c nwk_seclevel is not used any more but
+    # we should reconstruct and return what was asked for anyway.
+    pkt[ZigbeeSecurityHeader].nwk_seclevel = source_pkt[ZigbeeSecurityHeader].nwk_seclevel
     pkt[ZigbeeSecurityHeader].data = payload + mic
-    pkt[ZigbeeSecurityHeader].mic = ''
+    ota_miclen= kbgetmiclen(source_pkt.nwk_seclevel)
+    if ota_miclen > 0:
+        pkt[ZigbeeSecurityHeader].mic = pkt[ZigbeeSecurityHeader].data[-ota_miclen:]
+        pkt[ZigbeeSecurityHeader].data = pkt[ZigbeeSecurityHeader].data[:-ota_miclen]
     return pkt
 
+@conf.commands.register
+def kbgetmiclen(seclevel):
+    """Returns the MIC length in bytes for the specified packet security level"""
+    lengths= {DOT154_CRYPT_NONE:0, DOT154_CRYPT_MIC32:4, DOT154_CRYPT_MIC64:8, DOT154_CRYPT_MIC128:16, DOT154_CRYPT_ENC:0, DOT154_CRYPT_ENC_MIC32:4, DOT154_CRYPT_ENC_MIC64:8, DOT154_CRYPT_ENC_MIC128:16}
+
+    return lengths[seclevel]
