@@ -437,7 +437,7 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
     # So calculate an amount to crop, equal to the size of the encrypted data and mic.  Note that
     # if there was an FCS, scapy will have already stripped it, so it will not returned by the
     # do_build() call below (and hence doesn't need to be taken into account in crop_size).
-    crop_size = len(pkt.mic) + len(pkt[ZigbeeSecurityHeader].data)
+    crop_size = len(pkt.mic) + len(pkt.data)
 
     # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
     sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
@@ -512,8 +512,8 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
     pkt.nwk_seclevel = DOT154_CRYPT_ENC_MIC32
 
     # clear data and mic as we are about to create them
-    pkt[ZigbeeSecurityHeader].data = ''
-    pkt[ZigbeeSecurityHeader].mic = ''
+    pkt.data = ''
+    pkt.mic = ''
 
     if isinstance(data, Packet):
         decrypted = data.do_build()
@@ -547,12 +547,12 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
 
     # According to comments in e.g. https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-zbee-aps.c nwk_seclevel is not used any more but
     # we should reconstruct and return what was asked for anyway.
-    pkt[ZigbeeSecurityHeader].nwk_seclevel = source_pkt[ZigbeeSecurityHeader].nwk_seclevel
-    pkt[ZigbeeSecurityHeader].data = payload + mic
+    pkt.nwk_seclevel = source_pkt.nwk_seclevel
+    pkt.data = payload + mic
     ota_miclen= kbgetmiclen(source_pkt.nwk_seclevel)
     if ota_miclen > 0:
-        pkt[ZigbeeSecurityHeader].mic = pkt[ZigbeeSecurityHeader].data[-ota_miclen:]
-        pkt[ZigbeeSecurityHeader].data = pkt[ZigbeeSecurityHeader].data[:-ota_miclen]
+        pkt.mic = pkt.data[-ota_miclen:]
+        pkt.data = pkt.data[:-ota_miclen]
     return pkt
 
 @conf.commands.register
