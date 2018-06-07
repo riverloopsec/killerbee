@@ -135,6 +135,8 @@ if __name__ == '__main__':
                 print '     ', decrypted.summary()
                 if args.verbose:
                     print '     ', repr(decrypted)
+                if args.verbose > 2:
+                    print '     ', str(decrypted).encode('hex')
             else:
                 print '     ', decrypted
 
@@ -146,13 +148,16 @@ if __name__ == '__main__':
                 print '      decrypting APS...'
                 if args.verbose:
                     print '        ', repr(tmppkt)
-                    print tmppkt.command()
+                if args.verbose > 2:
+                    print '     ', str(tmppkt).encode('hex')
                 stat, app_decrypt= crypt(tmppkt)
                 if stat:
                     aps_passed += 1
                     print '        ', app_decrypt.summary()
                     if args.verbose:
                         print '        ', repr(app_decrypt)
+                    if args.verbose > 2:
+                        print '     ', str(app_decrypt).encode('hex')
                 else:
                     aps_failed += 1
                     print '        ', app_decrypt
