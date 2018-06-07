@@ -13,6 +13,9 @@ from scapy.all import *
 from killerbee import *
 from killerbee.scapy_extensions import *
 
+# APS security mask
+APS_SECURITY = 0x02
+
 # encrypt/decrypt packet with appropriate key
 def crypt(packet, data= None, encrypt= False):
     global link_key
@@ -93,6 +96,8 @@ if __name__ == '__main__':
         except:
             print >>sys.stderr, "ERROR: Invalid LINK_KEY"
             exit(True)
+    else:
+        link_key= None
 
     if args.pcapfile is not None:
         data= kbrdpcap(args.pcapfile)
@@ -133,15 +138,15 @@ if __name__ == '__main__':
             else:
                 print '     ', decrypted
 
-            # If we have an APS layer, build new packet with ZigbeeNWK so we can decrypt it
-            if decrypted.haslayer(ZigbeeAppDataPayload):
+            # If we have an APS layer and it's encrypted, build new packet with ZigbeeNWK so we can decrypt it
+            if decrypted.haslayer(ZigbeeAppDataPayload) and decrypted[ZigbeeAppDataPayload].frame_control & APS_SECURITY:
                 tmppkt = copy.copy(packet)
                 tmppkt[ZigbeeNWK].remove_payload()
-                aps_encrypted = decrypted[ZigbeeAppDataPayload]
-                tmppkt /= aps_encrypted
+                tmppkt /= decrypted[ZigbeeAppDataPayload]
                 print '      decrypting APS...'
                 if args.verbose:
                     print '        ', repr(tmppkt)
+                    print tmppkt.command()
                 stat, app_decrypt= crypt(tmppkt)
                 if stat:
                     aps_passed += 1
