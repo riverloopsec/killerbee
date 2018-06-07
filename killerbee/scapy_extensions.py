@@ -545,7 +545,7 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
         print "\tEncrypted Data: " + payload.encode('hex')
         print "\tMic:            " + mic.encode('hex')
 
-    # According to comments in e.g. https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-zbee-aps.c nwk_seclevel is not used any more but
+    # According to comments in e.g. https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-zbee-security.c nwk_seclevel is not used any more but
     # we should reconstruct and return what was asked for anyway.
     pkt.data = payload + mic
     pkt.nwk_seclevel = source_pkt.nwk_seclevel
