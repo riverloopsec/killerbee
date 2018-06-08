@@ -41,10 +41,14 @@ if __name__ == '__main__':
     # Command-line arguments
     parser = argparse.ArgumentParser(description="zbtestcrypt: \
         Decrypt, re-encrypt and optionally transmit packets for testing and tool development.")
+    parser.add_argument('-b', '--begin', action='store', type=int, dest='begin', default=0,
+        help='begin processing at packet #')
     parser.add_argument('-c', '--channel', action='store', type=int, default=11,
         help='tx/rx on given channel (default 11)')
     parser.add_argument('-D', action='store_true', dest='showdev',
         help='list KillerBee devices')
+    parser.add_argument('-e', '--end', action='store', type=int, dest='end', default=0,
+        help='end processing at packet #')
     parser.add_argument('-i', '--interface', action='store', type=str, default=None,
         help='provide the USB ID or Serial Device Path to use that device')
     parser.add_argument('-k', '--network_key', action='store', type=str, default=None,
@@ -57,10 +61,10 @@ if __name__ == '__main__':
         help='Daintree SNA file to test')
     parser.add_argument('-s', '--sleep', action='store', type=float, default=1.0,
         help='if tx, wait given seconds between packet injections (default 1.0)')
-    parser.add_argument('-t', '--transmit_both', action='store_true', dest='transmit_both',
-        help='transmit original and re-encrypted packets for independant capture/analysis')
-    parser.add_argument('-T', '--transmit_crypted', action='store_true', dest='transmit_crypted',
-        help='transmit only re-encrypted packets for independant capture/analysis')
+    parser.add_argument('-T', '--transmit_original', action='store_true', dest='transmit_original',
+        help='transmit original packets for independant capture/analysis')
+    parser.add_argument('-t', '--transmit_crypted', action='store_true', dest='transmit_crypted',
+        help='transmit re-encrypted packets for independant capture/analysis')
     parser.add_argument('-v', '--verbose', action='store', type=int, default=0,
         help='set debug verbosity')
     args = parser.parse_args()
@@ -118,6 +122,10 @@ if __name__ == '__main__':
     for packet in data:
         count += 1
         print
+        if args.begin and count < args.begin:
+            continue
+        if args.end and count > args.end:
+            break
         print 'Packet:', count
         print '  ', packet.summary()
         if args.verbose:
@@ -135,8 +143,8 @@ if __name__ == '__main__':
                 print '     ', decrypted.summary()
                 if args.verbose:
                     print '     ', repr(decrypted)
-                if args.verbose > 2:
-                    print '     ', str(decrypted).encode('hex')
+                if args.verbose > 1:
+                    print ' HEX:', str(decrypted).encode('hex')
             else:
                 print '     ', decrypted
 
@@ -148,16 +156,16 @@ if __name__ == '__main__':
                 print '      decrypting APS...'
                 if args.verbose:
                     print '        ', repr(tmppkt)
-                if args.verbose > 2:
-                    print '     ', str(tmppkt).encode('hex')
+                if args.verbose > 1:
+                    print ' HEX:', str(tmppkt).encode('hex')
                 stat, app_decrypt= crypt(tmppkt)
                 if stat:
                     aps_passed += 1
                     print '        ', app_decrypt.summary()
                     if args.verbose:
                         print '        ', repr(app_decrypt)
-                    if args.verbose > 2:
-                        print '     ', str(app_decrypt).encode('hex')
+                    if args.verbose > 1:
+                        print ' HEX:', str(app_decrypt).encode('hex')
                 else:
                     aps_failed += 1
                     print '        ', app_decrypt
@@ -191,15 +199,15 @@ if __name__ == '__main__':
                 print '   Packet match: FAILED!'
                 failed += 1
 
-        if args.transmit_both:
-            print '      transmitting ORIGINAL'
+        if args.transmit_original:
+            print '      transmitting ORIGINAL on channel', args.channel
             try:
                 kbsendp(packet, channel=args.channel, inter=args.sleep)
                 print '        OK'
             except:
                 print '        FAILED!'
-        if args.transmit_crypted or args.transmit_both:
-            print '      transmitting RE-ENCRYPTED'
+        if args.transmit_crypted:
+            print '      transmitting RE-ENCRYPTED on channel', args.channel
             try:
                 kbsendp(newpkt, channel=args.channel, inter=args.sleep)
                 print '        OK'
