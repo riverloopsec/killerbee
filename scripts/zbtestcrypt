@@ -13,6 +13,9 @@ from scapy.all import *
 from killerbee import *
 from killerbee.scapy_extensions import *
 
+# new scapy needs to know if we're using sixlowpan or zigbee
+conf.dot15d4_protocol = "zigbee"
+
 # APS security mask
 APS_SECURITY = 0x02
 
