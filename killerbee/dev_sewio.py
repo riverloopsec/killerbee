@@ -202,8 +202,8 @@ class SEWIO:
         if res is None:
             raise KBInterfaceError("Unable to parse the sniffer's current status.")
         # RUNNING means it's sniffing, STOPPED means it's not.
-        print("INFO: Status detected as {}".format(res.groups()))
-        return (res.group(1) == "RUNNING")
+        #print("INFO: Status detected as {}".format(res.group(1)))
+        return res.group(1) == "RUNNING"
 
     def __sync_status(self):
         '''
@@ -333,7 +333,7 @@ class SEWIO:
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.INJECT)
-	
+
         if len(packet) < 1:
             raise Exception('Empty packet')
         if len(packet) > 125:                # 127 -2 to accommodate FCS
@@ -449,9 +449,11 @@ class SEWIO:
             # Dissect the UDP packet
             (frame, ch, validcrc, rssi, lqival, recdtime) = self.__parse_zep_v2(data)
             #print("Valid CRC", validcrc, "LQI", lqival, "RSSI", rssi)
-            if frame == None or (ch is not None and ch != self._channel):
-                #TODO this maybe should be an error condition, instead of ignored?
-                print("ZEP parsing issue (bytes length={0}, channel={1}).".format(len(frame) if frame is not None else None, ch))
+            #NOTE: Some applications, like zbstumbler, will get data from a different channel than we are currently
+            #   on, and thus raising these as an error fails in this case.
+            if frame == None:  # or (ch is not None and ch != self._channel):
+                #TODO: Sort out situations for error vs warning
+                print("WARN: ZEP parsing issue (bytes length={0}, channel={1}).".format(len(frame) if frame is not None else None, ch))
                 continue
             break
 
@@ -462,34 +464,36 @@ class SEWIO:
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
         result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'dbm':None, 'location':None, 'datetime':recdtime}
         if rssi is not None:
-            # Per note from Sewino team regarding encoding of RSSI value as 2's complement dBm values
+            # Per note from Sewio team regarding encoding of RSSI value as 2's complement dBm values
             if rssi > 127:  result['dbm'] = rssi - 256
             else:           result['dbm'] = rssi
         return result
 
     def jammer_on(self, channel=None, method=None):
         '''
-        Not yet implemented.
+        Transmit a constant jamming signal following the given mode.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type method: String
+        @param method: One of the mode values supported by the device:
+            "1" - PRBS: AAAA...
+            "2" - PRBS: 0000...
+            "3" - PRBS: FFFF...
+            "4" - Fc - 0.5 MHz
+            "5" - Fc + 0.5 MHz
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
         if method is not None and method not in ["1","2","3","4","5"]:
             raise ValueError("Jamming method is unsupported by this driver.")
+        elif method is None:
+            method = "1"  #default to 1
 
         if channel != None:
             self.set_channel(channel)
 
         # Parameter enumeration
         # http://10.10.10.2/test.cgi?chn=15&mode=1&module=0&txlevel=0
-        #
-        # mode
-        #   1 - PRBS: AAAA...
-        #   2 - PRBS: 0000...
-        #   3 - PRBS: FFFF...
-        #   4 - Fc - 0.5 MHz
-        #   5 - Fc + 0.5 MHz
         #
         # txlevel
         #   0 - 3.0 dBm

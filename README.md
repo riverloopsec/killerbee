@@ -175,6 +175,10 @@ This hardware supports both 900 MHz as well as the 2.4 GHz channels.
 The early hardware supports sniffing.
 The gen3 hardware, firmware version 0.9.0+, supports injection and jamming.
 
+To use this, you must:
+ - configure your computer to be on the 10.10.10.0/24 network, to communicate with the device's default IP
+ - provide the `-i 10.10.10.2` or similar flags to utilities so it detects this device
+
 _This is currently supported for beta._
 
 TOOLS
