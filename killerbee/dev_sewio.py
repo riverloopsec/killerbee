@@ -159,8 +159,9 @@ class SEWIO:
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_900, True)
-        #TODO: Add jamming in newer firmware based on self.__revision_num.
-        #TODO: Add injection capability in newer firmware.
+        if ( self.__revision_num == "0.9.0" ):
+            self.capabilities.setcapab(KBCapabilities.INJECT, True)
+            self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
         return
 
     # KillerBee expects the driver to implement this function
@@ -320,9 +321,39 @@ class SEWIO:
     # KillerBee expects the driver to implement this function
     def inject(self, packet, channel=None, count=1, delay=0):
         '''
-        Not implemented.
+        Injects the specified packet contents.
+        @type packet: String
+        @param packet: Packet contents to transmit, without FCS.
+        @type channel: Integer
+        @param channel: Sets the channel, optional
+        @type count: Integer
+        @param count: Transmits a specified number of frames, def=1
+        @type delay: Float
+        @param delay: Delay between each frame, def=0
+        @rtype: None
         '''
         self.capabilities.require(KBCapabilities.INJECT)
+	
+        if len(packet) < 1:
+            raise Exception('Empty packet')
+        if len(packet) > 125:                # 127 -2 to accommodate FCS
+            raise Exception('Packet too long')
+
+        if channel != None:
+            self.set_channel(channel)
+
+        # Example of packet injection:
+        #   Auto CRC ON
+        # http://10.10.10.2/inject.cgi?chn=15&modul=0&txlevel=0&rxen=0&nrepeat=1&tspace=1&autocrc=1&spayload=010203&len=3
+        
+        packet = packet.encode('hex')        # API accepts string hex payload
+        packet_length = len(packet) / 2   
+         
+        self.__make_rest_call(
+            "inject.cgi?chn={0}&modul=0&txlevel=0&rxen=1&nrepeat={1}&tspace={2}&autocrc=1&spayload={3}&len={4}".format(
+                self._channel, count, delay, packet, packet_length
+            )
+        )
 
     @staticmethod
     def __parse_zep_v2(data):
@@ -444,12 +475,45 @@ class SEWIO:
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
+        
+        if channel != None:
+            self.set_channel(channel)
+
+        # Parameter enumeration
+        # http://10.10.10.2/test.cgi?chn=15&mode=1&module=0&txlevel=0
+        #
+        # mode
+        #   1 - PRBS: AAAA...
+        #   2 - PRBS: 0000...
+        #   3 - PRBS: FFFF...
+        #   4 - Fc - 0.5 MHz
+        #   5 - Fc + 0.5 MHz
+        #
+        # txlevel
+        #   0 - 3.0 dBm
+        #   2 - 2.3 dBm
+        #   4 - 1.3 dBm
+        #   6 - 0.0 dBm
+        #   9 - -3.0 dBm
+        #   c - -7.0 dBm
+        #   f - -17.0 dBm        
+    
+        if not self.__make_rest_call("test.cgi?chn={0}&mode=1&module=0&txlevel=0".format(self._channel), fetch=False):
+            raise KBInterfaceError("Error instructing sniffer to start jamming.")
 
     def jammer_off(self, channel=None):
         '''
         Not yet implemented.
-        @return: None
+        @type channel: Integer
+        @param channel: Sets the channel, optional
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
+        
+        if channel != None:
+            self.set_channel(channel)
+
+        if not self.__make_rest_call("status.cgi?p=4"):
+            raise KBInterfaceError("Error instructing sniffer to stop jamming.")
+        
 
