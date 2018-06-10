@@ -191,14 +191,17 @@ class TELOSB:
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, method=None):
         '''
-        Not yet implemented.
+        Implements reflexive jamming.
+        Targeted frames must be >12 bytes for reliable jamming in current firmware.
         @type channel: Integer
         @param channel: Sets the channel, optional
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM_REFLEX)
+        if method is not None and method != "reflexive":
+            raise ValueError("Jamming method is unsupported by this driver.")
 
         self.handle.RF_promiscuity(1)
         self.handle.RF_autocrc(0)

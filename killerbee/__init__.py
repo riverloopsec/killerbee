@@ -299,13 +299,22 @@ class KillerBee:
         '''
         return self.driver.pnext(timeout)
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, method=None):
         '''
-        Attempts reflexive jamming on all 802.15.4 frames.
-        Targeted frames must be >12 bytes for reliable jamming in current firmware.
+        Attempts jamming against 802.15.4 frames on the given channel.
         @type channel: Integer
         @param channel: Sets the channel, optional.
+        @type method: String
+        @param method: Sets which method the jammer should use.
+            The driver must raise a ValueError exception if it doesn't know the given type.
+            If a value is not provided, the driver may pick their default method.
         @rtype: None
         '''
-        return self.driver.jammer_on(channel=channel)
+        return self.driver.jammer_on(channel=channel, method=method)
 
+    def jammer_off(self):
+        '''
+        Instruct the device to stop jamming.
+        @rtype: None
+        '''
+        return self.driver.jammer_off()

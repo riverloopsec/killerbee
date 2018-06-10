@@ -274,14 +274,14 @@ class SEWIO:
     @staticmethod
     def __get_default_modulation(channel):
         '''
-        Return the Sewio-specific integer representing the modulation which
-        should be choosen to be IEEE 802.15.4 complinating for a given channel 
+        Return the Sewio-specific string value representing the modulation which
+        should be chosen to be IEEE 802.15.4 complinating for a given channel
         number.
         Captured values from sniffing Sewio web interface, unsure why these
-        are done as such.
+        are encoded in this way.
         Available modulations are listed at:
         http://www.sewio.net/open-sniffer/develop/http-rest-interface/
-        @rtype: Integer, or None if unable to determine modulation
+        @rtype: String, or None if unable to determine modulation
         '''
         if channel >= 11 or channel <= 26: return '0'   #O-QPSK 250 kb/s 2.4GHz
         elif channel >= 1 or channel <= 10: return 'c'  #O-QPSK 250 kb/s 915MHz
@@ -345,10 +345,10 @@ class SEWIO:
         # Example of packet injection:
         #   Auto CRC ON
         # http://10.10.10.2/inject.cgi?chn=15&modul=0&txlevel=0&rxen=0&nrepeat=1&tspace=1&autocrc=1&spayload=010203&len=3
-        
-        packet = packet.encode('hex')        # API accepts string hex payload
-        packet_length = len(packet) / 2   
-         
+
+        packet_length = len(packet)
+        packet = packet.encode('hex')  # API accepts string hex payload, but the byte length of the un-encoded frame.
+
         self.__make_rest_call(
             "inject.cgi?chn={0}&modul=0&txlevel=0&rxen=1&nrepeat={1}&tspace={2}&autocrc=1&spayload={3}&len={4}".format(
                 self._channel, count, delay, packet, packet_length
@@ -448,7 +448,7 @@ class SEWIO:
                 continue
             # Dissect the UDP packet
             (frame, ch, validcrc, rssi, lqival, recdtime) = self.__parse_zep_v2(data)
-            print "Valid CRC", validcrc, "LQI", lqival, "RSSI", rssi
+            #print("Valid CRC", validcrc, "LQI", lqival, "RSSI", rssi)
             if frame == None or (ch is not None and ch != self._channel):
                 #TODO this maybe should be an error condition, instead of ignored?
                 print("ZEP parsing issue (bytes length={0}, channel={1}).".format(len(frame) if frame is not None else None, ch))
@@ -467,7 +467,7 @@ class SEWIO:
             else:           result['dbm'] = rssi
         return result
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, method=None):
         '''
         Not yet implemented.
         @type channel: Integer
@@ -475,7 +475,9 @@ class SEWIO:
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
-        
+        if method is not None and method not in ["1","2","3","4","5"]:
+            raise ValueError("Jamming method is unsupported by this driver.")
+
         if channel != None:
             self.set_channel(channel)
 
@@ -498,22 +500,17 @@ class SEWIO:
         #   c - -7.0 dBm
         #   f - -17.0 dBm        
     
-        if not self.__make_rest_call("test.cgi?chn={0}&mode=1&module=0&txlevel=0".format(self._channel), fetch=False):
+        if not self.__make_rest_call("test.cgi?chn={0}&mode={1}&module=0&txlevel=0".format(self._channel, method), fetch=False):
             raise KBInterfaceError("Error instructing sniffer to start jamming.")
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self):
         '''
-        Not yet implemented.
+        Instruct the device to stop jamming.
         @type channel: Integer
         @param channel: Sets the channel, optional
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
         
-        if channel != None:
-            self.set_channel(channel)
-
         if not self.__make_rest_call("status.cgi?p=4"):
             raise KBInterfaceError("Error instructing sniffer to stop jamming.")
-        
-

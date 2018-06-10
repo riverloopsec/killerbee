@@ -265,8 +265,7 @@ class CC253x:
                 ret['bytes'] = ret[0]
                 return ret
 
-
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, method=None):
         '''
         Not yet implemented.
         @type channel: Integer
@@ -279,7 +278,7 @@ class CC253x:
         '''Set the register controlling the 802.15.4 PHY sync byte.'''
         raise Exception('Not yet implemented')
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self):
         '''
         Not yet implemented.
         @return: None

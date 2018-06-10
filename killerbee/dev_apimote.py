@@ -209,22 +209,28 @@ class APIMOTE:
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, method=None):
         '''
-        Not yet implemented.
+        Implements reflexive jamming or constant carrier wave jamming.
         @type channel: Integer
         @param channel: Sets the channel, optional
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM_REFLEX)
+        if method is not None and method not in ["reflexive","constant"]:
+            raise ValueError("Jamming method is unsupported by this driver.")
 
         self.handle.RF_promiscuity(1)
         self.handle.RF_autocrc(0)
         if channel != None:
             self.set_channel(channel)
         self.handle.CC_RFST_RX()
-        self.handle.RF_carrier() #constant carrier wave jamming
-        #self.handle.RF_reflexjam() #reflexive jamming (advanced)
+        if method == "reflexive":
+            #NOTE: Untested
+            self.handle.RF_reflexjam()  # reflexive jamming (advanced)
+        else:
+            self.handle.RF_carrier()    #constant carrier wave jamming
+        #TODO: Check success
 
     def set_sync(self, sync=0xA70F):
         '''Set the register controlling the 802.15.4 PHY sync byte.'''
@@ -233,7 +239,7 @@ class APIMOTE:
             raise Exception("Sync word (%x) must be 2-bytes or less." % sync)
         return self.handle.poke(CC2420_REG_SYNC, sync)
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self):
         '''
         Not yet implemented.
         @return: None

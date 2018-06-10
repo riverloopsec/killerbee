@@ -167,6 +167,16 @@ In order to get the full functionality included in KillerBee, the RZ RAVEN USB
 Stick must be flashed with the custom firmware included in the `firmware/ `
 directory. _See `firmware/README.md` for details._
 
+Sewio OpenSniffer
+----------------
+
+This hardware supports both 900 MHz as well as the 2.4 GHz channels.
+
+The early hardware supports sniffing.
+The gen3 hardware, firmware version 0.9.0+, supports injection and jamming.
+
+_This is currently supported for beta._
+
 TOOLS
 ================
 KillerBee includes several tools designed to attack ZigBee and IEEE 802.15.4
@@ -287,18 +297,19 @@ Please us the ticketing system at https://github.com/riverloopsec/killerbee/issu
 
 The original version was written by: jwright@willhackforsushi.com
 The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
-Additional Tools/Fixes by: bryanhalf@gmail.com
+Additional Tools/Fixes by bryanhalf@gmail.com and other fine individuals.
 
 THANKS
 ==============
 A word of thanks to several folks who helped out with this project:
 
-+ Travis Goodspeed
++ Travis Goodspeed (TelosB firmware based on GoodFET)
 + Mike Kershaw (dragorn)
 + Chris Wang (aikiba)
 + Nick DePetrillo
 + Ed Skoudis
 + Matt Carpenter
 + Sergey Bratus (research support at Dartmouth)
-+ Jeff Spielberg
++ Jeff Spielberg (River Loop Security)
 + Scytmo (bug fixes and CC2530/1 EMK board support)
++ null0x00 (Sewio injection/jamming)
