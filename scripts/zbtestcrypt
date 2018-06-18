@@ -221,6 +221,7 @@ if __name__ == '__main__':
             else:
                 print '     ', decrypted
                 newpkt= None
+                failed += 1
 
         if args.transmit_original:
             print '      transmitting ORIGINAL on channel', args.channel
