@@ -13,11 +13,13 @@ from scapy.all import *
 from killerbee import *
 from killerbee.scapy_extensions import *
 
+from rangeparser import RangeParser
+
 # new scapy needs to know if we're using sixlowpan or zigbee
 conf.dot15d4_protocol = "zigbee"
 
-# APS security mask
-APS_SECURITY = 0x02
+# parser for packet ranges
+rangeparser= RangeParser()
 
 # encrypt/decrypt packet with appropriate key
 def crypt(packet, data= None, encrypt= False):
@@ -58,6 +60,8 @@ if __name__ == '__main__':
         help='provide the NWK_KEY in HEX')
     parser.add_argument('-l', '--link_key', action='store', type=str, default=None,
         help='provide the LINK_KEY in HEX')
+    parser.add_argument('-p', '--packet_range', action='store', type=str, default=None,
+        help='process range of packets - e.g. "1,5,12-19,42"')
     parser.add_argument('-r', '--pcapfile', action='store', default=None,
         help='pcap file to test')
     parser.add_argument('-R', '--dsnafile', action='store', default=None,
@@ -93,6 +97,8 @@ if __name__ == '__main__':
         except:
             print >>sys.stderr, "ERROR: Invalid NWK_KEY"
             exit(True)
+    else:
+        nwk_key= None
 
     if args.link_key and len(args.link_key) != 32:
         print >>sys.stderr, "ERROR: Must specify 16 byte LINK_KEY in HEX"
@@ -105,6 +111,15 @@ if __name__ == '__main__':
             exit(True)
     else:
         link_key= None
+
+    if (args.begin or args.end) and args.packet_range:
+        print >>sys.stderr, "ERROR: Specify begin/end or packet_range"
+        exit(True)
+
+    if args.packet_range:
+        packets= rangeparser.parse(args.packet_range)
+    else:
+        packets= None
 
     if args.pcapfile is not None:
         data= kbrdpcap(args.pcapfile)
@@ -124,11 +139,13 @@ if __name__ == '__main__':
 
     for packet in data:
         count += 1
-        print
         if args.begin and count < args.begin:
             continue
         if args.end and count > args.end:
             break
+        if packets and not count in packets:
+            continue
+        print
         print 'Packet:', count
         print '  ', packet.summary()
         if args.verbose:
@@ -148,59 +165,62 @@ if __name__ == '__main__':
                     print '     ', repr(decrypted)
                 if args.verbose > 1:
                     print ' HEX:', str(decrypted).encode('hex')
+
+                # If we have an APS layer and it's encrypted, build new packet with ZigbeeNWK so we can decrypt it
+                if decrypted.haslayer(ZigbeeAppDataPayload) and decrypted.haslayer(ZigbeeSecurityHeader):
+                    tmppkt = copy.copy(packet)
+                    tmppkt[ZigbeeNWK].remove_payload()
+                    tmppkt /= decrypted[ZigbeeAppDataPayload]
+                    print '      decrypting APS...'
+                    if args.verbose:
+                        print '        ', repr(tmppkt)
+                    if args.verbose > 1:
+                        print ' HEX:', str(tmppkt).encode('hex')
+                    stat, app_decrypt= crypt(tmppkt)
+                    if stat:
+                        aps_passed += 1
+                        print '        ', app_decrypt.summary()
+                        if args.verbose:
+                            print '        ', repr(app_decrypt)
+                        if args.verbose > 1:
+                            print ' HEX:', str(app_decrypt).encode('hex')
+                    else:
+                        aps_failed += 1
+                        print '        ', app_decrypt
+    
+                    print '      encrypting APS...'
+                    tmppkt = copy.copy(packet)
+                    tmppkt[ZigbeeNWK].remove_payload()
+                    tmppkt /= decrypted[ZigbeeAppDataPayload]
+                    if args.verbose:
+                        print '          ', repr(tmppkt)
+                    stat, recrypt = crypt(tmppkt, data= app_decrypt, encrypt= True)
+                    if stat:
+                        decrypted.data= recrypt.data
+                        decrypted.mic= recrypt.mic
+                        if args.verbose:
+                            print '          ', repr(decrypted)
+                    else:
+                        print '          ', recrypt
+
+                print '   encrypting NWK...'
+                stat, newpkt= crypt(packet, data= decrypted, encrypt= True)
+                if stat:
+                    if args.verbose:
+                        print '  ', repr(newpkt)
+                else:
+                    print '     ', newpkt
+                if newpkt == packet:
+                    print '   Packet match: OK'
+                    passed += 1
+                else:
+                    print '   Packet match: FAILED!'
+                    failed += 1
+
+            # NWK decrypt failed
             else:
                 print '     ', decrypted
-
-            # If we have an APS layer and it's encrypted, build new packet with ZigbeeNWK so we can decrypt it
-            if decrypted.haslayer(ZigbeeAppDataPayload) and decrypted[ZigbeeAppDataPayload].frame_control & APS_SECURITY:
-                tmppkt = copy.copy(packet)
-                tmppkt[ZigbeeNWK].remove_payload()
-                tmppkt /= decrypted[ZigbeeAppDataPayload]
-                print '      decrypting APS...'
-                if args.verbose:
-                    print '        ', repr(tmppkt)
-                if args.verbose > 1:
-                    print ' HEX:', str(tmppkt).encode('hex')
-                stat, app_decrypt= crypt(tmppkt)
-                if stat:
-                    aps_passed += 1
-                    print '        ', app_decrypt.summary()
-                    if args.verbose:
-                        print '        ', repr(app_decrypt)
-                    if args.verbose > 1:
-                        print ' HEX:', str(app_decrypt).encode('hex')
-                else:
-                    aps_failed += 1
-                    print '        ', app_decrypt
-
-                print '      encrypting APS...'
-                tmppkt = copy.copy(packet)
-                tmppkt[ZigbeeNWK].remove_payload()
-                tmppkt /= decrypted[ZigbeeAppDataPayload]
-                if args.verbose:
-                    print '          ', repr(tmppkt)
-                stat, recrypt = crypt(tmppkt, data= app_decrypt, encrypt= True)
-                if stat:
-                    decrypted.data= recrypt.data
-                    decrypted.mic= recrypt.mic
-                    if args.verbose:
-                        print '          ', repr(decrypted)
-                else:
-                    print '          ', recrypt
-
-            print '   encrypting NWK...'
-            stat, newpkt= crypt(packet, data= decrypted, encrypt= True)
-            if stat:
-                if args.verbose:
-                    print '  ', repr(newpkt)
-            else:
-                print '     ', newpkt
-            if newpkt == packet:
-                print '   Packet match: OK'
-                passed += 1
-            else:
-                print '   Packet match: FAILED!'
-                failed += 1
+                newpkt= None
 
         if args.transmit_original:
             print '      transmitting ORIGINAL on channel', args.channel
@@ -209,7 +229,7 @@ if __name__ == '__main__':
                 print '        OK'
             except:
                 print '        FAILED!'
-        if args.transmit_crypted:
+        if args.transmit_crypted and newpkt:
             print '      transmitting RE-ENCRYPTED on channel', args.channel
             try:
                 kbsendp(newpkt, channel=args.channel, inter=args.sleep)
