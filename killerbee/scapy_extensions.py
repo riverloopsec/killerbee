@@ -445,8 +445,6 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
     # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
     sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
     if pkt.haslayer(ZigbeeAppDataPayload):
-        print 'source_pkt[ZigbeeNWK].ext_src', '%x' % source_pkt[ZigbeeNWK].ext_src
-        print 'source_pkt[ZigbeeSecurityHeader].fc', '%x' % source_pkt[ZigbeeSecurityHeader].fc
         nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
         zigbeeData = pkt[ZigbeeAppDataPayload].do_build()
     else:
