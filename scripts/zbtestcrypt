@@ -80,6 +80,8 @@ if __name__ == '__main__':
         show_dev()
         exit(False)
 
+    print
+
     if args.pcapfile == None and args.dsnafile == None:
         print >>sys.stderr, "ERROR: Must specify a capture file using -r (libpcap) or -R (Daintree SNA)"
         exit(True)
@@ -94,6 +96,7 @@ if __name__ == '__main__':
     if args.network_key:
         try:
             nwk_key= args.network_key.decode('hex')
+            print ' NWK_KEY:', nwk_key.encode('hex').upper()
         except:
             print >>sys.stderr, "ERROR: Invalid NWK_KEY"
             exit(True)
@@ -106,6 +109,7 @@ if __name__ == '__main__':
     if args.link_key:
         try:
             link_key= args.link_key.decode('hex')
+            print 'LINK_KEY:', link_key.encode('hex').upper()
         except:
             print >>sys.stderr, "ERROR: Invalid LINK_KEY"
             exit(True)
@@ -123,12 +127,14 @@ if __name__ == '__main__':
 
     if args.pcapfile is not None:
         data= kbrdpcap(args.pcapfile)
+        fname= args.pcapfile
 
     if args.dsnafile is not None:
         data= kbrddain(args.dsnafile)
+        fname= args.dsnafile
 
     print
-    print '%d packets read' % len(data)
+    print '%d packets read from %s' % (len(data), fname)
 
     count= 0
     testcount= 0
@@ -157,8 +163,12 @@ if __name__ == '__main__':
             continue
 
         if packet.haslayer(ZigbeeSecurityHeader):
-            print '   decrypting NWK...'
-            stat, decrypted = crypt(packet)
+            # only decrypt if APS layer is not already in the plain
+            if not packet.haslayer(ZigbeeAppDataPayload):
+                print '   decrypting NWK...'
+                stat, decrypted = crypt(packet)
+            else:
+                stat, decrypted = True, copy.copy(packet)
             if stat:
                 print '     ', decrypted.summary()
                 if args.verbose:
@@ -171,6 +181,9 @@ if __name__ == '__main__':
                     tmppkt = copy.copy(packet)
                     tmppkt[ZigbeeNWK].remove_payload()
                     tmppkt /= decrypted[ZigbeeAppDataPayload]
+                    # if no ext_src we must provide it
+                    if not tmppkt[ZigbeeNWK].ext_src:
+                        tmppkt[ZigbeeNWK].ext_src= packet[ZigbeeSecurityHeader].source
                     print '      decrypting APS...'
                     if args.verbose:
                         print '        ', repr(tmppkt)
@@ -192,6 +205,9 @@ if __name__ == '__main__':
                     tmppkt = copy.copy(packet)
                     tmppkt[ZigbeeNWK].remove_payload()
                     tmppkt /= decrypted[ZigbeeAppDataPayload]
+                    # if no ext_src we must provide it
+                    if not tmppkt[ZigbeeNWK].ext_src:
+                        tmppkt[ZigbeeNWK].ext_src= packet[ZigbeeSecurityHeader].source
                     if args.verbose:
                         print '          ', repr(tmppkt)
                     stat, recrypt = crypt(tmppkt, data= app_decrypt, encrypt= True)
