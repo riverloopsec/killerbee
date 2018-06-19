@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
         if packet.haslayer(ZigbeeSecurityHeader):
             # only decrypt if APS layer is not already in the plain
-            if not packet.haslayer(ZigbeeAppDataPayload):
+            if not packet.haslayer(ZigbeeAppDataPayload) and packet[ZigbeeSecurityHeader].data != '':
                 print '   decrypting NWK...'
                 stat, decrypted = crypt(packet)
             else:
@@ -174,7 +174,7 @@ if __name__ == '__main__':
                     print ' HEX:', str(decrypted).encode('hex')
 
                 # If we have an APS layer and it's encrypted, build new packet with ZigbeeNWK so we can decrypt it
-                if decrypted.haslayer(ZigbeeAppDataPayload) and decrypted.haslayer(ZigbeeSecurityHeader):
+                if decrypted.haslayer(ZigbeeAppDataPayload) and decrypted.haslayer(ZigbeeSecurityHeader) and decrypted[ZigbeeSecurityHeader].data != '':
                     tmppkt = copy.copy(packet)
                     tmppkt[ZigbeeNWK].remove_payload()
                     tmppkt /= decrypted[ZigbeeAppDataPayload]
@@ -196,7 +196,7 @@ if __name__ == '__main__':
                             print ' HEX:', str(app_decrypt).encode('hex')
                     else:
                         aps_failed += 1
-                        print '        ', app_decrypt
+                        print '         FAILED:', app_decrypt
     
                     print '      encrypting APS...'
                     tmppkt = copy.copy(packet)
@@ -232,7 +232,7 @@ if __name__ == '__main__':
 
             # NWK decrypt failed
             else:
-                print '     ', decrypted
+                print '     FAILED:', decrypted
                 newpkt= None
                 failed += 1
 
