@@ -15,9 +15,6 @@ from killerbee.scapy_extensions import *
 
 from rangeparser import RangeParser
 
-# new scapy needs to know if we're using sixlowpan or zigbee
-conf.dot15d4_protocol = "zigbee"
-
 # parser for packet ranges
 rangeparser= RangeParser()
 
