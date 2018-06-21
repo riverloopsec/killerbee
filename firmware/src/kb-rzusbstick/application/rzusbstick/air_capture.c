@@ -365,7 +365,7 @@ bool air_capture_set_channel(uint8_t channel) {
 bool air_capture_open_stream(void) {
     /* Check that the AirCapture application is initialized and not busy. */
     if (AC_IDLE != ac_state) { return false; }
-    
+
     /* Initialize the frame pool in the RF230 device driver and set the radio 
      * transceiver in receive mode. 
      */
@@ -402,6 +402,8 @@ bool air_capture_open_stream(void) {
             rf230_set_callback_handler(air_capture_callback);
             ac_state = AC_BUSY_CAPTURING;
             ac_open_stream_status = true;
+            /* indicate that we are active */
+            Blink_Blue_LED = true;
         } // END: if (RX_ON != rf230_subregister_read(SR_TRX_STATUS)) ...
     } // END: if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) ...
     
@@ -424,6 +426,8 @@ bool air_capture_close_stream(void) {
     } else {
         ac_state = AC_IDLE;
         ac_close_stream_status = true;
+        /* indicate that we are no longer active */
+        Blink_Blue_LED = false;
     } // END: if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) ...
     
     return ac_close_stream_status;
@@ -492,6 +496,7 @@ uint8_t air_capture_inject_frame(uint8_t length, uint8_t *frame) {
         /* Update state information. */
         ac_state = AC_BUSY_TRANSMITTING;
         ac_inject_frame_status = true;
+        LED_RED_ON();
     } // END: if (PLL_ON != rf230_subregister_read(SR_TRX_STATUS)) ...
 	
 	if (ac_inject_frame_status == true) {
@@ -531,6 +536,8 @@ bool air_capture_jammer_on(void) {
         rf230_register_write(0x02, 0x02);
         ac_state = AC_BUSY_JAMMING;
         ac_jammer_on_status = true;
+        LED_RED_ON();
+        LED_GREEN_ON();
     } // END: if (PLL_ON != rf230_subregister_read(SR_TRX_STATUS)) ...
     
     return ac_jammer_on_status;
@@ -547,6 +554,8 @@ bool air_capture_jammer_off(void) {
     } else {
         ac_state = AC_IDLE;
         ac_jammer_off_status = true;
+        LED_RED_OFF();
+        LED_GREEN_OFF();
     } // END: if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) ...
     
     return ac_jammer_off_status;
@@ -571,7 +580,7 @@ static void air_capture_callback(uint8_t isr_event) {
      */
     if (RF230_TRX_END_MASK == (isr_event & RF230_TRX_END_MASK)) {
     /* End of frame indicated. Upload it if there is packets in the pool left. */
-        if (0 == items_free) { nmbr_of_frames_missed++; return; }
+        if (0 == items_free) { nmbr_of_frames_missed++; LED_GREEN_OFF(); return; }
         
         RF230_SS_LOW();
         
@@ -637,8 +646,11 @@ static void air_capture_callback(uint8_t isr_event) {
         
         /* Read CRC flag. */
         RF230_QUICK_SUBREGISTER_READ(RG_PHY_RSSI , 0x80, 7, (this_acdu->crc));
+
+        LED_GREEN_OFF();
     } else if (RF230_RX_START_MASK == (isr_event & RF230_RX_START_MASK)) {
         /* Start of frame indicated. Read RSSI and timestamp the frame. */
+        LED_GREEN_ON();
         acdu_time_stamp = vrt_timer_get_tick_cnt() / AC_TICK_PER_US;
         RF230_QUICK_SUBREGISTER_READ(0x06, 0x1F, 0, acdu_rssi);
     } else {
@@ -685,6 +697,7 @@ static void air_capture_transmission_callback(uint8_t isr_event) {
         RF230_QUICK_SUBREGISTER_WRITE(0x02, 0x1f, 0, CMD_FORCE_TRX_OFF);
         delay_us(TIME_CMD_FORCE_TRX_OFF);
         ac_state = AC_IDLE;
+        LED_RED_OFF();
     } // END: if (RF230_TRX_END_MASK == (isr_event & RF230_TRX_END_MASK))...
 }
 //! @}

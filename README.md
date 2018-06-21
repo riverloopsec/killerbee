@@ -280,3 +280,4 @@ A word of thanks to several folks who helped out with this project:
 + Sergey Bratus (research support at Dartmouth)
 + Jeff Spielberg
 + Scytmo (bug fixes and CC2530/1 EMK board support)
++ Adam Laurie/rfidiot (bug fixes, APS crypto implementation, firmware support)

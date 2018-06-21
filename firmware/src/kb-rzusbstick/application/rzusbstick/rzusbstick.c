@@ -47,12 +47,15 @@
 #define BLOCK_COUNT_2 (AC_ACDU_FIFO_SIZE + NWK_EVENT_FIFO_SIZE)
 /*================================= TYEPDEFS         =========================*/
 /*================================= GLOBAL VARIABLES =========================*/
+bool Blink_Blue_LED= false;
 /*================================= LOCAL VARIABLES  =========================*/
 static vrt_mem_partition_desc_t partition1;
 static uint8_t partition_buffer1[BLOCK_SIZE_1 * BLOCK_COUNT_1];
 
 static vrt_mem_partition_desc_t partition2;
 static uint8_t partition_buffer2[BLOCK_SIZE_2 * BLOCK_COUNT_2];
+
+static uint16_t loop_count = 0;
 /*================================= PROTOTYPES       =========================*/
 bool avr_init(void);
 static void error_handler(void);
@@ -126,13 +129,11 @@ int main(void) {
     /* Disable modules that are not needed any more. */
     eep_deinit();
     
-    LED_ORANGE_ON();
-        
     /* Enable interrupts. */
     sei();
     
 	/* Endless application loop. */
-	for(;;) {
+	for(;;++loop_count) {
         /* Dispatch events from the event queue. */
 		vrt_dispatch_event();
         
@@ -141,6 +142,12 @@ int main(void) {
         usb_task();
         air_capture_task();
         cmd_if_task();
+
+        /* show we're alive */
+        if (Blink_Blue_LED && loop_count % 8192 == 0)
+            LED_BLUE_TOGGLE();
+        if (!Blink_Blue_LED)
+            LED_BLUE_ON();
 	}
 }
 /* EOF */

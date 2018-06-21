@@ -29,6 +29,10 @@
 
 #include "compiler.h"
 #include "board.h"
+
+/*================================= GLOBAL VARIABLES =========================*/
+extern bool Blink_Blue_LED;
+
 /*================================= MACROS           =========================*/
 
 /*! \brief This is a function-like macro that enables the LEDs and turn them all off.  
