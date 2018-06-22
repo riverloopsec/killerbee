@@ -41,6 +41,10 @@ if not kb.is_valid_channel(args.channel):
 kb.set_channel(args.channel)
 
 print "zbjammer: jamming channel", args.channel
-kb.jammer_on()
-while 42:
-	pass
+print "*** WARNING: this may not actually work on your hardware! Check with spectrum analyser!"
+if not kb.jammer_on():
+    while 42:
+        pass
+else:
+    print 'ERROR: could not set jammer mode!'
+    sys.exit(1)
