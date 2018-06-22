@@ -87,31 +87,33 @@ if __name__ == '__main__':
         print >>sys.stderr, "ERROR: Must specify only one of -r (libpcap) or -R (Daintree SNA)"
         exit(True)
 
-    if args.network_key and len(args.network_key) != 32:
-        print >>sys.stderr, "ERROR: Must specify 16 byte NWK_KEY in HEX"
-        exit(True)
     if args.network_key:
         try:
-            nwk_key= args.network_key.decode('hex')
+            nwk_key= args.network_key.replace(':','')
+            nwk_key= nwk_key.decode('hex')
             print ' NWK_KEY:', nwk_key.encode('hex').upper()
         except:
             print >>sys.stderr, "ERROR: Invalid NWK_KEY"
             exit(True)
     else:
         nwk_key= None
-
-    if args.link_key and len(args.link_key) != 32:
-        print >>sys.stderr, "ERROR: Must specify 16 byte LINK_KEY in HEX"
+    if nwk_key and len(nwk_key) != 16:
+        print >>sys.stderr, "ERROR: Must specify 16 byte NWK_KEY in HEX"
         exit(True)
+
     if args.link_key:
         try:
-            link_key= args.link_key.decode('hex')
+            link_key= args.link_key.replace(':','')
+            link_key= link_key.decode('hex')
             print 'LINK_KEY:', link_key.encode('hex').upper()
         except:
             print >>sys.stderr, "ERROR: Invalid LINK_KEY"
             exit(True)
     else:
         link_key= None
+    if link_key and len(link_key) != 16:
+        print >>sys.stderr, "ERROR: Must specify 16 byte LINK_KEY in HEX"
+        exit(True)
 
     if (args.begin or args.end) and args.packet_range:
         print >>sys.stderr, "ERROR: Specify begin/end or packet_range"
