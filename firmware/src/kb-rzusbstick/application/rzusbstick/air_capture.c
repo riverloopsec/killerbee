@@ -84,7 +84,7 @@ static uint8_t packets_left; //!< Number of packets left in the transaction.
 static uint8_t *data_ptr; //!< Pointer current byte to send.
 
 /*! \brief Frame with randomized data. Used by the jammer.
-           1 byte PHR, 126 bytes PSDU  */
+           1 byte PHR, 126 bytes PSDU (last two bytes will be replaced with FCS) */
 const PROGMEM_DECLARE(static uint8_t jammer_frame[127]) = {                 \
                         126,
                         186,38,120,91,206,116,184,22,42,239,243,204,139,78, \
@@ -95,7 +95,7 @@ const PROGMEM_DECLARE(static uint8_t jammer_frame[127]) = {                 \
                         80,98,47,198,48,231,96,248,220,92,95,8,195,185,19,  \
                         168,190,233,122,129,101,188,210,46,85,229,144,247,  \
                         167,123,194,193,234,74,174,147,242,255,179,197,103, \
-                        57,152,73,5,44,63,56,141,211,202,45,224,178,165};
+                        57,152,73,5,44,63,56,141,211,202,45,224,0,0};
 /*================================= PROTOTYPES       =========================*/
 static bool init_rf(void);
 static void air_capture_callback(uint8_t isr_event);
