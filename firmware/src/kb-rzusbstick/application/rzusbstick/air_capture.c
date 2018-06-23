@@ -287,10 +287,10 @@ void air_capture_task(void) {
                 
                 return;
             } else {
-                /* Turn the orange LED on to signal a level 2. error. The 
+                /* Turn the blue LED on to signal a level 2. error. The 
                  * application should be restarted.
                  */
-                LED_ORANGE_ON();
+                LED_BLUE_ON();
             }// END: if (0 == packets_left) ...
         } // END: if ((0 == bytes_left) ...
         
@@ -405,7 +405,7 @@ bool air_capture_open_stream(void) {
             ac_state = AC_BUSY_CAPTURING;
             ac_open_stream_status = true;
             /* indicate that we are active */
-            Blink_Blue_LED = true;
+            Blink_Orange_LED = true;
         } // END: if (RX_ON != rf230_subregister_read(SR_TRX_STATUS)) ...
     } // END: if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) ...
     
@@ -429,7 +429,7 @@ bool air_capture_close_stream(void) {
         ac_state = AC_IDLE;
         ac_close_stream_status = true;
         /* indicate that we are no longer active */
-        Blink_Blue_LED = false;
+        Blink_Orange_LED = false;
     } // END: if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) ...
     
     return ac_close_stream_status;
@@ -527,7 +527,7 @@ bool air_capture_jammer_on(void) {
      * RF230's datasheet for detailed instructions on how to use the different
      * internal test modes.
      */
-    rf230_frame_write_P(sizeof(jammer_frame), jammer_frame);
+    rf230_frame_write_P(sizeof(jammer_frame), (uint8_t *) jammer_frame);
     rf230_register_write(0x36, 0x0F); // Configure continuous TX
     rf230_register_write(0x3D, 0x00); // PRBS mode
     rf230_set_tst_high(); // enable TEST mode

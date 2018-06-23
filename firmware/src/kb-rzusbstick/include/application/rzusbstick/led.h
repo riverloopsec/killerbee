@@ -32,6 +32,7 @@
 
 /*================================= GLOBAL VARIABLES =========================*/
 extern bool Blink_Blue_LED;
+extern bool Blink_Orange_LED;
 
 /*================================= MACROS           =========================*/
 

@@ -19,13 +19,14 @@ This needs to be flashed using external tools. Compiled firmware is:
 - `kb-rzusbstick-002.hex`: Newer version with EEMAGIC=0xFF, reported to be needed on newer models
 - `kb-rzusbstick-003.hex`: Newer version built by Scytmo with fix for stalling on 64-byte packets
 - `kb-rzusbstick-004.hex`: Newer version built by Adam Laurie (rfidiot) with LEDs for status:
-  - Blue solid: firmware running
-  - Blue blinking: packet sniffer running
+  - Orange solid: firmware running
+  - Orange blinking: packet sniffer running
   - Green momentary: packet RX
-  - Red solid: ERROR
+  - Red solid: ERROR - bootloader
   - Red momentary: packet TX
   - Red&Green solid: jammer active
-  - Yellow solid: ERROR
+  - Blue solid: ERROR - capture data underrun
+  - Blue blinking: ERROR - USB timeout
 
 Note that if your blue LED appears to be turning off then on instead of blinking multiple times per second when running in sniffer mode, this indicates that your hardware is an older slower model and you may experience poor performance resulting in missed/partial/corrupt packets.
 

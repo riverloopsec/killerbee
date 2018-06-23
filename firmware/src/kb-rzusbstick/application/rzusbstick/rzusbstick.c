@@ -48,6 +48,7 @@
 /*================================= TYEPDEFS         =========================*/
 /*================================= GLOBAL VARIABLES =========================*/
 bool Blink_Blue_LED= false;
+bool Blink_Orange_LED= false;
 /*================================= LOCAL VARIABLES  =========================*/
 static vrt_mem_partition_desc_t partition1;
 static uint8_t partition_buffer1[BLOCK_SIZE_1 * BLOCK_COUNT_1];
@@ -144,10 +145,14 @@ int main(void) {
         cmd_if_task();
 
         /* show we're alive */
+        if (Blink_Orange_LED && loop_count % 8192 == 0)
+            LED_ORANGE_TOGGLE();
+        if (!Blink_Orange_LED)
+            LED_ORANGE_ON();
+
+        /* show errors */
         if (Blink_Blue_LED && loop_count % 8192 == 0)
             LED_BLUE_TOGGLE();
-        if (!Blink_Blue_LED)
-            LED_BLUE_ON();
 	}
 }
 /* EOF */
