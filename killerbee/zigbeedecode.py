@@ -164,7 +164,7 @@ class ZigBeeAPSPacketParser:
         reassemble original packet string.  Fields which may or may not be
         present (such as the destination endpoint) are empty if they are not
         present, keeping the list elements consistent, as follows:
-        Frame Control | Dst Endpoint | Group Address | Cluster Identifier | Profile Identifier | Source Endpoint | APS Counter | Payload
+        Frame Control | Dst Endpoint | Group Address | Cluster Identifier | Profile Identifier | Source Endpoint | APS Counter | Fragmentation | Block Number | Payload
 
         An exception is raised if the packet contents are too short to
         decode.
@@ -267,6 +267,18 @@ class ZigBeeAPSPacketParser:
         pktchop.append(packet[offset])
         offset+= 1
 
+        # Extended Header (fragmentation)
+        if ord(fc) & ZBEE_APS_FCF_EXT_HEADER:
+            # if fragmentation is set get another byte as block number
+            if packet[offset] != 0x00:
+                pktchop.append(packet[offset])
+                offset+= 1
+            pktchop.append(packet[offset])
+            offset+= 1
+        else:
+            pktchop.append("") # fragmentation
+            pktchop.append("") # block number
+
         # Payload
         pktchop.append(packet[offset:])
         return pktchop
@@ -307,6 +319,12 @@ class ZigBeeAPSPacketParser:
                 plen += 6
         
         plen += 1 # APS Counter
+
+        # fragmentation + packet number if true
+        if ord(fc) & ZBEE_APS_FCF_EXT_HEADER:
+            if packet[plen] != 0x00:
+                plen += 1
+            plen += 1
 
         return plen
 

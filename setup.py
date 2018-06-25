@@ -44,6 +44,11 @@ try:
 except ImportError:
     err += "serial (apt-get install python-serial)\n"
 
+try:
+    import rangeparser
+except ImportError:
+    err += "rangeparser (pip install rangeparser)\n"
+
 # Dot15d4 is a dep of some of the newer tools
 try:
     from scapy.all import Dot15d4
@@ -81,7 +86,7 @@ setup  (name        = 'killerbee',
         author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
         license   = 'LICENSE.txt',
         packages  = ['killerbee', 'killerbee.openear', 'killerbee.zbwardrive'],
-        requires = ['Crypto', 'usb', 'gtk', 'cairo'], # Not causing setup to fail, not sure why
+        requires = ['Crypto', 'usb', 'gtk', 'cairo', 'rangeparser'], # Not causing setup to fail, not sure why
         scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 
                    'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 
                    'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey', 
