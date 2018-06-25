@@ -91,7 +91,7 @@ setup  (name        = 'killerbee',
                    'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 
                    'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey', 
                     'tools/zbwardrive', 'tools/zbopenear', 'tools/zbfakebeacon', 
-                    'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign', 'tools/zbcat'],
+                    'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign', 'tools/zbcat', 'tools/zbjammer'],
         install_requires=['pyserial>=2.0', 'pyusb', 'crypto'],
         ext_modules = [ zigbee_crypt ],
         )

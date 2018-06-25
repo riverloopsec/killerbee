@@ -28,6 +28,7 @@ def interrupt(signum, frame):
     global rxbadcount
     global args
     global kb
+    kb.sniffer_off()
     kb.close()
     if args.recv:
         print "\n%d packets received, %d were likely bad (%f%%)." % (rxcount,rxbadcount,(rxbadcount/rxcount)*100.0)

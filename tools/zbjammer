@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+
+"""
+zbjammer: enable Zigbee jamming (firmware option)
+rfidiot <adam@algroup.co.uk>
+"""
+
+import sys
+import time
+import signal
+import argparse
+
+from killerbee import *
+
+def interrupt(signum, frame):
+    global kb
+    kb.jammer_off()
+    sys.exit(0)
+
+# Command-line arguments
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring')
+parser.add_argument('-c', '-f', '--channel', action='store', type=int, default=None)
+parser.add_argument('-D', action='store_true', dest='showdev')
+args = parser.parse_args()
+
+if args.showdev:
+    show_dev()
+    sys.exit(0)
+
+if args.channel == None:
+    print >>sys.stderr, "ERROR: Must specify a channel."
+    sys.exit(1)
+
+kb = KillerBee(device=args.devstring)
+signal.signal(signal.SIGINT, interrupt)
+if not kb.is_valid_channel(args.channel):
+    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel for the selected device."
+    kb.close()
+    sys.exit(1)
+kb.set_channel(args.channel)
+
+print "zbjammer: jamming channel", args.channel
+print "*** WARNING: this may not actually work on your hardware! Check with spectrum analyser!"
+if not kb.jammer_on():
+    while 42:
+        pass
+else:
+    print 'ERROR: could not set jammer mode!'
+    sys.exit(1)

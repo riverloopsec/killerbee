@@ -279,7 +279,8 @@ uint8_t usb_ep_write(uint8_t ep, uint8_t length, uint8_t *packet) {
         
         while ((UEINTX & (1 << TXINI)) != (1 << TXINI)) {
             if (timeout == 0) {
-                LED_ORANGE_ON();
+                // show error condition
+                Blink_Blue_LED = true;
                 return 1;
             } else {
                 timeout--;

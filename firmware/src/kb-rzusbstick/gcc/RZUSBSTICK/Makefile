@@ -25,7 +25,8 @@ ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 
 ## Linker flags
 LDFLAGS = $(COMMON)
-LDFLAGS += --gc-sections -Wl,-Map=RZUSBSTICK.map
+#LDFLAGS += --gc-sections -Wl,-Map=RZUSBSTICK.map
+LDFLAGS += -Wl,-Map=RZUSBSTICK.map
 
 
 ## Intel Hex file production flags
@@ -50,6 +51,10 @@ LINKONLYOBJECTS =
 
 ## Build
 all: $(TARGET) RZUSBSTICK.hex RZUSBSTICK.eep RZUSBSTICK.lss size
+
+## Install
+install: all
+	@avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:RZUSBSTICK.hex
 
 ## Compile
 rzusbstick.o: ../../application/rzusbstick/rzusbstick.c
