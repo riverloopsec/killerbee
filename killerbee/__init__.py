@@ -307,3 +307,13 @@ class KillerBee:
         '''
         return self.driver.jammer_on(channel=channel)
 
+    def jammer_off(self, channel=None):
+        '''
+        End reflexive jamming on all 802.15.4 frames.
+        Targeted frames must be >12 bytes for reliable jamming in current firmware.
+        @type channel: Integer
+        @param channel: Sets the channel, optional.
+        @rtype: None
+        '''
+        return self.driver.jammer_off(channel=channel)
+

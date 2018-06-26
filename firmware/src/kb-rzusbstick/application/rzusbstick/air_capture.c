@@ -83,8 +83,10 @@ static uint8_t bytes_left; //!< Bytes left to send of current frame.
 static uint8_t packets_left; //!< Number of packets left in the transaction.
 static uint8_t *data_ptr; //!< Pointer current byte to send.
 
-/*! \brief Frame with randomized data. Used by the jammer. */
-const PROGMEM_DECLARE(static uint8_t jammer_frame[127]) = {                   \
+/*! \brief Frame with randomized data. Used by the jammer.
+           1 byte PHR, 126 bytes PSDU (last two bytes will be replaced with FCS) */
+const PROGMEM_DECLARE(static uint8_t jammer_frame[127]) = {                 \
+                        126,
                         186,38,120,91,206,116,184,22,42,239,243,204,139,78, \
                         83,10,226,215,183,60,86,76,181,102,219,30,87,238,   \
                         230,244,67,26,6,223,205,159,134,62,138,121,58,4,9,  \
@@ -93,7 +95,7 @@ const PROGMEM_DECLARE(static uint8_t jammer_frame[127]) = {                   \
                         80,98,47,198,48,231,96,248,220,92,95,8,195,185,19,  \
                         168,190,233,122,129,101,188,210,46,85,229,144,247,  \
                         167,123,194,193,234,74,174,147,242,255,179,197,103, \
-                        57,152,73,5,44,63,56,141,211,202,45,224,178,0,0};
+                        57,152,73,5,44,63,56,141,211,202,45,224,0,0};
 /*================================= PROTOTYPES       =========================*/
 static bool init_rf(void);
 static void air_capture_callback(uint8_t isr_event);
@@ -285,10 +287,10 @@ void air_capture_task(void) {
                 
                 return;
             } else {
-                /* Turn the orange LED on to signal a level 2. error. The 
+                /* Turn the blue LED on to signal a level 2. error. The 
                  * application should be restarted.
                  */
-                LED_ORANGE_ON();
+                LED_BLUE_ON();
             }// END: if (0 == packets_left) ...
         } // END: if ((0 == bytes_left) ...
         
@@ -365,7 +367,7 @@ bool air_capture_set_channel(uint8_t channel) {
 bool air_capture_open_stream(void) {
     /* Check that the AirCapture application is initialized and not busy. */
     if (AC_IDLE != ac_state) { return false; }
-    
+
     /* Initialize the frame pool in the RF230 device driver and set the radio 
      * transceiver in receive mode. 
      */
@@ -402,6 +404,8 @@ bool air_capture_open_stream(void) {
             rf230_set_callback_handler(air_capture_callback);
             ac_state = AC_BUSY_CAPTURING;
             ac_open_stream_status = true;
+            /* indicate that we are active */
+            Blink_Orange_LED = true;
         } // END: if (RX_ON != rf230_subregister_read(SR_TRX_STATUS)) ...
     } // END: if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) ...
     
@@ -424,6 +428,8 @@ bool air_capture_close_stream(void) {
     } else {
         ac_state = AC_IDLE;
         ac_close_stream_status = true;
+        /* indicate that we are no longer active */
+        Blink_Orange_LED = false;
     } // END: if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) ...
     
     return ac_close_stream_status;
@@ -492,6 +498,7 @@ uint8_t air_capture_inject_frame(uint8_t length, uint8_t *frame) {
         /* Update state information. */
         ac_state = AC_BUSY_TRANSMITTING;
         ac_inject_frame_status = true;
+        LED_RED_ON();
     } // END: if (PLL_ON != rf230_subregister_read(SR_TRX_STATUS)) ...
 	
 	if (ac_inject_frame_status == true) {
@@ -501,11 +508,18 @@ uint8_t air_capture_inject_frame(uint8_t length, uint8_t *frame) {
 	}
 }
 
-/* This function starts the jammer. */
+/* This function starts the jammer on currently selected channel. */
+// TODO: make this work! although we appear to be following the correct procedure,
+//       spectral analysis shows that the jammer is not activated. :(
 bool air_capture_jammer_on(void) {
     /* Check that the AirCapture application is initialized and not busy. */
     if (AC_IDLE != ac_state) { return false; }
     
+    rf230_register_write(0x0E, 0x01); // enable PLL_LOCK
+    rf230_register_write(0x02, 0x03); // FORCE_TRX_OFF
+    rf230_register_write(0x05, 0x00); // MAX TX OUTPUT POWER
+    rf230_register_write(0x03, 0x10); // CLKM
+
     /* Check that the radio transceiver is in TRX_OFF. */
     if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) { return false; }
     
@@ -513,24 +527,27 @@ bool air_capture_jammer_on(void) {
      * RF230's datasheet for detailed instructions on how to use the different
      * internal test modes.
      */
-    rf230_frame_write_P(sizeof(jammer_frame), jammer_frame);
-    rf230_register_write(0x36, 0x0F);
-    rf230_register_write(0x3D, 0x00);
-    rf230_set_tst_high();
-    
+    rf230_frame_write_P(sizeof(jammer_frame), (uint8_t *) jammer_frame);
+    rf230_register_write(0x36, 0x0F); // Configure continuous TX
+    rf230_register_write(0x3D, 0x00); // PRBS mode
+    rf230_set_tst_high(); // enable TEST mode
+
     /* Do state transition to PLL_ON and verify. */
     rf230_subregister_write(SR_TRX_CMD, CMD_PLL_ON);
     delay_us(TIME_TRX_OFF_TO_PLL_ACTIVE);
     
     bool ac_jammer_on_status = false;
-    if (PLL_ON != rf230_subregister_read(SR_TRX_STATUS)) { 
+    /* also check TST pin has gone high */
+    if (PLL_ON != rf230_subregister_read(SR_TRX_STATUS) || true != rf230_get_tst()) { 
         /* Reset the radio transceiver. */
         (bool)rf230_init();
     } else {
         /* Start PBRS mode and update AirCapture status. */
-        rf230_register_write(0x02, 0x02);
+        rf230_register_write(0x02, 0x02); // TX_START
         ac_state = AC_BUSY_JAMMING;
         ac_jammer_on_status = true;
+        LED_RED_ON();
+        LED_GREEN_ON();
     } // END: if (PLL_ON != rf230_subregister_read(SR_TRX_STATUS)) ...
     
     return ac_jammer_on_status;
@@ -547,6 +564,8 @@ bool air_capture_jammer_off(void) {
     } else {
         ac_state = AC_IDLE;
         ac_jammer_off_status = true;
+        LED_RED_OFF();
+        LED_GREEN_OFF();
     } // END: if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) ...
     
     return ac_jammer_off_status;
@@ -571,7 +590,7 @@ static void air_capture_callback(uint8_t isr_event) {
      */
     if (RF230_TRX_END_MASK == (isr_event & RF230_TRX_END_MASK)) {
     /* End of frame indicated. Upload it if there is packets in the pool left. */
-        if (0 == items_free) { nmbr_of_frames_missed++; return; }
+        if (0 == items_free) { nmbr_of_frames_missed++; LED_GREEN_OFF(); return; }
         
         RF230_SS_LOW();
         
@@ -637,8 +656,11 @@ static void air_capture_callback(uint8_t isr_event) {
         
         /* Read CRC flag. */
         RF230_QUICK_SUBREGISTER_READ(RG_PHY_RSSI , 0x80, 7, (this_acdu->crc));
+
+        LED_GREEN_OFF();
     } else if (RF230_RX_START_MASK == (isr_event & RF230_RX_START_MASK)) {
         /* Start of frame indicated. Read RSSI and timestamp the frame. */
+        LED_GREEN_ON();
         acdu_time_stamp = vrt_timer_get_tick_cnt() / AC_TICK_PER_US;
         RF230_QUICK_SUBREGISTER_READ(0x06, 0x1F, 0, acdu_rssi);
     } else {
@@ -685,6 +707,7 @@ static void air_capture_transmission_callback(uint8_t isr_event) {
         RF230_QUICK_SUBREGISTER_WRITE(0x02, 0x1f, 0, CMD_FORCE_TRX_OFF);
         delay_us(TIME_CMD_FORCE_TRX_OFF);
         ac_state = AC_IDLE;
+        LED_RED_OFF();
     } // END: if (RF230_TRX_END_MASK == (isr_event & RF230_TRX_END_MASK))...
 }
 //! @}

@@ -227,6 +227,7 @@ class RZUSBSTICK:
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
+            self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
         else:
             pass
 
@@ -345,7 +346,6 @@ class RZUSBSTICK:
 
     def jammer_on(self, channel=None):
         '''
-        Not yet implemented.  Stay tuned.
         @type channel: Integer
         @param channel: Sets the channel, optional
         @rtype: None
@@ -362,10 +362,15 @@ class RZUSBSTICK:
 
     def jammer_off(self, channel=None):
         '''
-        Not yet implemented.  Stay tuned.
-        @return: None
+        @type channel: Integer
+        @param channel: Sets the channel, optional
         @rtype: None
         '''
+        self.capabilities.require(KBCapabilities.PHYJAM)
+
+        if self.__cmdmode != RZ_CMD_MODE_AC:
+            self._set_mode(RZ_CMD_MODE_AC)
+
         self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_JAMMER_OFF])
 
     # KillerBee expects the driver to implement this function
