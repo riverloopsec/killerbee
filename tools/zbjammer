@@ -46,7 +46,7 @@ kb.set_channel(args.channel)
 print "zbjammer: jamming channel", args.channel
 print "*** WARNING: this may not actually work on your hardware! Check with spectrum analyser!"
 print "*** NOTICE: it is your responsibility to comply with local law. Please check radio spectrum laws in your area before"
-raw_input("    proceeding. Hite <ENTER> to continue or CTL-C to abort.")
+raw_input("    proceeding. Hit <ENTER> to continue or CTL-C to abort.")
 if not kb.jammer_on():
     while 42:
         pass
