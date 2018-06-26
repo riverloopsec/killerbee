@@ -22,15 +22,22 @@ This needs to be flashed using external tools. Compiled firmware is:
   - Orange solid: firmware running
   - Orange blinking: packet sniffer running
   - Green momentary: packet RX
-  - Red solid: ERROR - bootloader
   - Red momentary: packet TX
   - Red&Green solid: jammer active
+  - Red solid: ERROR - bootloader
   - Blue solid: ERROR - capture data underrun
   - Blue blinking: ERROR - USB timeout
 
-Note that if your blue LED appears to be turning off then on instead of blinking multiple times per second when running in sniffer mode, this indicates that your hardware is an older slower model and you may experience poor performance resulting in missed/partial/corrupt packets.
+Note that if your orange LED appears to be turning off then on instead of blinking multiple times per second when running in sniffer mode, this indicates that your hardware is an older slower model and you may experience poor performance resulting in missed/partial/corrupt packets.
 
 The source is included in `src/kb-rzusbstick/` folder. It should build on Windows and Ubuntu.
+Command line make and install with AVR Dragon:
+```
+cd firmware/src/kb-rzusbstick/gcc/RZUSBSTICK
+make
+make install
+```
+
 
 As described in the main `README.md`, you need to update the default firmware to support injection.
 This process requires additional hardware and software and multiple methods are offered:
@@ -195,21 +202,21 @@ avrdude: erasing chip
 avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
 avrdude: reading input file "kb-rzusbstick-004.hex"
 avrdude: input file kb-rzusbstick-004.hex auto detected as Intel Hex
-avrdude: writing flash (26718 bytes):
+avrdude: writing flash (26786 bytes):
 
 Writing | ################################################## | 100% 2.33s
 
-avrdude: 26718 bytes of flash written
+avrdude: 26786 bytes of flash written
 avrdude: verifying flash memory against kb-rzusbstick-004.hex:
 avrdude: load data flash data from input file kb-rzusbstick-004.hex:
 avrdude: input file kb-rzusbstick-004.hex auto detected as Intel Hex
-avrdude: input file kb-rzusbstick-004.hex contains 26718 bytes
+avrdude: input file kb-rzusbstick-004.hex contains 26786 bytes
 avrdude: reading on-chip flash data:
 
 Reading | ################################################## | 100% 2.56s
 
 avrdude: verifying ...
-avrdude: 26718 bytes of flash verified
+avrdude: 26786 bytes of flash verified
 
 avrdude: safemode: Fuses OK (E:FE, H:98, L:FF)
 
