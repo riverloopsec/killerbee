@@ -33,15 +33,15 @@ is necessary to install the following Python modules before installation:
 + crypto  (for some functions)
 + pygtk   (for use of tools that have GUIs)
 + cairo   (for use of tools that have GUIs)
-+ scapy-com (for some tools which utilize 802.15.4 Scapy extensions)
++ scapy (for some tools which utilize 802.15.4 Scapy extensions)
 
 On Ubuntu systems, you can install the needed dependencies with the following
 commands:
 
 ```
 # apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
-# hg clone https://bitbucket.org/secdev/scapy-com
-# cd scapy-com
+# git clone https://github.com/secdev/scapy
+# cd scapy
 # python setup.py install
 ```
 
