@@ -65,6 +65,8 @@ if __name__ == '__main__':
         help='Daintree SNA file to test')
     parser.add_argument('-s', '--sleep', action='store', type=float, default=1.0,
         help='if tx, wait given seconds between packet injections (default 1.0)')
+    parser.add_argument('-S', '--search_keys', action='store_true', dest='search_keys',
+        help='search for AppCommandPayload packets and extract transport keys')
     parser.add_argument('-T', '--transmit_original', action='store_true', dest='transmit_original',
         help='transmit original packets for independant capture/analysis')
     parser.add_argument('-t', '--transmit_crypted', action='store_true', dest='transmit_crypted',
@@ -132,6 +134,9 @@ if __name__ == '__main__':
         data= kbrddain(args.dsnafile)
         fname= args.dsnafile
 
+    if args.search_keys:
+        transport_keys= []
+
     print
     print '%d packets read from %s' % (len(data), fname)
 
@@ -155,6 +160,23 @@ if __name__ == '__main__':
         print '  ', packet.summary()
         if args.verbose:
             print '  ', repr(packet)
+
+        # check for transport keys
+        if args.search_keys:
+            if packet.haslayer(ZigbeeAppCommandPayload):
+                # TODO: all transport key types - need to find sample pcaps
+                # (this will probably mean repeating after decryption but need to see examples to be sure!)
+                f,v = packet[ZigbeeAppCommandPayload].getfield_and_val("cmd_identifier")
+                cmd_identifier = f.i2repr(None, v)
+                # SKKE_1
+                if packet[ZigbeeAppCommandPayload].cmd_identifier == 1:
+                    f,v = packet[ZigbeeAppCommandPayload].getfield_and_val("src_addr")
+                    src_addr = f.i2repr(None, v)
+                    f,v = packet[ZigbeeAppCommandPayload].getfield_and_val("dest_addr")
+                    dest_addr = f.i2repr(None, v)
+                    transport_keys.append([count, cmd_identifier, packet[ZigbeeAppCommandPayload].key, packet[ZigbeeAppCommandPayload].key_seqnum, src_addr, dest_addr])
+                else:
+                    transport_keys.append([count, cmd_identifier, packet[ZigbeeAppCommandPayload].data, None, None, None])
 
         # ignore frames with no encrypted payload
         if not packet.haslayer(ZigbeeNWK) or not packet.haslayer(ZigbeeSecurityHeader):
@@ -260,4 +282,10 @@ if __name__ == '__main__':
     print '  NWK crypto failed:', failed
     print '    APS crypto passed:', aps_passed
     print '    APS crypto failed:', aps_failed
+
+    if args.search_keys:
+        print
+        print '%d key(s) found:' % len(transport_keys)
+        for key in transport_keys:
+            print '  packet: %d\n    type: %s\n     key: %s (%s)\n     seq: %d\n     src: %s\n    dest: %s' % (key[0], key[1], key[2].encode('hex'), key[2][::-1].encode('hex'), key[3], key[4], key[5])
     exit(False)

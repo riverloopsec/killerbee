@@ -98,6 +98,7 @@ def main():
                 else:
                     raise
 
+            kb.sniffer_off()
             print("{0} packets captured".format(packetcount))
 
 if __name__ == '__main__':
