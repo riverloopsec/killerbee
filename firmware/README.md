@@ -19,9 +19,11 @@ This needs to be flashed using external tools. Compiled firmware is:
 - `kb-rzusbstick-002.hex`: Newer version with EEMAGIC=0xFF, reported to be needed on newer models
 - `kb-rzusbstick-003.hex`: Newer version built by Scytmo with fix for stalling on 64-byte packets
 - `kb-rzusbstick-004.hex`: Newer version built by Adam Laurie (rfidiot) with LEDs for status:
-  - Orange solid: firmware running
-  - Orange blinking: packet sniffer running
-  - Green momentary: packet RX
+- `kb-rzusbstick-005.hex`: Newer version built by Adam Laurie (rfidiot) with LEDs for status:
+  - Green solid: firmware running
+  - Green blinking: packet sniffer running
+  - Orange solid: bootloader running
+  - Orange momentary: packet RX
   - Red momentary: packet TX
   - Red&Green solid: jammer active
   - Red solid: ERROR - bootloader
@@ -70,14 +72,14 @@ make
 sudo make install
 ```
 
-2. Obtain the KillerBee RZUSBSTICK firmware from `firmware/kb-rzusbstick-004.hex`.
+2. Obtain the KillerBee RZUSBSTICK firmware from `firmware/kb-rzusbstick-005.hex`.
 Copy the firmware file into your Downloads directory.
 
 3. Download the configuration file for OpenOCD and the DP buspirate form [here](https://gist.githubusercontent.com/mertenats/5150ce65a358cb91919fc3013ce81ab3/raw/3c17361366219f14805ac855540e30cfc4efac0e/openOCD_buspirate_rzusbstick.cfg) and edit the variable `_FIRMWARE_LOCATION`.
 
 Example:
 ```
-set  _FIRMWARE_LOCATION /home/user/repos/killerbee/firmware/kb-rzusbstick-004.hex
+set  _FIRMWARE_LOCATION /home/user/repos/killerbee/firmware/kb-rzusbstick-005.hex
 ```
 
 4. Connect the buspirate to the RZ Raven USB stick with the following connections: GND to GND (RZ Raven USB stick to buspirate), TCK to CLK, TDO to MISO, TMS to CS, TDI to MOSI and SRST to AUX (pins layouts available [here](http://esver.free.fr/upload/RZUSBstick-JTAG.png) and [here](http://esver.free.fr/upload/Bp-cable-color-hk.png)).
@@ -170,14 +172,14 @@ libusb-win32 `inf-wizard.exe` executable.
   * Complete the wizard by clicking Next, then Finish to install the drivers.
   * When prompted by Windows, click "Install This Driver Sofware Anyway".
 
-* Copy the RZUSBSTICK firmware from `firmware/kb-rzusbstick-004.hex` to the directory where you extracted the AVRDUDE software.
-  * Note: We are suggesting the `-004` version now as some people report that `-001` does not work on newer RZUSBSTICK versions. Change the filenames in the example commands below.
+* Copy the RZUSBSTICK firmware from `firmware/kb-rzusbstick-005.hex` to the directory where you extracted the AVRDUDE software.
+  * Note: We are suggesting the `-005` version now as some people report that `-001` does not work on newer RZUSBSTICK versions. Change the filenames in the example commands below.
 
 * Connect the AVR Dragon programmer to the ribbon cable, and connect the 100-mm to 50-mm adapter with the header.
 * Prepare your terminal to flash the RZUSBSTICK by entering the following command at a
 command prompt (but _do not_ hit enter yet):
 ```
-avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-004.hex
+avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-005.hex
 ```
   * On "older" RZUSBSTICKs, use the file `kb-rzusbstick-001.hex` instead.
 
@@ -188,7 +190,7 @@ make contact.
 * Hit enter where you typed the AVRDUDE comand. You should see output similar to the following:
 
 ```
-C:\avrdude>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-004.hex
+C:\avrdude>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-005.hex
 
 avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
 avrdude: AVR device initialized and ready to accept instructions
@@ -200,23 +202,23 @@ avrdude: NOTE: "flash" memory has been specified, an erase cycle will be perform
          To disable this feature, specify the -D option.
 avrdude: erasing chip
 avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
-avrdude: reading input file "kb-rzusbstick-004.hex"
-avrdude: input file kb-rzusbstick-004.hex auto detected as Intel Hex
-avrdude: writing flash (26786 bytes):
+avrdude: reading input file "kb-rzusbstick-005.hex"
+avrdude: input file kb-rzusbstick-005.hex auto detected as Intel Hex
+avrdude: writing flash (26784 bytes):
 
 Writing | ################################################## | 100% 2.33s
 
-avrdude: 26786 bytes of flash written
-avrdude: verifying flash memory against kb-rzusbstick-004.hex:
-avrdude: load data flash data from input file kb-rzusbstick-004.hex:
-avrdude: input file kb-rzusbstick-004.hex auto detected as Intel Hex
-avrdude: input file kb-rzusbstick-004.hex contains 26786 bytes
+avrdude: 26784 bytes of flash written
+avrdude: verifying flash memory against kb-rzusbstick-005.hex:
+avrdude: load data flash data from input file kb-rzusbstick-005.hex:
+avrdude: input file kb-rzusbstick-005.hex auto detected as Intel Hex
+avrdude: input file kb-rzusbstick-005.hex contains 26784 bytes
 avrdude: reading on-chip flash data:
 
 Reading | ################################################## | 100% 2.56s
 
 avrdude: verifying ...
-avrdude: 26786 bytes of flash verified
+avrdude: 26784 bytes of flash verified
 
 avrdude: safemode: Fuses OK (E:FE, H:98, L:FF)
 

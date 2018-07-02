@@ -405,7 +405,7 @@ bool air_capture_open_stream(void) {
             ac_state = AC_BUSY_CAPTURING;
             ac_open_stream_status = true;
             /* indicate that we are active */
-            Blink_Orange_LED = true;
+            Blink_Green_LED = true;
         } // END: if (RX_ON != rf230_subregister_read(SR_TRX_STATUS)) ...
     } // END: if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) ...
     
@@ -429,7 +429,7 @@ bool air_capture_close_stream(void) {
         ac_state = AC_IDLE;
         ac_close_stream_status = true;
         /* indicate that we are no longer active */
-        Blink_Orange_LED = false;
+        Blink_Green_LED = false;
     } // END: if (TRX_OFF != rf230_subregister_read(SR_TRX_STATUS)) ...
     
     return ac_close_stream_status;
@@ -590,7 +590,7 @@ static void air_capture_callback(uint8_t isr_event) {
      */
     if (RF230_TRX_END_MASK == (isr_event & RF230_TRX_END_MASK)) {
     /* End of frame indicated. Upload it if there is packets in the pool left. */
-        if (0 == items_free) { nmbr_of_frames_missed++; LED_GREEN_OFF(); return; }
+        if (0 == items_free) { nmbr_of_frames_missed++; LED_ORANGE_OFF(); return; }
         
         RF230_SS_LOW();
         
@@ -657,10 +657,10 @@ static void air_capture_callback(uint8_t isr_event) {
         /* Read CRC flag. */
         RF230_QUICK_SUBREGISTER_READ(RG_PHY_RSSI , 0x80, 7, (this_acdu->crc));
 
-        LED_GREEN_OFF();
+        LED_ORANGE_OFF();
     } else if (RF230_RX_START_MASK == (isr_event & RF230_RX_START_MASK)) {
         /* Start of frame indicated. Read RSSI and timestamp the frame. */
-        LED_GREEN_ON();
+        LED_ORANGE_ON();
         acdu_time_stamp = vrt_timer_get_tick_cnt() / AC_TICK_PER_US;
         RF230_QUICK_SUBREGISTER_READ(0x06, 0x1F, 0, acdu_rssi);
     } else {
