@@ -149,9 +149,11 @@ int main(void) {
         // if this board is newly flashed, we must also enter boot 
         if (EE_BOOT_MAGIC_VALUE != magic_value && magic_value != 0xFF) {
             start_application();
-        } else {
-            EEPUT(EE_BOOT_MAGIC_ADR, 0x00);
         }
+        // disabled - this should be done by the flashing code only after installing an application
+        //else {
+        //    EEPUT(EE_BOOT_MAGIC_ADR, 0x00);
+        //}
     }
     
     /* Set the interrupt vectors to the bootloader, initialize the LEDs and the

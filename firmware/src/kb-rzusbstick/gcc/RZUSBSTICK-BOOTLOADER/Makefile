@@ -16,7 +16,14 @@ COMMON = -mmcu=$(MCU)
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON)
 
-CFLAGS += -Wall -gdwarf-2 -std=gnu99 -DAVR -DLITTLE_ENDIAN -DRZUSBSTICK -DBOOT_VER_MAJ=0 -DBOOT_VER_MIN=5     -ffunction-sections  -fdata-sections  -DF_CPU=8000000UL -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
+CFLAGS += -Wall -gdwarf-2 -std=gnu99 -DAVR -DLITTLE_ENDIAN -DRZUSBSTICK -ffunction-sections  -fdata-sections  -DF_CPU=8000000UL -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
+
+## Version
+##
+## history - MAJ=0 = Original ATMEL code
+##           MAJ=1 = KILLERBEE updates
+##                   MIN=0 - Enter bootloader if no user application exists (freshly erased)
+CFLAGS += -DBOOT_VER_MAJ=1 -DBOOT_VER_MIN=0
 
 CFLAGS += -MD -MP -MT $(*F).o -MF dep/$(@F).d 
 
