@@ -232,6 +232,37 @@ class KillerBee:
         '''
         return self.driver.capabilities.getlist()
 
+    def enter_bootloader(self):
+        '''
+        Starts the bootloader
+        @rtype: None
+        '''
+        return self.driver.enter_bootloader()
+
+    def get_bootloader_version(self):
+        '''
+        Gets the bootloader major and minor version.
+        @rtype:  List
+        @return: Returns a list: [Major, Minor]
+        '''
+        return self.driver.get_bootloader_version()
+
+    def get_bootloader_signature(self):
+        '''
+        Gets the bootloader chip signature.
+        @rtype:  List
+        @return: Returns a list: [Low, Mid, High]
+        '''
+        return self.driver.get_bootloader_signature()
+
+    def bootloader_sign_on(self):
+        '''
+        @rtype: String
+        @return: Bootloader sign_on message
+        self.capabilities.require(KBCapabilities.BOOT)
+        '''
+        return self.driver.bootloader_sign_on()
+
     def sniffer_on(self, channel=None):
         '''
         Turns the sniffer on such that pnext() will start returning observed

@@ -197,7 +197,7 @@ size: ${TARGET}
 ## Clean target
 .PHONY: clean
 clean:
-	-rm -rf $(OBJECTS) RZUSBSTICK.elf dep/* RZUSBSTICK.hex RZUSBSTICK.eep RZUSBSTICK.lss RZUSBSTICK.map
+	-rm -rf $(OBJECTS) RZUSBSTICK.elf dep RZUSBSTICK.hex RZUSBSTICK.eep RZUSBSTICK.lss RZUSBSTICK.map
 
 
 ## Other dependencies

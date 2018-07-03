@@ -2,23 +2,33 @@
 # This program is for debugging purposes only
 import sys
 from killerbee import *
+from time import sleep
 
 def test_functions():
     kb = KillerBee()
     # Enter the bootloader
-    #kb.enter_bootloader()
+    kb.enter_bootloader()
     kb.close()
     # RZUSBSTICK reboots, so we need to make a new connection
+    sleep(1)
     kb = KillerBee()
     
     # Get the bootloader version
-    #print kb.get_bootloader_version()
+    print 'version:',
+    ver = kb.get_bootloader_version()
+    print '%02x - %02x' % (ver[0], ver[1])
 
     # Get AT90USB1287 signature
-    #print kb.get_signature()
+    print 'AT90USB1287 signature:', 
+    sig = kb.get_bootloader_signature()
+    print '%02x - %02x - %02x' % (sig[0], sig[1], sig[2])
 
     # Get identifier string
-    print kb.sign_on()
+    print 'identifier string',
+    arr = kb.bootloader_sign_on()
+    # return is an array of bytes with 1st byte being length
+    st = ''.join([chr(x) for x in arr[1:]])
+    print "(%d bytes):" % arr[0], st
 
     # Read the fuses
     #fuses = kb.read_fuses()
@@ -26,27 +36,27 @@ def test_functions():
     #    print fuse,':',bin(fuses[fuse]),hex(fuses[fuse])
     
     # Read the lockbits
-    print 'lockbits:',bin( kb.read_lockbits() )
+    #print 'lockbits:',bin( kb.read_lockbits() )
 
     # Read some EEPROM addresses
-    eeprom_addresses = [0x0000]
-    for address in eeprom_addresses:
-    	print hex(address),':',hex( kb.read_eeprom(address) )
+    #eeprom_addresses = [0x0000]
+    #for address in eeprom_addresses:
+    #	print hex(address),':',hex( kb.read_eeprom(address) )
 
     # Program EEPROM
     #kb.program_eeprom(0x00, 0xaa)
     #kb.program_eeprom(0xfe, 0xcc)
 
     #kb.erase_flash()
-    kb.erase_eeprom()
+    #kb.erase_eeprom()
 
     #kb.write_lockbits(0b11111111)
 
     # Read some flash addresses
-    flash_addresses = [0x00000000, 0x00000001, 0x00000010,
-                       0x000057F0, 0x000058B0, 0x000050B0]
-    for address in flash_addresses:
-        print hex(address),':',hex( kb.read_flash(address) )
+    #flash_addresses = [0x00000000, 0x00000001, 0x00000010,
+    #                   0x000057F0, 0x000058B0, 0x000050B0]
+    #for address in flash_addresses:
+    #    print hex(address),':',hex( kb.read_flash(address) )
     
     # Leave bootloader and start application
     #kb.leave_bootloader()

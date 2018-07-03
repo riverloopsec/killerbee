@@ -17,8 +17,8 @@ from kbutils import KBCapabilities
 
 # Functions for RZUSBSTICK, not all are implemented in firmware
 # Functions not used are commented out but retained for prosperity
-#RZ_CMD_SIGN_OFF             = 0x00
-#RZ_CMD_SIGN_ON              = 0x01
+RZ_CMD_SIGN_OFF             = 0x00
+RZ_CMD_SIGN_ON              = 0x01
 #RZ_CMD_GET_PARAMETER        = 0x02
 #RZ_CMD_SET_PARAMETER        = 0x03
 #RZ_CMD_SELF_TEST            = 0x04
@@ -33,6 +33,9 @@ RZ_CMD_CLOSE_STREAM         = 0x0A  #: RZUSB opcode to close a stream for packet
 RZ_CMD_INJECT_FRAME         = 0x0D  #: RZUSB opcode to specify a frame to inject
 RZ_CMD_JAMMER_ON            = 0x0E  #: RZUSB opcode to turn the jammer function on
 RZ_CMD_JAMMER_OFF           = 0x0F  #: RZUSB opcode to turn the jammer function off
+RZ_CMD_ENTER_BOOT           = 0x18  #: RZUSB opcode to enter bootloader
+RZ_CMD_BOOT_GET_VERSION     = 0xB1  #: RZUSB opcode to get bootloader maj/min version (not supprted!)
+RZ_CMD_BOOT_READ_SIGNATURE  = 0xB0  #: RZUSB opcode to get bootloader chip signature
 
 # Operating modes following RZ_CMD_SET_MODE function
 RZ_CMD_MODE_AC              = 0x00  #: RZUSB mode for aircapture (inject + sniff)
@@ -64,7 +67,7 @@ RZ_RESP_NOT_INITIALIZED     = 0x92 #: RZUSB Response: Not Initialized Error
 RZ_RESP_NOT_IMPLEMENTED     = 0x93 #: RZUSB Response: Opcode Not Implemented Error
 RZ_RESP_PRIMITIVE_FAILED    = 0x94 #: RZUSB Response: Primitive Failed Error
 RZ_RESP_VRT_KERNEL_ERROR    = 0x95 #: RZUSB Response: Could not execute due to vrt_kernel_error
-RZ_RESP_BOOT_PARAM          = 0x96 #: RZUSB Response: Boot Param Error
+RZ_RESP_BOOT_PARAM          = 0x96 #: RZUSB Response: Boot Param
 
 RZ_EVENT_STREAM_AC_DATA          = 0x50 #: RZUSB Event Opcode: AirCapture Data
 #RZ_EVENT_SNIFFER_SCAN_COMPLETE   = 0x51 #: RZUSB Event Opcode: Sniffer Scan Complete
@@ -222,6 +225,7 @@ class RZUSBSTICK:
             self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
+            self.capabilities.setcapab(KBCapabilities.BOOT, True)
         elif prod == "KILLERB001":
             self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
@@ -245,12 +249,42 @@ class RZUSBSTICK:
                     usb.util.get_string(self.dev, self.dev.iProduct),     \
                     usb.util.get_string(self.dev, self.dev.iSerialNumber) ]
 
-    def __usb_write(self, endpoint, data):
+    def __usb_read(self):
+        '''
+        Read data from the USB device opened as self.handle.
+        
+        @rtype: String
+        @param data: The data received from the USB endpoint
+        '''
+        response = None
+        if USBVER == 0: # TODO: UNTESTED!!!!
+            try:
+                response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
+            except usb.USBError, e:
+                if e.args != ('No error',): # http://bugs.debian.org/476796
+                    raise e
+        else: #pyUSB 1.x
+            try:
+                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, timeout=500)
+                #print 'response length:', len(response)
+                #print response
+                #response = ''.join([chr(x) for x in response])
+                #response = response.pop()
+            except usb.core.USBError as e:
+                if e.errno != 110: #Not Operation timed out
+                    print "Error args:", e.args
+                    raise e
+                elif e.errno == 110:
+                    print "DEBUG: Received operation timed out error ...attempting to continue."
+        return response
+
+    def __usb_write(self, endpoint, data, expected_response=RZ_RESP_SUCCESS):
         '''
         Write data to the USB device opened as self.handle.
         
         @type endpoint: Integer
         @param endpoint: The USB endpoint to write to
+        @param expected_response: The desired response - defaults to RZ_RESP_SUCCESS
         @type data: Mixed
         @param data: The data to send to the USB endpoint
         '''
@@ -258,35 +292,38 @@ class RZUSBSTICK:
             try:
                 self.handle.bulkWrite(endpoint, data)
                 # Returns a tuple, first value is an int as the RZ_RESP_* code
-                response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
+#                response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
             except usb.USBError, e:
                 if e.args != ('No error',): # http://bugs.debian.org/476796
                     raise e
-            time.sleep(0.0005)
-            if response != RZ_RESP_SUCCESS:
-                if response in RESPONSE_MAP:
-                    raise Exception("Error: %s" % RESPONSE_MAP[response])
-                else:
-                    raise Exception("Unknown USB write error: 0x%02x" % response)
+#            time.sleep(0.0005)
+#            if response != RZ_RESP_SUCCESS:
+#                if response in RESPONSE_MAP:
+#                    raise Exception("Error: %s" % RESPONSE_MAP[response])
+#                else:
+#                    raise Exception("Unknown USB write error: 0x%02x" % response)
         else: #pyUSB 1.x
-            res = self.dev.write(endpoint, data)#, 0, 100)
-            if len(data) != res:
-                raise Exception("Issue writing USB data {0} to endpoint {1}, got a return of {2}.".format(data, endpoint, res))
             try:
-                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, timeout=500)
-                response = response.pop()
+                res = self.dev.write(endpoint, data)#, 0, 100)
+                if len(data) != res:
+                    raise Exception("Issue writing USB data {0} to endpoint {1}, got a return of {2}.".format(data, endpoint, res))
+#                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, timeout=500)
+#                response = response.pop()
             except usb.core.USBError as e:
                 if e.errno != 110: #Not Operation timed out
                     print "Error args:", e.args
                     raise e
                 elif e.errno == 110:
                     print "DEBUG: Received operation timed out error ...attempting to continue."
-            time.sleep(0.0005)
-            if response != RZ_RESP_SUCCESS:
-                if response in RESPONSE_MAP:
-                    raise Exception("Error: %s" % RESPONSE_MAP[response])
-                else:
-                    raise Exception("Unknown USB write error: 0x%02x" % response)
+        #time.sleep(0.0005)
+        response = self.__usb_read()
+        #print 'response 0: %x' % response[0]
+        if response[0] != expected_response:
+            if response[0] in RESPONSE_MAP:
+                raise Exception("Error: %s" % RESPONSE_MAP[response[0]])
+            else:
+                raise Exception("Unknown USB write error: 0x%02x" % response[0])
+        return response[1:]
 
     def _set_mode(self, mode=RZ_CMD_MODE_AC):
         '''
@@ -359,6 +396,41 @@ class RZUSBSTICK:
             self.set_channel(channel)
 
         self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_JAMMER_ON])
+
+    def enter_bootloader(self):
+        '''
+        @rtype: None
+        '''
+        self.capabilities.require(KBCapabilities.BOOT)
+
+        self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_ENTER_BOOT])
+
+    def get_bootloader_version(self):
+        '''
+        @rtype: List
+        @return: List: Version number as [Major, Minor]
+        '''
+        self.capabilities.require(KBCapabilities.BOOT)
+
+        return self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_BOOT_GET_VERSION], RZ_RESP_BOOT_PARAM)
+
+    def get_bootloader_signature(self):
+        '''
+        @rtype: List
+        @return: List: Chip signature as [Low, Mid, High]
+        '''
+        self.capabilities.require(KBCapabilities.BOOT)
+
+        return self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_BOOT_READ_SIGNATURE], RZ_RESP_BOOT_PARAM)
+
+    def bootloader_sign_on(self):
+        '''
+        @rtype: String
+        @return: Bootloader sign_on message (array of length + length bytes)
+        '''
+        self.capabilities.require(KBCapabilities.BOOT)
+
+        return self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_SIGN_ON], RZ_RESP_SIGN_ON)
 
     def jammer_off(self, channel=None):
         '''

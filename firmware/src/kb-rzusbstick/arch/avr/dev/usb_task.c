@@ -279,8 +279,16 @@ uint8_t usb_ep_write(uint8_t ep, uint8_t length, uint8_t *packet) {
         
         while ((UEINTX & (1 << TXINI)) != (1 << TXINI)) {
             if (timeout == 0) {
+#ifdef BOOT_VER_MAJ
+// original bootloader used ORANGE LED for ERROR
+// which actually makes no sense as it also uses it
+// for "I'm alive!". Doh!
+// keeping it here for consistency. :(
+                LED_ORANGE_ON();
+#else
                 // show error condition
                 Blink_Blue_LED = true;
+#endif
                 return 1;
             } else {
                 timeout--;

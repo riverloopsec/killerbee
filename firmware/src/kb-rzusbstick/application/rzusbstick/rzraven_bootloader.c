@@ -145,11 +145,12 @@ int main(void) {
         /* Check if the application has requested to enter the bootloader. */
         uint8_t volatile magic_value = 0xAA;
         EEGET(magic_value, EE_BOOT_MAGIC_ADR);
-   
-        if (EE_BOOT_MAGIC_VALUE != magic_value) {
+  
+        // if this board is newly flashed, we must also enter boot 
+        if (EE_BOOT_MAGIC_VALUE != magic_value && magic_value != 0xFF) {
             start_application();
         } else {
-            EEPUT(EE_BOOT_MAGIC_ADR, 0xFF);
+            EEPUT(EE_BOOT_MAGIC_ADR, 0x00);
         }
     }
     
