@@ -30,7 +30,7 @@ This needs to be flashed using external tools. Compiled firmware is:
   - Blue solid: ERROR - capture data underrun
   - Blue blinking: ERROR - USB timeout
 
-Note that if your orange LED appears to be turning off then on instead of blinking multiple times per second when running in sniffer mode, this indicates that your hardware is an older slower model and you may experience poor performance resulting in missed/partial/corrupt packets.
+Note that if your green LED appears to be turning off then on instead of blinking multiple times per second when running in sniffer mode, this indicates that your hardware is an older slower model and you may experience poor performance resulting in missed/partial/corrupt packets.
 
 The source is included in `src/kb-rzusbstick/` folder. It should build on Windows and Ubuntu.
 Command line make and install with AVR Dragon:
