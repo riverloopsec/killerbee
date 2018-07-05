@@ -1,5 +1,5 @@
 ###############################################################################
-# Makefile for the project RZUSBSTICK
+# Makefile for the project RZUSBSTICK-BOOTLOADER
 ###############################################################################
 
 ## General Flags
@@ -23,7 +23,8 @@ CFLAGS += -Wall -gdwarf-2 -std=gnu99 -DAVR -DLITTLE_ENDIAN -DRZUSBSTICK -ffuncti
 ## history - MAJ=0 = Original ATMEL code
 ##           MAJ=1 = KILLERBEE updates
 ##                   MIN=0 - Enter bootloader if no user application exists (freshly erased)
-CFLAGS += -DBOOT_VER_MAJ=1 -DBOOT_VER_MIN=0
+##                   MIN=1 - Set ERROR LED to BLUE
+CFLAGS += -DBOOT_VER_MAJ=1 -DBOOT_VER_MIN=1
 
 CFLAGS += -MD -MP -MT $(*F).o -MF dep/$(@F).d 
 
@@ -35,8 +36,7 @@ ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 ## Linker flags
 LDFLAGS = $(COMMON)
 #LDFLAGS += --gc-sections -Wl,-Map=RZUSBSTICK.map
-LDFLAGS += -Wl,--section-start=.text=1E000  -Wl,-Map=RZUSBSTICK_BOOTLOADER.map
-
+LDFLAGS += -Wl,--gc-sections -Wl,--section-start=.text=1E000 -Wl,-Map=RZUSBSTICK_BOOTLOADER.map
 
 ## Intel Hex file production flags
 HEX_FLASH_FLAGS = -R .eeprom -R .fuse -R .lock -R .signature
@@ -121,8 +121,11 @@ size: ${TARGET}
 
 ## Clean target
 .PHONY: clean
-clean:
-	-rm -rf $(OBJECTS) RZUSBSTICK_BOOTLOADER.elf dep RZUSBSTICK_BOOTLOADER.hex RZUSBSTICK_BOOTLOADER.eep RZUSBSTICK_BOOTLOADER.lss RZUSBSTICK_BOOTLOADER.map
+clean: mostlyclean
+	-rm -rf RZUSBSTICK_BOOTLOADER.hex
+
+mostlyclean:
+	-rm -rf $(OBJECTS) RZUSBSTICK_BOOTLOADER.elf dep RZUSBSTICK_BOOTLOADER.eep RZUSBSTICK_BOOTLOADER.lss RZUSBSTICK_BOOTLOADER.map
 
 
 ## Other dependencies
