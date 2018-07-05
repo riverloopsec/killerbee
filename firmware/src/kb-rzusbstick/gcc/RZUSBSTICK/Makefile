@@ -2,12 +2,16 @@
 # Makefile for the project RZUSBSTICK
 ###############################################################################
 
+# http://eleccelerator.com/fusecalc/fusecalc.php?chip=at90usb1287&HIGH=98&EXTENDED=FE&LOCKBIT=FF
+# http://ww1.microchip.com/downloads/en/DeviceDoc/doc7618.pdf
+# avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U hfuse:w:0x99:m
+
+
 ## General Flags
 PROJECT = RZUSBSTICK
 MCU = at90usb1287
 TARGET = RZUSBSTICK.elf
 CC = avr-gcc
-
 CPP = avr-g++
 
 ## Options common to compile, link and assembly rules
@@ -26,7 +30,7 @@ ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 ## Linker flags
 LDFLAGS = $(COMMON)
 #LDFLAGS += --gc-sections -Wl,-Map=RZUSBSTICK.map
-LDFLAGS += -Wl,-Map=RZUSBSTICK.map
+LDFLAGS += -Wl,--gc-sections -Wl,-Map=RZUSBSTICK.map 
 
 
 ## Intel Hex file production flags
@@ -50,12 +54,46 @@ OBJECTS = rzusbstick.o air_capture.o cmd_if.o isr.o usb_task.o at24cxx.o eep.o r
 LINKONLYOBJECTS = 
 
 ## Build
+
 all: $(TARGET) RZUSBSTICK.hex RZUSBSTICK.eep RZUSBSTICK.lss size
 
-## Install
-install: all
+bootloader: ../RZUSBSTICK-BOOTLOADER/RZUSBSTICK_BOOTLOADER.hex
+	@cd ../RZUSBSTICK-BOOTLOADER && make
+
+## Install application and old bootloader using avrdude JTAG
+install-old-bootloader: all bootloader
+	@srec_cat ../RZUSBSTICK-BOOTLOADER/RZUSBSTICK_BOOTLOADER.hex -Intel RZUSBSTICK.hex -Intel -o BOTH.hex -Intel
+	@avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:BOTH.hex
+
+# install using avrdude JTAG
+install-with-avrdude: all
 	@avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:RZUSBSTICK.hex
 
+# install using DFU with dfu-programmer
+install-with-dfu-programmer: all
+	@kbbootloader
+	@echo "Waiting 5 seconds for BOOTLOADER..."
+	@sleep 5
+	@dfu-programmer at90usb1287 erase --force
+	@dfu-programmer at90usb1287 flash RZUSBSTICK.hex
+	@echo
+	@echo "Done! Now power cycle your RZUSBSTICK"
+	@echo "Warning! If you have not set your fuses you will be stuck in DFU mode!"
+	@echo "This can only be fixed with a hardware programmer such as AVR Dragon:"
+	@echo "avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U hfuse:w:0x99:m"
+	
+# install using DFU with avrdude
+install-with-dfu-avrdude: all
+	@kbbootloader
+	@echo "Waiting 5 seconds for BOOTLOADER..."
+	@sleep 5
+	@avrdude -c flip1 -p usb1287 -U flash:w:RZUSBSTICK.hex -u
+	@echo
+	@echo "Done! Now power cycle your RZUSBSTICK"
+	@echo "Warning! If you have not set your fuses you will be stuck in DFU mode!"
+	@echo "This can only be fixed with a hardware programmer such as AVR Dragon:"
+	@echo "avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U hfuse:w:0x99:m"
+	
 ## Compile
 rzusbstick.o: ../../application/rzusbstick/rzusbstick.c
 	$(CC) $(INCLUDES) $(CFLAGS) -c  $<
@@ -196,9 +234,11 @@ size: ${TARGET}
 
 ## Clean target
 .PHONY: clean
-clean:
-	-rm -rf $(OBJECTS) RZUSBSTICK.elf dep RZUSBSTICK.hex RZUSBSTICK.eep RZUSBSTICK.lss RZUSBSTICK.map
+clean: mostlyclean
+	-rm -rf RZUSBSTICK.hex
 
+mostlyclean:
+	-rm -rf $(OBJECTS) RZUSBSTICK.elf dep RZUSBSTICK.eep RZUSBSTICK.lss RZUSBSTICK.map BOTH.hex
 
 ## Other dependencies
 -include $(shell mkdir dep 2>/dev/null) $(wildcard dep/*)
