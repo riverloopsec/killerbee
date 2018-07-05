@@ -122,6 +122,15 @@ int main(void) {
         
     /* Initialize AVR peripheral modules. */
     (bool)avr_init();
+
+    nop();
+    nop();
+    nop();
+    nop();
+    nop();
+    nop();
+    nop();
+    nop();
     
     /* Check if the RX and TX pins are shorted. If they are shorted, the RZUSBSTICK
      * shall start the bootloader. If not, continue to verify if the application
@@ -146,11 +155,11 @@ int main(void) {
         uint8_t volatile magic_value = 0xAA;
         EEGET(magic_value, EE_BOOT_MAGIC_ADR);
   
-        // if this board is newly flashed, we must also enter boot 
         if (EE_BOOT_MAGIC_VALUE != magic_value && magic_value != 0xFF) {
+        //if (EE_BOOT_MAGIC_VALUE != magic_value) {
             start_application();
         }
-        // disabled - this should be done by the flashing code only after installing an application
+        // disabled - this is done by the app itself when it sucessfully runs
         //else {
         //    EEPUT(EE_BOOT_MAGIC_ADR, 0x00);
         //}

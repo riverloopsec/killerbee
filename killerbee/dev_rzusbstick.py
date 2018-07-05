@@ -34,8 +34,9 @@ RZ_CMD_INJECT_FRAME         = 0x0D  #: RZUSB opcode to specify a frame to inject
 RZ_CMD_JAMMER_ON            = 0x0E  #: RZUSB opcode to turn the jammer function on
 RZ_CMD_JAMMER_OFF           = 0x0F  #: RZUSB opcode to turn the jammer function off
 RZ_CMD_ENTER_BOOT           = 0x18  #: RZUSB opcode to enter bootloader
-RZ_CMD_BOOT_GET_VERSION     = 0xB1  #: RZUSB opcode to get bootloader maj/min version (not supprted!)
 RZ_CMD_BOOT_READ_SIGNATURE  = 0xB0  #: RZUSB opcode to get bootloader chip signature
+RZ_CMD_BOOT_GET_VERSION     = 0xB1  #: RZUSB opcode to get bootloader maj/min version
+RZ_CMD_BOOT_START_APPLICATION = 0xB2  #: RZUSB opcode to tell bootloader to start main application
 
 # Operating modes following RZ_CMD_SET_MODE function
 RZ_CMD_MODE_AC              = 0x00  #: RZUSB mode for aircapture (inject + sniff)
@@ -232,6 +233,15 @@ class RZUSBSTICK:
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
             self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
+        elif prod == "KILLERB002":
+            self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
+            self.capabilities.setcapab(KBCapabilities.SNIFF, True)
+            self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
+            self.capabilities.setcapab(KBCapabilities.INJECT, True)
+            self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
+            self.capabilities.setcapab(KBCapabilities.BOOT, True)
+        elif prod == "KILLERB00T":
+            self.capabilities.setcapab(KBCapabilities.BOOT, True)
         else:
             pass
 
@@ -431,6 +441,14 @@ class RZUSBSTICK:
         self.capabilities.require(KBCapabilities.BOOT)
 
         return self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_SIGN_ON], RZ_RESP_SIGN_ON)
+
+    def bootloader_start_application(self):
+        '''
+        Instruct bootloader to run main app
+        '''
+        self.capabilities.require(KBCapabilities.BOOT)
+
+        return self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_BOOT_START_APPLICATION])
 
     def jammer_off(self, channel=None):
         '''

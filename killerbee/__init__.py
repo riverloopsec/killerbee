@@ -259,9 +259,15 @@ class KillerBee:
         '''
         @rtype: String
         @return: Bootloader sign_on message
-        self.capabilities.require(KBCapabilities.BOOT)
         '''
         return self.driver.bootloader_sign_on()
+
+    def bootloader_start_application(self):
+        '''
+        Instructs the bootloader to exit and run the app
+        '''
+
+        return self.driver.bootloader_start_application()
 
     def sniffer_on(self, channel=None):
         '''

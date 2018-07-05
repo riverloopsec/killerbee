@@ -145,7 +145,7 @@
  ,Usb_unicode('B') \
  ,Usb_unicode('0') \
  ,Usb_unicode('0') \
- ,Usb_unicode('1') \
+ ,Usb_unicode('2') \
 }
 #endif
 

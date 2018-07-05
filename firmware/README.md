@@ -22,27 +22,55 @@ This needs to be flashed using external tools. Compiled firmware is:
 - `kb-rzusbstick-005.hex`: Newer version built by Adam Laurie (rfidiot) with LEDs for status:
   - Green solid: firmware running
   - Green blinking: packet sniffer running
-  - Orange solid: bootloader running
+  - Orange solid: bootloader running (original RZUSBSTICK version)
   - Orange momentary: packet RX
   - Red momentary: packet TX
   - Red&Green solid: jammer active
   - Red solid: ERROR - bootloader
-  - Blue solid: ERROR - capture data underrun
-  - Blue blinking: ERROR - USB timeout
+  - Blue solid: ERROR - USB timeout
+  - Blue blinking: ERROR - capture data underrun
+- `kb-rzusbstick-006.hex`: Newer version built by Adam Laurie (rfidiot) with DFU & native BOOTLOADER support:
+  - ALL solid: REBOOTING
+  - NO lights: DFU bootloader running (Atmel FLIP1 compatible)
 
 Note that if your green LED appears to be turning off then on instead of blinking multiple times per second when running in sniffer mode, this indicates that your hardware is an older slower model and you may experience poor performance resulting in missed/partial/corrupt packets.
 
-The source is included in `src/kb-rzusbstick/` folder. It should build on Windows and Ubuntu.
+It is recommended that you install the DFU bootloader with a hardware debugger and then all future updates can be done via USB:
+
+```
+cd firmware/src/kb-rzusbstick/gcc/RZUSBSTICK-DFU
+make install-with-avrdude
+```
+
+Alternatively, the RZUSBSTICK comes with a bootloader already installed, but it is not well documented or supported so good luck finding a PC client that knows how to talk to it! :) (The source is included in firmware/src/kb-rzusbstick/gcc/RZUSBSTICK-BOOTLOADER). The script 'scripts/bootloader_test' can be used by developers who need a clue as to how to work with it!.
+
+The main apllication source is also included in `src/kb-rzusbstick/` folder. It should build on Windows and Ubuntu. HEX files are included if you simply want to flash the current version.
+
 Command line make and install with AVR Dragon:
 ```
 cd firmware/src/kb-rzusbstick/gcc/RZUSBSTICK
 make
-make install
+make install-with-avrdude
 ```
 
+Command line make and install with 'avrdude' after installing DFU bootloader:
+```
+cd firmware/src/kb-rzusbstick/gcc/RZUSBSTICK
+make
+make install-with-dfu-avrdude
+```
+
+Command line make and install with 'dfu-programmer' after installing DFU bootloader:
+```
+cd firmware/src/kb-rzusbstick/gcc/RZUSBSTICK
+make
+make install-with-dfu-programmer
+```
+
+Windows users should look for [FLIP](http://www.microchip.com/Developmenttools/ProductDetails/FLIP) compatible tools.
 
 As described in the main `README.md`, you need to update the default firmware to support injection.
-This process requires additional hardware and software and multiple methods are offered:
+This process requires additional hardware and software and as well as the DFU mode above, multiple methods are offered:
 
 ### OpenOCD and buspirate (Linux)
 
@@ -72,14 +100,14 @@ make
 sudo make install
 ```
 
-2. Obtain the KillerBee RZUSBSTICK firmware from `firmware/kb-rzusbstick-005.hex`.
+2. Obtain the KillerBee RZUSBSTICK firmware from `firmware/kb-rzusbstick-006.hex`.
 Copy the firmware file into your Downloads directory.
 
 3. Download the configuration file for OpenOCD and the DP buspirate form [here](https://gist.githubusercontent.com/mertenats/5150ce65a358cb91919fc3013ce81ab3/raw/3c17361366219f14805ac855540e30cfc4efac0e/openOCD_buspirate_rzusbstick.cfg) and edit the variable `_FIRMWARE_LOCATION`.
 
 Example:
 ```
-set  _FIRMWARE_LOCATION /home/user/repos/killerbee/firmware/kb-rzusbstick-005.hex
+set  _FIRMWARE_LOCATION /home/user/repos/killerbee/firmware/kb-rzusbstick-006.hex
 ```
 
 4. Connect the buspirate to the RZ Raven USB stick with the following connections: GND to GND (RZ Raven USB stick to buspirate), TCK to CLK, TDO to MISO, TMS to CS, TDI to MOSI and SRST to AUX (pins layouts available [here](http://esver.free.fr/upload/RZUSBstick-JTAG.png) and [here](http://esver.free.fr/upload/Bp-cable-color-hk.png)).
@@ -126,7 +154,7 @@ _Although we have not tested this, the submitter assures us it is working._
 
 + Software: Windows
 + Software: AtmelStudio
-+ Hardware: [Atmel-ICE Basic](http://www.atmel.com/tools/atatmel-ice.aspx) ([docs](http://www.atmel.com/Images/Atmel-42330-Atmel-ICE_UserGuide.pdf))
++ Hardware: [Atmel-ICE Basic](http://www.microchip.com/developmenttools/ProductDetails/ATATMEL-ICE) ([docs](http://www.atmel.com/Images/Atmel-42330-Atmel-ICE_UserGuide.pdf))
 
 #### Procedure
 
@@ -172,14 +200,14 @@ libusb-win32 `inf-wizard.exe` executable.
   * Complete the wizard by clicking Next, then Finish to install the drivers.
   * When prompted by Windows, click "Install This Driver Sofware Anyway".
 
-* Copy the RZUSBSTICK firmware from `firmware/kb-rzusbstick-005.hex` to the directory where you extracted the AVRDUDE software.
-  * Note: We are suggesting the `-005` version now as some people report that `-001` does not work on newer RZUSBSTICK versions. Change the filenames in the example commands below.
+* Copy the RZUSBSTICK firmware from `firmware/kb-rzusbstick-006.hex` to the directory where you extracted the AVRDUDE software.
+  * Note: We are suggesting the `-006` version now as some people report that `-001` does not work on newer RZUSBSTICK versions. Change the filenames in the example commands below.
 
 * Connect the AVR Dragon programmer to the ribbon cable, and connect the 100-mm to 50-mm adapter with the header.
 * Prepare your terminal to flash the RZUSBSTICK by entering the following command at a
 command prompt (but _do not_ hit enter yet):
 ```
-avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-005.hex
+avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-006.hex
 ```
   * On "older" RZUSBSTICKs, use the file `kb-rzusbstick-001.hex` instead.
 
@@ -190,7 +218,7 @@ make contact.
 * Hit enter where you typed the AVRDUDE comand. You should see output similar to the following:
 
 ```
-C:\avrdude>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-005.hex
+C:\avrdude>avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:kb-rzusbstick-006.hex
 
 avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
 avrdude: AVR device initialized and ready to accept instructions
@@ -202,17 +230,17 @@ avrdude: NOTE: "flash" memory has been specified, an erase cycle will be perform
          To disable this feature, specify the -D option.
 avrdude: erasing chip
 avrdude: jtagmkII_initialize(): warning: OCDEN fuse not programmed, single-byte EEPROM updates not possible
-avrdude: reading input file "kb-rzusbstick-005.hex"
-avrdude: input file kb-rzusbstick-005.hex auto detected as Intel Hex
+avrdude: reading input file "kb-rzusbstick-006.hex"
+avrdude: input file kb-rzusbstick-006.hex auto detected as Intel Hex
 avrdude: writing flash (26784 bytes):
 
 Writing | ################################################## | 100% 2.33s
 
 avrdude: 26784 bytes of flash written
-avrdude: verifying flash memory against kb-rzusbstick-005.hex:
-avrdude: load data flash data from input file kb-rzusbstick-005.hex:
-avrdude: input file kb-rzusbstick-005.hex auto detected as Intel Hex
-avrdude: input file kb-rzusbstick-005.hex contains 26784 bytes
+avrdude: verifying flash memory against kb-rzusbstick-006.hex:
+avrdude: load data flash data from input file kb-rzusbstick-006.hex:
+avrdude: input file kb-rzusbstick-006.hex auto detected as Intel Hex
+avrdude: input file kb-rzusbstick-006.hex contains 26784 bytes
 avrdude: reading on-chip flash data:
 
 Reading | ################################################## | 100% 2.56s

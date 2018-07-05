@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-# This program is for debugging purposes only
+# kbbootloader.py - put KILLERBEE into bootloader mode
+#
+# Adam Laurie / rfidiot, 2018
+# adam@algroup.co.uk
+
 import sys
 from killerbee import *
 from time import sleep
@@ -17,13 +21,9 @@ def test_functions():
         print 'Could not activate bootloader - may be already running...'
     
     # Get the bootloader version
-    try:
-        print 'version:',
-        ver = kb.get_bootloader_version()
-        print '%02x - %02x' % (ver[0], ver[1])
-    except:
-        print 'Could not get the bootloader version - using DFU?'
-        exit(True)
+    print 'version:',
+    ver = kb.get_bootloader_version()
+    print '%02x - %02x' % (ver[0], ver[1])
 
     # Get AT90USB1287 signature
     print 'AT90USB1287 signature:', 
@@ -64,8 +64,7 @@ def test_functions():
     #                   0x000057F0, 0x000058B0, 0x000050B0]
     #for address in flash_addresses:
     #    print hex(address),':',hex( kb.read_flash(address) )
-
-    raw_input("Finished tests! Hit <ENTER> to exit bootloader or CTL-C to leave it running")    
+    
     # Leave bootloader and start application
     kb.bootloader_start_application()
     
@@ -73,5 +72,10 @@ def test_functions():
     #kb.reset()
 
 if __name__ == '__main__':
-    test_functions()
+    try:
+        kb = KillerBee()
+        kb.enter_bootloader()
+    except:
+	print 'Could not activate bootloader - may be already running...'
+
 
