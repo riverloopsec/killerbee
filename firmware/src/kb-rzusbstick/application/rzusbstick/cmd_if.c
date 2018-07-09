@@ -39,6 +39,7 @@
 
 #include "air_capture.h"
 #include "cmd_if.h"
+#include "led.h"
 
 #include "ieee802_15_4.h"
 #include "ieee802_15_4_const.h"
@@ -625,7 +626,13 @@ void cmd_if_task(void) {
 
 
 static void reboot(void) {
-    wdt_enable(WDTO_15MS);
+    LED_ORANGE_ON();
+    LED_BLUE_ON();
+    LED_RED_ON();
+    LED_GREEN_ON();
+    //wdt_enable(WDTO_15MS);
+    wdt_enable(WDTO_1S);
+    
     
     while (true) {
         ;
@@ -1009,10 +1016,25 @@ static void cmd_enter_boot(void *cmd_enter_boot) {
     
     /* Delay so that the response is sent before bootloader section is entered. */
     delay_us(50000);
-    
-    /* Set EEPROM magic and reset the device. */
+
+    /* DFU mode ignores this so safe to do for either bootloader */
     EEPUT(EE_BOOT_MAGIC_ADR, EE_BOOT_MAGIC_VALUE);
-    reboot();
+
+    /* signal a reboot */
+    LED_RED_ON();
+    LED_BLUE_ON();
+    LED_GREEN_ON();
+    LED_ORANGE_ON();
+
+    /* magic required to jump! */
+    UDCON = 1;
+    UCSR1B = 0;
+    EIMSK = 0; PCICR = 0; SPCR = 0; ACSR = 0; EECR = 0; ADCSRA = 0;    //disable A/D converter
+    TIMSK0 = 0; TIMSK1 = 0; TIMSK2 = 0; TIMSK3 = 0; TWCR = 0;         //disable timers
+    DDRA = 0; DDRB = 0; DDRC = 0; DDRD = 0; DDRE = 0; DDRF = 0;     //disable I/O pin drivers
+    PORTA = 0; PORTB = 0; PORTC = 0; PORTD = 0; PORTE = 0; PORTF = 0;
+ 
+    asm("jmp 0x1E000"); //jump to boot loader   //word address = 0xF000    //byte address = 2*word address = 0x1E000
 }
 
 

@@ -290,7 +290,7 @@ void air_capture_task(void) {
                 /* Turn the blue LED on to signal a level 2. error. The 
                  * application should be restarted.
                  */
-                LED_BLUE_ON();
+                Blink_Blue_LED = true;
             }// END: if (0 == packets_left) ...
         } // END: if ((0 == bytes_left) ...
         

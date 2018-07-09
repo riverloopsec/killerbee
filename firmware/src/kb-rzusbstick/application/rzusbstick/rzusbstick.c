@@ -132,11 +132,17 @@ int main(void) {
     
     /* Enable interrupts. */
     sei();
+
+    /* Disable bootloader */
+    uint8_t volatile magic_value;
+    EEGET(magic_value, EE_BOOT_MAGIC_ADR);
+    if (magic_value != 0x00)
+        EEPUT(EE_BOOT_MAGIC_ADR, 0x00);
     
-	/* Endless application loop. */
-	for(;;++loop_count) {
-        /* Dispatch events from the event queue. */
-		vrt_dispatch_event();
+    /* Endless application loop. */
+    for(;;++loop_count) {
+    /* Dispatch events from the event queue. */
+        vrt_dispatch_event();
         
         /* Poll modules that require this. */
         vrt_timer_task();

@@ -53,6 +53,7 @@ class KBCapabilities:
     SET_SYNC           = 0x07 #: Capabilities Flag: Can set the register controlling 802.15.4 sync byte
     FREQ_2400          = 0x08 #: Capabilities Flag: Can preform 2.4 GHz sniffing (ch 11-26)
     FREQ_900           = 0x09 #: Capabilities Flag: Can preform 900 MHz sniffing (ch 1-10)
+    BOOT               = 0x0a #: Capabilities Flag: Has BootLoader
     def __init__(self):
         self._capabilities = {
                 self.NONE : False,
@@ -64,7 +65,8 @@ class KBCapabilities:
                 self.PHYJAM_REFLEX: False,
                 self.SET_SYNC: False,
                 self.FREQ_2400: False,
-                self.FREQ_900: False }
+                self.FREQ_900: False ,
+                self.BOOT: False }
     def check(self, capab):
         if capab in self._capabilities:
             return self._capabilities[capab]

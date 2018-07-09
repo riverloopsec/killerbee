@@ -181,14 +181,32 @@ void cmd_if_deinit(void) {
 }
 
 static void reboot(void) {
-    LED_GREEN_OFF();
-    LED_ORANGE_OFF();
+    LED_GREEN_ON();
+    LED_ORANGE_ON();
+    LED_RED_ON();
+    LED_BLUE_ON();
 
-    wdt_enable(WDTO_15MS);
+    /* original reboot method disabled due to not completely resetting! */
+    //wdt_enable(WDTO_1S);
     
-    while (true) {
-        ;
-    }
+    //while (true) {
+    //    ;
+
+    /* signal a reboot */
+    LED_RED_ON();
+    LED_BLUE_ON();
+    LED_GREEN_ON();
+    LED_ORANGE_ON();
+
+    /* magic required to jump! */
+    UDCON = 1;
+    UCSR1B = 0;
+    EIMSK = 0; PCICR = 0; SPCR = 0; ACSR = 0; EECR = 0; ADCSRA = 0;    //disable A/D converter
+    TIMSK0 = 0; TIMSK1 = 0; TIMSK2 = 0; TIMSK3 = 0; TWCR = 0;         //disable timers
+    DDRA = 0; DDRB = 0; DDRC = 0; DDRD = 0; DDRE = 0; DDRF = 0;     //disable I/O pin drivers
+    PORTA = 0; PORTB = 0; PORTC = 0; PORTD = 0; PORTE = 0; PORTF = 0;
+
+    asm("jmp 0x0000"); //jump to application start
 }
 
 /*                          COMMAND HANDLERS                                  */
@@ -304,8 +322,7 @@ static void cmd_if_start_application(void *cmd_start_application) {
     MCUCR |= (1<<IVCE);
     MCUCR = mcucr;
 	LEAVE_CRITICAL_REGION();
-    
-    EEPUT(EE_BOOT_MAGIC_ADR, 0xFF);
+   
     reboot();
 }
 
