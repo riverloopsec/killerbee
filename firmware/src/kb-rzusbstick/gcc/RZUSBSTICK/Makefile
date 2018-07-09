@@ -61,16 +61,16 @@ bootloader: ../RZUSBSTICK-BOOTLOADER/RZUSBSTICK_BOOTLOADER.hex
 	@cd ../RZUSBSTICK-BOOTLOADER && make
 
 ## Install application and old bootloader using avrdude JTAG
-install-old-bootloader: all bootloader
+install-old-bootloader:
 	@srec_cat ../RZUSBSTICK-BOOTLOADER/RZUSBSTICK_BOOTLOADER.hex -Intel RZUSBSTICK.hex -Intel -o BOTH.hex -Intel
 	@avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:BOTH.hex
 
 # install using avrdude JTAG
-install-with-avrdude: all
+install-with-avrdude:
 	@avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:RZUSBSTICK.hex
 
 # install using DFU with dfu-programmer
-install-with-dfu-programmer: all
+install-with-dfu-programmer:
 	@kbbootloader
 	@echo "Waiting 5 seconds for BOOTLOADER..."
 	@sleep 5
@@ -83,7 +83,7 @@ install-with-dfu-programmer: all
 	@echo "avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U hfuse:w:0x99:m"
 	
 # install using DFU with avrdude
-install-with-dfu-avrdude: all
+install-with-dfu-avrdude:
 	@kbbootloader
 	@echo "Waiting 5 seconds for BOOTLOADER..."
 	@sleep 5

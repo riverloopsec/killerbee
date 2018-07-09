@@ -123,15 +123,6 @@ int main(void) {
     /* Initialize AVR peripheral modules. */
     (bool)avr_init();
 
-    nop();
-    nop();
-    nop();
-    nop();
-    nop();
-    nop();
-    nop();
-    nop();
-    
     /* Check if the RX and TX pins are shorted. If they are shorted, the RZUSBSTICK
      * shall start the bootloader. If not, continue to verify if the application
      * requested to enter the bootloader.

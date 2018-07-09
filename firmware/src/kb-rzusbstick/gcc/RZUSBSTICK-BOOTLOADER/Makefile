@@ -62,7 +62,7 @@ LINKONLYOBJECTS =
 all: $(TARGET) RZUSBSTICK_BOOTLOADER.hex RZUSBSTICK_BOOTLOADER.eep RZUSBSTICK_BOOTLOADER.lss size
 
 ## Install
-install: all
+install:
 	@avrdude -P usb -c dragon_jtag -p usb1287 -B 10 -U flash:w:RZUSBSTICK_BOOTLOADER.hex
 
 ## Compile
