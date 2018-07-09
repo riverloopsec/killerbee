@@ -20,20 +20,21 @@ This needs to be flashed using external tools. Compiled firmware is:
 - `kb-rzusbstick-003.hex`: Newer version built by Scytmo with fix for stalling on 64-byte packets
 - `kb-rzusbstick-004.hex`: Newer version built by Adam Laurie (rfidiot) with LEDs for status:
 - `kb-rzusbstick-005.hex`: Newer version built by Adam Laurie (rfidiot) with LEDs for status:
-  - Green solid: firmware running
+  - Green solid: KILLERBEE firmware running
   - Green blinking: packet sniffer running
   - Orange solid: bootloader running (original RZUSBSTICK version)
   - Orange momentary: packet RX
   - Red momentary: packet TX
   - Red&Green solid: jammer active
-  - Red solid: ERROR - bootloader
-  - Blue solid: ERROR - USB timeout
-  - Blue blinking: ERROR - capture data underrun
+  - Red&Orange solid: ERROR - bootloader
+  - Blue solid&Green any: ERROR - USB timeout
+  - Blue solid: original RZUSBSTICK firmware running
+  - Blue blinking&Green any: ERROR - capture data underrun
 - `kb-rzusbstick-006.hex`: Newer version built by Adam Laurie (rfidiot) with DFU & native BOOTLOADER support:
   - ALL solid: REBOOTING
   - NO lights: DFU bootloader running (Atmel FLIP1 compatible)
 
-Note that if your green LED appears to be turning off then on instead of blinking multiple times per second when running in sniffer mode, this indicates that your hardware is an older slower model and you may experience poor performance resulting in missed/partial/corrupt packets.
+*Note that if your green LED appears to be turning off then on instead of blinking multiple times per second when running in sniffer mode, this indicates that your hardware is an older slower model and you may experience poor performance resulting in missed/partial/corrupt packets.*
 
 It is recommended that you install the DFU bootloader with a hardware debugger and then all future updates can be done via USB:
 
