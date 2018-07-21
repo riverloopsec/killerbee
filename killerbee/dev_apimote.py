@@ -40,6 +40,7 @@ class APIMOTE:
         @rtype: None
         '''
         self._channel = None
+        self._page = 0
         self.handle = None
         self.dev = dev
 
@@ -88,13 +89,15 @@ class APIMOTE:
         return [self.dev, "GoodFET Apimote v%d".format(self.__revision_num), ""]
 
     # KillerBee expects the driver to implement this function
-    def sniffer_on(self, channel=None):
+    def sniffer_on(self, channel=None, page=0):
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.  Will set the command mode to Air Capture if it is not already
         set.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
@@ -103,7 +106,7 @@ class APIMOTE:
         self.handle.RF_autocrc(0)
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
         
         self.handle.CC_RFST_RX()
         #print "Sniffer started (listening as %010x on %i MHz)" % (self.handle.RF_getsmac(), self.handle.RF_getfreq()/10**6);
@@ -122,9 +125,10 @@ class APIMOTE:
         self.__stream_open = False
 
     # KillerBee expects the driver to implement this function
-    def set_channel(self, channel):
+    def set_channel(self, channel, page=0):
         '''
-        Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
+        Sets the radio interface to the spec/
+ifid channel (limited to 2.4 GHz channels 11-26)
         @type channel: Integer
         @param channel: Sets the channel, optional
         @rtype: None
@@ -136,15 +140,19 @@ class APIMOTE:
             self.handle.RF_setchan(channel)
         else:
             raise Exception('Invalid channel')
+        if page:
+            raise Exception('SubGHz not supported')
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
         @type packet: String
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @type count: Integer
         @param count: Transmits a specified number of frames, def=1
         @type delay: Float
@@ -159,7 +167,7 @@ class APIMOTE:
             raise Exception('Packet too long')
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         self.handle.RF_autocrc(1)               #let radio add the CRC
         for pnum in range(0, count):
@@ -201,7 +209,7 @@ class APIMOTE:
         result['datetime'] = datetime.utcnow()
         return result
  
-    def ping(self, da, panid, sa, channel=None):
+    def ping(self, da, panid, sa, channel=None, page=0):
         '''
         Not yet implemented.
         @return: None
@@ -209,11 +217,13 @@ class APIMOTE:
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=Nonei, page=0):
         '''
         Not yet implemented.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM_REFLEX)
@@ -221,7 +231,7 @@ class APIMOTE:
         self.handle.RF_promiscuity(1)
         self.handle.RF_autocrc(0)
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
         self.handle.CC_RFST_RX()
         self.handle.RF_carrier() #constant carrier wave jamming
         #self.handle.RF_reflexjam() #reflexive jamming (advanced)
@@ -233,7 +243,7 @@ class APIMOTE:
             raise Exception("Sync word (%x) must be 2-bytes or less." % sync)
         return self.handle.poke(CC2420_REG_SYNC, sync)
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self, channel=None, page=0):
         '''
         Not yet implemented.
         @return: None

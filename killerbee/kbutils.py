@@ -51,9 +51,13 @@ class KBCapabilities:
     SELFACK            = 0x05 #: Capabilities Flag: Can ACK Frames Automatically
     PHYJAM_REFLEX      = 0x06 #: Capabilities Flag: Can Jam PHY Layer Reflexively
     SET_SYNC           = 0x07 #: Capabilities Flag: Can set the register controlling 802.15.4 sync byte
-    FREQ_2400          = 0x08 #: Capabilities Flag: Can preform 2.4 GHz sniffing (ch 11-26)
-    FREQ_900           = 0x09 #: Capabilities Flag: Can preform 900 MHz sniffing (ch 1-10)
+    FREQ_2400          = 0x08 #: Capabilities Flag: Can perform 2.4 GHz sniffing (ch 11-26)
+    FREQ_900           = 0x09 #: Capabilities Flag: Can perform 900 MHz sniffing (ch 1-10)
     BOOT               = 0x0a #: Capabilities Flag: Has BootLoader
+    FREQ_863           = 0x0b #: Capabilities Flag: Can perform 863-868 MHz sniffing (ch 0-26 )
+    FREQ_868           = 0x0c #: Capabilities Flag: Can perform 868-876 MHz sniffing (ch 27-34, 62)
+    FREQ_870           = 0x0d #: Capabilities Flag: Can perform 870-876 MHz sniffing (ch 35-61)
+    FREQ_915           = 0x0e #: Capabilities Flag: Can perform 915-917 MHz sniffing (ch 0-26)
     def __init__(self):
         self._capabilities = {
                 self.NONE : False,
@@ -66,6 +70,10 @@ class KBCapabilities:
                 self.SET_SYNC: False,
                 self.FREQ_2400: False,
                 self.FREQ_900: False ,
+                self.FREQ_863: False,
+                self.FREQ_868: False ,
+                self.FREQ_870: False,
+                self.FREQ_915: False,
                 self.BOOT: False }
     def check(self, capab):
         if capab in self._capabilities:
@@ -79,14 +87,67 @@ class KBCapabilities:
     def require(self, capab):
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
-    def is_valid_channel(self, channel):
+    def frequency(self, channel= None, page= None):
+        '''
+        Return actual frequency of channel/page in KHz
+        '''
+        #TODO: FREQ_900
+        if not self.is_valid_channel(channel, page):
+            return 0
+        #FREQ_2400
+        if page == 0:
+            base = 2405000
+            step = 5000
+            first = 11
+        #FREQ_863
+        if page == 28:
+            base = 863250
+            step = 200
+            first = 0
+        #FREQ_868
+        if page == 29:
+            base = 868650
+            step = 200
+            first = 0
+        #FREQ_870
+        if page == 30:
+            base = 870250
+            step = 200
+            first = 0
+        #FREQ_915
+        if page == 31:
+            base = 915350
+            step = 200
+            first = 0
+        return (channel - first) * step + base
+
+    def is_valid_channel(self, channel, page= 0):
         '''
         Based on sniffer capabilities, return if this is an OK channel number.
         @rtype: Boolean
         '''
+        # if sub-ghz, check that page and channel match
+        if page:
+            if (page == 28 or page == 31) and channel > 26:
+                return False
+            elif page == 29 and (channel < 27 or (channel > 34 and channel != 62)):
+                return False
+            elif page == 30 and (channel < 25 or channel > 61):
+                return False
+            elif page < 28 or page > 31:
+                return False
+
         if (channel >= 11 and channel <= 26) and self.check(self.FREQ_2400):
             return True
+        elif (channel >= 0 and channel <= 26) and self.check(self.FREQ_863):
+            return True
+        elif ((channel >= 27 and channel <= 34) or channel == 62) and self.check(self.FREQ_868):
+            return True
+        elif (channel >= 35 and channel <= 61) and self.check(self.FREQ_870):  
+            return True
         elif (channel >= 1 and channel <= 10) and self.check(self.FREQ_900):
+            return True
+        elif (channel >= 0 and channel <= 26) and self.check(self.FREQ_915):
             return True
         return False
 
@@ -221,6 +282,10 @@ def devlist(vendor=None, product=None, gps=None, include=None):
         if serialdev == gps_devstring:
             print("kbutils.devlist is skipping ignored/GPS device string {0}".format(serialdev)) #TODO remove debugging print
             continue
+        elif (DEV_ENABLE_SL_NODETEST and issl_nodetest(serialdev)):
+            devlist.append([serialdev, "Silabs NodeTest", ""])
+        elif (DEV_ENABLE_SL_BEEHIVE and issl_beehive(serialdev)):
+            devlist.append([serialdev, "Silabs BeeHive", ""])
         elif (DEV_ENABLE_ZIGDUINO and iszigduino(serialdev)):
             devlist.append([serialdev, "Zigduino", ""])
         elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
@@ -270,7 +335,7 @@ def get_serial_ports(include=None):
         by the normal search. This may be useful if we're not including some
         oddly named serial port which you have a KillerBee device on. Optional.
     '''
-    seriallist = glob.glob("/dev/ttyUSB*") + glob.glob("/dev/tty.usbserial*")  #TODO make cross platform globing/winnt
+    seriallist = glob.glob("/dev/ttyUSB*") + glob.glob("/dev/tty.usbserial*") + glob.glob("/dev/ttyACM*") #TODO make cross platform globing/winnt
     if include is not None:
         seriallist = list( set(seriallist).union(set(filter(isSerialDeviceString, include))) )
     return seriallist
@@ -364,6 +429,54 @@ def iszigduino(serialdev):
             return True
     return False
     
+def issl_nodetest(serialdev):
+    '''
+    Determine if a given serial device is a Silabs dev board NodeTest loaded (https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf)
+    @type serialdev: String
+    @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
+    @rtype: Boolean
+    '''
+    s = serial.Serial(port=serialdev, baudrate=115200, timeout=.5, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+    #time.sleep(.5)
+    # send RX stop in case it was left running
+    s.write('\re\r')
+    # get anything in the buffers
+    while s.in_waiting:
+        s.readline()
+    s.write('version\r')
+    version = None
+    for i in range(5):
+        d= s.readline()
+        if 'Node Test Application' in d:
+            version = d
+            break
+    s.close()
+    return (version is not None)
+
+def issl_beehive(serialdev):
+    '''
+    Determine if a given serial device is a Silabs BeeHive - contact Adam Laurie <adam@algroup.co.uk> for more info
+    @type serialdev: String
+    @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
+    @rtype: Boolean
+    '''
+    s = serial.Serial(port=serialdev, baudrate=115200, timeout=.5, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+    #time.sleep(.5)
+    # send RX stop in case it was left running
+    s.write('\rrx 0\r')
+    # get anything in the buffers
+    while s.in_waiting:
+        d = s.readline()
+    s.write('\r')
+    version = None
+    for i in range(5):
+        d= s.readline()
+        if 'BeeHive' in d:
+            version = d
+            break
+    s.close()
+    return (version is not None)
+
 def isfreakduino(serialdev):
     '''
     Determine if a given serial device is a Freakduino attached with the right sketch loaded.

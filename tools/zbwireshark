@@ -28,6 +28,8 @@ def parse_args():
             help='Include CACE Per-Packet Information in PCAP')
     parser.add_argument('-c', '-f', '--channel', action='store', type=int, required=True,
             help='Channel on which to sniff')
+    parser.add_argument('-s', '--subghz_page', action='store', type=int, required=False, default=0,
+            help='SubGHz page on which to sniff')
     parser.add_argument('-n', '--count', action='store', type=int, default=None,
             metavar='COUNT', help='Limit capture to COUNT packets')
     parser.add_argument('-D', action = ShowDevAction, nargs=0,
@@ -58,7 +60,7 @@ def main():
     # Start KillerBee
     with KillerBee(device=args.devstring) as kb:
         try:
-            kb.set_channel(args.channel)
+            kb.set_channel(args.channel, args.subghz_page)
         except ValueError as e:
             print 'ERROR:', e
             sys.exit(1)
@@ -71,9 +73,10 @@ def main():
         # Create a PCAP dumper to write packets to wireshark
         with PcapDumper(DLT_IEEE802_15_4, wireshark_proc.stdin, ppi=args.ppi) as pd:
 
-            rf_freq_mhz = (args.channel - 10) * 5 + 2400
-            print("zbwireshark: listening on \'{0}\'".format(kb.get_dev_info()[0]))
-
+            #rf_freq_mhz = (args.channel - 10) * 5 + 2400
+            #print("zbwireshark: listening on \'{0}\'".format(kb.get_dev_info()[0]))
+            rf_freq_mhz = kb.frequency(args.channel, args.subghz_page) / 1000.0
+            print("zbwireshark: listening on \'{0}\', channel {1}, page {2} ({3} MHz), link-type DLT_IEEE802_15_4, capture size 127 bytes".format(kb.get_dev_info()[0], args.channel, args.subghz_page, rf_freq_mhz))
             try:
                 packetcount = 0
                 while args.count != packetcount:
