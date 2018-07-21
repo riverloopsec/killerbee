@@ -184,6 +184,7 @@ instructions documented by running the tool with the "-h" argument, and
 summarized below.
 
 
++ kbbootloader -  Switches device into DFU/BOOTLOADER mode (if device is capable)
 + zbid         -  Identifies available interfaces that can be used by KillerBee
                 and associated tools.
 + zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time 
