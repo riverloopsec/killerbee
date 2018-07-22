@@ -304,7 +304,7 @@ if __name__ == '__main__':
         if args.transmit_original:
             print '      transmitting ORIGINAL on channel', args.channel
             try:
-                kb.inject(str(packet), args.channel, 1, args.delay, args.subghz_page)
+                kb.inject(str(packet), args.channel, 1, args.delay, page= args.subghz_page)
                 print '        OK'
                 #debug
                 print packet.command()
@@ -316,7 +316,7 @@ if __name__ == '__main__':
         if args.transmit_crypted and newpkt:
             print '      transmitting RE-ENCRYPTED on channel', args.channel
             try:
-                kb.inject(str(packet), args.channel, 1, args.delay, args.subghz_page)
+                kb.inject(str(packet), args.channel, 1, args.delay, page= args.subghz_page)
                 print '        OK'
             except:
                 print '        FAILED!'
