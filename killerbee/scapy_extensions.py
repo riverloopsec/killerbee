@@ -105,7 +105,7 @@ def kbdev():
     show_dev()
 
 @conf.commands.register
-def kbsendp(pkt, channel = None, page = 0, inter = 0, loop = 0, iface = None, count = None, verbose = None, realtime=None):
+def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None, verbose = None, realtime=None, page= 0):
     """
     Send a packet with KillerBee
     @param channel:  802.15.4 channel to transmit/receive on
