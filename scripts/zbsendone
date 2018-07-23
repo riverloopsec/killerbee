@@ -87,6 +87,7 @@ signal.signal(signal.SIGINT, interrupt)
 print "Injecting %d packets on channel %d page %d with a %d length" % (arg_packetcount, arg_channel, arg_subghz_page, len(packet))
 # The packet variable is set by the user near the top of the script.
 #kb.inject(packet, arg_channel, arg_packetcount, arg_delay, arg_subghz_page)
+print 'sending:', str(packet).encode('hex')
 kb.inject(str(packet), arg_channel, arg_packetcount, arg_delay, page= arg_subghz_page)
 kb.close()
 
