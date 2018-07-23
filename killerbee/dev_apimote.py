@@ -217,7 +217,7 @@ ifid channel (limited to 2.4 GHz channels 11-26)
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel=Nonei, page=0):
+    def jammer_on(self, channel=None, page=0):
         '''
         Not yet implemented.
         @type channel: Integer
