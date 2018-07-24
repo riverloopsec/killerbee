@@ -436,12 +436,12 @@ def issl_nodetest(serialdev):
     @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
     @rtype: Boolean
     '''
-    s = serial.Serial(port=serialdev, baudrate=115200, timeout=.5, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+    s = serial.Serial(port=serialdev, baudrate=115200, timeout=.1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
     #time.sleep(.5)
     # send RX stop in case it was left running
     s.write('\re\r')
     # get anything in the buffers
-    while s.in_waiting:
+    for x in range(5):
         s.readline()
     s.write('version\r')
     version = None
