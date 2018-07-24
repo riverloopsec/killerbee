@@ -127,8 +127,7 @@ class APIMOTE:
     # KillerBee expects the driver to implement this function
     def set_channel(self, channel, page=0):
         '''
-        Sets the radio interface to the spec/
-ifid channel (limited to 2.4 GHz channels 11-26)
+        Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
         @type channel: Integer
         @param channel: Sets the channel, optional
         @rtype: None
