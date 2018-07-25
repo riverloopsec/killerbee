@@ -55,8 +55,8 @@ class KBCapabilities:
     FREQ_900           = 0x09 #: Capabilities Flag: Can perform 900 MHz sniffing (ch 1-10)
     BOOT               = 0x0a #: Capabilities Flag: Has BootLoader
     FREQ_863           = 0x0b #: Capabilities Flag: Can perform 863-868 MHz sniffing (ch 0-26 )
-    FREQ_868           = 0x0c #: Capabilities Flag: Can perform 868-876 MHz sniffing (ch 27-34, 62)
-    FREQ_870           = 0x0d #: Capabilities Flag: Can perform 870-876 MHz sniffing (ch 35-61)
+    FREQ_868           = 0x0c #: Capabilities Flag: Can perform 868-876 MHz sniffing (ch 0-8)
+    FREQ_870           = 0x0d #: Capabilities Flag: Can perform 870-876 MHz sniffing (ch 0-26)
     FREQ_915           = 0x0e #: Capabilities Flag: Can perform 915-917 MHz sniffing (ch 0-26)
     def __init__(self):
         self._capabilities = {
@@ -128,26 +128,18 @@ class KBCapabilities:
         '''
         # if sub-ghz, check that page and channel match
         if page:
-            if (page == 28 or page == 31) and channel > 26:
+            if (page == 28 or page == 30 or page == 31) and channel > 26:
                 return False
-            elif page == 29 and (channel < 27 or (channel > 34 and channel != 62)):
-                return False
-            elif page == 30 and (channel < 25 or channel > 61):
+            elif page == 29 and channel  > 8:
                 return False
             elif page < 28 or page > 31:
                 return False
 
         if (channel >= 11 and channel <= 26) and self.check(self.FREQ_2400):
             return True
-        elif (channel >= 0 and channel <= 26) and self.check(self.FREQ_863):
-            return True
-        elif ((channel >= 27 and channel <= 34) or channel == 62) and self.check(self.FREQ_868):
-            return True
-        elif (channel >= 35 and channel <= 61) and self.check(self.FREQ_870):  
+        elif (channel >= 0 and channel <= 26) and (self.check(self.FREQ_863) or self.check(self.FREQ_870) or self.check(self.FREQ_915)):
             return True
         elif (channel >= 1 and channel <= 10) and self.check(self.FREQ_900):
-            return True
-        elif (channel >= 0 and channel <= 26) and self.check(self.FREQ_915):
             return True
         return False
 
