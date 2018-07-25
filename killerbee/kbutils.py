@@ -126,18 +126,21 @@ class KBCapabilities:
         Based on sniffer capabilities, return if this is an OK channel number.
         @rtype: Boolean
         '''
-        # if sub-ghz, check that page and channel match
+        # if sub-ghz, check that page and channel and capability match
         if page:
-            if (page == 28 or page == 30 or page == 31) and channel > 26:
+            if page == 28 and (channel > 26 or not self.check(self.FREQ_863)):
                 return False
-            elif page == 29 and channel  > 8:
+            elif page == 29 and (channel > 8 or not self.check(self.FREQ_868)):
+                return False
+            if page == 30 and (channel > 26 or not self.check(self.FREQ_870)):
+                return False
+            if page == 31 and (channel > 26 or not self.check(self.FREQ_915)):
                 return False
             elif page < 28 or page > 31:
                 return False
+            return True
 
         if (channel >= 11 and channel <= 26) and self.check(self.FREQ_2400):
-            return True
-        elif (channel >= 0 and channel <= 26) and (self.check(self.FREQ_863) or self.check(self.FREQ_870) or self.check(self.FREQ_915)):
             return True
         elif (channel >= 1 and channel <= 10) and self.check(self.FREQ_900):
             return True
