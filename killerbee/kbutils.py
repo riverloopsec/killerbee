@@ -280,7 +280,7 @@ def devlist(vendor=None, product=None, gps=None, include=None):
         elif (DEV_ENABLE_SL_NODETEST and issl_nodetest(serialdev)):
             devlist.append([serialdev, "Silabs NodeTest", ""])
         elif (DEV_ENABLE_SL_BEEHIVE and issl_beehive(serialdev)):
-            devlist.append([serialdev, "Silabs BeeHive", ""])
+            devlist.append([serialdev, "BeeHive SG", ""])
         elif (DEV_ENABLE_ZIGDUINO and iszigduino(serialdev)):
             devlist.append([serialdev, "Zigduino", ""])
         elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
@@ -450,7 +450,7 @@ def issl_nodetest(serialdev):
 
 def issl_beehive(serialdev):
     '''
-    Determine if a given serial device is a Silabs BeeHive - contact Adam Laurie <adam@algroup.co.uk> for more info
+    Determine if a given serial device is a BeeHive SG - contact Adam Laurie <adam@algroup.co.uk> for more info
     @type serialdev: String
     @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
     @rtype: Boolean
@@ -466,7 +466,7 @@ def issl_beehive(serialdev):
     version = None
     for i in range(5):
         d= s.readline()
-        if 'BeeHive' in d:
+        if 'BeeHive SG' in d:
             version = d
             break
     s.close()
