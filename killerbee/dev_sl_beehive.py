@@ -218,7 +218,6 @@ class SL_BEEHIVE:
                 self.__send_cmd("863MHz", extra_delay= 0.3)
         else:
             self.__send_cmd("2p4GHz")
-        self.__send_cmd("802154", "rx 100 192 864")
         #TODO actually check that it responds correctly to the request
         self.__send_cmd("setchannel", "%d" % channel)
 
