@@ -103,16 +103,36 @@ class SL_NODETEST:
         '''
         internal routine to deconstruct serial text received from device
         packet will be in the format: "{{num}   {oflo}  {seq}   {per}  {err} {lqi}  {rssi}{ed}   {gain}       {status} {time}       {fp}{length}{payload}}"
+        @type packet: String
+        @param: packet: The raw packet to dissect
+        @rtype: List
+        @return: Returns None if packet is not in correct format.  When a packet is correct,
+                 a list is returned, in the form [ String: Frame | Bool: Valid CRC | Int: Unscaled RSSI ]
         '''
         data = packet[1:].replace('{',' ').replace('}',' ').split()
+        # should be 12 fields + payload length + payload
+        if not data or not len(data[13:]) == int(data[12], 16):
+            print "Error parsing stream received from device (payload size error):", packet
+            return None
         # payload is in the form e.g. "0x03 0x08 0xA3 0xFF 0xFF 0xFF 0xFF 0x07" so we need to convert to a string
-        out = ''
+        frame = ''
         for x in data[13:]:
             try:
-                out += chr(int(x, 16))
+                frame += chr(int(x, 16))
             except:
+                print "Error parsing stream received from device (invalid payload):", packet
                 return None
-        return data[:13] + [out]
+
+        # Parse other useful fields
+        try:
+            rssi = int(data[6])
+            # sniffer doesn't give us the CRC so we must add it, but must be correct or we would not have received it
+            validcrc = True
+            frame += makeFCS(frame)
+        except:
+            print "Error parsing stream received from device (invalid rssi or FCS build error):", packet
+            return None
+        return [frame, validcrc, rssi]
 
     # KillerBee expects the driver to implement this function
     def sniffer_on(self, channel=None, page=0):
@@ -222,7 +242,7 @@ class SL_NODETEST:
         @type timeout: Integer
         @param timeout: Timeout to wait for packet reception in usec
         @rtype: List
-        @return: Returns None is timeout expires and no packet received.  When a packet is received,
+        @return: Returns None if timeout expires and no packet received or packet is corrupt.  When a packet is received,
                  a list is returned, in the form [ String: packet contents | Bool: Valid CRC | Int: Unscaled RSSI ]
         '''
         if not self.__stream_open:
@@ -234,20 +254,11 @@ class SL_NODETEST:
             return None   # Sense timeout case and return
 
         data = self.__dissect_pkt(packet)
-        # should be 14 fields
-        if not data or not len(data) == 14:
-            print "Error parsing stream received from device:", packet, packet.encode('hex')
-
-        # Parse received data as <rssi>!<time>!<packtlen>!<frame>
-        try:
-            rssi = int(data[6])
-            frame = data[13]
-            # sniffer doesn't give is the CRC so we must add it
-            validcrc = True
-            frame += makeFCS(frame)
-        except:
-            print "Error parsing stream received from device:", packet
+        if not data:
             return None
+        frame = data[0]
+        validcrc = data[1]
+        rssi = data[2]
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
         result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi}
