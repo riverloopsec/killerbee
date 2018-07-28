@@ -214,11 +214,6 @@ class SL_NODETEST:
 
         raise Exception('Not yet implemented')
 
-        for pnum in range(0, count):
-            # Format for packet is opcode CMD_INJECT_FRAME, one-byte length,  packet data
-            #TODO RZ_USB_COMMAND_EP, struct.pack("B", RZ_CMD_INJECT_FRAME) + struct.pack("B", len(packet)) + packet)
-            time.sleep(delay)
-
     # KillerBee expects the driver to implement this function
     #TODO I suspect that if you don't call this often enough while getting frames, the serial buffer may overflow.
     def pnext(self, timeout=100):
