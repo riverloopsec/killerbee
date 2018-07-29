@@ -1,8 +1,10 @@
 DEFAULT_KB_CHANNEL = 11
+DEFAULT_KB_PAGE = None
 DEFAULT_KB_DEVICE = None
 
 from scapy.config import conf
 setattr(conf, 'killerbee_channel', DEFAULT_KB_CHANNEL)
+setattr(conf, 'killerbee_page', DEFAULT_KB_PAGE)
 setattr(conf, 'killerbee_device', DEFAULT_KB_DEVICE)
 setattr(conf, 'killerbee_nkey', None)
 from scapy.base_classes import SetGen
@@ -18,7 +20,10 @@ from kbutils import randmac
 import logging
 log_killerbee = logging.getLogger('scapy.killerbee')
 
-def __kb_send(kb, x, channel = None, inter = 0, loop = 0, count = None, verbose = None, realtime = None, *args, **kargs):
+# new scapy needs to know if we're using sixlowpan or zigbee
+conf.dot15d4_protocol = "zigbee"
+
+def __kb_send(kb, x, channel = None, page = 0, inter = 0, loop = 0, count = None, verbose = None, realtime = None, *args, **kargs):
     if type(x) is str:
         x = Raw(load=x)
     if not isinstance(x, Gen):
@@ -43,7 +48,7 @@ def __kb_send(kb, x, channel = None, inter = 0, loop = 0, count = None, verbose 
                             time.sleep(st)
                     else:
                         dt0 = ct-p.time
-                kb.inject(p.do_build()[:-2], channel = None, count = 1, delay = 0)  # [:-2] because the firmware adds the FCS
+                kb.inject(p.do_build()[:-2], channel = None, count = 1, delay = 0, page = 0)  # [:-2] because the firmware adds the FCS
                 n += 1
                 if verbose:
                     os.write(1,".")
@@ -100,10 +105,11 @@ def kbdev():
     show_dev()
 
 @conf.commands.register
-def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None, verbose = None, realtime=None):
+def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None, verbose = None, realtime=None, page= 0):
     """
     Send a packet with KillerBee
     @param channel:  802.15.4 channel to transmit/receive on
+    @param page:     802.15.4 subghz page to transmit/receive on
     @param inter:    time to wait between tranmissions
     @param loop:     number of times to process the packet list
     @param iface:    KillerBee interface to use, or KillerBee() class instance
@@ -112,27 +118,32 @@ def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None
     """
     if channel == None:
         channel = conf.killerbee_channel
+    if not page:
+        page = conf.killerbee_page
     if not isinstance(iface, KillerBee):
         if iface is not None:
             kb = KillerBee(device = iface)
         else:
             kb = KillerBee(device = conf.killerbee_device)
-        kb.set_channel(channel)
+        kb.set_channel(channel, page)
     else:
         kb = iface
 
     # Make sure the packet has 2 bytes for FCS before TX
-    if not pkt.haslayer(Dot15d4FCS):
+    if not Dot15d4FCS in pkt:
         pkt/=Raw("\x00\x00")
 
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = loop, count = count, verbose = verbose, realtime = realtime)
-    print "\nSent %i packets." % pkts_out
+    if verbose:
+        print "\nSent %i packets." % pkts_out
+    kb.close()
 
 @conf.commands.register
-def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
+def kbsrp(pkt, channel = None, page = 0, inter = 0, count = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
     """
     Send and receive packets with KillerBee
     @param channel:  802.15.4 channel to transmit/receive on
+    @param page:     802.15.4 subghz page to transmit/receive on
     @param inter:    time to wait between tranmissions
     @param count:    number of packets to capture. 0 means infinity
     @param iface:    KillerBee interface to use, or KillerBee() class instance
@@ -151,17 +162,19 @@ def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, pr
         verbose = conf.verb
     if channel == None:
         channel = conf.killerbee_channel
+    if not page:
+        page = conf.killerbee_page
     if not isinstance(iface, KillerBee):
         if iface is not None:
             kb = KillerBee(device = iface)
         else:
             kb = KillerBee(device = conf.killerbee_device)
-        kb.set_channel(channel)
+        kb.set_channel(channel, page)
     else:
         kb = iface
 
     # Make sure the packet has an FCS layer before TX
-    if not pkt.haslayer(Dot15d4FCS):
+    if not Dot15d4FCS in pkt:
         pkt/=Raw("\x00\x00")
 
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = 0, count = None, verbose = verbose, realtime = realtime)
@@ -174,15 +187,16 @@ def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, pr
     return plist.PacketList(pkts_in, 'Results')
 
 @conf.commands.register
-def kbsrp1(pkt, channel = None, inter = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
+def kbsrp1(pkt, channel = None, page = 0, inter = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
     """Send and receive packets with KillerBee and return only the first answer"""
-    return kbsrp(pkt, channel = channel, inter = inter, count = 1, iface = iface, store = store, prn = prn, lfilter = lfilter, timeout = timeout, verbose = verbose, realtime = realtime)
+    return kbsrp(pkt, channel = channel, page = page, inter = inter, count = 1, iface = iface, store = store, prn = prn, lfilter = lfilter, timeout = timeout, verbose = verbose, realtime = realtime)
 
 @conf.commands.register
-def kbsniff(channel = None, count = 0, iface = None, store = 1, prn = None, lfilter = None, stop_filter = None, verbose = None, timeout = None):
+def kbsniff(channel = None, page = 0, count = 0, iface = None, store = 1, prn = None, lfilter = None, stop_filter = None, verbose = None, timeout = None):
     """
     Sniff packets with KillerBee.
     @param channel:  802.15.4 channel to transmit/receive on
+    @param page:     802.15.4 subghz page to transmit/receive on
     @param count:    number of packets to capture. 0 means infinity
     @param iface:    KillerBee interface to use, or KillerBee() class instance
     @param store:    whether to store sniffed packets or discard them
@@ -196,12 +210,14 @@ def kbsniff(channel = None, count = 0, iface = None, store = 1, prn = None, lfil
     """
     if channel == None:
         channel = conf.killerbee_channel
+    if not page:
+        page = conf.killerbee_page
     if not isinstance(iface, KillerBee):
         if iface is not None:
             kb = KillerBee(device = iface)
         else:
             kb = KillerBee(device = conf.killerbee_device)
-        kb.set_channel(channel)
+        kb.set_channel(channel, page)
     else:
         kb = iface
     return plist.PacketList(__kb_recv(kb, count = count, store = store, prn = prn, lfilter = lfilter, stop_filter = stop_filter, verbose = verbose, timeout = timeout), 'Sniffed')
@@ -392,7 +408,7 @@ def kbrandmac(length = 8):
     return randmac(length)
 
 @conf.commands.register
-def kbdecrypt(pkt, key = None, verbose = None, doMicCheck = False):
+def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
     """Decrypt Zigbee frames using AES CCM* with 32-bit MIC"""
     if verbose is None:
         verbose = conf.verb
@@ -404,8 +420,11 @@ def kbdecrypt(pkt, key = None, verbose = None, doMicCheck = False):
     if len(key) != 16:
         log_killerbee.error("Invalid decryption key, must be a 16 byte string.")
         return None
-    elif not pkt.haslayer(ZigbeeSecurityHeader) or not pkt.haslayer(ZigbeeNWK):
+    if not ZigbeeSecurityHeader in source_pkt:
         log_killerbee.error("Cannot decrypt frame without a ZigbeeSecurityHeader.")
+        return None
+    if not ZigbeeNWK in source_pkt:
+        log_killerbee.error("Cannot decrypt frame without a ZigbeeNWK.")
         return None
     try:
         import zigbee_crypt
@@ -413,66 +432,50 @@ def kbdecrypt(pkt, key = None, verbose = None, doMicCheck = False):
         log_killerbee.error("Could not import zigbee_crypt extension, cryptographic functionality is not available.")
         return None
 
-    #TODO: Investigate and issue a different fix:
-    # https://code.google.com/p/killerbee/issues/detail?id=30
     # This function destroys the packet, therefore work on a copy - @cutaway
-    pkt = pkt.copy()   #this is hack to fix the below line
-    pkt.nwk_seclevel=5 #the issue appears to be when this is set
-    # Now recreate 'pkt' by rebuilding the raw data and creating a new scapy Packet, because
-    # scapy splits the data/mic according to the nwk_seclevel in the ZigbeeSecurityHeader when
-    # the scapy Packet is created.  The value of nwk_seclevel in the ZigbeeSecurityHeader does
+    pkt = source_pkt.copy()
+
+    # DOT154_CRYPT_ENC_MIC32 is always used regardless of what is claimed in OTA packet, so we will force it here.
+    # This is done because the value of nwk_seclevel in the ZigbeeSecurityHeader does
     # not have to be accurate in the transmitted frame: the Zigbee NWK standard states that
     # the nwk_seclevel should be overwritten in the received frame with the value that is being
     # used by all nodes in the Zigbee network - this is to ensure that unencrypted frames can't be
     # maliciously injected.  i.e. the receiver shouldn't trust the received nwk_seclevel.
-    newpkt = pkt.build()
-    if pkt.haslayer(Dot15d4FCS): pkt = Dot15d4FCS(newpkt)
-    else:                        pkt = Dot15d4(newpkt)
+    # Recreate 'pkt' by rebuilding the raw data and mic to match:
+    pkt.nwk_seclevel = DOT154_CRYPT_ENC_MIC32
+    pkt.data += pkt.mic
+    pkt.mic = pkt.data[-4:]
+    pkt.data = pkt.data[:-4]
 
-    #mic = struct.unpack(">I", f['mic'])
-    mic = pkt.mic
+    encrypted = pkt.data
+    # So calculate an amount to crop, equal to the size of the encrypted data and mic.  Note that
+    # if there was an FCS, scapy will have already stripped it, so it will not returned by the
+    # do_build() call below (and hence doesn't need to be taken into account in crop_size).
+    crop_size = len(pkt.mic) + len(pkt.data)
 
-    f = pkt.getlayer(ZigbeeSecurityHeader).fields
-    encrypted = f['data']
+    # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
+    sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
+    if ZigbeeAppDataPayload in pkt:
+        nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
+        zigbeeData = pkt[ZigbeeAppDataPayload].do_build()
+    else:
+        nonce = struct.pack('L',source_pkt[ZigbeeSecurityHeader].source)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
+        zigbeeData = pkt[ZigbeeNWK].do_build()
+    # For zigbeeData, we need the entire zigbee packet, minus the encrypted data and mic (4 bytes).
+    zigbeeData = zigbeeData[:-crop_size]
 
-    sec_ctrl_byte = str(pkt.getlayer(ZigbeeSecurityHeader))[0]
-
-    # Bug fix thanks to cutaway (https://code.google.com/p/killerbee/issues/detail?id=25):
-    #nonce = struct.pack('L',f['ext_source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
-    nonce = struct.pack('L',f['source'])+struct.pack('I',f['fc']) + sec_ctrl_byte
-
-    #nonce = "" # build the nonce
-    #nonce += struct.pack(">Q", f['ext_source'])
-    #nonce += struct.pack(">I", f['fc'])
-    #fc = (f['reserved1'] << 6) | (f['extended_nonce'] << 5) | (f['key_type'] << 3) | f['reserved2']
-    #nonce += chr(fc | 0x05)
+    (payload, micCheck) = zigbee_crypt.decrypt_ccm(key, nonce, pkt.mic, encrypted, zigbeeData)
 
     if verbose > 2:
         print "Decrypt Details:"
         print "\tKey:            " + key.encode('hex')
         print "\tNonce:          " + nonce.encode('hex')
-        print "\tMic:            " + mic.encode('hex')
-        print "\tEncrypted Data: " + encrypted.encode('hex')
-
-    # For zigbeeData, we need the entire zigbee packet, minus the encrypted data and mic (4 bytes).
-    # So calculate an amount to crop, equal to the size of the encrypted data and mic.  Note that
-    # if there was an FCS, scapy will have already stripped it, so it will not returned by the
-    # do_build() call below (and hence doesn't need to be taken into account in crop_size).
-    crop_size = 4 + len(pkt.getlayer(ZigbeeSecurityHeader).fields['data'])
-
-    # the Security Control Field flags have to be adjusted before this is calculated, so we store their original values so we can reset them later
-    #reserved2 = pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2']
-    #pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] = (pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] | 0x05)
-    zigbeeData = pkt.getlayer(ZigbeeNWK).do_build()
-    zigbeeData = zigbeeData[:-crop_size]
-    #pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] = reserved2
-
-    (payload, micCheck) = zigbee_crypt.decrypt_ccm(key, nonce, mic, encrypted, zigbeeData)
-
-    if verbose > 2:
+        print "\tZigbeeData:     " + zigbeeData.encode('hex')
         print "\tDecrypted Data: " + payload.encode('hex')
+        print "\tEncrypted Data: " + encrypted.encode('hex')
+        print "\tMic:            " + pkt.mic.encode('hex')
 
-    frametype = pkt.getlayer(ZigbeeNWK).fields['frametype']
+    frametype = pkt[ZigbeeNWK].frametype
     if frametype == 0 and micCheck == 1:
         payload = ZigbeeAppDataPayload(payload)
     elif frametype == 1 and micCheck == 1:
@@ -487,7 +490,7 @@ def kbdecrypt(pkt, key = None, verbose = None, doMicCheck = False):
         else:             return (payload, False)
 
 @conf.commands.register
-def kbencrypt(pkt, data, key = None, verbose = None):
+def kbencrypt(source_pkt, data, key = None, verbose = None):
     """Encrypt Zigbee frames using AES CCM* with 32-bit MIC"""
     if verbose is None:
         verbose = conf.verb
@@ -499,8 +502,11 @@ def kbencrypt(pkt, data, key = None, verbose = None):
     if len(key) != 16:
         log_killerbee.error("Invalid encryption key, must be a 16 byte string.")
         return None
-    elif not pkt.haslayer(ZigbeeSecurityHeader) or not pkt.haslayer(ZigbeeNWK):
+    if not ZigbeeSecurityHeader in source_pkt:
         log_killerbee.error("Cannot encrypt frame without a ZigbeeSecurityHeader.")
+        return None
+    if not ZigbeeNWK in source_pkt:
+        log_killerbee.error("Cannot encrypt frame without a ZigbeeNWK.")
         return None
     try:
         import zigbee_crypt
@@ -508,43 +514,73 @@ def kbencrypt(pkt, data, key = None, verbose = None):
         log_killerbee.error("Could not import zigbee_crypt extension, cryptographic functionality is not available.")
         return None
 
-    f = pkt.getlayer(ZigbeeSecurityHeader).fields
-    f['data'] = ''  # explicitly clear it out, this should go without say
+    # This function destroys the packet, therefore work on a copy - @cutaway
+    pkt = source_pkt.copy()
+
+    # DOT154_CRYPT_ENC_MIC32 is always used regardless of what is claimed in OTA packet, so we will force it here.
+    # This is done because the value of nwk_seclevel in the ZigbeeSecurityHeader does
+    # not have to be accurate in the transmitted frame: the Zigbee NWK standard states that
+    # the nwk_seclevel should be overwritten in the received frame with the value that is being
+    # used by all nodes in the Zigbee network - this is to ensure that unencrypted frames can't be
+    # maliciously injected.  i.e. the receiver shouldn't trust the received nwk_seclevel.
+    pkt.nwk_seclevel = DOT154_CRYPT_ENC_MIC32
+
+    # clear data and mic as we are about to create them
+    pkt.data = ''
+    pkt.mic = ''
 
     if isinstance(data, Packet):
         decrypted = data.do_build()
     else:
         decrypted = data
 
-    nonce = ""  # build the nonce
-    nonce += struct.pack(">Q", f['source'])
-    nonce += struct.pack(">I", f['fc'])
-    fc = (f['reserved1'] << 6) | (f['extended_nonce'] << 5) | (f['key_type'] << 3) | f['nwk_seclevel']
-    nonce += chr(fc | 0x05)
+    # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
+    sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
+    if ZigbeeAppDataPayload in pkt:
+        nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
+        zigbeeData = pkt[ZigbeeAppDataPayload].do_build()
+    else:
+        nonce = struct.pack('L',source_pkt[ZigbeeSecurityHeader].source)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
+        zigbeeData = pkt[ZigbeeNWK].do_build()
+
+    # minimum security level is DOT154_CRYPT_ENC_MIC32 but provide more if requested
+    miclen= kbgetmiclen(source_pkt.nwk_seclevel)
+    if miclen < 4:
+        miclen= 4
+
+    (payload, mic) = zigbee_crypt.encrypt_ccm(key, nonce, miclen, decrypted, zigbeeData)
 
     if verbose > 2:
         print "Encrypt Details:"
         print "\tKey:            " + key.encode('hex')
         print "\tNonce:          " + nonce.encode('hex')
+        print "\tZigbeeData:     " + zigbeeData.encode('hex')
         print "\tDecrypted Data: " + decrypted.encode('hex')
-
-    crop_size = 4 + 2 # the size of all the zigbee crap, minus the length of the mic and FCS
-
-    # the Security Control Field flags have to be adjusted before this is calculated, so we store their original values so we can reset them later
-    reserved2 = pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2']
-    pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] = (pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] | 0x05)
-    zigbeeData = pkt.getlayer(ZigbeeNWK).do_build()
-    zigbeeData = zigbeeData[:-crop_size]
-    pkt.getlayer(ZigbeeSecurityHeader).fields['reserved2'] = reserved2
-
-    (payload, mic) = zigbee_crypt.encrypt_ccm(key, nonce, 4, decrypted, zigbeeData)
-
-    if verbose > 2:
         print "\tEncrypted Data: " + payload.encode('hex')
         print "\tMic:            " + mic.encode('hex')
 
-    # Set pkt's values to reflect the encrypted ones to it's ready to be sent
-    f['data'] = payload
-    f['mic'] = struct.unpack(">I", mic)[0]
+    # According to comments in e.g. https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-zbee-security.c nwk_seclevel is not used any more but
+    # we should reconstruct and return what was asked for anyway.
+    pkt.data = payload + mic
+    pkt.nwk_seclevel = source_pkt.nwk_seclevel
+    ota_miclen= kbgetmiclen(pkt.nwk_seclevel)
+    if ota_miclen > 0:
+        pkt.mic = pkt.data[-ota_miclen:]
+        pkt.data = pkt.data[:-ota_miclen]
     return pkt
 
+@conf.commands.register
+def kbgetmiclen(seclevel):
+    """Returns the MIC length in bytes for the specified packet security level"""
+    lengths= {DOT154_CRYPT_NONE:0, DOT154_CRYPT_MIC32:4, DOT154_CRYPT_MIC64:8, DOT154_CRYPT_MIC128:16, DOT154_CRYPT_ENC:0, DOT154_CRYPT_ENC_MIC32:4, DOT154_CRYPT_ENC_MIC64:8, DOT154_CRYPT_ENC_MIC128:16}
+
+    return lengths[seclevel]
+
+@conf.commands.register
+def kbgetpanid(packet):
+    """Returns the pan id and which layer it was found in or None, None"""
+    for layer in packet.layers():
+        for field in packet[layer].fields:
+            if 'dest_panid' in field:
+                return packet[layer].dest_panid, layer
+    return None, None

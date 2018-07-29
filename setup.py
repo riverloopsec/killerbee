@@ -49,6 +49,11 @@ try:
 except ImportError:
     err.append(("serial", "python-serial", "pyserial"))
 
+try:
+    import rangeparser
+except ImportError:
+    err += "rangeparser (pip install rangeparser)\n"
+
 # Dot15d4 is a dep of some of the newer tools
 try:
     from scapy.all import Dot15d4
@@ -76,7 +81,6 @@ apt-get install {}
 pip install {}""".format("\t".join(map(lambda x: x[0], warn)),
                          " ".join(map(lambda x: x[1], warn)),
                          " ".join(map(lambda x: x[2], warn))), file=sys.stderr)
-    # TODO: Offer the user to type y/n to continue or cancel at this point
 
 zigbee_crypt = Extension('zigbee_crypt',
                     sources = ['zigbee_crypt/zigbee_crypt.c'],
@@ -92,13 +96,13 @@ setup  (name        = 'killerbee',
         author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
         license   = 'LICENSE.txt',
         packages  = ['killerbee', 'killerbee.openear', 'killerbee.zbwardrive'],
-        requires = ['Crypto', 'usb', 'gtk', 'cairo'], # Not causing setup to fail, not sure why
+        requires = ['Crypto', 'usb', 'gtk', 'cairo', 'rangeparser'], # Not causing setup to fail, not sure why
         scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 
                    'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 
                    'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey', 
                    'tools/zbwardrive', 'tools/zbopenear', 'tools/zbfakebeacon',
-                   'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign'],
+                   'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign', 'tools/zbcat', 
+                   'tools/zbjammer', 'tools/kbbootloader'],
         install_requires=['pyserial>=2.0', 'pyusb', 'crypto'],
         ext_modules = [ zigbee_crypt ],
         )
-

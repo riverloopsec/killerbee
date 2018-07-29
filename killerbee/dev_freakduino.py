@@ -24,6 +24,7 @@ class FREAKDUINO:
         @rtype: None
         '''
         self._channel = None
+        self._page = 0
         self.handle = None
         self.dev = serialpath
         self.date = None
@@ -125,19 +126,21 @@ class FREAKDUINO:
         self.__send_cmd("C!D")
 
     # KillerBee expects the driver to implement this function
-    def sniffer_on(self, channel=None):
+    def sniffer_on(self, channel=None, page=0):
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.  Will set the command mode to Air Capture if it is not already
         set.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         #TODO implement mode change to start sniffer sending packets to us
         self.__send_cmd("C!N")
@@ -157,11 +160,13 @@ class FREAKDUINO:
         self.__stream_open = False
 
     # KillerBee expects the driver to implement this function
-    def set_channel(self, channel):
+    def set_channel(self, channel, page=0):
         '''
         Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SETCHAN)
@@ -172,15 +177,19 @@ class FREAKDUINO:
             self.__send_cmd("C!C %d" % channel)
         else:
             raise Exception('Invalid channel')
+        if page:
+            raise Exception('SubGHz not supported')
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
         @type packet: String
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @type count: Integer
         @param count: Transmits a specified number of frames, def=1
         @type delay: Float
@@ -195,7 +204,7 @@ class FREAKDUINO:
             raise Exception('Packet too long')
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         # Append two bytes to be replaced with FCS by firmware.
         packet = ''.join([packet, "\x00\x00"])
@@ -297,7 +306,7 @@ class FREAKDUINO:
         #TODO parse data formats (lon=-7228745 lat=4370648 alt=3800 age=63 date=70111 time=312530)
         print self.lon, self.lat, self.alt, self.date
 
-    def ping(self, da, panid, sa, channel=None):
+    def ping(self, da, panid, sa, channel=None, page=0):
         '''
         Not yet implemented.
         @return: None
@@ -305,11 +314,13 @@ class FREAKDUINO:
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, page=0):
         '''
         Not yet implemented.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
@@ -318,12 +329,12 @@ class FREAKDUINO:
             self._set_mode(RZ_CMD_MODE_AC)
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         #TODO implement
         raise Exception('Not yet implemented')
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self, channel=None, page=0):
         '''
         Not yet implemented.
         @return: None

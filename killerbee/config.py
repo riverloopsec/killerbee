@@ -1,8 +1,8 @@
 # Database (MySQL type assumed)
 # This configuration is only required
-#   if the dblog module is used.
+#  if the dblog module is used.
 # Database schema is expected to match that
-#   created by the file in killerbee/scripts.
+#  created by killerbee/scripts/create_db.sql.
 DB_HOST             = ""
 DB_PORT             = 3306
 DB_NAME             = ""
@@ -15,9 +15,10 @@ DB_PASS             = ""
 # If marked False, KillerBee will not try to
 #  detect or load drivers for that device.
 # Useful for disabling uncommon devices.
-DEV_ENABLE_FREAKDUINO = False
-DEV_ENABLE_ZIGDUINO = False
-DEV_ENABLE_TELOSB = False
+DEV_ENABLE_TELOSB = True
 DEV_ENABLE_APIMOTE2 = True
 DEV_ENABLE_APIMOTE1 = False
-
+DEV_ENABLE_FREAKDUINO = False
+DEV_ENABLE_SL_NODETEST = False
+DEV_ENABLE_SL_BEEHIVE = False
+DEV_ENABLE_ZIGDUINO = False

@@ -122,7 +122,7 @@ int main(void) {
         
     /* Initialize AVR peripheral modules. */
     (bool)avr_init();
-    
+
     /* Check if the RX and TX pins are shorted. If they are shorted, the RZUSBSTICK
      * shall start the bootloader. If not, continue to verify if the application
      * requested to enter the bootloader.
@@ -145,12 +145,15 @@ int main(void) {
         /* Check if the application has requested to enter the bootloader. */
         uint8_t volatile magic_value = 0xAA;
         EEGET(magic_value, EE_BOOT_MAGIC_ADR);
-   
-        if (EE_BOOT_MAGIC_VALUE != magic_value) {
+  
+        if (EE_BOOT_MAGIC_VALUE != magic_value && magic_value != 0xFF) {
+        //if (EE_BOOT_MAGIC_VALUE != magic_value) {
             start_application();
-        } else {
-            EEPUT(EE_BOOT_MAGIC_ADR, 0xFF);
         }
+        // disabled - this is done by the app itself when it sucessfully runs
+        //else {
+        //    EEPUT(EE_BOOT_MAGIC_ADR, 0x00);
+        //}
     }
     
     /* Set the interrupt vectors to the bootloader, initialize the LEDs and the

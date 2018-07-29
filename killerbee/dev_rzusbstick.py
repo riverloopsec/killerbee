@@ -17,8 +17,8 @@ from kbutils import KBCapabilities
 
 # Functions for RZUSBSTICK, not all are implemented in firmware
 # Functions not used are commented out but retained for prosperity
-#RZ_CMD_SIGN_OFF             = 0x00
-#RZ_CMD_SIGN_ON              = 0x01
+RZ_CMD_SIGN_OFF             = 0x00
+RZ_CMD_SIGN_ON              = 0x01
 #RZ_CMD_GET_PARAMETER        = 0x02
 #RZ_CMD_SET_PARAMETER        = 0x03
 #RZ_CMD_SELF_TEST            = 0x04
@@ -33,6 +33,10 @@ RZ_CMD_CLOSE_STREAM         = 0x0A  #: RZUSB opcode to close a stream for packet
 RZ_CMD_INJECT_FRAME         = 0x0D  #: RZUSB opcode to specify a frame to inject
 RZ_CMD_JAMMER_ON            = 0x0E  #: RZUSB opcode to turn the jammer function on
 RZ_CMD_JAMMER_OFF           = 0x0F  #: RZUSB opcode to turn the jammer function off
+RZ_CMD_ENTER_BOOT           = 0x18  #: RZUSB opcode to enter bootloader
+RZ_CMD_BOOT_READ_SIGNATURE  = 0xB0  #: RZUSB opcode to get bootloader chip signature
+RZ_CMD_BOOT_GET_VERSION     = 0xB1  #: RZUSB opcode to get bootloader maj/min version
+RZ_CMD_BOOT_START_APPLICATION = 0xB2  #: RZUSB opcode to tell bootloader to start main application
 
 # Operating modes following RZ_CMD_SET_MODE function
 RZ_CMD_MODE_AC              = 0x00  #: RZUSB mode for aircapture (inject + sniff)
@@ -64,7 +68,7 @@ RZ_RESP_NOT_INITIALIZED     = 0x92 #: RZUSB Response: Not Initialized Error
 RZ_RESP_NOT_IMPLEMENTED     = 0x93 #: RZUSB Response: Opcode Not Implemented Error
 RZ_RESP_PRIMITIVE_FAILED    = 0x94 #: RZUSB Response: Primitive Failed Error
 RZ_RESP_VRT_KERNEL_ERROR    = 0x95 #: RZUSB Response: Could not execute due to vrt_kernel_error
-RZ_RESP_BOOT_PARAM          = 0x96 #: RZUSB Response: Boot Param Error
+RZ_RESP_BOOT_PARAM          = 0x96 #: RZUSB Response: Boot Param
 
 RZ_EVENT_STREAM_AC_DATA          = 0x50 #: RZUSB Event Opcode: AirCapture Data
 #RZ_EVENT_SNIFFER_SCAN_COMPLETE   = 0x51 #: RZUSB Event Opcode: Sniffer Scan Complete
@@ -119,6 +123,7 @@ class RZUSBSTICK:
         @rtype: None
         '''
         self._channel = None
+        self._page = 0
         self.handle = None
         self.dev = dev
         self.__bus = bus
@@ -222,11 +227,22 @@ class RZUSBSTICK:
             self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
+            self.capabilities.setcapab(KBCapabilities.BOOT, True)
         elif prod == "KILLERB001":
             self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
+            self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
+        elif prod == "KILLERB006":
+            self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
+            self.capabilities.setcapab(KBCapabilities.SNIFF, True)
+            self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
+            self.capabilities.setcapab(KBCapabilities.INJECT, True)
+            self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
+            self.capabilities.setcapab(KBCapabilities.BOOT, True)
+        elif prod == "KILLERB00T":
+            self.capabilities.setcapab(KBCapabilities.BOOT, True)
         else:
             pass
 
@@ -244,12 +260,42 @@ class RZUSBSTICK:
                     usb.util.get_string(self.dev, self.dev.iProduct),     \
                     usb.util.get_string(self.dev, self.dev.iSerialNumber) ]
 
-    def __usb_write(self, endpoint, data):
+    def __usb_read(self):
+        '''
+        Read data from the USB device opened as self.handle.
+        
+        @rtype: String
+        @param data: The data received from the USB endpoint
+        '''
+        response = None
+        if USBVER == 0: # TODO: UNTESTED!!!!
+            try:
+                response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
+            except usb.USBError, e:
+                if e.args != ('No error',): # http://bugs.debian.org/476796
+                    raise e
+        else: #pyUSB 1.x
+            try:
+                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, timeout=500)
+                #print 'response length:', len(response)
+                #print response
+                #response = ''.join([chr(x) for x in response])
+                #response = response.pop()
+            except usb.core.USBError as e:
+                if e.errno != 110: #Not Operation timed out
+                    print "Error args:", e.args
+                    raise e
+                elif e.errno == 110:
+                    print "DEBUG: Received operation timed out error ...attempting to continue."
+        return response
+
+    def __usb_write(self, endpoint, data, expected_response=RZ_RESP_SUCCESS):
         '''
         Write data to the USB device opened as self.handle.
         
         @type endpoint: Integer
         @param endpoint: The USB endpoint to write to
+        @param expected_response: The desired response - defaults to RZ_RESP_SUCCESS
         @type data: Mixed
         @param data: The data to send to the USB endpoint
         '''
@@ -257,35 +303,38 @@ class RZUSBSTICK:
             try:
                 self.handle.bulkWrite(endpoint, data)
                 # Returns a tuple, first value is an int as the RZ_RESP_* code
-                response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
+#                response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
             except usb.USBError, e:
                 if e.args != ('No error',): # http://bugs.debian.org/476796
                     raise e
-            time.sleep(0.0005)
-            if response != RZ_RESP_SUCCESS:
-                if response in RESPONSE_MAP:
-                    raise Exception("Error: %s" % RESPONSE_MAP[response])
-                else:
-                    raise Exception("Unknown USB write error: 0x%02x" % response)
+#            time.sleep(0.0005)
+#            if response != RZ_RESP_SUCCESS:
+#                if response in RESPONSE_MAP:
+#                    raise Exception("Error: %s" % RESPONSE_MAP[response])
+#                else:
+#                    raise Exception("Unknown USB write error: 0x%02x" % response)
         else: #pyUSB 1.x
-            res = self.dev.write(endpoint, data)#, 0, 100)
-            if len(data) != res:
-                raise Exception("Issue writing USB data {0} to endpoint {1}, got a return of {2}.".format(data, endpoint, res))
             try:
-                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, timeout=500)
-                response = response.pop()
+                res = self.dev.write(endpoint, data)#, 0, 100)
+                if len(data) != res:
+                    raise Exception("Issue writing USB data {0} to endpoint {1}, got a return of {2}.".format(data, endpoint, res))
+#                response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, timeout=500)
+#                response = response.pop()
             except usb.core.USBError as e:
                 if e.errno != 110: #Not Operation timed out
                     print "Error args:", e.args
                     raise e
                 elif e.errno == 110:
                     print "DEBUG: Received operation timed out error ...attempting to continue."
-            time.sleep(0.0005)
-            if response != RZ_RESP_SUCCESS:
-                if response in RESPONSE_MAP:
-                    raise Exception("Error: %s" % RESPONSE_MAP[response])
-                else:
-                    raise Exception("Unknown USB write error: 0x%02x" % response)
+        #time.sleep(0.0005)
+        response = self.__usb_read()
+        #print 'response 0: %x' % response[0]
+        if response[0] != expected_response:
+            if response[0] in RESPONSE_MAP:
+                raise Exception("Error: %s" % RESPONSE_MAP[response[0]])
+            else:
+                raise Exception("Unknown USB write error: 0x%02x" % response[0])
+        return response[1:]
 
     def _set_mode(self, mode=RZ_CMD_MODE_AC):
         '''
@@ -314,13 +363,15 @@ class RZUSBSTICK:
         self.__stream_open = False
 
     # KillerBee expects the driver to implement this function
-    def sniffer_on(self, channel=None):
+    def sniffer_on(self, channel=None, page=0):
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.  Will set the command mode to Air Capture if it is not already
         set.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
@@ -329,7 +380,7 @@ class RZUSBSTICK:
             self._set_mode(RZ_CMD_MODE_AC)
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         self._open_stream()
 
@@ -343,11 +394,12 @@ class RZUSBSTICK:
         '''
         self._close_stream()
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, page=0):
         '''
-        Not yet implemented.  Stay tuned.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
@@ -356,25 +408,77 @@ class RZUSBSTICK:
             self._set_mode(RZ_CMD_MODE_AC)
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_JAMMER_ON])
 
-    def jammer_off(self, channel=None):
+    def enter_bootloader(self):
         '''
-        Not yet implemented.  Stay tuned.
-        @return: None
         @rtype: None
         '''
+        self.capabilities.require(KBCapabilities.BOOT)
+
+        self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_ENTER_BOOT])
+
+    def get_bootloader_version(self):
+        '''
+        @rtype: List
+        @return: List: Version number as [Major, Minor]
+        '''
+        self.capabilities.require(KBCapabilities.BOOT)
+
+        return self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_BOOT_GET_VERSION], RZ_RESP_BOOT_PARAM)
+
+    def get_bootloader_signature(self):
+        '''
+        @rtype: List
+        @return: List: Chip signature as [Low, Mid, High]
+        '''
+        self.capabilities.require(KBCapabilities.BOOT)
+
+        return self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_BOOT_READ_SIGNATURE], RZ_RESP_BOOT_PARAM)
+
+    def bootloader_sign_on(self):
+        '''
+        @rtype: String
+        @return: Bootloader sign_on message (array of length + length bytes)
+        '''
+        self.capabilities.require(KBCapabilities.BOOT)
+
+        return self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_SIGN_ON], RZ_RESP_SIGN_ON)
+
+    def bootloader_start_application(self):
+        '''
+        Instruct bootloader to run main app
+        '''
+        self.capabilities.require(KBCapabilities.BOOT)
+
+        return self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_BOOT_START_APPLICATION])
+
+    def jammer_off(self, channel=None, page=0):
+        '''
+        @type channel: Integer
+        @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
+        @rtype: None
+        '''
+        self.capabilities.require(KBCapabilities.PHYJAM)
+
+        if self.__cmdmode != RZ_CMD_MODE_AC:
+            self._set_mode(RZ_CMD_MODE_AC)
+
         self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_JAMMER_OFF])
 
     # KillerBee expects the driver to implement this function
-    def set_channel(self, channel):
+    def set_channel(self, channel, page):
         '''
         Sets the radio interface to the specifid channel.  Currently, support is
         limited to 2.4 GHz channels 11 - 26.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz channel, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SETCHAN)
@@ -387,15 +491,19 @@ class RZUSBSTICK:
             self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_SET_CHANNEL, channel])
         else:
             raise Exception('Invalid channel')
+        if page:
+            raise Exception('SubGHz not supported')
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
         @type packet: String
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz channel, not supported on this device
         @type count: Integer
         @param count: Transmits a specified number of frames, def=1
         @type delay: Float
@@ -413,7 +521,7 @@ class RZUSBSTICK:
             raise Exception('Packet too long')
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         # Append two bytes to be replaced with FCS by firmware.
         packet += "\x00\x00"
@@ -447,10 +555,10 @@ class RZUSBSTICK:
             if USBVER == 0:
                 try:
                     pdata = self.handle.bulkRead(RZ_USB_PACKET_EP, timeout)
-                except usb.USBError, e:
+                except usb.USBError as e:
                     if e.args != ('No error',): # http://bugs.debian.org/476796
                         if e.args[0] != "Connection timed out": # USB timeout issue
-                            print "Error args:", e.args
+                            print("Error args: {}".format(e.args))
                             raise e
                         else:
                             return None
@@ -459,15 +567,15 @@ class RZUSBSTICK:
                     pdata = self.dev.read(RZ_USB_PACKET_EP, self.dev.bMaxPacketSize0, timeout=timeout)
                 except usb.core.USBError as e:
                     if e.errno != 110: #Operation timed out
-                        print "Error args:", e.args
+                        print("Error args: {}".format(e.args))
                         raise e
                         #TODO error handling enhancements for USB 1.0
                     else:
                         return None
 
             # PyUSB returns an empty tuple occasionally, handle as "no data"
-            #TODO added len(pdata) check as some arrays were failing
-            if pdata == None or pdata == () or len(pdata)==0:
+            # TODO added len(pdata) check as some arrays were failing
+            if pdata == None or pdata == () or len(pdata) == 0 or len(pdata) <= 10:
                 return None
 
             if pdata[0] == RZ_EVENT_STREAM_AC_DATA and ret is None:
@@ -480,10 +588,10 @@ class RZUSBSTICK:
                     framedata.append(struct.pack("B", byteval))
                 #Return in a nicer dictionary format, so we don't have to reference by number indicies.
                 #Note that 0,1,2 indicies inserted twice for backwards compatibility.
-                ret = {1:validcrc, 2:rssi, \
-                        'validcrc':validcrc, 'rssi':rssi, \
+                ret = {1:validcrc, 2:rssi,
+                        'validcrc':validcrc, 'rssi':rssi,
                         'dbm':rssi,'datetime':datetime.utcnow()}
-                #TODO calculate dbm based on RSSI conversion formula for the chip
+                # TODO: calculate dbm based on RSSI conversion formula for the chip
             else:
                 if ret is not None:
                     # This is a continuation of a long AC packet, so append frame data
@@ -505,12 +613,11 @@ class RZUSBSTICK:
             else:
                 # ...otherwise we're expecting a continuation in the next USB read
                 explen = explen - len(pdata)
-     
-        def ping(self, da, panid, sa, channel=None):
-            '''
+
+    def ping(self, da, panid, sa, channel=None, page=0):
+        '''
         Not yet implemented.
         @return: None
         @rtype: None
         '''
         raise Exception('Not yet implemented')
-
