@@ -11,6 +11,23 @@ Compiled firmware versions are stored here for ease of use. However, you should 
 To flash it, plug in the ApiMote v3 or v4beta and then run the `flash\_apimote.sh` script.
 Note that it may sometimes take two attempts to flash correctly if the first time doesn't synchronize and times out.
 
+Silicon Labs Node Test 2.4GHz & SubGHz:
+==================
+See https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf
+
+This is a firmware image for a huge variety of hardware platforms, supporting EM250, EM375, EFR32, etc., and provides for (with appropriate radio part) the following frequencies:
++ 2.4 GHz (ch 11-26)
++ 863-917 MHz (pages 28-31, ch 0-26)
+
+It can be installed in Simplicity Studio by right clicking on the device in the 'Debug Adapters' window and selecting the appropriate Nodetest image for your hardware from the 'Upload application' menu (note that some of them are misspelled as 'Notetest').
+
+The device should come up as a CDC Serial port and can be addressed with the '-i' flag. For example, to sniff on Channel 0, SubGHz Page 28:
+```
+zbwireshark -c 0 -s 28 -i /dev/ttyACM0
+```
+
+_NOTE: This is a SNIFFER only implementation which will only read packets with a good CRC, and although the firmware has injection capability, it adds a 2 byte counter to the end of every packet, rendering it useless for all practical purposes. If you are interested in an INJECTION and BAD CRC capable device, contact the author, Adam Laurie - adam at algroup.co.uk_
+
 RZUSBSTICK
 ==================
 

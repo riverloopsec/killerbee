@@ -153,26 +153,17 @@ devices on the network.
 
 In order to get the full functionality included in KillerBee, the RZ RAVEN USB
 Stick must be flashed with the custom firmware included in the `firmware/ `
-directory. _See `firmware/README.md` for details._
+directory. _See [firmware/README.md](firmware/README.md) for details._
 
-Silicon Labs Node Test:
+Silicon Labs Node Test 2.4GHz & SubGHz:
 ----------------
 See https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf
 
 This is a firmware image for a huge variety of hardware platforms, supporting EM250, EM375, EFR32, etc., and provides for (with appropriate radio part) the following frequencies:
 + 2.4 GHz (ch 11-26)
-+ 863-868 MHz (ch 0-26)
-+ 868-876 MHz (ch 27-34, 62)
-+ 870-876 MHz (ch 35-61)
-+ 900 MHz (ch 1-10)
-+ 915-917 MHz (ch 0-26)
++ 863-917 MHz (pages 28-31, ch 0-26)
 
-It can be installed in Simplicity Studio by right clicking on the device in the 'Debug Adapters' window and selecting the appropriate Nodetest image for your hardware from the 'Upload application' menu (note that some of them are misspelled as 'Notetest').
-
-The device should come up as a CDC Serial port and can be addressed with the '-i' flag. For example, to sniff on Channel 0, SubGHz Page 28:
-```
-zbwireshark -c 0 -s 28 -i /dev/ttyACM0
-```
+See [firmware/README.md](firmware/README.md) for installation details.
 
 _NOTE: This is a SNIFFER only implementation which will only read packets with a good CRC, and although the firmware has injection capability, it adds a 2 byte counter to the end of every packet, rendering it useless for all practical purposes. If you are interested in an INJECTION and BAD CRC capable device, contact the author, Adam Laurie - adam at algroup.co.uk_
 
