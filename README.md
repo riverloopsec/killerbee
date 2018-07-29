@@ -165,7 +165,7 @@ This is a firmware image for a huge variety of hardware platforms, supporting EM
 
 See [firmware/README.md](firmware/README.md) for installation details.
 
-_NOTE: This is a SNIFFER only implementation which will only read packets with a good CRC, and although the firmware has injection capability, it adds a 2 byte counter to the end of every packet, rendering it useless for all practical purposes. If you are interested in an INJECTION and BAD CRC capable device, contact the author, Adam Laurie - adam at algroup.co.uk_
+_NOTE: This is a SNIFFER only implementation which will only read packets with a good FCS, and although the firmware has injection capability, it adds a 2 byte counter to the end of every packet, rendering it useless for all practical purposes. If you are interested in an INJECTION and BAD FCS capable device, contact the author, Adam Laurie - adam at algroup.co.uk_
 
 TOOLS
 ================
