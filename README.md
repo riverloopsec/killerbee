@@ -18,6 +18,16 @@ We appreciate the many contributers to the framework, including the following wh
 + Anonymous Contributors
 + Spencer McIntyre (scapy extension)
 + Bryan Halfpap <Bryanhalf@gmail.com> (additional tools)
++ Travis Goodspeed
++ Mike Kershaw (dragorn)
++ Chris Wang (aikiba)
++ Nick DePetrillo
++ Ed Skoudis
++ Matt Carpenter
++ Sergey Bratus (research support at Dartmouth)
++ Jeff Spielberg
++ Scytmo (bug fixes and CC2530/1 EMK board support)
++ Adam Laurie/rfidiot (APS crypto implementation, firmware, DFU & BOOTLOADER, SubGHZ, SiLabs NodeTest)
 
 REQUIREMENTS
 ================
@@ -143,7 +153,19 @@ devices on the network.
 
 In order to get the full functionality included in KillerBee, the RZ RAVEN USB
 Stick must be flashed with the custom firmware included in the `firmware/ `
-directory. _See `firmware/README.md` for details._
+directory. _See [firmware/README.md](firmware/README.md) for details._
+
+Silicon Labs Node Test 2.4GHz & SubGHz:
+----------------
+See https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf
+
+This is a firmware image for a huge variety of hardware platforms, supporting EM250, EM375, EFR32, etc., and provides for (with appropriate radio part) the following frequencies:
++ 2.4 GHz (ch 11-26)
++ 863-917 MHz (pages 28-31, ch 0-26)
+
+See [firmware/README.md](firmware/README.md) for installation details.
+
+_NOTE: This is a SNIFFER only implementation which will only read packets with a good FCS, and although the firmware has injection capability, it adds a 2 byte counter to the end of every packet, rendering it useless for all practical purposes. If you are interested in an INJECTION and BAD FCS capable device, contact the author, Adam Laurie - adam at algroup.co.uk_
 
 TOOLS
 ================
@@ -153,6 +175,7 @@ instructions documented by running the tool with the "-h" argument, and
 summarized below.
 
 
++ kbbootloader -  Switches device into DFU/BOOTLOADER mode (if device is capable)
 + zbid         -  Identifies available interfaces that can be used by KillerBee
                 and associated tools.
 + zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time 
@@ -267,18 +290,3 @@ The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
 Additional Tools/Fixes by: bryanhalf@gmail.com
 
 For contributors/developers, see DEVELOPMENT.md for details and guidance.
-
-THANKS
-==============
-A word of thanks to several folks who helped out with this project:
-
-+ Travis Goodspeed
-+ Mike Kershaw (dragorn)
-+ Chris Wang (aikiba)
-+ Nick DePetrillo
-+ Ed Skoudis
-+ Matt Carpenter
-+ Sergey Bratus (research support at Dartmouth)
-+ Jeff Spielberg
-+ Scytmo (bug fixes and CC2530/1 EMK board support)
-+ Adam Laurie/rfidiot (bug fixes, APS crypto implementation, firmware support, DFU & BOOTLOADER)

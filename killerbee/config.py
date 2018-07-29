@@ -16,5 +16,6 @@ DB_PASS             = ""
 #  detect or load drivers for that device.
 # Useful for disabling uncommon devices.
 DEV_ENABLE_FREAKDUINO = False
+DEV_ENABLE_SL_NODETEST = True
+DEV_ENABLE_SL_BEEHIVE = True
 DEV_ENABLE_ZIGDUINO = False
-

@@ -47,6 +47,8 @@ if __name__ == '__main__':
         help='begin processing at packet #')
     parser.add_argument('-c', '--channel', action='store', type=int, default=11,
         help='tx/rx on given channel (default 11)')
+    parser.add_argument('-d', '--delay', action='store', type=float, default=1.0,
+        help='if tx, wait given seconds between packet injections (default 1.0)')
     parser.add_argument('-D', action='store_true', dest='showdev',
         help='list KillerBee devices')
     parser.add_argument('-e', '--end', action='store', type=int, dest='end', default=0,
@@ -61,10 +63,10 @@ if __name__ == '__main__':
         help='process range of packets - e.g. "1,5,12-19,42"')
     parser.add_argument('-r', '--pcapfile', action='store', default=None,
         help='pcap file to test')
+    parser.add_argument('-s', '--subghz_page', action='store', type=int, default=0,
+        help='tx/rx on given SubGHz page (default disabled)')
     parser.add_argument('-R', '--dsnafile', action='store', default=None,
         help='Daintree SNA file to test')
-    parser.add_argument('-s', '--sleep', action='store', type=float, default=1.0,
-        help='if tx, wait given seconds between packet injections (default 1.0)')
     parser.add_argument('-S', '--search_keys', action='store_true', dest='search_keys',
         help='search for AppCommandPayload packets and extract transport keys')
     parser.add_argument('-T', '--transmit_original', action='store_true', dest='transmit_original',
@@ -137,6 +139,12 @@ if __name__ == '__main__':
     if args.search_keys:
         transport_keys= []
 
+    if args.transmit_original or args.transmit_crypted:
+        kb = KillerBee(device=args.interface)
+        if not kb.is_valid_channel(args.channel, args.subghz_page):
+            print >>sys.stderr, "ERROR: Invalid channel/subghz page"
+            exit(True)
+
     print
     print '%d packets read from %s' % (len(data), fname)
 
@@ -146,6 +154,7 @@ if __name__ == '__main__':
     passed= 0
     aps_failed= 0
     aps_passed= 0
+    ext_adresses= {}
 
     for packet in data:
         count += 1
@@ -157,13 +166,15 @@ if __name__ == '__main__':
             continue
         print
         print 'Packet:', count
+        #print packet.layers(False) # debug
+        print packet.layers() # debug
         print '  ', packet.summary()
         if args.verbose:
             print '  ', repr(packet)
 
         # check for transport keys
         if args.search_keys:
-            if packet.haslayer(ZigbeeAppCommandPayload):
+            if ZigbeeAppCommandPayload in packet:
                 # TODO: all transport key types - need to find sample pcaps
                 # (this will probably mean repeating after decryption but need to see examples to be sure!)
                 f,v = packet[ZigbeeAppCommandPayload].getfield_and_val("cmd_identifier")
@@ -179,13 +190,25 @@ if __name__ == '__main__':
                     transport_keys.append([count, cmd_identifier, packet[ZigbeeAppCommandPayload].data, None, None, None])
 
         # ignore frames with no encrypted payload
-        if not packet.haslayer(ZigbeeNWK) or not packet.haslayer(ZigbeeSecurityHeader):
+        if not ZigbeeNWK in packet or not ZigbeeSecurityHeader in packet:
             print '    no payload - skipping!'
             continue
 
-        if packet.haslayer(ZigbeeSecurityHeader):
+        if ZigbeeSecurityHeader in packet:
+            # capture extended source addresses for decryption
+            # format is dict of Dot15d4Data.dest_panid with dict of source -> ext_source
+            if ZigbeeSecurityHeader in packet and 'ext_src' in packet[ZigbeeNWK].fields:
+                if not packet[Dot15d4Data].dest_panid in ext_adresses:
+                    ext_adresses[packet[Dot15d4Data].dest_panid]= {}
+                # only set if ext_address is bigger (more extended) than one we've seen before
+                try:
+                    if packet[ZigbeeNWK].ext_src > ext_adresses[packet[Dot15d4Data].dest_panid][packet[Dot15d4Data].src_addr]:
+                        ext_adresses[packet[Dot15d4Data].dest_panid][packet[Dot15d4Data].src_addr] = packet[ZigbeeNWK].ext_src
+                except:
+                    print 'adding', packet[ZigbeeNWK].ext_src, packet[Dot15d4Data].src_addr
+                    ext_adresses[packet[Dot15d4Data].dest_panid][packet[Dot15d4Data].src_addr] = packet[ZigbeeNWK].ext_src
             # only decrypt if APS layer is not already in the plain
-            if not packet.haslayer(ZigbeeAppDataPayload) and packet[ZigbeeSecurityHeader].data != '':
+            if not ZigbeeAppDataPayload in packet and packet[ZigbeeSecurityHeader].data != '':
                 print '   decrypting NWK...'
                 stat, decrypted = crypt(packet)
             else:
@@ -198,13 +221,22 @@ if __name__ == '__main__':
                     print ' HEX:', str(decrypted).encode('hex')
 
                 # If we have an APS layer and it's encrypted, build new packet with ZigbeeNWK so we can decrypt it
-                if decrypted.haslayer(ZigbeeAppDataPayload) and decrypted.haslayer(ZigbeeSecurityHeader) and decrypted[ZigbeeSecurityHeader].data != '':
+                if ZigbeeAppDataPayload in decrypted and ZigbeeSecurityHeader in decrypted and decrypted[ZigbeeSecurityHeader].data != '':
                     tmppkt = copy.copy(packet)
                     tmppkt[ZigbeeNWK].remove_payload()
                     tmppkt /= decrypted[ZigbeeAppDataPayload]
                     # if no ext_src we must provide it
                     if not tmppkt[ZigbeeNWK].ext_src:
-                        tmppkt[ZigbeeNWK].ext_src= packet[ZigbeeSecurityHeader].source
+                        if packet[ZigbeeSecurityHeader].source:
+                            tmppkt[ZigbeeNWK].ext_src= packet[ZigbeeSecurityHeader].source
+                        else:
+                            try:
+                                tmppkt[ZigbeeNWK].ext_src = ext_adresses[packet[Dot15d4Data].dest_panid][packet[Dot15d4Data].src_addr]
+                            except:
+                                pass
+                            tmppkt[ZigbeeNWK].ext_src= packet[Dot15d4Data].src_addr
+                    #tmppkt[ZigbeeNWK].ext_src = ext_adresses[packet[Dot15d4Data].dest_panid][packet[Dot15d4Data].src_addr]
+                    print 'tmppkt[ZigbeeNWK].ext_src', tmppkt[ZigbeeNWK].ext_src
                     print '      decrypting APS...'
                     if args.verbose:
                         print '        ', repr(tmppkt)
@@ -228,7 +260,16 @@ if __name__ == '__main__':
                     tmppkt /= decrypted[ZigbeeAppDataPayload]
                     # if no ext_src we must provide it
                     if not tmppkt[ZigbeeNWK].ext_src:
-                        tmppkt[ZigbeeNWK].ext_src= packet[ZigbeeSecurityHeader].source
+                        if packet[ZigbeeSecurityHeader].source:
+                            tmppkt[ZigbeeNWK].ext_src= packet[ZigbeeSecurityHeader].source
+                        else:
+                            try:
+                                tmppkt[ZigbeeNWK].ext_src = ext_adresses[packet[Dot15d4Data].dest_panid][packet[Dot15d4Data].src_addr]
+                            except:
+                                pass
+                            #tmppkt[ZigbeeNWK].ext_src= packet[Dot15d4Data].src_addr
+                        print 'set tmppkt[ZigbeeNWK].ext_src!', tmppkt[ZigbeeNWK].ext_src
+                    tmppkt[ZigbeeNWK].ext_src = ext_adresses[packet[Dot15d4Data].dest_panid][packet[Dot15d4Data].src_addr]
                     if args.verbose:
                         print '          ', repr(tmppkt)
                     stat, recrypt = crypt(tmppkt, data= app_decrypt, encrypt= True)
@@ -263,18 +304,25 @@ if __name__ == '__main__':
         if args.transmit_original:
             print '      transmitting ORIGINAL on channel', args.channel
             try:
-                kbsendp(packet, channel=args.channel, inter=args.sleep)
+                kb.inject(str(packet), args.channel, 1, args.delay, page= args.subghz_page)
                 print '        OK'
+                #debug
+                print packet.command()
+		for x in str(packet):
+			print '0x%02x' % ord(x),
+		print
             except:
                 print '        FAILED!'
         if args.transmit_crypted and newpkt:
             print '      transmitting RE-ENCRYPTED on channel', args.channel
             try:
-                kbsendp(newpkt, channel=args.channel, inter=args.sleep)
+                kb.inject(str(packet), args.channel, 1, args.delay, page= args.subghz_page)
                 print '        OK'
             except:
                 print '        FAILED!'
         testcount += 1
+
+    print ext_adresses
 
     print
     print '%d of %d packets tested' % (testcount, len(data))
