@@ -47,6 +47,7 @@ class CC253x:
         else:
             self._data_ep = CC253x.USB_CC2531_DATA_EP
         self._channel = None
+        self._page = 0
         self.dev = dev
 
         self.__stream_open = False
@@ -102,19 +103,21 @@ class CC253x:
         return [self.name, "CC253x", ""]
 
     # KillerBee expects the driver to implement this function
-    def sniffer_on(self, channel=None):
+    def sniffer_on(self, channel=None, page=0):
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.  Will set the command mode to Air Capture if it is not already
         set.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         # Enable power in 802.15.4 radio
         self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_POWER_ON, wIndex = 4)
@@ -152,11 +155,13 @@ class CC253x:
         self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_CHAN, wIndex = 1, data_or_wLength = [0x00])
 
     # KillerBee expects the driver to implement this function
-    def set_channel(self, channel):
+    def set_channel(self, channel, page=0):
         '''
         Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SETCHAN)
@@ -169,15 +174,19 @@ class CC253x:
                 self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_START)
         else:
             raise Exception('Invalid channel')
+        if page:
+            raise Exception('SubGHz not supported')
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
         @type packet: String
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @type count: Integer
         @param count: Transmits a specified number of frames, def=1
         @type delay: Float
@@ -266,11 +275,13 @@ class CC253x:
                 return ret
 
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, page=0):
         '''
         Not yet implemented.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         raise Exception('Not yet implemented')
@@ -279,7 +290,7 @@ class CC253x:
         '''Set the register controlling the 802.15.4 PHY sync byte.'''
         raise Exception('Not yet implemented')
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self, channel=None, page=0):
         '''
         Not yet implemented.
         @return: None

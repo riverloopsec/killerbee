@@ -29,6 +29,7 @@ class ZIGDUINO:
 	    @rtype: None
 	    '''
 	    self._channel = None
+	    self._page = 0
 	    self.handle = None
 	    self.dev = dev
 	    self.handle = GoodFETatmel128rfa1()
@@ -72,19 +73,21 @@ class ZIGDUINO:
 	    return [self.dev, "Zigduino", ""]
 
     # KillerBee expects the driver to implement this function
-    def sniffer_on(self, channel=None):
+    def sniffer_on(self, channel=None, page=0):
 	    '''
 	    Turns the sniffer on such that pnext() will start returning observed
 	    data.  Will set the command mode to Air Capture if it is not already
 	    set.
 	    @type channel: Integer
 	    @param channel: Sets the channel, optional
+	    @type page: Integer
+	    @param page: Sets the subghz page, optional
 	    @rtype: None
 	    '''
 	    self.capabilities.require(KBCapabilities.SNIFF)
 
-	    if channel != None:
-	        self.set_channel(channel)
+	    if channel != None or page:
+	        self.set_channel(channel, page)
 
 	    #print "Sniffer started (listening as %010x on %i MHz)" % (self.handle.RF_getsmac(), self.handle.RF_getfreq()/10**6);
 
@@ -102,11 +105,13 @@ class ZIGDUINO:
 	    self.__stream_open = False
 
     # KillerBee expects the driver to implement this function
-    def set_channel(self, channel):
+    def set_channel(self, channel, page=0):
 	    '''
 	    Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
 	    @type channel: Integer
-	    @param channel: Sets the channel, optional
+	    @param channel: Sets the channel
+	    @type page: Integer
+	    @param page: Sets the subghz page, not supported on this device
 	    @rtype: None
 	    '''
 	    self.capabilities.require(KBCapabilities.SETCHAN)
@@ -118,13 +123,15 @@ class ZIGDUINO:
 	        raise Exception('Invalid channel')
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
         @type packet: String
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @type count: Integer
         @param count: Transmits a specified number of frames, def=1
         @type delay: Float
@@ -139,7 +146,9 @@ class ZIGDUINO:
             raise Exception('Packet too long')
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
+        if page:
+            raise Exception('SubGHz not supported')
         self.handle.RF_autocrc(1)               #let the radio add the CRC
         for pnum in range(0, count):
             gfready = [ord(x) for x in packet]  #convert packet string to GoodFET expected integer format
@@ -176,11 +185,13 @@ class ZIGDUINO:
         result['datetime'] = datetime.utcnow()
         return result
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, page=0):
 	    '''
 	    Not yet implemented.
 	    @type channel: Integer
 	    @param channel: Sets the channel, optional
+	    @type page: Integer
+	    @param page: Sets the subghz page, not supported on this device
 	    @rtype: None
 	    '''
 	    raise Exception('Not yet implemented')
@@ -194,7 +205,7 @@ class ZIGDUINO:
             raise Exception("Least-significant nybble in sync (%x) cannot be 0." % sync)
         return self.handle.poke(ATMEL_REG_SYNC, sync)
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self, channel=None, page=0):
 	    '''
 	    Not yet implemented.
 	    @return: None

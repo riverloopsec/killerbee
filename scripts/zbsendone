@@ -6,6 +6,7 @@
 import sys
 import signal
 from killerbee import *
+from killerbee.scapy_extensions import *
 
 '''
 This tool is extremely basic and can be used to repeatedly inject a hardcoded
@@ -21,15 +22,26 @@ basic command line parsing, creating a KillerBee object, and sending packets.
 '''
 
 # This tool requires that you manually set the packet to inject here:
-packet = "\x69\x88\x00\x07\x20\xef\xbe\xad\xde\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\xeb\x89\x33"
-#packet = "\x69\x88\x00\xad\xde\xef\xbe\xad\xde\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\xeb\x89\x33\x69\x88\x00\x07\x20\xef\xbe\x20\x25\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\xeb\x89\x33\x69\x88\x00\x07\x20\xef\xbe\x20\x25\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\xeb\x89\x33\x69\x88\x00\x07\x20\xef\xbe\x20\x25\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\xeb\x89\x33\x69\x88\x00\x07\x20\xef\xbe\x20\x25\x06\x0a\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\x00\x00\x00\xf1\xc7\xfa\x14\xe9\x66\x14\xe9\x66\x14"
+# you need to caclulate Dot15d4FCS(fcs) to match your packet if your radio is not doing it for you
+# BAD FCS can only be transmitted if your radio allows you send full packet
 
+# 21 byte packet + good FCS
+packet = Dot15d4FCS(fcf_destaddrmode=2, fcf_framever=0, fcs=0x67a5, fcf_srcaddrmode=2, fcf_reserved_2=0, fcf_reserved_1=0, fcf_ackreq=1, fcf_pending=0, seqnum=0, fcf_frametype=1, fcf_security=1, fcf_panidcompress=1)/Dot15d4Data(src_addr=57005, aux_sec_header=None, dest_addr=48879, src_panid=None, dest_panid=8199)/Raw(load='\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09')
+
+# 21 byte packet + bad FCS
+#packet = Dot15d4FCS(fcf_destaddrmode=2, fcf_framever=0, fcs=0xBAAD, fcf_srcaddrmode=2, fcf_reserved_2=0, fcf_reserved_1=0, fcf_ackreq=1, fcf_pending=0, seqnum=0, fcf_frametype=1, fcf_security=1, fcf_panidcompress=1)/Dot15d4Data(src_addr=57005, aux_sec_header=None, dest_addr=48879, src_panid=None, dest_panid=8199)/Raw(load='\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09')
+
+# max packet 125 bytes + good FCS
+#packet = Dot15d4FCS(fcf_destaddrmode=2, fcf_framever=0, fcs=0x60d4, fcf_srcaddrmode=2, fcf_reserved_2=0, fcf_reserved_1=0, fcf_ackreq=1, fcf_pending=0, seqnum=0, fcf_frametype=1, fcf_security=1, fcf_panidcompress=1)/Dot15d4Data(src_addr=57005, aux_sec_header=None, dest_addr=48879, src_panid=None, dest_panid=57005)/ZigbeeNWK(ext_src=None, source=61696, relay_count=None, seqnum=250, ext_dst=9829444329165744404L, destination=0, discover_route=0, flags=10, relay_index=None, radius=199, proto_version=1, relays=None, frametype=2)/ZigbeeSecurityHeader(key_seqnum=None, nwk_seclevel=0, data='\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e', key_type=0, source=None, fc=3203342343, extended_nonce=0, reserved1=0)
+
+# max packet 125 bytes + bad FCS
+#packet = Dot15d4FCS(fcf_destaddrmode=2, fcf_framever=0, fcs=0xBADD, fcf_srcaddrmode=2, fcf_reserved_2=0, fcf_reserved_1=0, fcf_ackreq=1, fcf_pending=0, seqnum=0, fcf_frametype=1, fcf_security=1, fcf_panidcompress=1)/Dot15d4Data(src_addr=57005, aux_sec_header=None, dest_addr=48879, src_panid=None, dest_panid=57005)/ZigbeeNWK(ext_src=None, source=61696, relay_count=None, seqnum=250, ext_dst=9829444329165744404L, destination=0, discover_route=0, flags=10, relay_index=None, radius=199, proto_version=1, relays=None, frametype=2)/ZigbeeSecurityHeader(key_seqnum=None, nwk_seclevel=0, data='\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e', key_type=0, source=None, fc=3203342343, extended_nonce=0, reserved1=0)
 
 def usage():
     print >>sys.stderr, """
 zbinject - sends a single IEEE 802.15.4 packet to remote channel
 
-Usage: zbsendone [-fip] [-f channel] [-i devnumstring] [-p packet_count]
+Usage: zbsendone [-cfip] [-c (or -f) channel] [-s subghz_page] [-i devnumstring] [-p packet_count]
     """
 
 def interrupt(signum, frame):
@@ -40,12 +52,15 @@ def interrupt(signum, frame):
 arg_channel = None
 arg_devstring = None
 arg_packetcount = 100
-arg_delay = 0
+arg_delay = 0.1
+arg_subghz_page = 0
 
 while len(sys.argv) > 1:
     op = sys.argv.pop(1)
-    if op == '-f':
+    if op == '-f' or op == '-c':
         arg_channel = int(sys.argv.pop(1))
+    if op == '-s':
+        arg_subghz_page = int(sys.argv.pop(1))
     elif op == '-i':
         arg_devstring = sys.argv.pop(1)
     elif op == '-h':
@@ -57,20 +72,22 @@ while len(sys.argv) > 1:
     elif op == '-p':
         arg_packetcount = int(sys.argv.pop(1))
 
+kb = KillerBee(device=arg_devstring)
 if arg_channel == None:
     print >>sys.stderr, "ERROR: Must specify a channel with -f"
     usage()
     sys.exit(1)
-elif arg_channel < 11 or arg_channel > 26:
-    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel between 11 and 26."
+elif not kb.is_valid_channel(arg_channel, arg_subghz_page):
+    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel/page."
     sys.exit(1)
 
-kb = KillerBee(device=arg_devstring)
 #print kb.get_dev_info()
 signal.signal(signal.SIGINT, interrupt)
 
-print "Injecting %d packets on %d channel with a %d length" % (arg_packetcount, arg_channel, len(packet))
+print "Injecting %d packets on channel %d page %d with a %d length" % (arg_packetcount, arg_channel, arg_subghz_page, len(packet))
 # The packet variable is set by the user near the top of the script.
-kb.inject(packet, arg_channel, arg_packetcount, arg_delay)
+#kb.inject(packet, arg_channel, arg_packetcount, arg_delay, arg_subghz_page)
+print 'sending:', str(packet).encode('hex')
+kb.inject(str(packet), arg_channel, arg_packetcount, arg_delay, page= arg_subghz_page)
 kb.close()
 

@@ -1,8 +1,10 @@
 DEFAULT_KB_CHANNEL = 11
+DEFAULT_KB_PAGE = None
 DEFAULT_KB_DEVICE = None
 
 from scapy.config import conf
 setattr(conf, 'killerbee_channel', DEFAULT_KB_CHANNEL)
+setattr(conf, 'killerbee_page', DEFAULT_KB_PAGE)
 setattr(conf, 'killerbee_device', DEFAULT_KB_DEVICE)
 setattr(conf, 'killerbee_nkey', None)
 from scapy.base_classes import SetGen
@@ -21,7 +23,7 @@ log_killerbee = logging.getLogger('scapy.killerbee')
 # new scapy needs to know if we're using sixlowpan or zigbee
 conf.dot15d4_protocol = "zigbee"
 
-def __kb_send(kb, x, channel = None, inter = 0, loop = 0, count = None, verbose = None, realtime = None, *args, **kargs):
+def __kb_send(kb, x, channel = None, page = 0, inter = 0, loop = 0, count = None, verbose = None, realtime = None, *args, **kargs):
     if type(x) is str:
         x = Raw(load=x)
     if not isinstance(x, Gen):
@@ -46,7 +48,7 @@ def __kb_send(kb, x, channel = None, inter = 0, loop = 0, count = None, verbose 
                             time.sleep(st)
                     else:
                         dt0 = ct-p.time
-                kb.inject(p.do_build()[:-2], channel = None, count = 1, delay = 0)  # [:-2] because the firmware adds the FCS
+                kb.inject(p.do_build()[:-2], channel = None, count = 1, delay = 0, page = 0)  # [:-2] because the firmware adds the FCS
                 n += 1
                 if verbose:
                     os.write(1,".")
@@ -103,10 +105,11 @@ def kbdev():
     show_dev()
 
 @conf.commands.register
-def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None, verbose = None, realtime=None):
+def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None, verbose = None, realtime=None, page= 0):
     """
     Send a packet with KillerBee
     @param channel:  802.15.4 channel to transmit/receive on
+    @param page:     802.15.4 subghz page to transmit/receive on
     @param inter:    time to wait between tranmissions
     @param loop:     number of times to process the packet list
     @param iface:    KillerBee interface to use, or KillerBee() class instance
@@ -115,17 +118,19 @@ def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None
     """
     if channel == None:
         channel = conf.killerbee_channel
+    if not page:
+        page = conf.killerbee_page
     if not isinstance(iface, KillerBee):
         if iface is not None:
             kb = KillerBee(device = iface)
         else:
             kb = KillerBee(device = conf.killerbee_device)
-        kb.set_channel(channel)
+        kb.set_channel(channel, page)
     else:
         kb = iface
 
     # Make sure the packet has 2 bytes for FCS before TX
-    if not pkt.haslayer(Dot15d4FCS):
+    if not Dot15d4FCS in pkt:
         pkt/=Raw("\x00\x00")
 
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = loop, count = count, verbose = verbose, realtime = realtime)
@@ -134,10 +139,11 @@ def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None
     kb.close()
 
 @conf.commands.register
-def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
+def kbsrp(pkt, channel = None, page = 0, inter = 0, count = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
     """
     Send and receive packets with KillerBee
     @param channel:  802.15.4 channel to transmit/receive on
+    @param page:     802.15.4 subghz page to transmit/receive on
     @param inter:    time to wait between tranmissions
     @param count:    number of packets to capture. 0 means infinity
     @param iface:    KillerBee interface to use, or KillerBee() class instance
@@ -156,17 +162,19 @@ def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, pr
         verbose = conf.verb
     if channel == None:
         channel = conf.killerbee_channel
+    if not page:
+        page = conf.killerbee_page
     if not isinstance(iface, KillerBee):
         if iface is not None:
             kb = KillerBee(device = iface)
         else:
             kb = KillerBee(device = conf.killerbee_device)
-        kb.set_channel(channel)
+        kb.set_channel(channel, page)
     else:
         kb = iface
 
     # Make sure the packet has an FCS layer before TX
-    if not pkt.haslayer(Dot15d4FCS):
+    if not Dot15d4FCS in pkt:
         pkt/=Raw("\x00\x00")
 
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = 0, count = None, verbose = verbose, realtime = realtime)
@@ -179,15 +187,16 @@ def kbsrp(pkt, channel = None, inter = 0, count = 0, iface = None, store = 1, pr
     return plist.PacketList(pkts_in, 'Results')
 
 @conf.commands.register
-def kbsrp1(pkt, channel = None, inter = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
+def kbsrp1(pkt, channel = None, page = 0, inter = 0, iface = None, store = 1, prn = None, lfilter = None, timeout = None, verbose = None, realtime = None):
     """Send and receive packets with KillerBee and return only the first answer"""
-    return kbsrp(pkt, channel = channel, inter = inter, count = 1, iface = iface, store = store, prn = prn, lfilter = lfilter, timeout = timeout, verbose = verbose, realtime = realtime)
+    return kbsrp(pkt, channel = channel, page = page, inter = inter, count = 1, iface = iface, store = store, prn = prn, lfilter = lfilter, timeout = timeout, verbose = verbose, realtime = realtime)
 
 @conf.commands.register
-def kbsniff(channel = None, count = 0, iface = None, store = 1, prn = None, lfilter = None, stop_filter = None, verbose = None, timeout = None):
+def kbsniff(channel = None, page = 0, count = 0, iface = None, store = 1, prn = None, lfilter = None, stop_filter = None, verbose = None, timeout = None):
     """
     Sniff packets with KillerBee.
     @param channel:  802.15.4 channel to transmit/receive on
+    @param page:     802.15.4 subghz page to transmit/receive on
     @param count:    number of packets to capture. 0 means infinity
     @param iface:    KillerBee interface to use, or KillerBee() class instance
     @param store:    whether to store sniffed packets or discard them
@@ -201,12 +210,14 @@ def kbsniff(channel = None, count = 0, iface = None, store = 1, prn = None, lfil
     """
     if channel == None:
         channel = conf.killerbee_channel
+    if not page:
+        page = conf.killerbee_page
     if not isinstance(iface, KillerBee):
         if iface is not None:
             kb = KillerBee(device = iface)
         else:
             kb = KillerBee(device = conf.killerbee_device)
-        kb.set_channel(channel)
+        kb.set_channel(channel, page)
     else:
         kb = iface
     return plist.PacketList(__kb_recv(kb, count = count, store = store, prn = prn, lfilter = lfilter, stop_filter = stop_filter, verbose = verbose, timeout = timeout), 'Sniffed')
@@ -409,10 +420,10 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
     if len(key) != 16:
         log_killerbee.error("Invalid decryption key, must be a 16 byte string.")
         return None
-    if not source_pkt.haslayer(ZigbeeSecurityHeader):
+    if not ZigbeeSecurityHeader in source_pkt:
         log_killerbee.error("Cannot decrypt frame without a ZigbeeSecurityHeader.")
         return None
-    if not source_pkt.haslayer(ZigbeeNWK):
+    if not ZigbeeNWK in source_pkt:
         log_killerbee.error("Cannot decrypt frame without a ZigbeeNWK.")
         return None
     try:
@@ -444,7 +455,7 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
 
     # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
     sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
-    if pkt.haslayer(ZigbeeAppDataPayload):
+    if ZigbeeAppDataPayload in pkt:
         nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
         zigbeeData = pkt[ZigbeeAppDataPayload].do_build()
     else:
@@ -491,10 +502,10 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
     if len(key) != 16:
         log_killerbee.error("Invalid encryption key, must be a 16 byte string.")
         return None
-    if not source_pkt.haslayer(ZigbeeSecurityHeader):
+    if not ZigbeeSecurityHeader in source_pkt:
         log_killerbee.error("Cannot encrypt frame without a ZigbeeSecurityHeader.")
         return None
-    if not source_pkt.haslayer(ZigbeeNWK):
+    if not ZigbeeNWK in source_pkt:
         log_killerbee.error("Cannot encrypt frame without a ZigbeeNWK.")
         return None
     try:
@@ -525,7 +536,7 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
 
     # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
     sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
-    if pkt.haslayer(ZigbeeAppDataPayload):
+    if ZigbeeAppDataPayload in pkt:
         nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
         zigbeeData = pkt[ZigbeeAppDataPayload].do_build()
     else:
@@ -564,3 +575,12 @@ def kbgetmiclen(seclevel):
     lengths= {DOT154_CRYPT_NONE:0, DOT154_CRYPT_MIC32:4, DOT154_CRYPT_MIC64:8, DOT154_CRYPT_MIC128:16, DOT154_CRYPT_ENC:0, DOT154_CRYPT_ENC_MIC32:4, DOT154_CRYPT_ENC_MIC64:8, DOT154_CRYPT_ENC_MIC128:16}
 
     return lengths[seclevel]
+
+@conf.commands.register
+def kbgetpanid(packet):
+    """Returns the pan id and which layer it was found in or None, None"""
+    for layer in packet.layers():
+        for field in packet[layer].fields:
+            if 'dest_panid' in field:
+                return packet[layer].dest_panid, layer
+    return None, None
