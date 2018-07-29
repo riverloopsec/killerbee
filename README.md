@@ -272,8 +272,7 @@ The pdf/ directory will have a file called "api.pdf" which includes the
 framework documentation.
 
 To get started using the KillerBee framework, take a look at the included tools
-(zbdump and zbreplay are good examples to get started) and the simple test
-cases in the t/ directory.
+(zbdump and zbreplay are good examples to get started).
 
 Since KillerBee is a Python library, it integrates well with other Python
 software as well.  For example, the Sulley library is a fuzzing framework
@@ -284,5 +283,10 @@ mechanism for generating and transmitting malformed ZigBee data to a target.
 
 QUESTIONS/COMMENTS/CONCERNS
 ==============
-Please us the ticketing system at https://github.com/riverloopsec/killerbee/issues.
+Please use the ticketing system at https://github.com/riverloopsec/killerbee/issues.
 
+The original version was written by: jwright@willhackforsushi.com
+The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
+Additional Tools/Fixes by: bryanhalf@gmail.com
+
+For contributors/developers, see DEVELOPMENT.md for details and guidance.
