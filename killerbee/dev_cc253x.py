@@ -16,11 +16,7 @@ except ImportError:
 import struct
 import time
 from datetime import datetime
-<<<<<<< HEAD
-from .kbutils import KBCapabilities
-=======
 from kbutils import KBCapabilities, makeFCS
->>>>>>> develop
 
 
 class CC253x:
