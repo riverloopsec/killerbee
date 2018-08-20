@@ -123,6 +123,7 @@ class RZUSBSTICK:
         @rtype: None
         '''
         self._channel = None
+        self._page = 0
         self.handle = None
         self.dev = dev
         self.__bus = bus
@@ -362,13 +363,15 @@ class RZUSBSTICK:
         self.__stream_open = False
 
     # KillerBee expects the driver to implement this function
-    def sniffer_on(self, channel=None):
+    def sniffer_on(self, channel=None, page=0):
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.  Will set the command mode to Air Capture if it is not already
         set.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
@@ -377,7 +380,7 @@ class RZUSBSTICK:
             self._set_mode(RZ_CMD_MODE_AC)
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         self._open_stream()
 
@@ -391,10 +394,12 @@ class RZUSBSTICK:
         '''
         self._close_stream()
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, page=0):
         '''
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
@@ -403,7 +408,7 @@ class RZUSBSTICK:
             self._set_mode(RZ_CMD_MODE_AC)
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_JAMMER_ON])
 
@@ -450,10 +455,12 @@ class RZUSBSTICK:
 
         return self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_BOOT_START_APPLICATION])
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self, channel=None, page=0):
         '''
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
@@ -464,12 +471,14 @@ class RZUSBSTICK:
         self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_JAMMER_OFF])
 
     # KillerBee expects the driver to implement this function
-    def set_channel(self, channel):
+    def set_channel(self, channel, page):
         '''
         Sets the radio interface to the specifid channel.  Currently, support is
         limited to 2.4 GHz channels 11 - 26.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz channel, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SETCHAN)
@@ -482,15 +491,19 @@ class RZUSBSTICK:
             self.__usb_write(RZ_USB_COMMAND_EP, [RZ_CMD_SET_CHANNEL, channel])
         else:
             raise Exception('Invalid channel')
+        if page:
+            raise Exception('SubGHz not supported')
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
         @type packet: String
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz channel, not supported on this device
         @type count: Integer
         @param count: Transmits a specified number of frames, def=1
         @type delay: Float
@@ -508,7 +521,7 @@ class RZUSBSTICK:
             raise Exception('Packet too long')
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         # Append two bytes to be replaced with FCS by firmware.
         packet += "\x00\x00"
@@ -601,7 +614,7 @@ class RZUSBSTICK:
                 # ...otherwise we're expecting a continuation in the next USB read
                 explen = explen - len(pdata)
 
-    def ping(self, da, panid, sa, channel=None):
+    def ping(self, da, panid, sa, channel=None, page=0):
         '''
         Not yet implemented.
         @return: None

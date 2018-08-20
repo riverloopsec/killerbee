@@ -142,6 +142,7 @@ class PcapDumper:
     def __exit__(self, *exinfo):
         self.close()
 
+    #TODO: fix freq_mhz for subGHz which end up as float
     def pcap_dump(self, packet, ts_sec=None, ts_usec=None, orig_len=None, 
                   freq_mhz = None, ant_dbm = None, location = None):
         '''
@@ -172,7 +173,7 @@ class PcapDumper:
             #CACE PPI Field 802.11-Common
             pph_len += 24 #802.11-common header and data
             rf_freq_mhz = 0x0000
-            if freq_mhz is not None: rf_freq_mhz = freq_mhz
+            if freq_mhz is not None: rf_freq_mhz = int(freq_mhz) #TODO: fix for float
             rf_ant_dbm = 0
             if ant_dbm is not None: rf_ant_dbm = ant_dbm
             caceppi_f80211common = ''.join([

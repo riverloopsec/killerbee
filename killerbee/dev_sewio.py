@@ -91,6 +91,7 @@ class SEWIO:
         @rtype: None
         '''
         self._channel = None
+        self._page = 0
         self._modulation = 0 #unknown, will be set by change channel currently
         self.handle = None
         self.dev = dev
@@ -198,12 +199,14 @@ class SEWIO:
         return int(res.group(1))
 
     # KillerBee expects the driver to implement this function
-    def sniffer_on(self, channel=None):
+    def sniffer_on(self, channel=None, page=0):
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
@@ -213,7 +216,7 @@ class SEWIO:
         self.__sync_status()
         if self.__stream_open == False:
             if channel != None:
-                self.set_channel(channel)
+                self.set_channel(channel, page)
             
             if not self.__make_rest_call('status.cgi?p=2', fetch=False):
                 raise KBInterfaceError("Error instructing sniffer to start capture.")
@@ -240,9 +243,10 @@ class SEWIO:
             self.__sync_status()
             if self.__stream_open:
                 raise KBInterfaceError("Sniffer did not turn off capture.")
-    
+   
+    #TODO: convert to channel/page for subghz
     @staticmethod
-    def __get_default_modulation(channel):
+    def __get_default_modulation(channel, page=0):
         '''
         Return the Sewio-specific integer representing the modulation which
         should be choosen to be IEEE 802.15.4 complinating for a given channel 
@@ -260,16 +264,18 @@ class SEWIO:
         else: return None                               #Error status
 
     # KillerBee expects the driver to implement this function
-    def set_channel(self, channel):
+    def set_channel(self, channel, page=0):
         '''
         Sets the radio interface to the specified channel, and the matching modulation setting.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device (but TODO: should be?)
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SETCHAN)
 
-        if self.capabilities.is_valid_channel(channel):
+        if self.capabilities.is_valid_channel(channel, page):
             # We only need to update our channel if it doesn't match the currently reported one.
             curChannel = self.__sniffer_channel()
             if channel != curChannel:
@@ -289,7 +295,7 @@ class SEWIO:
             raise Exception('Invalid channel number ({0}) was provided'.format(channel))
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Not implemented.
         '''
@@ -407,16 +413,18 @@ class SEWIO:
             else:           result['dbm'] = rssi
         return result
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, page=0):
         '''
         Not yet implemented.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self, channel=None, page=0):
         '''
         Not yet implemented.
         @return: None
