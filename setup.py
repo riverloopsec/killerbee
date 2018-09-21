@@ -70,7 +70,7 @@ Library recommendations not met. For full support, install the following librari
 then re-run the setup script.
 
     """, warn
-#TODO: Offer the user to type y/n to continue or cancel at this point
+# TODO: Offer the user to type y/n to continue or cancel at this point
 
 zigbee_crypt = Extension('zigbee_crypt',
                     sources = ['zigbee_crypt/zigbee_crypt.c'],
@@ -80,7 +80,7 @@ zigbee_crypt = Extension('zigbee_crypt',
                     )
 
 setup  (name        = 'killerbee',
-        version     = '2.6.1',
+        version     = '2.7.0',
         description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
         author = 'Joshua Wright, Ryan Speers',
         author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
@@ -96,4 +96,3 @@ setup  (name        = 'killerbee',
         install_requires=['pyserial>=2.0', 'pyusb', 'crypto'],
         ext_modules = [ zigbee_crypt ],
         )
-

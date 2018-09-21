@@ -6,7 +6,7 @@ This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4 n
 MAINTAINERS/LICENSE
 ================
 
-Distributed under a BSD license, see LICENSE for details.
+Distributed under a BSD license, see LICENSE.txt for details.
 All Rights Reserved.
 
 The main toolkit was/is authored by:
@@ -33,7 +33,7 @@ REQUIREMENTS
 ================
 
 KillerBee is developed and tested on Linux systems.
-OS X usage is possible but not supported.
+MacOS usage is possible but not supported.
 
 We have striven to use a minimum number of software dependencies, however, it
 is necessary to install the following Python modules before installation:
@@ -89,12 +89,12 @@ The directory structure for the KillerBee code is described as follows:
 REQUIRED HARDWARE
 ================
 The KillerBee framework is being expanded to support multiple devices.
-Currently there is support for the River Loop ApiMote,
-Atmel RZ RAVEN USB Stick, MoteIV Tmote Sky, TelosB mote, and Sewino Sniffer.
+Currently there is support for the River Loop ApiMote, Atmel RZ RAVEN USB Stick,
+MoteIV Tmote Sky, TelosB mote, Sewino Sniffer, and various hardware running Silicon Labs Node Test firmware.
 
-Support for Freaklab's Freakduino with added hardware
-and the Dartmouth arduino sketch, Zigduino, and Sewio Sniffer board
-is available but are not listed below as they are not maintained.
+Support for Freaklab's Freakduino with added hardware & the Dartmouth arduino sketch
+and Zigduino boards are available but are not listed below as they are not maintained.
+You must enable these to be searched for in `killerbee/config.py` and then reinstall KillerBee.
 
 ApiMote v4beta (and v3):
 ----------------
@@ -130,7 +130,6 @@ These boards can be obtained via multiple distributors, however
 stated that their "clone" of the original hardware is compatible.
 We have not tested nor do we endorse any specific "clone".
 
-
 Atmel RZ RAVEN USB Stick:
 ----------------
 See http://www.atmel.com/tools/RZUSBSTICK.aspx.
@@ -157,12 +156,13 @@ directory. _See [firmware/README.md](firmware/README.md) for details._
 
 Silicon Labs Node Test 2.4GHz & SubGHz:
 ----------------
-See https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf
+See [SiLabs AN1019](https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf).
 
 This is a firmware image for a huge variety of hardware platforms, supporting EM250, EM375, EFR32, etc., and provides for (with appropriate radio part) the following frequencies:
 + 2.4 GHz (ch 11-26)
 + 863-917 MHz (pages 28-31, ch 0-26)
 
+You must enable these to be searched for in `killerbee/config.py` and then reinstall KillerBee.
 See [firmware/README.md](firmware/README.md) for installation details.
 
 _NOTE: This is a SNIFFER only implementation which will only read packets with a good FCS, and although the firmware has injection capability, it adds a 2 byte counter to the end of every packet, rendering it useless for all practical purposes. If you are interested in an INJECTION and BAD FCS capable device, contact the author, Adam Laurie - adam at algroup.co.uk_
