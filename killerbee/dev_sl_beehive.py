@@ -76,10 +76,10 @@ class SL_BEEHIVE:
         '''
         return [self.dev, "BeeHive SG", ""]
 
-    def __send_cmd(self, cmdstr, arg=None, confirm= True, send_return= True, extra_delay= 0):
+    def __send_cmd(self, cmdstr, arg=None, confirm= True, send_return= True, extra_delay= 0, initial_read= 3):
         # read any cruft
         #time.sleep(0.1)
-        for x in range(3):
+        for x in range(initial_read):
             self.handle.readline()
 
         # some commands require us to be in idle, so do it always
@@ -176,10 +176,11 @@ class SL_BEEHIVE:
         close().
         @rtype: None
         '''
-        self.__send_cmd("rx", "0", confirm= False)
-        for x in range(5):
+        # reset timeout as sniffer has made it long
+        self.handle.timeout= 0.2
+        self.__send_cmd("rx", "0", confirm= False, initial_read= 0)
+        for x in range(3):
             d= self.handle.readline().strip()
-            #print 'got', d
             if "Rx:Disabled" in d:
                 self.mode = MODE_NONE
                 self.__stream_open = False
@@ -264,7 +265,7 @@ class SL_BEEHIVE:
 
     # KillerBee expects the driver to implement this function
     #TODO I suspect that if you don't call this often enough while getting frames, the serial buffer may overflow.
-    def pnext(self, timeout=100):
+    def pnext(self, timeout=1):
         '''
         Returns packet data as a string, else None.
         @type timeout: Integer
