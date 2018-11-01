@@ -151,12 +151,14 @@ if __name__ == '__main__':
         channel = args.channel
         kb.set_channel(channel)
     else:
-        channel = 11
+        channel = 0
 
     # Loop injecting and receiving packets
     while 1:
-        if channel > 26:
-            channel = 11
+        if channel == 27:
+            channel = 128
+        elif channel > 131:
+            channel = 0
 
         if seqnum > 255:
             seqnum = 0

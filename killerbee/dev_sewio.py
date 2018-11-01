@@ -31,16 +31,16 @@ NTP_DELTA = 70*365*24*60*60 #datetime(1970, 1, 1, 0, 0, 0) - datetime(1900, 1, 1
 '''
 Convert the two parts of an NTP timestamp to a datetime object.
 Similar code from Wireshark source:
-575 	/* NTP_BASETIME is in fact epoch - ntp_start_time */
-576 	#define NTP_BASETIME 2208988800ul
-619 	void
-620 	ntp_to_nstime(tvbuff_t *tvb, gint offset, nstime_t *nstime)
-621 	{
-622 	nstime->secs = tvb_get_ntohl(tvb, offset);
-623 	if (nstime->secs)
-624 	nstime->secs -= NTP_BASETIME;
-625 	nstime->nsecs = (int)(tvb_get_ntohl(tvb, offset+4)/(NTP_FLOAT_DENOM/1000000000.0));
-626 	}
+575     /* NTP_BASETIME is in fact epoch - ntp_start_time */
+576     #define NTP_BASETIME 2208988800ul
+619     void
+620     ntp_to_nstime(tvbuff_t *tvb, gint offset, nstime_t *nstime)
+621     {
+622     nstime->secs = tvb_get_ntohl(tvb, offset);
+623     if (nstime->secs)
+624     nstime->secs -= NTP_BASETIME;
+625     nstime->nsecs = (int)(tvb_get_ntohl(tvb, offset+4)/(NTP_FLOAT_DENOM/1000000000.0));
+626     }
 '''
 def ntp_to_system_time(secs, msecs):
     """convert a NTP time to system time"""
@@ -159,6 +159,8 @@ class SEWIO:
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_900, True)
+        self.capabilities.setcapab(KBCapabilities.FREQ_868, True)
+        self.capabilities.setcapab(KBCapabilities.FREQ_784, True)
         if ( self.__revision_num == "0.9.0" ):
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
             self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
@@ -283,10 +285,10 @@ class SEWIO:
         http://www.sewio.net/open-sniffer/develop/http-rest-interface/
         @rtype: String, or None if unable to determine modulation
         '''
-        if channel >= 11 or channel <= 26: return '0'   #O-QPSK 250 kb/s 2.4GHz
-        elif channel >= 1 or channel <= 10: return 'c'  #O-QPSK 250 kb/s 915MHz
-        elif channel >= 128 or channel <= 131: return '1c' #O-QPSK 250 kb/s 760MHz
-        elif channel == 0: return '0'                   #O-QPSK 100 kb/s 868MHz
+        if channel == 0: return '0'                     #BPSK 20 kb/s 868MHz
+        elif channel >= 11 and channel <= 26: return '0' #O-QPSK 250 kb/s 2.4GHz
+        elif channel >= 1 and channel <= 10: return '04'  #O-QPSK 250 kb/s 915MHz
+        elif channel >= 128 and channel <= 131: return '1c' #O-QPSK 250 kb/s 780MHz
         else: return None                               #Error status
 
     # KillerBee expects the driver to implement this function
@@ -310,6 +312,7 @@ class SEWIO:
                 #   channel 12, 250 compliant: http://10.10.10.2/settings.cgi?chn=12&modul=0&rxsens=0
                 #   chinese 0, 780 MHz, 250 compliant: http://10.10.10.2/settings.cgi?chn=128&modul=1c&rxsens=0
                 #   chinese 3, 786 MHz, 250 compliant: http://10.10.10.2/settings.cgi?chn=131&modul=1c&rxsens=0
+                #   europe 0, 868 MHz, 20 compliant: http://10.10.10.2/settings.cgi?chn=0&modul=00s&rxsens=0
                 #rxsens 0 is normal, 3 is high sensitivity to receive at
                 self.__make_rest_call("settings.cgi?chn={0}&modul={1}&rxsens=3".format(channel, self.modulation), fetch=False)
                 self._channel = self.__sniffer_channel()
