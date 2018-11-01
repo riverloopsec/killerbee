@@ -161,7 +161,7 @@ if __name__ == '__main__':
         if seqnum > 255:
             seqnum = 0
     
-        if not args.channel:
+        if args.channel is None:
             if args.verbose:
                 print("Setting channel to {0}.".format(channel))
             try:
@@ -198,6 +198,6 @@ if __name__ == '__main__':
 
         kb.sniffer_off()    
         seqnum += 1
-        if not args.channel:
+        if args.channel is None:
             channel += 1
 
