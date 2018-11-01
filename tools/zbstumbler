@@ -147,7 +147,7 @@ if __name__ == '__main__':
     
     # Sequence number of beacon request frame
     seqnum = 0
-    if args.channel:
+    if args.channel is not None:
         channel = args.channel
         kb.set_channel(channel)
     else:
