@@ -114,13 +114,13 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--gps', '--ignore', action='append', dest='ignore')
     parser.add_argument('-s', '--delay', action='store', type=float, dest='delay', default=2.0)
     parser.add_argument('-v', '--verbose', action='store_true')
-    parser.add_argument('-c', '--channel', action='store', type=int, default=None)
+    parser.add_argument('-c', '--channel', action='store', type=int, dest='channel', default=None)
     parser.add_argument('-w', '--file', action='store', dest='csvfile', default=None)
     parser.add_argument('-D', action='store_true', dest='showdev')
     args = parser.parse_args()
 
     if args.showdev:
-        show_dev()
+        show_dev(include=[args.devstring])
         sys.exit(0)
 
     if args.csvfile is not None:
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     
     # Sequence number of beacon request frame
     seqnum = 0
-    if args.channel:
+    if args.channel is not None:
         channel = args.channel
         kb.set_channel(channel)
     else:
@@ -161,7 +161,7 @@ if __name__ == '__main__':
         if seqnum > 255:
             seqnum = 0
     
-        if not args.channel:
+        if args.channel is None:
             if args.verbose:
                 print("Setting channel to {0}.".format(channel))
             try:
@@ -198,6 +198,6 @@ if __name__ == '__main__':
 
         kb.sniffer_off()    
         seqnum += 1
-        if not args.channel:
+        if args.channel is None:
             channel += 1
 
