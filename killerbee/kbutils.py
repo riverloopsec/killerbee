@@ -54,6 +54,8 @@ class KBCapabilities:
     SET_SYNC           = 0x07 #: Capabilities Flag: Can set the register controlling 802.15.4 sync byte
     FREQ_2400          = 0x08 #: Capabilities Flag: Can preform 2.4 GHz sniffing (ch 11-26)
     FREQ_900           = 0x09 #: Capabilities Flag: Can preform 900 MHz sniffing (ch 1-10)
+    FREQ_868           = 0x0a #: Capabilities Flag: Can preform 868 MHz sniffing (ch 0)
+    FREQ_784           = 0x0b #: Capabilities Flag: Can preform 784 MHz sniffing (ch 128-131)
     def __init__(self):
         self._capabilities = {
                 self.NONE : False,
@@ -65,7 +67,9 @@ class KBCapabilities:
                 self.PHYJAM_REFLEX: False,
                 self.SET_SYNC: False,
                 self.FREQ_2400: False,
-                self.FREQ_900: False }
+                self.FREQ_900: False,
+                self.FREQ_868: False,
+                self.FREQ_784: False }
     def check(self, capab):
         if capab in self._capabilities:
             return self._capabilities[capab]
@@ -86,6 +90,10 @@ class KBCapabilities:
         if (channel >= 11 and channel <= 26) and self.check(self.FREQ_2400):
             return True
         elif (channel >= 1 and channel <= 10) and self.check(self.FREQ_900):
+            return True
+        elif (channel == 0) and self.check(self.FREQ_868):
+            return True
+        elif (channel >= 128 and channel <= 131) and self.check(self.FREQ_784):
             return True
         return False
 
@@ -511,10 +519,10 @@ def makeFCS(data):
     crc = 0
     for i in xrange(len(data)):
         c = ord(data[i])
-        # if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
-        q = (crc ^ c) & 15				#Do low-order 4 bits
+        # if (A PARITY BIT EXISTS): c = c & 127 #Mask off any parity bit
+        q = (crc ^ c) & 15              #Do low-order 4 bits
         crc = (crc // 16) ^ (q * 4225)
-        q = (crc ^ (c // 16)) & 15		#And high 4 bits
+        q = (crc ^ (c // 16)) & 15      #And high 4 bits
         crc = (crc // 16) ^ (q * 4225)
     return pack('<H', crc) #return as bytes in little endian order
 
