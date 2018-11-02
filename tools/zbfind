@@ -917,7 +917,6 @@ class ZBPoller(Thread):
             return
 
         thresh = 0
-        seqnum = 0
         while not self.stopthread.isSet():
             # Used to populate details for the device
             details = []
