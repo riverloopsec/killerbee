@@ -29,18 +29,18 @@ is necessary to install the following Python modules before installation:
 
 + serial
 + usb
-+ crypto  (for some functions)
-+ pygtk   (for use of tools that have GUIs)
-+ cairo   (for use of tools that have GUIs)
-+ scapy-com (for some tools which utilize 802.15.4 Scapy extensions)
++ crypto (for some functions)
++ pygtk  (for use of tools that have GUIs)
++ cairo  (for use of tools that have GUIs)
++ scapy  (for some tools which utilize 802.15.4 Scapy extensions)
 
 On Ubuntu systems, you can install the needed dependencies with the following
 commands:
 
 ```
 # apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
-# hg clone https://bitbucket.org/secdev/scapy-com
-# cd scapy-com
+# git clone https://github.com/secdev/scapy
+# cd scapy
 # python setup.py install
 ```
 
@@ -170,7 +170,7 @@ directory. _See `firmware/README.md` for details._
 Sewio OpenSniffer
 ----------------
 
-This hardware supports both 900 MHz as well as the 2.4 GHz channels.
+This hardware supports 784 MHz, 868 MHz, 915 MHz as well as the 2.4 GHz channels.
 
 The early hardware supports sniffing.
 The gen3 hardware, firmware version 0.9.0+, supports injection and jamming.

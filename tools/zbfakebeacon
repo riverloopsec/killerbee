@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--channel', '-c', action='store', dest='channel', required=True, type=int, default=11)
-    parser.add_argument('-i', '--interface', action='store', dest='devstring')
+    parser.add_argument('-i', '--interface', action='store', dest='devstring', required=True)
     parser.add_argument('-p', '--panid', action='store', required=True, type=tohex)
     parser.add_argument('-e', '--epanid', action='store', required=True, type=tohex)
     parser.add_argument('-s', '--coordinator', action='store', required=False, default=0x0000, type=tohex)

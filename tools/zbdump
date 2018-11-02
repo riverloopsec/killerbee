@@ -46,8 +46,12 @@ parser.add_argument('-n', '--count', action='store', type=int, default=-1)
 parser.add_argument('-D', action='store_true', dest='showdev')
 args = parser.parse_args()
 
-if args.showdev:
-    show_dev()
+if args.showdev and not args.devstring:
+    print >>sys.stderr, "ERROR: Must specify an interface."
+    sys.exit(1)
+
+if args.showdev and args.devstring:
+    show_dev(include=[args.devstring])
     sys.exit(0)
 
 if args.channel == None:
@@ -71,9 +75,13 @@ if not kb.is_valid_channel(args.channel):
 kb.set_channel(args.channel)
 kb.sniffer_on()
 
+if args.channel == 0: rf_freq_mhz = 868
+elif args.channel >= 11 and args.channel <= 26: rf_freq_mhz = ((args.channel - 10) * 5 + 2400)
+elif args.channel >= 1 and args.channel <= 10: rf_freq_mhz = (args.channel * 2 + 904)
+elif args.channel >= 128 and args.channel <= 131: rf_freq_mhz = ((args.channel - 128) * 2 + 780)
+
 print("zbdump: listening on \'{0}\', link-type DLT_IEEE802_15_4, capture size 127 bytes".format(kb.get_dev_info()[0]))
 
-rf_freq_mhz = (args.channel - 10) * 5 + 2400
 while args.count != packetcount:
     packet = kb.pnext()
     # packet[1] is True if CRC is correct, check removed to have promiscous capture regardless of CRC
