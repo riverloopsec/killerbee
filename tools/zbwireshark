@@ -12,11 +12,6 @@ import subprocess
 
 from killerbee import *
 
-class ShowDevAction(argparse.Action):
-    def __call__(self, *a, **kw):
-        show_dev()
-        sys.exit(0)
-
 def parse_args():
     global args
 
@@ -26,11 +21,11 @@ def parse_args():
             help='Device to use for sniffing')
     parser.add_argument('-p', '--ppi', action='store_true',
             help='Include CACE Per-Packet Information in PCAP')
-    parser.add_argument('-c', '-f', '--channel', action='store', type=int, required=True,
+    parser.add_argument('-c', '-f', '--channel', action='store', type=int,
             help='Channel on which to sniff')
     parser.add_argument('-n', '--count', action='store', type=int, default=None,
             metavar='COUNT', help='Limit capture to COUNT packets')
-    parser.add_argument('-D', action = ShowDevAction, nargs=0,
+    parser.add_argument('-D', action='store_true', dest='showdev',
             help='Show device info and exit')
     args = parser.parse_args()
 
@@ -54,6 +49,18 @@ def start_wireshark():
 
 def main():
     parse_args()
+
+    if args.showdev and not args.devstring:
+        print >>sys.stderr, "ERROR: Must specify an interface."
+        sys.exit(1)
+
+    if args.showdev and args.devstring:
+        show_dev(include=[args.devstring])
+        sys.exit(0)
+
+    if not args.channel:
+        print >>sys.stderr, "ERROR: Must specify a channel."
+        sys.exit(1)
 
     # Start KillerBee
     with KillerBee(device=args.devstring) as kb:

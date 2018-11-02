@@ -119,7 +119,11 @@ if __name__ == '__main__':
     parser.add_argument('-D', action='store_true', dest='showdev')
     args = parser.parse_args()
 
-    if args.showdev:
+    if args.showdev and not args.devstring:
+        print >>sys.stderr, "ERROR: Must specify an interface."
+        sys.exit(1)
+
+    if args.showdev and args.devstring:
         show_dev(include=[args.devstring])
         sys.exit(0)
 

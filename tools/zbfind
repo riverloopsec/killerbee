@@ -891,13 +891,14 @@ class ZBPoller(Thread):
         beaconp1 = beacon[0:2]
         beaconp2 = beacon[3:]
 
-        beaconinj = ''.join([beaconp1, "%c"%self.seq, beaconp2])
+        beaconinj = ''.join([beaconp1, "%c" % self.seq, beaconp2])
         try:
             self.kb.inject(beaconinj)
         except Exception, e:
             print "ERROR: Unable to inject packet"
             print e
 
+        self.seq += 1
         if self.seq > 255:
             self.seq = 0
 
@@ -908,7 +909,7 @@ class ZBPoller(Thread):
         channel = args.channel
 
         try:
-            self.kb = KillerBee()
+            self.kb = KillerBee(device=args.devstring)
             self.kb.set_channel(channel)
             self.kb.sniffer_on()
         except:
@@ -916,6 +917,7 @@ class ZBPoller(Thread):
             return
 
         thresh = 0
+        seqnum = 0
         while not self.stopthread.isSet():
             # Used to populate details for the device
             details = []
@@ -1106,9 +1108,12 @@ class ZBPoller(Thread):
         except Exception, e:
             traceback.print_exc()
             sys.exit(1)
+        finally:
+            self.kb.sniffer_off()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring', required=True)
     parser.add_argument('-c', '--channel', action='store', dest='channel', required=True, type=int, default=26)
     args = parser.parse_args()
 
@@ -1119,7 +1124,7 @@ if __name__ == "__main__":
         zbpoll.start()
 
         try:
-            gtk.main()        
+            gtk.main()
         except (KeyboardInterrupt, SystemExit):
             zbpoll.stop()
             zbpoll.join()

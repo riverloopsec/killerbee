@@ -56,11 +56,13 @@ class KBCapabilities:
     FREQ_900           = 0x09 #: Capabilities Flag: Can preform 900 MHz sniffing (ch 1-10)
     FREQ_868           = 0x10 #: Capabilities Flag: Can preform 868 MHz sniffing (ch 0)
     FREQ_784           = 0x11 #: Capabilities Flag: Can preform 784 MHz sniffing (ch 128-131)
+    SETFREQ            = 0x12 #: Capabilities Flag: Can set Frequency
     def __init__(self):
         self._capabilities = {
                 self.NONE : False,
                 self.SNIFF : False,
                 self.SETCHAN : False,
+                self.SETFREQ : False,
                 self.INJECT : False,
                 self.PHYJAM : False,
                 self.SELFACK: False,

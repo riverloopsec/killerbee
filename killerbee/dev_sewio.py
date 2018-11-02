@@ -15,6 +15,7 @@ import struct
 import time
 import urllib2
 import re
+import sys
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR, timeout as error_timeout
 from struct import unpack
 
@@ -132,6 +133,7 @@ class SEWIO:
             print(e)
             print("ERROR: Attempted to bind on UDP {}:{}, but failed.".format(self.udp_recv_ip, self.udp_recv_port))
             print("ERROR: Is that a correct local IP in your environment? Is the port free?")
+            sys.exit(1)
 
         self.__stream_open = False
         self.capabilities = KBCapabilities()
@@ -157,6 +159,7 @@ class SEWIO:
         '''
         self.capabilities.setcapab(KBCapabilities.SNIFF, True)
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
+        self.capabilities.setcapab(KBCapabilities.SETFREQ, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_900, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_868, True)
@@ -305,24 +308,41 @@ class SEWIO:
             # We only need to update our channel if it doesn't match the currently reported one.
             curChannel = self.__sniffer_channel()
             if channel != curChannel:
-                self.modulation = self.__get_default_modulation(channel)
-                print("Setting to channel {0}, modulation {1}.".format(channel, self.modulation))
+                self._modulation = self.__get_default_modulation(channel)
+                print("Setting to channel {0}, modulation {1}.".format(channel, self._modulation))
                 # Examples captured in fw v0.5 sniffing:
                 #   channel 6, 250 compliant: http://10.10.10.2/settings.cgi?chn=6&modul=c&rxsens=0
                 #   channel 12, 250 compliant: http://10.10.10.2/settings.cgi?chn=12&modul=0&rxsens=0
                 #   chinese 0, 780 MHz, 250 compliant: http://10.10.10.2/settings.cgi?chn=128&modul=1c&rxsens=0
                 #   chinese 3, 786 MHz, 250 compliant: http://10.10.10.2/settings.cgi?chn=131&modul=1c&rxsens=0
-                #   europe 0, 868 MHz, 20 compliant: http://10.10.10.2/settings.cgi?chn=0&modul=00s&rxsens=0
+                #   europe 0, 868 MHz, 20 compliant: http://10.10.10.2/settings.cgi?chn=0&modul=00&rxsens=0
                 #rxsens 0 is normal, 3 is high sensitivity to receive at
-                self.__make_rest_call("settings.cgi?chn={0}&modul={1}&rxsens=3".format(channel, self.modulation), fetch=False)
+                self.__make_rest_call("settings.cgi?chn={0}&modul={1}&rxsens=3".format(channel, self._modulation), fetch=False)
                 self._channel = self.__sniffer_channel()
             else:
                 self._channel = curChannel
         else:
             raise Exception('Invalid channel number ({0}) was provided'.format(channel))
 
+    @staticmethod
+    def __get_tx_level(channel):
+        '''
+        Return the Sewio-specific string value representing the transmitted power (tx) level which
+        should be chosen to be IEEE 802.15.4 complinating for a given channel
+        number.
+        Available tx levels are listed at:
+        http://www.sewio.net/open-sniffer/develop/http-rest-interface/
+        @rtype: String, or None if unable to determine modulation
+        '''
+        if channel == 0: return 'a0'                        # 11 dBm
+        elif channel >= 11 and channel <= 26: return '0'    # 3.0 dBm
+        elif channel >= 1 and channel <= 10: return 'c0'    # 11 dBm
+        elif channel >= 128 and channel <= 131: return 'c1' # 11 dBm
+        else: return None                                   # Error status
+
+
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=1):
         '''
         Injects the specified packet contents.
         @type packet: String
@@ -331,8 +351,8 @@ class SEWIO:
         @param channel: Sets the channel, optional
         @type count: Integer
         @param count: Transmits a specified number of frames, def=1
-        @type delay: Float
-        @param delay: Delay between each frame, def=0
+        @type delay: Integer
+        @param delay: Delay between each frame, def=1
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.INJECT)
@@ -353,8 +373,8 @@ class SEWIO:
         packet = packet.encode('hex')  # API accepts string hex payload, but the byte length of the un-encoded frame.
 
         self.__make_rest_call(
-            "inject.cgi?chn={0}&modul=0&txlevel=0&rxen=1&nrepeat={1}&tspace={2}&autocrc=1&spayload={3}&len={4}".format(
-                self._channel, count, delay, packet, packet_length
+            "inject.cgi?chn={0}&modul={1}&txlevel={2}&rxen=1&nrepeat={3}&tspace={4}&autocrc=1&spayload={5}&len={6}".format(
+                self._channel, self._modulation, self.__get_tx_level(self._channel), count, delay, packet, packet_length
             )
         )
 
@@ -482,12 +502,14 @@ class SEWIO:
             "1" - PRBS: AAAA...
             "2" - PRBS: 0000...
             "3" - PRBS: FFFF...
-            "4" - Fc - 0.5 MHz
-            "5" - Fc + 0.5 MHz
+            "4" - CW: Fc - 0.1 MHz
+            "8" - CW: Fc + 0.1 MHz
+            "c" - CW: Fc - 0.25 MHz
+            "10" - CW: Fc + 0.25 MHz
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
-        if method is not None and method not in ["1","2","3","4","5"]:
+        if method is not None and method not in ["1","2","3","4","8","c","10"]:
             raise ValueError("Jamming method is unsupported by this driver.")
         elif method is None:
             method = "1"  #default to 1
@@ -497,18 +519,13 @@ class SEWIO:
 
         # Parameter enumeration
         # http://10.10.10.2/test.cgi?chn=15&mode=1&module=0&txlevel=0
-        #
-        # txlevel
-        #   0 - 3.0 dBm
-        #   2 - 2.3 dBm
-        #   4 - 1.3 dBm
-        #   6 - 0.0 dBm
-        #   9 - -3.0 dBm
-        #   c - -7.0 dBm
-        #   f - -17.0 dBm        
-    
-        if not self.__make_rest_call("test.cgi?chn={0}&mode={1}&module=0&txlevel=0".format(self._channel, method), fetch=False):
-            raise KBInterfaceError("Error instructing sniffer to start jamming.")
+        # http://10.10.10.2/test.cgi?chn=0&mode=10&txlevel=a0
+        if method in ["1","2","3"]:
+            if not self.__make_rest_call("test.cgi?chn={0}&mode={1}&module={2}&txlevel={3}".format(self._channel, method, self._modulation, self.__get_tx_level(self._channel)), fetch=False):
+                raise KBInterfaceError("Error instructing sniffer to start jamming.")
+        else:
+            if not self.__make_rest_call("test.cgi?chn={0}&mode={1}&txlevel={2}".format(self._channel, method, self.__get_tx_level(self._channel)), fetch=False):
+                raise KBInterfaceError("Error instructing sniffer to start jamming.")
 
     def jammer_off(self):
         '''
