@@ -1,12 +1,13 @@
-#NOTE: See the README file for a list of dependencies to install.
+# NOTE: See the README file for a list of dependencies to install.
+
 from __future__ import print_function  # needed for py2.7 to use print() as called below
+import sys
 
 try:
     from setuptools import setup, Extension
 except ImportError:
     print("No setuptools found, attempting to use distutils instead.")
     from distutils.core import setup, Extension
-import sys
 
 
 err = []
@@ -58,29 +59,25 @@ except ImportError:
 try:
     from scapy.all import Dot15d4
 except ImportError:
-    warn.append(("scapy-com with dot15d4.py", "", ""))
+    warn += "Scapy-com 802.15.4 (git clone https://bitbucket.org/secdev/scapy-com)"
 
-
-if len(err) > 0:
+if err != "":
     print("""
-Library requirements were not met.
-Install the following libraries, then re-run the setup script.
-\n\t{}\n\n
-apt-get install {}
-pip install {}""".format("\t".join(map(lambda x: x[0], err)),
-                         " ".join(map(lambda x: x[1], err)),
-                         " ".join(map(lambda x: x[2], err))), file=sys.stderr)
+Library requirements not met.  Install the following libraries, then re-run
+the setup script.
+
+{}
+    """.format(err), file=sys.stderr)
     sys.exit(1)
 
-if len(warn) > 0:
+if warn != "":
     print("""
-Library recommendations were not met.
-For full support, install the following libraries, then re-run the setup script.
-\n\t{}\n\n
-apt-get install {}
-pip install {}""".format("\t".join(map(lambda x: x[0], warn)),
-                         " ".join(map(lambda x: x[1], warn)),
-                         " ".join(map(lambda x: x[2], warn))), file=sys.stderr)
+Library recommendations not met. For full support, install the following libraries,
+then re-run the setup script.
+
+{}
+    """.format(warn), file=sys.stderr)
+
 
 zigbee_crypt = Extension('zigbee_crypt',
                     sources = ['zigbee_crypt/zigbee_crypt.c'],

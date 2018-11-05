@@ -25,7 +25,7 @@ def getKillerBee(channel, page= 0):
         raise Exception("Failed to create a KillerBee instance.")
     try:
         kb.set_channel(channel, page)
-    except Exception, e:
+    except Exception as e:
         raise Exception('Error: Failed to set channel to %d/%d' % (channel, page), e)
     return kb
 
@@ -57,14 +57,13 @@ class KillerBee:
         Instantiates the KillerBee class.
 
         @type device:   String
-        @param device:  Device identifier, either USB vendor:product, serial device node, or IP address
+        @param device:  Device identifier, either USB <BusNumber>:<DeviceNumber>, serial device path, or IP address
         @type datasource: String
-        @param datasource: A known datasource type that is used
-        by dblog to record how the data was captured.
+        @param datasource: A known data-source type that is used by dblog to record how the data was captured.
         @type gps: String
-        @param gps: Optional serial device identifier for an attached GPS
-            unit. If provided, or if global variable has previously been set, 
-            KillerBee skips that device in initalization process.
+        @param gps: Optional serial device identifier for an attached GPS unit.
+            If provided, or if global variable has previously been set,
+            KillerBee skips that device in initialization process.
         @return: None
         @rtype: None
         '''
@@ -83,8 +82,8 @@ class KillerBee:
         if (device is not None) and kbutils.isIpAddr(device):
             from .dev_sewio import isSewio
             if isSewio(device):
-                from .dev_sewio import SEWIO
-                self.driver = SEWIO(dev=device) #give it the ip address
+                from dev_sewio import SEWIO
+                self.driver = SEWIO(dev=device)  # give it the ip address
             else: del isSewio
 
         # Figure out a device is one is not set, trying USB devices next
