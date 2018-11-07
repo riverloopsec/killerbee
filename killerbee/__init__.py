@@ -53,7 +53,9 @@ class KillerBee:
         Instantiates the KillerBee class.
 
         @type device:   String
-        @param device:  Device identifier, either USB <BusNumber>:<DeviceNumber>, serial device path, or IP address
+        @param device:  Device identifier, which is either USB `<BusNumber>:<DeviceNumber>`,
+            serial device path (e.g., `/dev/ttyUSB0`), or IP address.
+            The format needed depends on the device's firmware and connectivity to the host system.
         @type datasource: String
         @param datasource: A known data-source type that is used by dblog to record how the data was captured.
         @type gps: String
