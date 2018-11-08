@@ -223,7 +223,7 @@ class KillerBee:
         '''
         return self.driver.capabilities.check(capab)
 
-    def is_valid_channel(self, channel, page):
+    def is_valid_channel(self, channel, page=0):
         '''
         Use the driver's capabilities class to determine if a requested channel number
         is within the capabilities of that device.
