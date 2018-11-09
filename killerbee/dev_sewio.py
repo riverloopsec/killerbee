@@ -520,7 +520,7 @@ class SEWIO:
         # http://10.10.10.2/test.cgi?chn=15&mode=1&module=0&txlevel=0
         # http://10.10.10.2/test.cgi?chn=0&mode=10&txlevel=a0
         if method in ["1","2","3"]:
-            if not self.__make_rest_call("test.cgi?chn={0}&mode={1}&module={2}&txlevel={3}".format(self._channel, method, self._modulation, self.__get_tx_level(self._channel)), fetch=False):
+            if not self.__make_rest_call("test.cgi?chn={0}&mode={1}&modul={2}&txlevel={3}".format(self._channel, method, self._modulation, self.__get_tx_level(self._channel)), fetch=False):
                 raise KBInterfaceError("Error instructing sniffer to start jamming.")
         else:
             if not self.__make_rest_call("test.cgi?chn={0}&mode={1}&txlevel={2}".format(self._channel, method, self.__get_tx_level(self._channel)), fetch=False):
