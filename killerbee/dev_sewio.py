@@ -505,13 +505,19 @@ class SEWIO:
             "8" - CW: Fc + 0.1 MHz
             "c" - CW: Fc - 0.25 MHz
             "10" - CW: Fc + 0.25 MHz
+            "20" - CW: Fc - 0.5 MHz
+            "40" - CW: Fc + 0.5 MHz
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
-        if method is not None and method not in ["1","2","3","4","8","c","10"]:
-            raise ValueError("Jamming method is unsupported by this driver.")
-        elif method is None:
+
+        if method is None:
             method = "1"  #default to 1
+        elif method not in ['1','2','3','4','8','c','10','20','40']:
+            raise ValueError("Jamming method is unsupported by this driver.")
+
+        if ((channel >= 11 and channel <=26) and method in ['4','8','c','10']) or (not (channel >= 11 and channel <=26) and method in ['20','40']):
+            raise ValueError("Jamming method is unsupported by this channel.")
 
         if channel != None:
             self.set_channel(channel)
