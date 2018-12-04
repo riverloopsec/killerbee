@@ -70,9 +70,6 @@ def response_handler(stumbled, packet, channel):
 
     # Check if this is a beacon frame
     if (fcf & DOT154_FCF_TYPE_MASK) == DOT154_FCF_TYPE_BEACON:
-        if args.verbose:
-            print "Received frame is a beacon."
-
         # The 6th element offset in the Dot154PacketParser.pktchop() method
         # contains the beacon data in its own list.  Extract the Ext PAN ID.
         spanid = pktdecode[4][::-1]
@@ -80,16 +77,26 @@ def response_handler(stumbled, packet, channel):
         beacondata = pktdecode[6]
         extpanid = beacondata[6][::-1]
         stackprofilever = beacondata[4]
+        assocPermit = struct.unpack("<", beacondata[0])[0] & 0x8000
 
         key = ''.join([spanid, source])
         value = [spanid, source, extpanid, stackprofilever, channel]
         if not key in stumbled:
             if args.verbose:
-                print("Beacon represents new network.")
+                if assocPermit:
+                    print("Beacon represents new network - ### Permitting new associations ###.")
+                else:
+                    print("Beacon represents new network - not accepting new associations.")
                 #print hexdump(packet)
                 #print pktdecode
             stumbled[key] = value
             display_details(value)
+        else:
+            if args.verbose:
+                if assocPermit:
+                    print("Received frame is a beacon - ### Permitting new associations ###.")
+                else:
+                    print("Received frame is a beacon - not accepting new associations.")
         return value
 
     if args.verbose:
@@ -129,7 +136,7 @@ if __name__ == '__main__':
         except Exception as e:
             print("Issue opening CSV output file: {0}.".format(e))
         csvfile.write("panid,source,extpanid,stackprofile,stackversion,channel\n")
-    
+
     # Beacon frame
     beacon = "\x03\x08\x00\xff\xff\xff\xff\x07"
     # Immutable strings - split beacon around sequence number field
@@ -144,7 +151,7 @@ if __name__ == '__main__':
 
     signal.signal(signal.SIGINT, interrupt)
     print("zbstumbler: Transmitting and receiving on interface \'{0}\'".format(kb.get_dev_info()[0]))
-    
+
     # Sequence number of beacon request frame
     seqnum = 0
     if args.channel:
@@ -160,7 +167,7 @@ if __name__ == '__main__':
 
         if seqnum > 255:
             seqnum = 0
-    
+
         if not args.channel:
             if args.verbose:
                 print("Setting channel to {0}.".format(channel))
@@ -169,7 +176,7 @@ if __name__ == '__main__':
             except Exception, e:
                 print("ERROR: Failed to set channel to {0}. ({1})".format(channel, e))
                 sys.exit(-1)
-    
+
         if args.verbose:
             print("Transmitting beacon request.")
 
@@ -194,9 +201,9 @@ if __name__ == '__main__':
                 rxcount += 1
                 if args.verbose:
                     print("Received frame.")#, time.time()-start
-                networkdata = response_handler(stumbled, recvpkt[0], channel) 
+                networkdata = response_handler(stumbled, recvpkt[0], channel)
 
-        kb.sniffer_off()    
+        kb.sniffer_off()
         seqnum += 1
         if not args.channel:
             channel += 1
