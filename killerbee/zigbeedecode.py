@@ -32,6 +32,8 @@ ZBEE_APS_FCF_INDIRECT       = 0x01 #: ZigBee APS Frame Control Field Delivery Mo
 ZBEE_APS_FCF_BCAST          = 0x02 #: ZigBee APS Frame Control Field Delivery Mode: Broadcast Delivery
 ZBEE_APS_FCF_GROUP          = 0x03 #: ZigBee APS Frame Control Field Delivery Mode: Group Delivery, ZigBee 2006 and later. 
 
+# ZigBee Security Levels
+ZBEE_SEC_ENC_MIC_32         = 0x5  #: ZigBee Seecurity Level id 5; Encrypted, 4 byte MIC
 
 class ZigBeeNWKPacketParser:
     def __init__(self):
