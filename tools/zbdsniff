@@ -150,7 +150,8 @@ if options.filename:
     files.append(options.filename)
 
 if options.directory:
-    files += glob.glob(options.directory + os.sep + "*.pcap")
+    files += glob.glob(os.path.join(options.directory, "*.pcap"))
+
 
 filecount = 0
 
