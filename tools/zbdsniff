@@ -1,18 +1,10 @@
 #!/usr/bin/env python
-
-'''
-Decode plaintext key ZigBee delivery from a capture file.  Will
-process libpcap or Daintree SNA capture files.
-'''
-
-import sys
-import os
-import glob
-from killerbee import *
+from killerbee.scapy_extensions import *
+from killerbee.kbutils import *
 from zigbee_crypt import *
 from optparse import OptionParser
 
-sourceMap = dict()
+ZBEE_SEC_ENC_MIC_32 = 0x5  #: ZigBee Seecurity Level id 5; Encrypted, 4 byte MIC
 
 APS_CMD = [
     "Unknown",
@@ -33,157 +25,86 @@ KEY_TYPE = [
     "High Security Network"
 ]
 
+def sniffNetworkKey(pkts, key, verbose):
+    addrMap = dict()
+    keyHash = sec_key_hash(key, '\0')
 
-def usage():
-    print >>sys.stderr, """
-zbdsniff: Decode plaintext key ZigBee delivery from a capture file.  Will
-process libpcap or Daintree SNA capture files.    jwright@willhackforsushi.com
-
-Usage: zbdsniff [capturefiles ...]
-    """
-
-def getnetworkkey(packet, key, verbose):
-    """
-    Look for the presence of the APS Transport Key command, revealing the
-    network key value.
-    """
-
-    try:
-        zmac = Dot154PacketParser()
-        znwk = ZigBeeNWKPacketParser()
-        zaps = ZigBeeAPSPacketParser()
-
-        # Process MAC layer details
-        macLayer = zmac.pktchop(packet)
-        if macLayer[-1] == None:
-            # No MAC Layer data
-            if verbose:
-                print("[-] Skipping - No MAC Layer data")
-            return
-
-        # Process NWK layer details
-        znwkLayer = znwk.pktchop(macLayer[-1])
-        fcf = struct.unpack("<H", znwkLayer[0])[0]
-
-        if znwkLayer[-1] == None:
-            # No NWK Layer
-            if verbose:
-                print("[-] Skipping - No NWK Layer data")
-            return
-
-        # Process the APS layer details
-        zapsLayer = zaps.pktchop(znwkLayer[-1])
-        if zapsLayer[-1] == None:
-            # No APS Layer
-            if verbose:
-                print("[-] Skipping - No APS Layer data")
-            return
-
-        apsfc = ord(zapsLayer[0])
-        source = struct.unpack("<H", znwkLayer[2])[0]
-        extSource = znwkLayer[6]
-        # If this packet has an extended source field, record for future ref.
-        if (fcf & ZBEE_NWK_FCF_EXT_SOURCE):
-            #extSource = zmacpayload[8:16]
-            sourceMap[source] = extSource
-            if verbose:
-                print("[+] Extended Source for: " + str(source) + " is " +
-                      ":".join("{:02x}".format(ord(ch)) for ch in extSource))
-            return
-
-        # Ensure Security is Disabled
-        if (fcf & ZBEE_NWK_FCF_SECURITY):
-            if verbose:
-                print("[-] Skipping - Security is enabled")
-            return
-
-        # We now beleive that this packet could hold a network key.
-        if (not source in sourceMap):
-            print("[-] No extended source address in capture, unable to compute nonce.")
-        else:
-            keyHash = sec_key_hash(key, '\0')
-            scf = (ord(zapsLayer[-1][0]) & ~ ZBEE_SEC_ENC_MIC_32) | ZBEE_SEC_ENC_MIC_32
-            a = znwkLayer[-1][0:2] + chr(scf) + znwkLayer[-1][3:7]
-            c = znwkLayer[-1][7:-6]
-            mic = znwkLayer[-1][-6:-2]
-            nonce = sourceMap[source] + zapsLayer[-1][1:5] + chr(scf)
-
-            decrypted, success = decrypt_ccm(keyHash, nonce, mic, c, a)
-            if success:
-                print("[+] Decrypted")
-                if ord(decrypted[0]) < len(APS_CMD):
-                    print("    APS Command: " + APS_CMD[ord(decrypted[0])])
-                if ord(decrypted[1]) < len(KEY_TYPE):
-                    print("    Key Type: " + KEY_TYPE[ord(decrypted[1])])
-                print("    Value: " + ":".join("{:02x}".format(ord(ch)) for ch in decrypted[2:18]))
-
-    except Exception, e:
-        if verbose:
-            print("[-] Error:" + str(e))
-        return
+    for p in pkts:
+        if (p.haslayer("ZigbeeNWK")):
+            nwk = p.getlayer("ZigbeeNWK")
+            if nwk.source is not None and nwk.ext_src is not None:
+                if not nwk.source in addrMap and verbose:
+                    print("[+] Extended Source: " + ":".join("{:02x}".format(ord(ch)) for ch in raw(nwk)[8:16]) + " mapped to " + hex(nwk.source))
+                addrMap[nwk.source] = raw(nwk)[8:16]
+            if (p.haslayer("ZigbeeSecurityHeader") and p.haslayer("ZigbeeAppDataPayload")):
+                sec = p.getlayer("ZigbeeSecurityHeader")
+                if sec.key_type < 6:
+                    if nwk.source in addrMap:
+                        data = raw(p.getlayer("ZigbeeAppDataPayload"))
+                        scf = (ord(data[2]) & ~ ZBEE_SEC_ENC_MIC_32) | ZBEE_SEC_ENC_MIC_32
+                        a = data[0:2] + chr(scf) + data[3:7]
+                        c = data[7:-4]
+                        mic = data[-4:]
+                        nonce = addrMap[nwk.source] + data[3:7] + chr(scf)
+                        decrypted, success = decrypt_ccm(keyHash, nonce, mic, c, a)
+                        if success:
+                            print("[+] Decrypted:")
+                            if ord(decrypted[0]) < len(APS_CMD):
+                                print("    APS Command: " + APS_CMD[ord(decrypted[0])])
+                            if ord(decrypted[1]) < len(KEY_TYPE):
+                                print("    Key Type: " + KEY_TYPE[ord(decrypted[1])])
+                            print("    Value: " + ":".join("{:02x}".format(ord(ch)) for ch in decrypted[2:18]))
+                        else:
+                            print("[-] Decrypt failed - Wrong Key ???")
+                    else:
+                        print("[-] There was no ext_src mapping for: ", str(nwk.source))
+                else:
+                    print("[-] Unexpected key_type", str(sec.key_type))
 
 
-# Define the command line options.
-parser = OptionParser()
-parser.add_option("-f", "--file", dest="filename",
-                  help="PCap file to process", metavar="FILE")
-parser.add_option("-d", "--dir", dest="directory",
-                  help="Directory of PCap files to process", metavar="DIR")
-parser.add_option("-k", "--transport-key", dest="transportKey",
-                  help="Transport Key for decryption")
-parser.add_option("-v", "--verbose",
-                  action="store_true", dest="verbose", default=False,
-                  help="Print detailed status messages to stdout")
+if __name__ == '__main__':
+    # Define the command line options.
+    parser = OptionParser(description="zbdsniff: Decode plaintext Zigbee Nwtwork key from a " +
+        "capture file. Will process libpcap or Daintree SNA capture files. Original concept: " +
+        "jwright@willhackforsushi.com, re-implemented using Scapy by Steve Martin.")
+    parser.add_option("-f", "--file", dest="filename",
+                    help="PCap file to process", metavar="FILE")
+    parser.add_option("-d", "--dir", dest="directory",
+                    help="Directory of PCap files to process", metavar="DIR")
+    parser.add_option("-k", "--transport-key", dest="transportKey",
+                    help="Transport Key for decryption")
+    parser.add_option("-v", "--verbose",
+                    action="store_true", dest="verbose", default=False,
+                    help="Print detailed status messages to stdout")
 
-(options, args) = parser.parse_args()
+    (options, args) = parser.parse_args()
 
-if (not options.filename and not options.directory):
-    print("A packet capture file or directory must be specified")
-    sys.exit(1)
-
-if (not options.transportKey):
-    print("A transport key value must be specified")
-    sys.exit(1)
-
-files = []
-if options.filename:
-    files.append(options.filename)
-
-if options.directory:
-    files += glob.glob(os.path.join(options.directory, "*.pcap"))
-
-
-filecount = 0
-
-for file in files:
-    print "Processing %s"%file
-    if not os.path.exists(str(file)):
-        print >>sys.stderr, "ERROR: Input file \"%s\" does not exist." % file
+    if (not options.filename and not options.directory):
+        print("A packet capture file or directory must be specified")
         sys.exit(1)
 
-    filecount += 1
+    if (not options.transportKey):
+        print("A transport key value must be specified")
+        sys.exit(1)
 
-    # Check if the input file is libpcap; if not, assume SNA.
-    cap = None
-    try:
-        pr = PcapReader(file)
-    except Exception, e:
-        if e.args == ('Unsupported pcap header format or version',):
-            # Input file was not pcap, open it as SNA
-            cap = DainTreeReader(file)
+    files = []
+    if options.filename:
+        files.append(options.filename)
 
-    # Following exception
-    if cap == None:
-            cap = pr
+    if options.directory:
+        files += glob.glob(os.path.join(options.directory, "*.pcap"))
 
-    while True:
-        packet = cap.pnext()
-        if packet[1] == None:
-            # End of capture
-            break
-        # Add additional key/password/interesting-stuff here
-        getnetworkkey(packet[1], options.transportKey, options.verbose)
+    filecount = 0
 
-    cap.close()
+    for file in files:
+        print "Processing %s"%file
+        if not os.path.exists(str(file)):
+            print >>sys.stderr, "ERROR: Input file \"%s\" does not exist." % file
+            sys.exit(1)
 
-print "[+] Processed %d capture files." % filecount
+        filecount += 1
+        pkts = kbrdpcap(file)
+        sniffNetworkKey(pkts, options.transportKey, options.verbose)
+
+
+    print "[+] Processed %d capture files." % filecount
