@@ -27,6 +27,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	const char			*zigbeeData;
 	int					sizeZigbeeData;
 	int i, j;
+	PyObject			*res;
 
 	char				pMIC[ZBEE_SEC_CONST_MICSIZE];
 	char				pEncMIC[ZBEE_SEC_CONST_MICSIZE];
@@ -188,7 +189,9 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	/* Done with the CTR Cipher. */
 	gcry_cipher_close(cipher_hd);
 
-	return Py_BuildValue("(s#s#)", pEncrypted, sizeUnencryptedData, pEncMIC, sizeMIC);
+	res = Py_BuildValue("(s#s#)", pEncrypted, sizeUnencryptedData, pEncMIC, sizeMIC);
+	free(pEncrypted);
+	return res;
 };
 
 static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
@@ -202,6 +205,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	int					sizeEncryptedData;
 	const char			*zigbeeData;
 	int					sizeZigbeeData;
+	PyObject			*res;
 
 	char				pMIC[ZBEE_SEC_CONST_MICSIZE];
 	char				pUnencMIC[ZBEE_SEC_CONST_MICSIZE];
@@ -390,9 +394,11 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	if (memcmp(cipher_out, pUnencMIC, sizeMIC) == 0) {
 		j = 1;
 	}
-
-	return Py_BuildValue("(s#i)", pUnencrypted, sizeEncryptedData, j);
+	res = Py_BuildValue("(s#i)", pUnencrypted, sizeEncryptedData, j);
+	free(pUnencrypted);
+	return res;
 };
+
 /*FUNCTION:------------------------------------------------------
  *  NAME
  *      zbee_sec_hash
