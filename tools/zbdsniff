@@ -1,8 +1,11 @@
 #!/usr/bin/env python
+
+from __future__ import print_function
+from optparse import OptionParser
+
 from killerbee.scapy_extensions import *
 from killerbee.kbutils import *
 from zigbee_crypt import *
-from optparse import OptionParser
 
 ZBEE_SEC_ENC_MIC_32 = 0x5  #: ZigBee Seecurity Level id 5; Encrypted, 4 byte MIC
 
@@ -25,6 +28,7 @@ KEY_TYPE = [
     "High Security Network"
 ]
 
+
 def sniffNetworkKey(pkts, key, verbose):
     addrMap = dict()
     keyHash = sec_key_hash(key, '\0')
@@ -34,7 +38,7 @@ def sniffNetworkKey(pkts, key, verbose):
             nwk = p.getlayer("ZigbeeNWK")
             if nwk.source is not None and nwk.ext_src is not None:
                 if not nwk.source in addrMap and verbose:
-                    print("[+] Extended Source: " + ":".join("{:02x}".format(ord(ch)) for ch in raw(nwk)[8:16]) + " mapped to " + hex(nwk.source))
+                    print(("[+] Extended Source: " + ":".join("{:02x}".format(ord(ch)) for ch in raw(nwk)[8:16]) + " mapped to " + hex(nwk.source)))
                 addrMap[nwk.source] = raw(nwk)[8:16]
             if (p.haslayer("ZigbeeSecurityHeader") and p.haslayer("ZigbeeAppDataPayload")):
                 sec = p.getlayer("ZigbeeSecurityHeader")
@@ -50,32 +54,29 @@ def sniffNetworkKey(pkts, key, verbose):
                         if success:
                             print("[+] Decrypted:")
                             if ord(decrypted[0]) < len(APS_CMD):
-                                print("    APS Command: " + APS_CMD[ord(decrypted[0])])
+                                print("    APS Command: {}".format(APS_CMD[ord(decrypted[0])]))
                             if ord(decrypted[1]) < len(KEY_TYPE):
-                                print("    Key Type: " + KEY_TYPE[ord(decrypted[1])])
+                                print("    Key Type: {}".format(KEY_TYPE[ord(decrypted[1])]))
                             print("    Value: " + ":".join("{:02x}".format(ord(ch)) for ch in decrypted[2:18]))
                         else:
                             print("[-] Decrypt failed - Wrong Key ???")
                     else:
-                        print("[-] There was no ext_src mapping for: ", str(nwk.source))
+                        print("[-] There was no ext_src mapping for: {}".format(nwk.source))
                 else:
-                    print("[-] Unexpected key_type", str(sec.key_type))
+                    print("[-] Unexpected key_type {}".format(sec.key_type))
 
 
 if __name__ == '__main__':
     # Define the command line options.
     parser = OptionParser(description="zbdsniff: Decode plaintext Zigbee Nwtwork key from a " +
-        "capture file. Will process libpcap or Daintree SNA capture files. Original concept: " +
+        "capture file. Will process libpcap capture files. Original concept: " +
         "jwright@willhackforsushi.com, re-implemented using Scapy by Steve Martin.")
-    parser.add_option("-f", "--file", dest="filename",
-                    help="PCap file to process", metavar="FILE")
+    parser.add_option("-f", "--file", dest="filename", help="PCap file to process", metavar="FILE")
     parser.add_option("-d", "--dir", dest="directory",
-                    help="Directory of PCap files to process", metavar="DIR")
-    parser.add_option("-k", "--transport-key", dest="transportKey",
-                    help="Transport Key for decryption")
-    parser.add_option("-v", "--verbose",
-                    action="store_true", dest="verbose", default=False,
-                    help="Print detailed status messages to stdout")
+                      help="Directory of PCap files to process", metavar="DIR")
+    parser.add_option("-k", "--transport-key", dest="transportKey", help="Transport Key for decryption")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False,
+                      help="Print detailed status messages to stdout")
 
     (options, args) = parser.parse_args()
 
@@ -90,21 +91,23 @@ if __name__ == '__main__':
     files = []
     if options.filename:
         files.append(options.filename)
-
     if options.directory:
         files += glob.glob(os.path.join(options.directory, "*.pcap"))
 
     filecount = 0
-
-    for file in files:
-        print "Processing %s"%file
-        if not os.path.exists(str(file)):
-            print >>sys.stderr, "ERROR: Input file \"%s\" does not exist." % file
+    for fname in files:
+        print("Processing {}".format(fname))
+        if not os.path.exists(str(fname)):
+            print("ERROR: Input file \"{}\" does not exist.".format(fname), file=sys.stderr)
             sys.exit(1)
 
         filecount += 1
-        pkts = kbrdpcap(file)
+        try:
+            pkts = kbrdpcap(fname)
+        except Exception as e:
+            print("ERROR: Input file \"{}\" is not able to be loaded. Is it a PCAP file? Daintree support was removed in KillerBee 2.7.1".format(fname), file=sys.stderr)
+            continue
         sniffNetworkKey(pkts, options.transportKey, options.verbose)
 
+    print("[+] Processed {} capture files.".format(filecount))
 
-    print "[+] Processed %d capture files." % filecount
