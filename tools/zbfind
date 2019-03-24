@@ -1020,7 +1020,7 @@ class ZBPoller(Thread):
                     idev = dev
                     details = idev[1]
                     # Update last seen detail
-                    details[0][1] = "Last seen: " + str(datetime.datetime.now())
+                    details[0][1] = "Last seen: " + str(datetime.now())
                     if (fc_secenabled != 0):
                         details[0][2] = "Security: Enabled"
                     details[0][3] = "Last Seq Num: " + seq
@@ -1036,7 +1036,7 @@ class ZBPoller(Thread):
 
             if match == False:
                 # Add this entry to the list
-                nowstr = str(datetime.datetime.now())
+                nowstr = str(datetime.now())
                 details = [["First seen: " + nowstr]]
                 details[0].append("Last Seen: " + nowstr)
                 if (fc_secenabled != 0):

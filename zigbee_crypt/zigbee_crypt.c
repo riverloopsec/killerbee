@@ -2,12 +2,12 @@
  * zigbee_crypt.c
  * Copyright 2011 steiner <steiner@localhost.localdomain>
  * zigbee convenience functions
- * 
+ *
  * alot of this code was "borrowed" from wireshark
  * packet-zbee-security.c & pzcket-zbee-security.h
  * function: zbee_sec_ccm_decrypt
  */
- 
+
 // Explaination of Python Build Values http://docs.python.org/c-api/arg.html#Py_BuildValue
 
 #include <Python.h>
@@ -27,6 +27,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	const char			*zigbeeData;
 	int					sizeZigbeeData;
 	int i, j;
+	PyObject			*res;
 
 	char				pMIC[ZBEE_SEC_CONST_MICSIZE];
 	char				pEncMIC[ZBEE_SEC_CONST_MICSIZE];
@@ -35,7 +36,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	char				cipher_out[ZBEE_SEC_CONST_BLOCKSIZE];
 	/* Cipher Instance. */
 	gcry_cipher_hd_t	cipher_hd;
-	
+
 	if (!PyArg_ParseTuple(args, "s#s#is#s#",
 								&pZkey, &sizeZkey,
 								&pNonce, &sizeNonce,
@@ -48,12 +49,12 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 		PyErr_SetString(PyExc_ValueError, "incorrect key size (must be 16)");
 		return NULL;
 	}
-	
+
 	if (sizeNonce != ZBEE_SEC_CONST_NONCE_LEN) {
 		PyErr_SetString(PyExc_ValueError, "incorrect nonce size (must be 13)");
 		return NULL;
 	}
-	
+
 	if ((sizeMIC != 0) && (sizeMIC != 4) && (sizeMIC != 8) && (sizeMIC != 16)) {
 		PyErr_SetString(PyExc_ValueError, "incorrect mic size (must be 0, 4, 8, or 16 bytes)");
 		return NULL;
@@ -63,7 +64,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	memset(pEncMIC, 0, ZBEE_SEC_CONST_MICSIZE);
 	pEncrypted = malloc(sizeUnencryptedData);
 	memset(pEncrypted, 0, sizeUnencryptedData);
-	
+
 	/* Open the cipher in ECB mode. */
 	if (gcry_cipher_open(&cipher_hd, GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, 0)) {
 		PyErr_SetString(PyExc_Exception, "gcrypt open AES-128 ECB cipher failed");
@@ -87,7 +88,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 		gcry_cipher_close(cipher_hd);
 		return NULL;
 	}
-	
+
 	j = 0;
 	if (sizeZigbeeData > 0) {
 		/* Process L(a) into the cipher block. */
@@ -139,10 +140,10 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 		gcry_cipher_close(cipher_hd);
 		return NULL;
 	}
-	
+
 	gcry_cipher_close(cipher_hd);
 	memcpy(pMIC, cipher_out, sizeMIC);
-	
+
 	/* Create the CCM* counter block A0 */
 	memset(cipher_in, 0, ZBEE_SEC_CONST_BLOCKSIZE);
 	cipher_in[0] = ZBEE_SEC_CCM_FLAG_L;
@@ -187,8 +188,10 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	}
 	/* Done with the CTR Cipher. */
 	gcry_cipher_close(cipher_hd);
-	
-	return Py_BuildValue("(s#s#)", pEncrypted, sizeUnencryptedData, pEncMIC, sizeMIC);
+
+	res = Py_BuildValue("(s#s#)", pEncrypted, sizeUnencryptedData, pEncMIC, sizeMIC);
+	free(pEncrypted);
+	return res;
 };
 
 static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
@@ -202,6 +205,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	int					sizeEncryptedData;
 	const char			*zigbeeData;
 	int					sizeZigbeeData;
+	PyObject			*res;
 
 	char				pMIC[ZBEE_SEC_CONST_MICSIZE];
 	char				pUnencMIC[ZBEE_SEC_CONST_MICSIZE];
@@ -220,7 +224,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 		PyErr_SetString(PyExc_ValueError, "incorrect key size (must be 16)");
 		return NULL;
 	}
-	
+
 	if (sizeNonce != ZBEE_SEC_CONST_NONCE_LEN) {
 		PyErr_SetString(PyExc_ValueError, "incorrect nonce size (must be 13)");
 		return NULL;
@@ -233,12 +237,12 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 
 	memset(pMIC, 0, ZBEE_SEC_CONST_MICSIZE);
 	memcpy(pMIC, pOldMIC, sizeMIC);
-	
+
 	memset(pUnencMIC, 0, ZBEE_SEC_CONST_MICSIZE);
-	
+
 	pUnencrypted = malloc(sizeEncryptedData);
 	memset(pUnencrypted, 0, sizeEncryptedData);
-	
+
 	/* Create the CCM* counter block A0 */
 	memset(cipher_in, 0, ZBEE_SEC_CONST_BLOCKSIZE);
 	cipher_in[0] = ZBEE_SEC_CCM_FLAG_L;
@@ -287,7 +291,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	}
 	/* Done with the CTR Cipher. */
 	gcry_cipher_close(cipher_hd);
-	
+
 	int i, j;
 	/* Re-open the cipher in ECB mode. */
 	if (gcry_cipher_open(&cipher_hd, GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, 0)) {
@@ -382,16 +386,17 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 		gcry_cipher_close(cipher_hd);
 		return NULL;
 	}
-	
+
 	gcry_cipher_close(cipher_hd);
-	
+
 	// now use j to indicate whether the MICs match
 	j = 0;
 	if (memcmp(cipher_out, pUnencMIC, sizeMIC) == 0) {
 		j = 1;
 	}
-	
-	return Py_BuildValue("(s#i)", pUnencrypted, sizeEncryptedData, j);
+	res = Py_BuildValue("(s#i)", pUnencrypted, sizeEncryptedData, j);
+	free(pUnencrypted);
+	return res;
 };
 
 static PyMethodDef zigbee_crypt_Methods[] = {
