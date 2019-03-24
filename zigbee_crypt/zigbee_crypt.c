@@ -62,18 +62,26 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 
 	memset(pMIC, 0, ZBEE_SEC_CONST_MICSIZE);	// set both mics to 0
 	memset(pEncMIC, 0, ZBEE_SEC_CONST_MICSIZE);
+
 	pEncrypted = malloc(sizeUnencryptedData);
+	if (pEncrypted == NULL) {
+		PyErr_SetString(PyExc_MemoryError, "could not allocate memory");
+		return NULL;
+	}
+
 	memset(pEncrypted, 0, sizeUnencryptedData);
 
 	/* Open the cipher in ECB mode. */
 	if (gcry_cipher_open(&cipher_hd, GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, 0)) {
 		PyErr_SetString(PyExc_Exception, "gcrypt open AES-128 ECB cipher failed");
+		free(pEncrypted);
 		return NULL;
 	}
 	/* Load the key. */
 	if (gcry_cipher_setkey(cipher_hd, pZkey, ZBEE_SEC_CONST_KEYSIZE)) {
 		PyErr_SetString(PyExc_Exception, "setting the key failed");
 		gcry_cipher_close(cipher_hd);
+		free(pEncrypted);
 		return NULL;
 	}
 	/* Generate the first cipher block B0. */
@@ -86,6 +94,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	if (gcry_cipher_encrypt(cipher_hd, cipher_out, ZBEE_SEC_CONST_BLOCKSIZE, cipher_in, ZBEE_SEC_CONST_BLOCKSIZE)) {
 		PyErr_SetString(PyExc_Exception, "mic creation failed");
 		gcry_cipher_close(cipher_hd);
+		free(pEncrypted);
 		return NULL;
 	}
 
@@ -103,6 +112,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 				if (gcry_cipher_encrypt(cipher_hd, cipher_out, ZBEE_SEC_CONST_BLOCKSIZE, cipher_in, ZBEE_SEC_CONST_BLOCKSIZE)) {
 					PyErr_SetString(PyExc_Exception, "mic creation failed");
 					gcry_cipher_close(cipher_hd);
+					free(pEncrypted);
 					return NULL;
 				}
 				/* Reset j to point back to the start of the new cipher block. */
@@ -122,6 +132,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 			if (gcry_cipher_encrypt(cipher_hd, cipher_out, ZBEE_SEC_CONST_BLOCKSIZE, cipher_in, ZBEE_SEC_CONST_BLOCKSIZE)) {
 				PyErr_SetString(PyExc_Exception, "mic creation failed");
 				gcry_cipher_close(cipher_hd);
+				free(pEncrypted);
 				return NULL;
 			}
 			/* Reset j to point back to the start of the new cipher block. */
@@ -138,6 +149,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	if (gcry_cipher_encrypt(cipher_hd, cipher_out, ZBEE_SEC_CONST_BLOCKSIZE, cipher_in, ZBEE_SEC_CONST_BLOCKSIZE)) {
 		PyErr_SetString(PyExc_Exception, "mic creation failed");
 		gcry_cipher_close(cipher_hd);
+		free(pEncrypted);
 		return NULL;
 	}
 
@@ -151,6 +163,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 
 	if (pEncrypted == NULL) {
 		PyErr_SetString(PyExc_MemoryError, "could not allocate memory");
+		free(pEncrypted);
 		return NULL;
 	}
 	/*
@@ -160,30 +173,35 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	 */
 	if (gcry_cipher_open(&cipher_hd, GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CTR, 0)) {
 		PyErr_SetString(PyExc_Exception, "gcrypt open AES-128 CTR cipher failed");
+		free(pEncrypted);
 		return NULL;
 	}
 	/* Re-load the Key. */
 	if (gcry_cipher_setkey(cipher_hd, pZkey, ZBEE_SEC_CONST_KEYSIZE)) {
 		PyErr_SetString(PyExc_Exception, "setting the key failed");
 		gcry_cipher_close(cipher_hd);
+		free(pEncrypted);
 		return NULL;
 	}
 	/* Set the counter. */
 	if (gcry_cipher_setctr(cipher_hd, cipher_in, ZBEE_SEC_CONST_BLOCKSIZE)) {
 		PyErr_SetString(PyExc_Exception, "setting the counter failed");
 		gcry_cipher_close(cipher_hd);
+		free(pEncrypted);
 		return NULL;
 	}
 	/* Encrypt/Decrypt the payload. */
 	if (gcry_cipher_encrypt(cipher_hd, pEncMIC, ZBEE_SEC_CONST_MICSIZE, pMIC, ZBEE_SEC_CONST_MICSIZE)) {
 		PyErr_SetString(PyExc_Exception, "encryption of the mic failed");
 		gcry_cipher_close(cipher_hd);
+		free(pEncrypted);
 		return NULL;
 	}
 	/* Encrypt/Decrypt the payload. */
 	if (gcry_cipher_encrypt(cipher_hd, pEncrypted, sizeUnencryptedData, pUnencryptedData, sizeUnencryptedData)) {
 		PyErr_SetString(PyExc_Exception, "encryption of the payload failed");
 		gcry_cipher_close(cipher_hd);
+		free(pEncrypted);
 		return NULL;
 	}
 	/* Done with the CTR Cipher. */
@@ -241,17 +259,17 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	memset(pUnencMIC, 0, ZBEE_SEC_CONST_MICSIZE);
 
 	pUnencrypted = malloc(sizeEncryptedData);
+	if (pUnencrypted == NULL) {
+		PyErr_SetString(PyExc_MemoryError, "could not allocate memory");
+		return NULL;
+	}
+
 	memset(pUnencrypted, 0, sizeEncryptedData);
 
 	/* Create the CCM* counter block A0 */
 	memset(cipher_in, 0, ZBEE_SEC_CONST_BLOCKSIZE);
 	cipher_in[0] = ZBEE_SEC_CCM_FLAG_L;
 	memcpy(cipher_in + 1, pNonce, ZBEE_SEC_CONST_NONCE_LEN);
-
-	if (pUnencrypted == NULL) {
-		PyErr_SetString(PyExc_MemoryError, "could not allocate memory");
-		return NULL;
-	}
 
 	/* Cipher Instance. */
 	gcry_cipher_hd_t	cipher_hd;
@@ -263,30 +281,35 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	 */
 	if (gcry_cipher_open(&cipher_hd, GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_CTR, 0)) {
 		PyErr_SetString(PyExc_Exception, "gcrypt open AES-128 CTR cipher failed");
+		free(pUnencrypted);
 		return NULL;
 	}
 	/* Set the Key. */
 	if (gcry_cipher_setkey(cipher_hd, pZkey, ZBEE_SEC_CONST_KEYSIZE)) {
 		PyErr_SetString(PyExc_Exception, "setting the key failed");
 		gcry_cipher_close(cipher_hd);
+		free(pUnencrypted);
 		return NULL;
 	}
 	/* Set the counter. */
 	if (gcry_cipher_setctr(cipher_hd, cipher_in, ZBEE_SEC_CONST_BLOCKSIZE)) {
 		PyErr_SetString(PyExc_Exception, "setting the counter failed");
 		gcry_cipher_close(cipher_hd);
+		free(pUnencrypted);
 		return NULL;
 	}
 	/* Encrypt/Decrypt the payload. */
 	if (gcry_cipher_encrypt(cipher_hd, pUnencMIC, ZBEE_SEC_CONST_MICSIZE, pMIC, ZBEE_SEC_CONST_MICSIZE)) {
 		PyErr_SetString(PyExc_Exception, "decryption of the mic failed");
 		gcry_cipher_close(cipher_hd);
+		free(pUnencrypted);
 		return NULL;
 	}
 	/* Encrypt/Decrypt the payload. */
 	if (gcry_cipher_encrypt(cipher_hd, pUnencrypted, sizeEncryptedData, pEncryptedData, sizeEncryptedData)) {
 		PyErr_SetString(PyExc_Exception, "decryption of the payload failed");
 		gcry_cipher_close(cipher_hd);
+		free(pUnencrypted);
 		return NULL;
 	}
 	/* Done with the CTR Cipher. */
@@ -296,12 +319,14 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	/* Re-open the cipher in ECB mode. */
 	if (gcry_cipher_open(&cipher_hd, GCRY_CIPHER_AES128, GCRY_CIPHER_MODE_ECB, 0)) {
 		PyErr_SetString(PyExc_Exception, "gcrypt open AES-128 ECB cipher failed");
+		free(pUnencrypted);
 		return NULL;
 	}
 	/* Re-load the key. */
 	if (gcry_cipher_setkey(cipher_hd, pZkey, ZBEE_SEC_CONST_KEYSIZE)) {
 		PyErr_SetString(PyExc_Exception, "setting the key failed");
 		gcry_cipher_close(cipher_hd);
+		free(pUnencrypted);
 		return NULL;
 	}
 	/* Generate the first cipher block B0. */
@@ -314,6 +339,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	if (gcry_cipher_encrypt(cipher_hd, cipher_out, ZBEE_SEC_CONST_BLOCKSIZE, cipher_in, ZBEE_SEC_CONST_BLOCKSIZE)) {
 		PyErr_SetString(PyExc_Exception, "mic verification failed");
 		gcry_cipher_close(cipher_hd);
+		free(pUnencrypted);
 		return NULL;
 	}
 	/*
@@ -349,6 +375,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 				if (gcry_cipher_encrypt(cipher_hd, cipher_out, ZBEE_SEC_CONST_BLOCKSIZE, cipher_in, ZBEE_SEC_CONST_BLOCKSIZE)) {
 					PyErr_SetString(PyExc_Exception, "mic verification failed");
 					gcry_cipher_close(cipher_hd);
+					free(pUnencrypted);
 					return NULL;
 				}
 				/* Reset j to point back to the start of the new cipher block. */
@@ -368,6 +395,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 			if (gcry_cipher_encrypt(cipher_hd, cipher_out, ZBEE_SEC_CONST_BLOCKSIZE, cipher_in, ZBEE_SEC_CONST_BLOCKSIZE)) {
 				PyErr_SetString(PyExc_Exception, "mic verification failed");
 				gcry_cipher_close(cipher_hd);
+				free(pUnencrypted);
 				return NULL;
 			}
 			/* Reset j to point back to the start of the new cipher block. */
@@ -384,6 +412,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	if (gcry_cipher_encrypt(cipher_hd, cipher_out, ZBEE_SEC_CONST_BLOCKSIZE, cipher_in, ZBEE_SEC_CONST_BLOCKSIZE)) {
 		PyErr_SetString(PyExc_Exception, "mic verification failed");
 		gcry_cipher_close(cipher_hd);
+		free(pUnencrypted);
 		return NULL;
 	}
 
