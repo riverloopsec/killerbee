@@ -1,149 +1,110 @@
 #!/usr/bin/env python
+from killerbee.scapy_extensions import *
+from killerbee.kbutils import *
+from zigbee_crypt import *
+from optparse import OptionParser
 
-'''
-Decode plaintext key ZigBee delivery from a capture file.  Will
-process libpcap or Daintree SNA capture files.
-'''
+ZBEE_SEC_ENC_MIC_32 = 0x5  #: ZigBee Seecurity Level id 5; Encrypted, 4 byte MIC
 
-import sys
-import os
-from killerbee import *
+APS_CMD = [
+    "Unknown",
+    "SKKE 1",
+    "SKKE 2",
+    "SKKE 3",
+    "SKKE 4",
+    "Transport Key",
+    "Update Device"
+]
 
-def usage():
-    print >>sys.stderr, """
-zbdsniff: Decode plaintext key ZigBee delivery from a capture file.  Will
-process libpcap or Daintree SNA capture files.    jwright@willhackforsushi.com
+KEY_TYPE = [
+    "Trust Center",
+    "Network",
+    "Application Master",
+    "Aplication Link",
+    "Trust Link",
+    "High Security Network"
+]
 
-Usage: zbdsniff [capturefiles ...]
-    """
+def sniffNetworkKey(pkts, key, verbose):
+    addrMap = dict()
+    keyHash = sec_key_hash(key, '\0')
 
-def getnetworkkey(packet):
-    """
-    Look for the presence of the APS Transport Key command, revealing the
-    network key value.
-    """
-
-    try:
-        zmac = Dot154PacketParser()
-        znwk = ZigBeeNWKPacketParser()
-        zaps = ZigBeeAPSPacketParser()
-    
-        # Process MAC layer details
-        zmacpayload = zmac.pktchop(packet)[-1]
-        if zmacpayload == None:
-            return
-
-        # Process NWK layer details
-        znwkpayload = znwk.pktchop(zmacpayload)[-1]
-        if znwkpayload == None:
-            return
-
-        # Process the APS layer details
-        zapschop = zaps.pktchop(znwkpayload)
-        if zapschop == None:
-            return
-
-        # See if this is an APS Command frame
-        apsfc = ord(zapschop[0])
-        if (apsfc & ZBEE_APS_FCF_FRAME_TYPE) != ZBEE_APS_FCF_CMD:
-            return
-
-        # Delivery mode is Normal Delivery (0)
-        apsdeliverymode = (apsfc & ZBEE_APS_FCF_DELIVERY_MODE) >> 2
-        if apsdeliverymode != 0:
-            return
-
-        # Ensure Security is Disabled
-        if (apsfc & ZBEE_APS_FCF_SECURITY) == 1:
-            return
-
-        zapspayload = zapschop[-1]
-
-        # Check payload length, must be at least 35 bytes
-        # APS cmd | key type | key | sequence number | dest addr | src addr
-        if len(zapspayload) < 35:
-            return
-
-        # Check for APS command identifier Transport Key (0x05)
-        if ord(zapspayload[0]) != 5:
-            return
-
-        # Transport Key Frame, get the key type.  Network Key is 0x01, no
-        # other keys should be sent in plaintext
-        if ord(zapspayload[1]) != 1:
-            print "Possible key or false positive?"
-            return
-
-        # Reverse these fields
-        networkkey = zapspayload[2:18][::-1]
-        destaddr = zapspayload[19:27][::-1]
-        srcaddr = zapspayload[27:35][::-1]
-
-        print "NETWORK KEY FOUND: ",
-        for x in networkkey[0:15]:
-            sys.stdout.write("%02x:"%ord(x))
-        print "%02x" % ord(networkkey[15])
-        print "      (Wireshark): ",
-        for x in zapspayload[2:17]:
-            sys.stdout.write("%02x:"%ord(x))
-        print "%02x" % ord(zapspayload[17])
-
-        print "  Destination MAC Address: ",
-        for x in destaddr[0:7]:
-            sys.stdout.write("%02x:"%ord(x))
-        print "%02x" % ord(destaddr[7])
-
-        print "  Source MAC Address:      ",
-        for x in srcaddr[0:7]:
-            sys.stdout.write("%02x:"%ord(x))
-        print "%02x" % ord(srcaddr[7])
-
-    except Exception, e:
-        #print e
-        return
+    for p in pkts:
+        if (p.haslayer("ZigbeeNWK")):
+            nwk = p.getlayer("ZigbeeNWK")
+            if nwk.source is not None and nwk.ext_src is not None:
+                if not nwk.source in addrMap and verbose:
+                    print("[+] Extended Source: " + ":".join("{:02x}".format(ord(ch)) for ch in raw(nwk)[8:16]) + " mapped to " + hex(nwk.source))
+                addrMap[nwk.source] = raw(nwk)[8:16]
+            if (p.haslayer("ZigbeeSecurityHeader") and p.haslayer("ZigbeeAppDataPayload")):
+                sec = p.getlayer("ZigbeeSecurityHeader")
+                if sec.key_type < 6:
+                    if nwk.source in addrMap:
+                        data = raw(p.getlayer("ZigbeeAppDataPayload"))
+                        scf = (ord(data[2]) & ~ ZBEE_SEC_ENC_MIC_32) | ZBEE_SEC_ENC_MIC_32
+                        a = data[0:2] + chr(scf) + data[3:7]
+                        c = data[7:-4]
+                        mic = data[-4:]
+                        nonce = addrMap[nwk.source] + data[3:7] + chr(scf)
+                        decrypted, success = decrypt_ccm(keyHash, nonce, mic, c, a)
+                        if success:
+                            print("[+] Decrypted:")
+                            if ord(decrypted[0]) < len(APS_CMD):
+                                print("    APS Command: " + APS_CMD[ord(decrypted[0])])
+                            if ord(decrypted[1]) < len(KEY_TYPE):
+                                print("    Key Type: " + KEY_TYPE[ord(decrypted[1])])
+                            print("    Value: " + ":".join("{:02x}".format(ord(ch)) for ch in decrypted[2:18]))
+                        else:
+                            print("[-] Decrypt failed - Wrong Key ???")
+                    else:
+                        print("[-] There was no ext_src mapping for: ", str(nwk.source))
+                else:
+                    print("[-] Unexpected key_type", str(sec.key_type))
 
 
-if len(sys.argv) == 1:
-    usage()
-    sys.exit(0)
+if __name__ == '__main__':
+    # Define the command line options.
+    parser = OptionParser(description="zbdsniff: Decode plaintext Zigbee Nwtwork key from a " +
+        "capture file. Will process libpcap or Daintree SNA capture files. Original concept: " +
+        "jwright@willhackforsushi.com, re-implemented using Scapy by Steve Martin.")
+    parser.add_option("-f", "--file", dest="filename",
+                    help="PCap file to process", metavar="FILE")
+    parser.add_option("-d", "--dir", dest="directory",
+                    help="Directory of PCap files to process", metavar="DIR")
+    parser.add_option("-k", "--transport-key", dest="transportKey",
+                    help="Transport Key for decryption")
+    parser.add_option("-v", "--verbose",
+                    action="store_true", dest="verbose", default=False,
+                    help="Print detailed status messages to stdout")
 
-files = []
-filecount = 0
+    (options, args) = parser.parse_args()
 
-while len(sys.argv) > 1:
-    files.append(sys.argv.pop(1))
+    if (not options.filename and not options.directory):
+        print("A packet capture file or directory must be specified")
+        sys.exit(1)
 
-while len(files) != 0:
-    file = files.pop()
-    print "Processing %s"%file
-    if not os.path.exists(file):
-        print >>sys.stderr, "ERROR: Input file \"%s\" does not exist." % file
-        continue
+    if (not options.transportKey):
+        print("A transport key value must be specified")
+        sys.exit(1)
 
-    filecount += 1
+    files = []
+    if options.filename:
+        files.append(options.filename)
 
-    # Check if the input file is libpcap; if not, assume SNA.
-    cap = None
-    try:
-        pr = PcapReader(file)
-    except Exception, e:
-        if e.args == ('Unsupported pcap header format or version',):
-            # Input file was not pcap, open it as SNA
-            cap = DainTreeReader(file)
-    
-    # Following exception
-    if cap == None:
-            cap = pr
-    
-    packetcount = 0
-    while 1:
-        packet = cap.pnext()
-        if packet[1] == None:
-            # End of capture
-            break
-        # Add additional key/password/interesting-stuff here
-        getnetworkkey(packet[1])
-        
-    cap.close()
+    if options.directory:
+        files += glob.glob(os.path.join(options.directory, "*.pcap"))
 
-print "Processed %d capture files." % filecount
+    filecount = 0
+
+    for file in files:
+        print "Processing %s"%file
+        if not os.path.exists(str(file)):
+            print >>sys.stderr, "ERROR: Input file \"%s\" does not exist." % file
+            sys.exit(1)
+
+        filecount += 1
+        pkts = kbrdpcap(file)
+        sniffNetworkKey(pkts, options.transportKey, options.verbose)
+
+
+    print "[+] Processed %d capture files." % filecount
