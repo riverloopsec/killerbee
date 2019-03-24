@@ -1,22 +1,24 @@
-'''
+"""
 CC253x support is contributed by Scytmo.
-'''
+"""
+
+from __future__ import print_function
+import sys
+import struct
+import time
+from datetime import datetime
+from kbutils import KBCapabilities, makeFCS
 
 # Import USB support depending on version of pyUSB
 try:
     import usb.core
     import usb.util
     import sys
-    print >>sys.stderr, "Warning: You are using pyUSB 1.x, support is in beta."
+    print("Warning: You are using pyUSB 1.x, support is in beta.", file=sys.stderr)
 except ImportError:
     import usb
-    print >>sys.stderr, "Error: You are using pyUSB 0.x, not supported for CC253x."
-    sys.exit()
-
-import struct
-import time
-from datetime import datetime
-from kbutils import KBCapabilities, makeFCS
+    print("Error: You are using pyUSB 0.x, not supported for CC253x.", file=sys.stderr)
+    sys.exit(-1)
 
 
 class CC253x:
@@ -35,13 +37,13 @@ class CC253x:
 
     def __init__(self, dev, bus, variant):
         #TODO deprecate bus param, and dev becomes a usb.core.Device object, not a string in pyUSB 1.x use
-        '''
+        """
         Instantiates the KillerBee class for Zigduino running GoodFET firmware.
         @type dev:   String
         @param dev:  PyUSB device
         @return: None
         @rtype: None
-        '''
+        """
         if variant == CC253x.VARIANT_CC2530:
             self._data_ep = CC253x.USB_CC2530_DATA_EP
         else:
@@ -80,40 +82,36 @@ class CC253x:
         return self.capabilities.getlist()
 
     def __set_capabilities(self):
-        '''
+        """
         Sets the capability information appropriate for CC253x.
         @rtype: None
         @return: None
-        '''
+        """
         self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
         self.capabilities.setcapab(KBCapabilities.SNIFF, True)
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
-        #self.capabilities.setcapab(KBCapabilities.INJECT, True)
-        #self.capabilities.setcapab(KBCapabilities.PHYJAM_REFLEX, True)
-        #self.capabilities.setcapab(KBCapabilities.SET_SYNC, True)
 
     # KillerBee expects the driver to implement this function
     def get_dev_info(self):
-        '''
+        """
         Returns device information in a list identifying the device.
         @rtype: List
         @return: List of 3 strings identifying device.
-        '''
+        """
         # TODO Determine if there is a way to get a unique ID from the device
         return [self.name, "CC253x", ""]
 
     # KillerBee expects the driver to implement this function
     def sniffer_on(self, channel=None, page=0):
-        '''
-        Turns the sniffer on such that pnext() will start returning observed
-        data.  Will set the command mode to Air Capture if it is not already
-        set.
+        """
+        Turns the sniffer on such that pnext() will start returning observed data.
+        Will set the command mode to Air Capture if it is not already set.
         @type channel: Integer
         @param channel: Sets the channel, optional
         @type page: Integer
         @param page: Sets the subghz page, not supported on this device
         @rtype: None
-        '''
+        """
         self.capabilities.require(KBCapabilities.SNIFF)
 
         if channel != None:
@@ -137,12 +135,12 @@ class CC253x:
 
     # KillerBee expects the driver to implement this function
     def sniffer_off(self):
-        '''
+        """
         Turns the sniffer off, freeing the hardware for other functions.  It is
         not necessary to call this function before closing the interface with
         close().
         @rtype: None
-        '''
+        """
         if self.__stream_open == True:
             # TODO Here, and in other places, add error handling for ctrl_transfer failure
             self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_STOP)
@@ -156,14 +154,14 @@ class CC253x:
 
     # KillerBee expects the driver to implement this function
     def set_channel(self, channel, page=0):
-        '''
+        """
         Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
         @type channel: Integer
         @param channel: Sets the channel, optional
         @type page: Integer
         @param page: Sets the subghz page, not supported on this device
         @rtype: None
-        '''
+        """
         self.capabilities.require(KBCapabilities.SETCHAN)
 
         if channel >= 11 or channel <= 26:
@@ -179,7 +177,7 @@ class CC253x:
 
     # KillerBee expects the driver to implement this function
     def inject(self, packet, channel=None, count=1, delay=0, page=0):
-        '''
+        """
         Injects the specified packet contents.
         @type packet: String
         @param packet: Packet contents to transmit, without FCS.
@@ -192,18 +190,18 @@ class CC253x:
         @type delay: Float
         @param delay: Delay between each frame, def=1
         @rtype: None
-        '''
+        """
         raise Exception('Not yet implemented')
 
     # KillerBee expects the driver to implement this function
     def pnext(self, timeout=100):
-        '''
+        """
         Returns a dictionary containing packet data, else None.
         @type timeout: Integer
         @param timeout: Timeout to wait for packet reception in usec
         @rtype: List
         @return: Returns None is timeout expires and no packet received.  When a packet is received, a dictionary is returned with the keys bytes (string of packet bytes), validcrc (boolean if a vaid CRC), rssi (unscaled RSSI), and location (may be set to None). For backwards compatibility, keys for 0,1,2 are provided such that it can be treated as if a list is returned, in the form [ String: packet contents | Bool: Valid CRC | Int: Unscaled RSSI ]
-        '''
+        """
         if self.__stream_open == False:
             self.sniffer_on() #start sniffing
 
@@ -276,25 +274,27 @@ class CC253x:
 
 
     def jammer_on(self, channel=None, page=0):
-        '''
+        """
         Not yet implemented.
         @type channel: Integer
         @param channel: Sets the channel, optional
         @type page: Integer
         @param page: Sets the subghz page, not supported on this device
         @rtype: None
-        '''
+        """
         raise Exception('Not yet implemented')
 
     def set_sync(self, sync=0xA7):
-        '''Set the register controlling the 802.15.4 PHY sync byte.'''
+        """
+        Set the register controlling the 802.15.4 PHY sync byte.
+        """
         raise Exception('Not yet implemented')
 
     def jammer_off(self, channel=None, page=0):
-        '''
+        """
         Not yet implemented.
         @return: None
         @rtype: None
-        '''
+        """
         raise Exception('Not yet implemented')
 

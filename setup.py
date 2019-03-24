@@ -1,11 +1,13 @@
-#NOTE: See the README file for a list of dependencies to install.
+# NOTE: See the README file for a list of dependencies to install.
+
+from __future__ import print_function
+import sys
 
 try:
     from setuptools import setup, Extension
 except ImportError:
     print("No setuptools found, attempting to use distutils instead.")
     from distutils.core import setup, Extension
-import sys
 
 err = ""
 warn = ""
@@ -55,22 +57,23 @@ try:
 except ImportError:
     warn += "Scapy-com 802.15.4 (git clone https://bitbucket.org/secdev/scapy-com)"
 
-
 if err != "":
-    print >>sys.stderr, """
+    print("""
 Library requirements not met.  Install the following libraries, then re-run
 the setup script.
 
-    """, err
+{}
+    """.format(err), file=sys.stderr)
     sys.exit(1)
 
 if warn != "":
-    print >>sys.stderr, """
+    print("""
 Library recommendations not met. For full support, install the following libraries,
 then re-run the setup script.
 
-    """, warn
-# TODO: Offer the user to type y/n to continue or cancel at this point
+{}
+    """.format(warn), file=sys.stderr)
+
 
 zigbee_crypt = Extension('zigbee_crypt',
                     sources = ['zigbee_crypt/zigbee_crypt.c'],
@@ -80,7 +83,7 @@ zigbee_crypt = Extension('zigbee_crypt',
                     )
 
 setup  (name        = 'killerbee',
-        version     = '2.7.0',
+        version     = '2.7.1',
         description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
         author = 'Joshua Wright, Ryan Speers',
         author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',

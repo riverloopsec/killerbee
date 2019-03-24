@@ -1,8 +1,7 @@
 *.pyc
+.vscode/
 build/
 dist/
 pdf/
-.vscode/
 .DS_Store
 *.egg-info/
-

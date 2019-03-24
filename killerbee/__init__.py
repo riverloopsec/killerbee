@@ -24,7 +24,7 @@ def getKillerBee(channel, page= 0):
         raise Exception("Failed to create a KillerBee instance.")
     try:
         kb.set_channel(channel, page)
-    except Exception, e:
+    except Exception as e:
         raise Exception('Error: Failed to set channel to %d/%d' % (channel, page), e)
     return kb
 
@@ -53,14 +53,15 @@ class KillerBee:
         Instantiates the KillerBee class.
 
         @type device:   String
-        @param device:  Device identifier, either USB vendor:product, serial device node, or IP address
+        @param device:  Device identifier, which is either USB `<BusNumber>:<DeviceNumber>`,
+            serial device path (e.g., `/dev/ttyUSB0`), or IP address.
+            The format needed depends on the device's firmware and connectivity to the host system.
         @type datasource: String
-        @param datasource: A known datasource type that is used
-        by dblog to record how the data was captured.
+        @param datasource: A known data-source type that is used by dblog to record how the data was captured.
         @type gps: String
-        @param gps: Optional serial device identifier for an attached GPS
-            unit. If provided, or if global variable has previously been set, 
-            KillerBee skips that device in initalization process.
+        @param gps: Optional serial device identifier for an attached GPS unit.
+            If provided, or if global variable has previously been set,
+            KillerBee skips that device in initialization process.
         @return: None
         @rtype: None
         '''
@@ -80,7 +81,7 @@ class KillerBee:
             from dev_sewio import isSewio
             if isSewio(device):
                 from dev_sewio import SEWIO
-                self.driver = SEWIO(dev=device) #give it the ip address
+                self.driver = SEWIO(dev=device)  # give it the ip address
             else: del isSewio
 
         # Figure out a device is one is not set, trying USB devices next
@@ -222,7 +223,7 @@ class KillerBee:
         '''
         return self.driver.capabilities.check(capab)
 
-    def is_valid_channel(self, channel, page):
+    def is_valid_channel(self, channel, page=0):
         '''
         Use the driver's capabilities class to determine if a requested channel number
         is within the capabilities of that device.

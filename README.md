@@ -11,7 +11,7 @@ All Rights Reserved.
 
 The main toolkit was/is authored by:
 + 2009, Joshua Wright <jwright@willhackforsushi.com>
-+ 2010-2017, Ryan Speers <ryan@riverloopsecurity.com>
++ 2010-2019, Ryan Speers <ryan@riverloopsecurity.com>
 + 2010-2011, Ricky Melgares <ricky@riverloopsecurity.com>
 
 We appreciate the many contributers to the framework, including the following who have contributed capabilities:
@@ -285,8 +285,9 @@ QUESTIONS/COMMENTS/CONCERNS
 ==============
 Please use the ticketing system at https://github.com/riverloopsec/killerbee/issues.
 
-The original version was written by: jwright@willhackforsushi.com
-The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
-Additional Tools/Fixes by: bryanhalf@gmail.com
+The original version was written by: jwright@willhackforsushi.com.
+The current version, fixes, etc are handled by: ryan@riverloopsecurity.com.
+(See the list above for all contributors/credits.)
 
 For contributors/developers, see DEVELOPMENT.md for details and guidance.
+
