@@ -25,6 +25,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring')
 parser.add_argument('-c', '-f', '--channel', action='store', type=int, default=None)
 parser.add_argument('-D', action='store_true', dest='showdev')
+parser.add_argument('-s', '--subghz_page', action='store', type=int, default=0)
 args = parser.parse_args()
 
 if args.showdev:
@@ -37,7 +38,7 @@ if args.channel == None:
 
 kb = KillerBee(device=args.devstring)
 signal.signal(signal.SIGINT, interrupt)
-if not kb.is_valid_channel(args.channel):
+if not kb.is_valid_channel(args.channel, args.subghz_page):
     print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel for the selected device."
     kb.close()
     sys.exit(1)
