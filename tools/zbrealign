@@ -78,4 +78,3 @@ if __name__ == '__main__':
             seqnummac = 0
         kb.inject(sp2) # already made it a string to get around limitation in dot14d4
         sleep(0.005)
-

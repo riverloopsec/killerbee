@@ -8,15 +8,16 @@ import argparse
 from time import sleep
 
 import logging
-logging.getLogger("scapy.runtime").setLevel(logging.ERROR) # suppress annoying Scapy IPv6 warning
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)  o# suppress annoying Scapy IPv6 warning
 from killerbee import *
 
 try:
-	from scapy.all import *
+    from scapy.all import *
 except ImportError:
-	print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
-	from sys import exit
-	exit(-1)
+    print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
+    from sys import exit
+    exit(-1)
+
 
 def create_orphan_mac(panid, devleave, coordinator, device, seqnum):
     '''802.15.4 Disassociation Frame'''
@@ -32,6 +33,7 @@ def create_orphan_mac(panid, devleave, coordinator, device, seqnum):
     b.dest_addr = coordinator
     b.src_addr = device
     return b
+
 
 if __name__ == '__main__':
     tohex = lambda s: int(s.replace(':', ''), 16)
@@ -68,4 +70,3 @@ if __name__ == '__main__':
         print sp.summary()
         kb.inject(str(sp))
         sleep(0.005)
-

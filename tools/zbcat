@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-
 # Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2016
+
 import argparse
 from time import sleep
 
@@ -15,8 +15,9 @@ Can be configured to respond to DATA REQUEST packets (--respond) or it can just 
 Written to help facilitate these situations due to a Wireless Village Wireless Capture-the-Flag at Shmoocon 2016 by @redbarondefcoin
 
 NOTE: This script will not handle all scenarios with longer addressing or different frame versions. A future version
- could use scapy-com dot15d4 layer to construct/parse packets. [-rmspeers]
+ could use the scapy dot15d4 layer to construct/parse packets. [-rmspeers]
 """
+
 
 def create_packet(panid, source, dest, data, extsource=False, ack=False, shortaddress=True, seq=0):
     if extsource == False:
