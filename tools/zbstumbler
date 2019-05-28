@@ -59,6 +59,7 @@ def display_details(routerdata):
     if args.csvfile is not None:
         csvfile.write("0x%02X%02X,0x%02X%02X,%s,%s,%s,%d\n"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1]), extpanidstr, stackprofilestr, stackverstr, channel))
 
+
 def response_handler(stumbled, packet, channel):
     global args
     d154 = Dot154PacketParser()
@@ -77,7 +78,7 @@ def response_handler(stumbled, packet, channel):
         beacondata = pktdecode[6]
         extpanid = beacondata[6][::-1]
         stackprofilever = beacondata[4]
-        assocPermit = struct.unpack("<", beacondata[0])[0] & 0x8000
+        assocPermit = struct.unpack("<H", beacondata[0])[0] & 0x8000
 
         key = ''.join([spanid, source])
         value = [spanid, source, extpanid, stackprofilever, channel]

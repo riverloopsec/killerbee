@@ -8,7 +8,7 @@ import argparse
 from time import sleep
 
 import logging
-logging.getLogger("scapy.runtime").setLevel(logging.ERROR)  o# suppress annoying Scapy IPv6 warning
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)  # suppress annoying Scapy IPv6 warning
 from killerbee import *
 
 try:
