@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-'''
+"""
 Print a list of the attached KillerBee recognized devices to stdout.
 
 The -g flag may be provided to ignore a serial device, such as an attached GPS
 serial device which should be ignored by KillerBee.
-'''
+"""
 
 import sys
 import argparse
@@ -21,4 +21,3 @@ if __name__ == '__main__':
     arg_gpsdev = args.ignore[0] if args.ignore is not None else None
     #arg_include = args.include if len(args.include)>0 else None
     show_dev(gps=arg_gpsdev, include=args.include)
-

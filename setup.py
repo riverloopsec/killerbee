@@ -9,75 +9,68 @@ except ImportError:
     print("No setuptools found, attempting to use distutils instead.")
     from distutils.core import setup, Extension
 
-
 err = []
 warn = []
+apt_get_pkgs = []
+pip_pkgs = []
 
 # We have made gtk, cairo, scapy-com into optional libraries
 try:
     import gtk
 except ImportError:
-    warn.append(("gtk", "python-gtk2", ""))
-    # TODO: Add pip name
+    warn.append("gtk")
+    apt_get_pkgs.append("python-gtk2")
 
 try:
     import cairo
 except ImportError:
-    warn.append(("cairo", "python-cairo", ""))
-    # TODO: Add pip name
-
-try:
-    import Crypto
-except ImportError:
-    err.append(("crypto", "python-crypto", "pycrypto"))
+    warn.append("cairo")
+    apt_get_pkgs.append("python-cairo")
 
 # Ensure we have either pyUSB 0.x or pyUSB 1.x, but we now
 #  prefer pyUSB 1.x moving forward. Support for 0.x may be deprecated.
 try:
     import usb
 except ImportError:
-    err.append(("usb", "python-usb", "pyusb"))
+    err.append("usb")
+    apt_get_pkgs.append("python-usb")
 
 try:
     import usb.core
     #print("Warning: You are using pyUSB 1.x, support is in beta.")
 except ImportError:
-    warn.append(("NOTE: You are using pyUSB 0.x. Consider upgrading to pyUSB 1.x.", "", ""))
-    # TODO: Add apt/pip names
+    warn.append("You are using pyUSB 0.x. Consider upgrading to pyUSB 1.x.")
 
-try:
-    import serial
-except ImportError:
-    err.append(("serial", "python-serial", "pyserial"))
-
-try:
-    import rangeparser
-except ImportError:
-    err += "rangeparser (pip install rangeparser)\n"
+# TODO: Ideally we would detect missing python-dev and libgcrypt-dev to give better errors.
 
 # Dot15d4 is a dep of some of the newer tools
 try:
     from scapy.all import Dot15d4
 except ImportError:
-    warn += "Scapy-com 802.15.4 (git clone https://bitbucket.org/secdev/scapy-com)"
+    warn.append("Scapy 802.15.4 (see README.md)")
+    pip_pkgs.append("git+https://github.com/secdev/scapy.git#egg=scapy")
 
-if err != "":
+if len(err) > 0:
     print("""
-Library requirements not met.  Install the following libraries, then re-run
-the setup script.
+Library requirements not met.  Install the following libraries, then re-run the setup script.
 
-{}
-    """.format(err), file=sys.stderr)
+{}\n""".format('\n'.join(err)), file=sys.stderr)
+
+if len(warn) > 0:
+    print("""
+Library recommendations not met. For full support, install the following libraries, then re-run the setup script.
+
+{}\n""".format('\n'.join(warn)), file=sys.stderr)
+
+if len(apt_get_pkgs) > 0 or len(pip_pkgs) > 0:
+    print("The following commands should install these dependencies on Ubuntu, and can be adapted for other OSs:", file=sys.stderr)
+    if len(apt_get_pkgs) > 0:
+        print("\tsudo apt-get install -y {}".format(' '.join(apt_get_pkgs)), file=sys.stderr)
+    if len(pip_pkgs) > 0:
+        print("\tpip install {}".format(' '.join(pip_pkgs)), file=sys.stderr)
+
+if len(err) > 0:
     sys.exit(1)
-
-if warn != "":
-    print("""
-Library recommendations not met. For full support, install the following libraries,
-then re-run the setup script.
-
-{}
-    """.format(warn), file=sys.stderr)
-
 
 zigbee_crypt = Extension('zigbee_crypt',
                     sources = ['zigbee_crypt/zigbee_crypt.c'],
@@ -100,6 +93,8 @@ setup  (name        = 'killerbee',
                    'tools/zbwardrive', 'tools/zbopenear', 'tools/zbfakebeacon',
                    'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign', 'tools/zbcat', 
                    'tools/zbjammer', 'tools/kbbootloader'],
-        install_requires=['pyserial>=2.0', 'pyusb', 'crypto'],
-        ext_modules = [ zigbee_crypt ],
+        install_requires=['pyserial>=2.0', 'pyusb', 'pycrypto', 'rangeparser',
+                          'git+https://github.com/secdev/scapy.git#egg=scapy'],
+        # NOTE: pygtk doesn't install via distutils on non-Windows hosts
+        ext_modules = [zigbee_crypt],
         )
