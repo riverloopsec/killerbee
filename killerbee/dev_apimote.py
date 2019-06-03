@@ -198,10 +198,10 @@ class APIMOTE:
             return None
 
         frame = packet[1:]
-        '''
+        
         frame = frame[:-7]
         frame = frame + "\xff"
-        '''
+        
         validcrc = False
         if frame[-2:] == makeFCS(frame[:-2]):
             validcrc = True
