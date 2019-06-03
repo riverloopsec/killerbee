@@ -58,9 +58,9 @@ def associate_response_handle(packet):
     print "Length of packet received in associate_handle: {0}".format(len(packet))
     try:
         if packet[33] == '\x02':
-            print("test2")
-            short_addr = packet[34:36]
-            return short_addr
+            if packet[34:36] != "\x00\x8d":
+                short_addr = packet[34:36]
+                return short_addr
         else:
             return None 
     except:
@@ -107,16 +107,16 @@ arg_delay = 4
 # Parameters to build association packet
 arg_IEE64addr = None    #May be specified on command line
 arg_panID = None        #May be specified on command line
-ASSOC_SEQNUM = '\x01'
+ASSOC_SEQNUM = '\x70'
 ASSOC_DST = '\x00\x00'
 ASSOC_SRC_PANID = '\xff\xff'
 assoc_packet = None
 
 # Parameters to build data packet
-ASSOC_DATA_SEQNUM = '\x02'
+ASSOC_DATA_SEQNUM = '\x71'
 
 # key transport data arguments
-DATA_KEY_SEQNUM = '\x03'
+DATA_KEY_SEQNUM = '\x72'
 
 # Command Line Processing
 while len(sys.argv) > 1:
@@ -207,7 +207,7 @@ if value == None:
 # Now build a packet to issue the SECOND DATA REQUEST, for the key to be sent
 if value != None:
     data_key_packet = '\x63\x88'+DATA_KEY_SEQNUM+arg_panID+ASSOC_DST+value+'\x04' # data packet after association response 
-    print "Sending the data key packet..."
+    print "Sending the data key packet with short address..."
     #print kbutils.hexdump(data_key_packet)
     kb.inject(data_key_packet)
 
