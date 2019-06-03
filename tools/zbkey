@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python\x00\x8
 
 import sys
 import signal
@@ -7,6 +7,17 @@ import struct
 import time
 
 from killerbee import *
+
+
+#Return bytes in the right format.
+def beautify(info):
+    info = repr(info).replace("\\x","")
+    info = info.replace("'","")
+    info = info[2:] + info[:2]
+    info = "0x" + info
+    return info 
+
+
 
 def usage():
     print >>sys.stderr, """
@@ -45,16 +56,15 @@ def associate_response_handle(packet):
             or none if the packet was not the length or type expected.
     '''
     print "Length of packet received in associate_handle: {0}".format(len(packet))
-    print kbutils.hexdump(packet)
-    if len(packet) > 24:
-        # Offset to Command Type, check to be 0x02 for assoc response type
-        if packet[21] == '\x02':
-            if packet[24] != '\x00':
-                print("Association response status was not successful. Received {0}.".format(struct.unpack('B', packet[24])[0]))
-                return None
-            # Offset to Response Assigned Short Addr (in assoc response type)
-            return packet[22:24] #device's short address, as binary string
-    return None   
+    try:
+        if packet[33] == '\x02':
+            print("test2")
+            short_addr = packet[34:36]
+            return short_addr
+        else:
+            return None 
+    except:
+        return None   
 
 
 def transport_response_handle(packet):
@@ -173,24 +183,20 @@ print "Sending data request packet..."
 #print kbutils.hexdump(data_assoc_packet)
 kb.inject(data_assoc_packet)
 
-# receiving the association response and setting the device_short_address
-value = None
-start = time.time()
-while (start+arg_delay > time.time()):		
-    # Does not block
+
+while True:
     recvpkt = kb.pnext()
-    # Check for empty packet (timeout) and valid FCS
-    if recvpkt != None and recvpkt['validcrc']:
-        print "Received frame"
-        # If packet is an assocation response, get the assigned device
-        # short address, else get None if packet isn't the right type
-        value = associate_response_handle(recvpkt['bytes'])
-        if value != None:
-            # Let's ack them to thank them for the join...
-            kb.sniffer_off()
-            kb.inject('\x02\x00'+getAckByte(recvpkt['bytes']))
-            print "Short address: {0}".format(value)
-            break
+    if recvpkt != None:
+            print "Received frame"
+            # If packet is an assocation response, get the assigned device
+            # short address, else get None if packet isn't the right type
+            value = associate_response_handle(recvpkt['bytes'])
+            if value != None:
+                print "Short address: {0}".format(repr(value))
+                kb.sniffer_off()
+                kb.inject('\x02\x00'+getAckByte(recvpkt['bytes']))
+                break
+
 
 if value == None:
     print "Sorry, we didn't hear a device respond with an association response. Do you have an active target within range?"
