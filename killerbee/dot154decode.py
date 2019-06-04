@@ -62,7 +62,7 @@ class Dot154PacketParser:
         '''
         Decrypts the specified packet. Returns empty string if the packet is
         not encrypted, or if decryption MIC validation fails.
-        
+
         @type packet: String
         @param packet: Packet contents.
         @type key: String
@@ -96,14 +96,14 @@ class Dot154PacketParser:
         #    remaining bytes (representing encrypted packet payload content)
         C = c[0:-8]
         U = c[-8:]
-        
+
         # 2. Form cipherText by padding C to a block size
         cipherText = C + ("\x00" * (16 - len(C)%16))
-        
-        # 3. Form 1-byte flags field = 01 
+
+        # 3. Form 1-byte flags field = 01
         #    XXX will vary when L changes
         flags = "\x01"
-        
+
         # 4. Define 16-octet A_i consisting of:
         #        Flags || Nonce || 2-byte counter i for i=0,1,2, ...
         #    A[0] is for authenticity check, A[1] is for the first block of data,
@@ -111,45 +111,45 @@ class Dot154PacketParser:
         self.__crypt_A_i = []
         for i in xrange(0, (1+1+(len(C)/16))):
             self.__crypt_A_i.append(flags + nonce + struct.pack(">H",i))
-        
+
         # 5. Decrypt cipherText producing plainText (observed)
         self.__crypt_blockcntr = 1               # Start at A[1] to decrypt
         crypt = AES.new(key, AES.MODE_CTR, counter=self.__crypt_counter)
         plainText = crypt.decrypt(cipherText)[0:len(C)]
-        
+
         # 6. Compute S_0 as E(Key, A[0])
         crypt = AES.new(key, AES.MODE_CBC, "\x00"*16)
         S_0 = crypt.encrypt(self.__crypt_A_i[0])
-        
+
         # 7. Compute MIC (T) observed as S_0 XOR U
         T_obs = []
         for i in xrange(0,len(S_0[0:8])):
             T_obs.append((ord(S_0[i]) ^ ord(U[i])))
-        
+
         # Convert T_obs back into a string (please, I need Python help)
         T_obs = ''.join(struct.pack("B",i) for i in T_obs)
-        
+
         # 8. Compute a over packet contents before ciphertext payload
         #    This is the 802.15.4 header,plus the security level, frame
         #    counter and flags byte (01)
         hdrlen = self.hdrlen(packet)
         a = packet[0:hdrlen] + packet[hdrlen:hdrlen+6]
-        
+
         # 9. Concatenate L(a) of 2-byte length a with a
         addAuthData = struct.pack(">H",len(a)) + a
-        
+
         # 10. Pad addAuthData to an even block size
         addAuthData += ("\x00" * (16 - len(addAuthData)%16))
-        
+
         # 11. Form AuthData by concatenating addAuthData and PlaintextData
         #     Pad plainText to an even block size
         plainTextPadded = plainText + ("\x00" * (16 - len(plainText)%16))
-        
+
         authData = addAuthData + plainTextPadded
-        
+
         # 12. Perform authData transformation into B[0], B[1], ..., B[i]
         B = "\x59" + nonce + "\x00\x01" + authData
-        
+
         # 13. Calculate the MIC (T) calculated with CBC-MAC
         iv = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
         for i in xrange(0, len(B)/16):
@@ -157,8 +157,8 @@ class Dot154PacketParser:
             Bn = B[i*16:(i*16)+16]
             iv = crypt.encrypt(Bn)
         T_calc = iv[0:8]
-        
-        # 14. Compare 
+
+        # 14. Compare
         if T_obs == T_calc:
             return plainText
         else:
@@ -176,7 +176,7 @@ class Dot154PacketParser:
 
         If the packet is a beacon frame, the Beacon Data field will be populated
         as a list element in the format:
- 
+
         Superframe Spec | GTS Fields | Pending Addr Counts | Proto ID | Stack Profile/Profile Version | Device Capabilities | Ext PAN ID | TX Offset | Update ID
 
         An exception is raised if the packet contents are too short to
@@ -212,35 +212,35 @@ class Dot154PacketParser:
                 # Superframe specification
                 beacondata[0] = packet[offset:offset+2]
                 offset+=2
-    
+
                 # GTS data
                 beacondata[1] = packet[offset]
                 offset+=1
-    
+
                 # Pending address count
                 beacondata[2] = packet[offset]
                 offset+=1
-    
+
                 # Protocol ID
                 beacondata[3] = packet[offset]
                 offset+=1
-    
+
                 # Stack Profile version
                 beacondata[4] = packet[offset]
                 offset+=1
-    
+
                 # Capability information
                 beacondata[5] = packet[offset]
                 offset+=1
-    
+
                 # Extended PAN ID
                 beacondata[6] = packet[offset:offset+8]
                 offset+=8
-    
+
                 # TX Offset
                 beacondata[7] = packet[offset:offset+3]
                 offset+=3
-    
+
                 # Update ID
                 beacondata[8] = packet[offset]
                 offset+=1
@@ -256,7 +256,7 @@ class Dot154PacketParser:
             # DPAN
             pktchop[2] = packet[3:5]
             offset = 5
-    
+
             # Examine the destination addressing mode
             daddr_mask = (fcf & DOT154_FCF_DADDR_MASK) >> 10
             if daddr_mask == DOT154_FCF_ADDR_EXT:
@@ -265,12 +265,12 @@ class Dot154PacketParser:
             elif daddr_mask == DOT154_FCF_ADDR_SHORT:
                 pktchop[3] = packet[offset:offset+2]
                 offset+=2
-    
+
             # Examine the Intra-PAN flag
             if (fcf & DOT154_FCF_INTRA_PAN) == 0:
                 pktchop[4] = packet[offset:offset+2]
                 offset+=2
-    
+
             # Examine the source addressing mode
             saddr_mask = (fcf & DOT154_FCF_SADDR_MASK) >> 14
             if daddr_mask == DOT154_FCF_ADDR_EXT:
@@ -283,7 +283,7 @@ class Dot154PacketParser:
         # Append remaining payload
         if offset < len(packet):
             pktchop[7] = packet[offset:]
-    
+
         return pktchop
 
 
@@ -344,7 +344,7 @@ class Dot154PacketParser:
 
         # Byte swap
         fcf = struct.unpack("<H",packet[0:2])[0]
-        
+
         if (fcf & DOT154_FCF_SEC_EN) == 0:
             # Packet is not encrypted
             return ""
@@ -363,6 +363,6 @@ class Dot154PacketParser:
 
         # The next 4 bytes of the encrypted payload is the frame counter, rev
         noncep2 = encpayload[1:5][::-1]
-        
+
         return noncep1 + noncep2 + noncep3
 

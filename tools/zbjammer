@@ -24,6 +24,7 @@ def interrupt(signum, frame):
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring')
 parser.add_argument('-c', '-f', '--channel', action='store', type=int, default=None)
+parser.add_argument('-z', '--subghz_page', action='store', type=int, default=0)
 parser.add_argument('-D', action='store_true', dest='showdev')
 args = parser.parse_args()
 
@@ -37,11 +38,11 @@ if args.channel == None:
 
 kb = KillerBee(device=args.devstring)
 signal.signal(signal.SIGINT, interrupt)
-if not kb.is_valid_channel(args.channel):
-    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel for the selected device."
+if not kb.is_valid_channel(args.channel, args.subghz_page):
+    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel/page for the selected device."
     kb.close()
     sys.exit(1)
-kb.set_channel(args.channel)
+kb.set_channel(args.channel, page=args.subghz_page)
 
 print "zbjammer: jamming channel", args.channel
 print "*** WARNING: this may not actually work on your hardware! Check with spectrum analyser!"

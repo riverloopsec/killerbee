@@ -49,6 +49,7 @@ if __name__ == '__main__':
     # Command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--channel', '-c', action='store', dest='channel', required=True, type=int, default=11)
+    parser.add_argument('-z', '--subghz_page', action='store', type=int, default=0)
     parser.add_argument('-i', '--interface', action='store', dest='devstring', default=None)
     parser.add_argument('-p', '--panid', help="The current PAN ID of the victim PAN", action='store', required=True, type=tohex)
     parser.add_argument('-s', '--coordinator', help="Realignment packet coordinator short address", action='store', required=True, type=tohex)
@@ -66,7 +67,7 @@ if __name__ == '__main__':
     #TODO: seqnums for each direction
 
     kb = KillerBee(device=args.devstring)
-    kb.set_channel(args.channel)
+    kb.set_channel(args.channel, page=args.subghz_page)
 
     seqnummac = args.srcseq
 
@@ -78,4 +79,3 @@ if __name__ == '__main__':
             seqnummac = 0
         kb.inject(sp2) # already made it a string to get around limitation in dot14d4
         sleep(0.005)
-

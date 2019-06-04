@@ -11,7 +11,7 @@ All Rights Reserved.
 
 The main toolkit was/is authored by:
 + 2009, Joshua Wright <jwright@willhackforsushi.com>
-+ 2010-2017, Ryan Speers <ryan@riverloopsecurity.com>
++ 2010-2019, Ryan Speers <ryan@riverloopsecurity.com>
 + 2010-2011, Ricky Melgares <ricky@riverloopsecurity.com>
 
 We appreciate the many contributers to the framework, including the following who have contributed capabilities:
@@ -28,6 +28,7 @@ We appreciate the many contributers to the framework, including the following wh
 + Jeff Spielberg
 + Scytmo (bug fixes and CC2530/1 EMK board support)
 + Adam Laurie/rfidiot (APS crypto implementation, firmware, DFU & BOOTLOADER, SubGHZ, SiLabs NodeTest)
++ Steve Martin
 
 REQUIREMENTS
 ================
@@ -36,14 +37,8 @@ KillerBee is developed and tested on Linux systems.
 MacOS usage is possible but not supported.
 
 We have striven to use a minimum number of software dependencies, however, it
-is necessary to install the following Python modules before installation:
-
-+ serial
-+ usb
-+ crypto  (for some functions)
-+ pygtk   (for use of tools that have GUIs)
-+ cairo   (for use of tools that have GUIs)
-+ scapy (for some tools which utilize 802.15.4 Scapy extensions)
+is necessary to install the following Python modules before installation.
+The install will detect and prompt you for what is needed.
 
 On Ubuntu systems, you can install the needed dependencies with the following
 commands:
@@ -98,8 +93,7 @@ You must enable these to be searched for in `killerbee/config.py` and then reins
 
 ApiMote v4beta (and v3):
 ----------------
-The devices typically come preloaded and do not need to be reflashed for basic
-use.
+The devices typically come preloaded and do not need to be reflashed for basic use.
 
 The hardware is open-source at https://github.com/riverloopsec/apimote.
 It is available assembled by contacting team at riverloopsecurity dot com.
@@ -174,8 +168,6 @@ networks, built using the KillerBee framework.  Each tool has its own usage
 instructions documented by running the tool with the "-h" argument, and
 summarized below.
 
-
-+ kbbootloader -  Switches device into DFU/BOOTLOADER mode (if device is capable)
 + zbid         -  Identifies available interfaces that can be used by KillerBee
                 and associated tools.
 + zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time 
@@ -218,17 +210,15 @@ summarized below.
 + zbdsniff     -  Captures ZigBee traffic, looking for NWK frames and over-the-air
                 key provisioning.  When a key is found, zbdsniff prints the
                 key to stdout.  The sample packet capture
-                sample/zigbee-network-key-ota.dcf can be used to demonstrate
+                `sample/zigbee-network-key-ota.dcf` can be used to demonstrate
                 this functionality.
 + zbfind       -  A GTK GUI application for tracking the location of an IEEE
-                802.15.4 transmitter by measuring RSSI.  Zbfind can be passive
+                802.15.4 transmitter by measuring RSSI. zbfind can be passive
                 in discovery (only listen for packets) or it can be active by
                 sending Beacon Request frames and recording the responses from
                 ZigBee routers and coordinators.
                 If you get a bunch of errors after starting this tool, make
-                sure your DISPLAY variable is set properly.  If you know how
-                to catch these errors to display a reasonable error message,
-                please drop me a note.
+                sure your `DISPLAY` variable is set properly.
 + zbgoodfind   -  Implements a key search function using an encrypted packet
                 capture and memory dump from a legitimate ZigBee or IEEE
                 802.15.4 device.  This tool accompanies Travis Goodspeed's
@@ -245,6 +235,7 @@ summarized below.
                 installed to run this.
 + zbscapy      -  Provides an interactive Scapy shell for interacting via a
                 KillerBee interface. Scapy must be installed to run this.
++ kbbootloader -  Switches device into DFU/BOOTLOADER mode (if device is capable)
 
 Additional tools, that are for special cases or are not stable, are stored in
     the Api-Do project repository: http://code.google.com/p/zigbee-security/
@@ -285,8 +276,8 @@ QUESTIONS/COMMENTS/CONCERNS
 ==============
 Please use the ticketing system at https://github.com/riverloopsec/killerbee/issues.
 
-The original version was written by: jwright@willhackforsushi.com
-The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
-Additional Tools/Fixes by: bryanhalf@gmail.com
+The original version was written by: jwright@willhackforsushi.com.
+The current version, fixes, etc are handled by: ryan@riverloopsecurity.com.
+(See the list above for all contributors/credits.)
 
-For contributors/developers, see DEVELOPMENT.md for details and guidance.
+For contributors/developers, see `DEVELOPMENT.md` for details and guidance.

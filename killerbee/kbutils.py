@@ -1,3 +1,6 @@
+from __future__ import print_function
+import sys
+
 # Import USB support depending on version of pyUSB
 try:
     import usb.core
@@ -11,7 +14,8 @@ except ImportError:
     USBVER=0
 
 import serial
-import os, glob
+import os
+import glob
 import time
 import random
 import inspect
@@ -39,10 +43,11 @@ usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID, CC2530_USB_PROD_ID, CC2531_USB
 # Global variables
 gps_devstring = None
 
+
 class KBCapabilities:
-    '''
+    """
     Class to store and report on the capabilities of a specific KillerBee device.
-    '''
+    """
     NONE               = 0x00 #: Capabilities Flag: No Capabilities
     SNIFF              = 0x01 #: Capabilities Flag: Can Sniff
     SETCHAN            = 0x02 #: Capabilities Flag: Can Set the Channel
@@ -58,6 +63,7 @@ class KBCapabilities:
     FREQ_868           = 0x0c #: Capabilities Flag: Can perform 868-876 MHz sniffing (ch 0-8)
     FREQ_870           = 0x0d #: Capabilities Flag: Can perform 870-876 MHz sniffing (ch 0-26)
     FREQ_915           = 0x0e #: Capabilities Flag: Can perform 915-917 MHz sniffing (ch 0-26)
+
     def __init__(self):
         self._capabilities = {
                 self.NONE : False,
@@ -75,19 +81,24 @@ class KBCapabilities:
                 self.FREQ_870: False,
                 self.FREQ_915: False,
                 self.BOOT: False }
+
     def check(self, capab):
         if capab in self._capabilities:
             return self._capabilities[capab]
         else:
             return False
+
     def getlist(self):
         return self._capabilities
+
     def setcapab(self, capab, value):
         self._capabilities[capab] = value
+
     def require(self, capab):
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
-    def frequency(self, channel= None, page= None):
+
+    def frequency(self, channel=None, page=None):
         '''
         Return actual frequency of channel/page in KHz
         '''
@@ -495,13 +506,13 @@ def isfreakduino(serialdev):
     return (version is not None)
 
 def search_usb(device):
-    '''
+    """
     Takes either None, specifying that any USB device in the
     global vendor and product lists are acceptable, or takes
     a string that identifies a device in the format
     <BusNumber>:<DeviceNumber>, and returns the pyUSB objects
     for bus and device that correspond to the identifier string.
-    '''
+    """
     if device == None:
         busNum = None
         devNum = None
@@ -515,11 +526,12 @@ def search_usb(device):
             dev = search_usb_bus_v0x(bus, busNum, devNum)
             if dev != None:
                 return (bus, dev)
-        return None #Note, can't expect a tuple returned
+        return None  # NOTE: can't expect a tuple returned
     elif USBVER == 1:
         return usb.core.find(custom_match=findFromListAndBusDevId(busNum, devNum, usbVendorList, usbProductList)) #backend=backend, 
     else:
         raise Exception("USB version expected to be 0.x or 1.x.")
+
 
 def search_usb_bus_v0x(bus, busNum, devNum):
     '''Helper function for USB enumeration in pyUSB 0.x enviroments.'''
@@ -533,6 +545,7 @@ def search_usb_bus_v0x(bus, busNum, devNum):
                 #print "Choose device", bus.dirname, dev.filename, "to initialize KillerBee instance on."
                 return dev
     return None
+
 
 def hexdump(src, length=16):
     '''
@@ -552,6 +565,7 @@ def hexdump(src, length=16):
        result.append("%04x:  %-*s  %s\n" % (i, length*3, hex, printable))
     return ''.join(result)
 
+
 def randbytes(size):
     '''
     Returns a random string of size bytes.  Not cryptographically safe.
@@ -560,6 +574,7 @@ def randbytes(size):
     @rtype: String
     '''
     return ''.join(chr(random.randrange(0,256)) for i in xrange(size))
+
 
 def randmac(length=8):
     '''
@@ -590,6 +605,7 @@ def randmac(length=8):
     # Reverse the address for use in a packet
     return ''.join([prefix, suffix])[::-1]
 
+
 def makeFCS(data):
     '''
     Do a CRC-CCITT Kermit 16bit on the data given
@@ -609,9 +625,11 @@ def makeFCS(data):
         crc = (crc // 16) ^ (q * 4225)
     return pack('<H', crc) #return as bytes in little endian order
 
+
 class KBException(Exception):
     '''Base class for all KillerBee specific exceptions.'''
     pass
+
 
 class KBInterfaceError(KBException):
     '''
@@ -631,11 +649,12 @@ def pyusb_1x_patch():
     have to ever pass this argument.
     '''
     if 'length' in inspect.getargspec(usb.util.get_string).args:
-        print 'Monkey-patching usb.util.get_string()'
+        print('Monkey-patching usb.util.get_string()', file=sys.stderr)
         def get_string(dev, index, langid = None):
             return usb.util.zzz__get_string(dev, 255, index, langid)
         usb.util.zzz__get_string = usb.util.get_string
         usb.util.get_string = get_string
+
 
 if USBVER == 1:
     pyusb_1x_patch()

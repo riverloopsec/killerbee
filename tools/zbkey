@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+# Contributed by: mandar.satam@gmail.com
+# Edited by:      ryan@riverloopsecurity.com
+# Version:        BETA
 
 import sys
 import signal
@@ -8,17 +11,15 @@ import time
 
 from killerbee import *
 
+
 def usage():
     print >>sys.stderr, """
 zbkey: Attempts to retrieve a key by sending the associate request followed by the data request after association response
        Example usage: ./zbkey -f 14 -s 0.1 -p aa1a -a 0fc8071c08c25100 -i [deviceid]
 
-Contributed by: mandar.satam@gmail.com
-Edited by:      ryan@riverloopsecurity.com
-Version:        BETA
-
 Usage: ./zbkey -f [channel] -s 0.1 -p [PANID] -a [IEEE64bitaddress] -i [deviceid]
     """
+
 
 def show_dev():
     '''Prints the list of connected devices to stdout.'''
@@ -27,12 +28,14 @@ def show_dev():
     for dev in kb.dev_list():
         print "%s\t%s\t%s" % (dev[0], dev[1], dev[2])
 
+
 def interrupt(signum, frame):
     '''Handles shutdown when a signal is received.'''
     global kb
     kb.close()
     print "Exiting..."
     sys.exit(2)
+
 
 def associate_response_handle(packet):
     #TODO link to the correct part of the specification for this frame
@@ -75,6 +78,7 @@ def transport_response_handle(packet):
         	return key
     return None
 
+
 def isAckFor(packet, lastseq):
     '''
     Determine if the packet is an acknowledgement frame corresponding to our
@@ -84,7 +88,8 @@ def isAckFor(packet, lastseq):
         if packet[2] == lastseq:
             return True
     return False
-    
+
+
 def getAckByte(packet):
     return packet[2]
 
@@ -224,4 +229,3 @@ if value != None:
 
 kb.close()
 sys.exit(1)
-

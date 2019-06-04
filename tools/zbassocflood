@@ -52,8 +52,8 @@ def watchforaresp(kb, timeout=1):
     kb.sniffer_off()
     return None
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     # Command-line arguments
     arg_panid = None
     arg_devstring = None
@@ -65,10 +65,10 @@ if __name__ == '__main__':
 
     # Assoc Request
     assocreq = "\x23\xc8\x41\x0b\xc7\x00\x00\xff" \
-                "\xff\x00\x00\x00\x00\x00\x00\x00\x00\x01\x8e"
+               "\xff\x00\x00\x00\x00\x00\x00\x00\x00\x01\x8e"
 
     # Association Request Frame in list form, split where we need to modify
-    assocreqp = [ "\x23\xc8",
+    assocreqp = [   "\x23\xc8",
                     "", # Seq num
                     "", # Dest PANID
                     "\x00\x00", # Destination (coordinator)
@@ -78,7 +78,7 @@ if __name__ == '__main__':
                 ]
 
     # Data Request Frame in list form, split where we need to modify
-    datareqp = [ "\x63\xc8",   # FC (intra PAN set)
+    datareqp = [    "\x63\xc8",   # FC (intra PAN set)
                     "", # Seq num
                     "", # Dest PANID
                     "\x00\x00", # Destination (coordinator)
@@ -87,10 +87,9 @@ if __name__ == '__main__':
                 ]
 
     # ACK Frame in list form, split where we need to modify
-    ackp = [ "\x02\x00",    # FC 
-                    ""      # ACK'd seq num
-                ]
-
+    ackp = ["\x02\x00",    # FC
+            ""      # ACK'd seq num
+            ]
 
     while len(sys.argv) > 1:
         op = sys.argv.pop(1)
@@ -136,7 +135,7 @@ if __name__ == '__main__':
     seqnum = 0
     ffdswitch = False
     while 1:
-        if seqnum > 254:                        # 254 to accommodate datareq
+        if seqnum > 254:  # 254 to accommodate datareq
             seqnum = 0
     
         mac = randmac()
@@ -161,7 +160,7 @@ if __name__ == '__main__':
         try:
             # Send the associate request frame
             kb.inject(assocreqinj)
-            time.sleep(0.05) # Delay between assoc and data requests
+            time.sleep(0.05)  # Delay between assoc and data requests
 
             # Send the data request frame
             kb.inject(datareqinj)
@@ -174,7 +173,6 @@ if __name__ == '__main__':
             # Listen for the ACK response
             seq = watchforaresp(kb, arg_framedelay*10)
         except Exception, e:
-            print e
             print "ERROR: Unable to handle response processing."
             print e
             sys.exit(-1)
