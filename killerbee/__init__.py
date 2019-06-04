@@ -315,7 +315,7 @@ class KillerBee:
         # Driver must have this variable name set in its set_channel function
         return self.driver._page
 
-    def set_channel(self, channel, page= 0):
+    def set_channel(self, channel, page=0):
         '''
         Sets the radio interface to the specifid channel & page (subghz)
         @type channel: Integer
