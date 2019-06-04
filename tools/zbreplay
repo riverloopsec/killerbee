@@ -44,6 +44,7 @@ parser.add_argument('-r', '--pcapfile', action='store', default=None)
 parser.add_argument('-R', '--dsnafile', action='store', default=None)
 #parser.add_argument('-g', '--gps', '--ignore', action='append', dest='ignore')
 parser.add_argument('-c', '-f', '--channel', action='store', type=int, default=None)
+parser.add_argument('-z', '--subghz_page', action='store', type=int, default=0)
 parser.add_argument('-n', '--count', action='store', type=int, default=-1)
 parser.add_argument('-s', '--sleep', action='store', type=float, default=1.0)
 parser.add_argument('-D', action='store_true', dest='showdev')
@@ -69,11 +70,11 @@ elif args.dsnafile is not None:
 
 kb = KillerBee(device=args.devstring)
 signal.signal(signal.SIGINT, interrupt)
-if not kb.is_valid_channel(args.channel):
-    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel for the selected device."
+if not kb.is_valid_channel(args.channel, args.subghz_page):
+    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel/page for the selected device."
     kb.close()
     sys.exit(1)
-kb.set_channel(args.channel)
+kb.set_channel(args.channel, page=args.subghz_page)
 
 print("zbreplay: retransmitting frames from \'{0}\' on interface \'{1}\' with a delay of {2} seconds.".format(savefile, kb.get_dev_info()[0], args.sleep))
 
