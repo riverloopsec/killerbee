@@ -95,7 +95,7 @@ a serial sync with some hosts.
 - Cause: Often we find that users are not attaching the antenna as required.
 - Fix: As detailed in the product documentation, you must either:
   - have an appropriate antenna attached to the RP-SMA port
-  - or, move the component on the PCB to select the internal antenna
+  - or, move the component C501 on the PCB to select the internal antenna
 
 #### Shows v2 when it enumerates
 
