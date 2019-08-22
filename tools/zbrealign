@@ -57,7 +57,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--device', help="Destination device long address", action='store', required=True, type=tohex)
     parser.add_argument('-e', '--deviceshort', help="Realignment packet device short address", action='store', required=True, type=tohex)
     parser.add_argument('-q', '--srcseq', action='store', default=254, type=int)
-    parser.add_argument('-z', '--srcseqzbnwk', action='store', default=254, type=int)
+    parser.add_argument('-b', '--srcseqzbnwk', action='store', default=254, type=int)
     parser.add_argument('--newchannel', help="The channel to re-align the PAN with", action='store', required=True, type=int)
     parser.add_argument('--newpanid', help="The new PANID to re-alight the target PAN with", action='store', required=True, type=tohex)
     parser.add_argument('--numloops', action='store', default=1, type=int)
