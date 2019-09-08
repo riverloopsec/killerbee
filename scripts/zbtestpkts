@@ -28,11 +28,12 @@ def interrupt(signum, frame):
     global rxbadcount
     global args
     global kb
+    kb.sniffer_off()
     kb.close()
     if args.recv:
-        print "\n%d packets received, %d were likely bad (%f%%)." % (rxcount,rxbadcount,(rxbadcount/rxcount)*100.0)
+        print("\n%d packets received, %d were likely bad (%f%%)." % (rxcount,rxbadcount,(rxbadcount/rxcount)*100.0))
     else:
-        print "\n%d packets transmitted." % (txcount)
+        print("\n%d packets transmitted." % (txcount))
     sys.exit(0)
 
 def restricted_length(string):
@@ -66,8 +67,8 @@ if __name__ == '__main__':
     kb = KillerBee(device=args.interface)
     kb.set_channel(args.channel)
 
-    print "zbtestpkts: %s on interface \'%s\'" % \
-          ("Receiving" if args.recv else "Transmitting", kb.get_dev_info()[0])
+    print("zbtestpkts: %s on interface \'%s\'" % \
+          ("Receiving" if args.recv else "Transmitting", kb.get_dev_info()[0]))
     
     # Create the default frame we will be testing with (will add seqnums later):
     injframe = ''.join(["%c"%num for num in range(args.length)])
@@ -82,46 +83,46 @@ if __name__ == '__main__':
             try:
                 rxseqnum = ord(packet['bytes'][0])
             except Exception as e:
-                print("Error: {0}, where packet[bytes]=`{1}`".format(e, packet['bytes']))
-            print packet['bytes'].encode('hex')
+                print(("Error: {0}, where packet[bytes]=`{1}`".format(e, packet['bytes'])))
+            print(packet['bytes'].encode('hex'))
             if len(packet['bytes']) < 3:
-                print " > Extremely short packet. Will not try to compare."
+                print(" > Extremely short packet. Will not try to compare.")
                 notoursprob += 1
                 continue
             # Make sure sequence numbers match
             if packet['bytes'][0] != packet['bytes'][-3]:
-                print " > Sequence number missmatch!"
+                print(" > Sequence number missmatch!")
                 notoursprob += 1
             # Make sure we don't have a missed packet
             elif seqnum != rxseqnum:
-                print " > Expected sequence number {0}, received {1}. Possible dropped frame?".format(seqnum, rxseqnum)
+                print(" > Expected sequence number {0}, received {1}. Possible dropped frame?".format(seqnum, rxseqnum))
                 issuesinpkt += 1
                 seqnum = rxseqnum
             # Compare the middle of the message to ensure no corruption
             compbytes = packet['bytes'][1:-3] #cut off seq nums and FCSs
             if compbytes != injframe:
-                print " > Variation from expected frame contents."
+                print(" > Variation from expected frame contents.")
                 if len(injframe) == DEFAULT_PKT_LENGTH:
-                    print " ? If you are transmitting with a non-default length (-l), you should set the same length on this receiver."
+                    print(" ? If you are transmitting with a non-default length (-l), you should set the same length on this receiver.")
                 for i in range(len(injframe)):
                     if compbytes[:i] != injframe[:i]:
-                        print " > Variation occurs at byte %d." % i
+                        print(" > Variation occurs at byte %d." % i)
                         if i < 5: notoursprob += 1
                         issuesinpkt += 1
                         break
             # Compare expected vs actual checksum on the received packet
             if makeFCS(packet['bytes'][:-2]) != packet['bytes'][-2:]:
-                print " > Received checksum is not the expected FCS."
+                print(" > Received checksum is not the expected FCS.")
                 issuesinpkt += 1
             # Increment our sequence number, if we believe the frame rx'ed was meant for us
             if notoursprob > 1:
-                print " ! This packet was likely not meant for our test. Will not count against our ratio."
+                print(" ! This packet was likely not meant for our test. Will not count against our ratio.")
             else:
                 if issuesinpkt >= 1:
                     rxbadcount += 1
                 seqnum += 1
                 if seqnum > 255:
-                    print " > Wrapping around sequence number."
+                    print(" > Wrapping around sequence number.")
                     seqnum = 0
             
     
@@ -129,17 +130,17 @@ if __name__ == '__main__':
     # Loop injecting packets:
     while 1:
         if seqnum > 255:
-            print " . Wrapping around sequence number."
+            print(" . Wrapping around sequence number.")
             seqnum = 0
         # Transmitted frame is: SEQNUM / Bytes 0x00 -> args.length / SEQNUM / FCS
         injbytes = "%c"%seqnum + injframe + "%c"%seqnum
-        print "Sending:", injbytes.encode('hex')
+        print("Sending:", injbytes.encode('hex'))
         try:
             kb.inject(injbytes)
             txcount += 1
             seqnum += 1
-        except Exception, e:
-            print "ERROR: Unable to inject packet:", e
+        except Exception as e:
+            print("ERROR: Unable to inject packet:", e)
             sys.exit(-1)
         if args.delay:
             time.sleep(args.delay)

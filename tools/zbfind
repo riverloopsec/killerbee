@@ -11,6 +11,8 @@ zbstumbler will be more actively maintained for eliciting beacon responses,
 and more recent work has been completed demonstrating the ability to
 use captures to automatically triangulate locations of devices. See:
 http://code.google.com/p/zigbee-security/wiki/PapersAndCoverage
+
+This has to be completely rewritten in order to support python3!
 '''
 
 import pygtk

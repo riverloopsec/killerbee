@@ -1,3 +1,6 @@
+
+import sys
+
 # Import USB support depending on version of pyUSB
 try:
     import usb.core
@@ -11,13 +14,14 @@ except ImportError:
     USBVER=0
 
 import serial
-import os, glob
+import os
+import glob
 import time
 import random
 import inspect
 from struct import pack
 
-from config import *       #to get DEV_ENABLE_* variables
+from .config import *       #to get DEV_ENABLE_* variables
 
 # Known devices by USB ID:
 RZ_USB_VEND_ID      = 0x03EB
@@ -52,8 +56,15 @@ class KBCapabilities:
     SELFACK            = 0x05 #: Capabilities Flag: Can ACK Frames Automatically
     PHYJAM_REFLEX      = 0x06 #: Capabilities Flag: Can Jam PHY Layer Reflexively
     SET_SYNC           = 0x07 #: Capabilities Flag: Can set the register controlling 802.15.4 sync byte
-    FREQ_2400          = 0x08 #: Capabilities Flag: Can preform 2.4 GHz sniffing (ch 11-26)
-    FREQ_900           = 0x09 #: Capabilities Flag: Can preform 900 MHz sniffing (ch 1-10)
+    FREQ_2400          = 0x08 #: Capabilities Flag: Can perform 2.4 GHz sniffing (ch 11-26)
+    FREQ_900           = 0x09 #: Capabilities Flag: Can perform 900 MHz sniffing (ch 1-10)
+    BOOT               = 0x0a #: Capabilities Flag: Has BootLoader
+    FREQ_863           = 0x0b #: Capabilities Flag: Can perform 863-868 MHz sniffing (ch 0-26 )
+    FREQ_868           = 0x0c #: Capabilities Flag: Can perform 868 MHz sniffing (ch 0)
+    FREQ_870           = 0x0d #: Capabilities Flag: Can perform 870-876 MHz sniffing (ch 0-26)
+    FREQ_915           = 0x0e #: Capabilities Flag: Can perform 915-917 MHz sniffing (ch 0-26)
+    FREQ_784           = 0x0f #: Capabilities Flag: Can preform 784 MHz sniffing (ch 128-131)
+
     def __init__(self):
         self._capabilities = {
                 self.NONE : False,
@@ -65,30 +76,118 @@ class KBCapabilities:
                 self.PHYJAM_REFLEX: False,
                 self.SET_SYNC: False,
                 self.FREQ_2400: False,
-                self.FREQ_900: False }
+                self.FREQ_900: False ,
+                self.FREQ_863: False,
+                self.FREQ_868: False ,
+                self.FREQ_870: False,
+                self.FREQ_784: False,
+                self.FREQ_915: False,
+                self.BOOT: False }
+
     def check(self, capab):
         if capab in self._capabilities:
             return self._capabilities[capab]
         else:
             return False
+
     def getlist(self):
         return self._capabilities
+
     def setcapab(self, capab, value):
         self._capabilities[capab] = value
+
     def require(self, capab):
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
-    def is_valid_channel(self, channel):
+
+    def frequency(self, channel=None, page=None):
+        '''
+        Return actual frequency of channel/page in KHz
+        '''
+        #TODO: FREQ_900
+        if not self.is_valid_channel(channel, page):
+            return 0
+
+        # Check if device is Sewio, since this device doesn't support pages
+        from .dev_sewio import isSewio
+        if isSewio(ipaddr):
+            if channel == 0: 
+                base = 868000
+                step = 1000
+                first = 0
+            elif channel >= 11 and channel <= 26: 
+                base = 2400000
+                step = 5000
+                first = 10
+            elif channel >= 1 and channel <= 10: 
+                base = 904000
+                step = 2000
+                first = 0
+            elif channel >= 128 and channel <= 131:
+                base = 780000
+                step = 2000
+                first = 128
+            else:
+                #FREQ_2400
+                base = 2405000
+                step = 5000
+                first = 11
+        else:
+            #FREQ_2400
+            if page == 0:
+                base = 2405000
+                step = 5000
+                first = 11
+            #FREQ_863
+            if page == 28:
+                base = 863250
+                step = 200
+                first = 0
+            #FREQ_868
+            if page == 29:
+                base = 868650
+                step = 200
+                first = 0
+            #FREQ_870
+            if page == 30:
+                base = 870250
+                step = 200
+                first = 0
+            #FREQ_915
+            if page == 31:
+                base = 915350
+                step = 200
+                first = 0
+        return (channel - first) * step + base
+
+    def is_valid_channel(self, channel, page=0):
         '''
         Based on sniffer capabilities, return if this is an OK channel number.
         @rtype: Boolean
         '''
+        # if sub-ghz, check that page and channel and capability match
+        if page:
+            if page == 28 and (channel > 26 or not self.check(self.FREQ_863)):
+                return False
+            if page == 29 and (channel > 8 or not self.check(self.FREQ_868)):
+                return False
+            if page == 30 and (channel > 26 or not self.check(self.FREQ_870)):
+                return False
+            if page == 31 and (channel > 26 or not self.check(self.FREQ_915)):
+                return False
+            if page < 28 or page > 31:
+                return False
+            return True
+
         if (channel >= 11 and channel <= 26) and self.check(self.FREQ_2400):
             return True
         elif (channel >= 1 and channel <= 10) and self.check(self.FREQ_900):
             return True
+        elif (channel == 0) and self.check(self.FREQ_868):
+            return True
+        elif (channel >= 128 and channel <= 131) and self.check(self.FREQ_784):
+            return True
         return False
-
 
 class findFromList(object):
     '''
@@ -109,7 +208,6 @@ class findFromList(object):
             return True
         return False
 
-
 class findFromListAndBusDevId(findFromList):
     '''
     Custom matching function for pyUSB 1.x.
@@ -127,10 +225,9 @@ class findFromListAndBusDevId(findFromList):
         '''
         if findFromList.__call__(self, device)                      and \
            (self._busNum == None or device.bus == self._busNum)     and \
-           (self._devNum == None or device.address == self._devNum)     :
+           (self._devNum == None or device.address == self._devNum):
             return True
         return False
-
 
 def devlist_usb_v1x(vendor=None, product=None):
     '''
@@ -158,7 +255,6 @@ def devlist_usb_v1x(vendor=None, product=None):
 
     return devlist
 
-
 def devlist_usb_v0x(vendor=None, product=None):
     '''
     Private function. Do not call from tools/scripts/etc.
@@ -174,7 +270,6 @@ def devlist_usb_v0x(vendor=None, product=None):
                                   dev.open().getString(dev.iProduct, 50),    \
                                   dev.open().getString(dev.iSerialNumber, 12)])
     return devlist
-
 
 def isIpAddr(ip):
     '''Return True if the given string is a valid IPv4 or IPv6 address.'''
@@ -192,7 +287,6 @@ def isIpAddr(ip):
         except socket.error:    return False
         return True
     return ( is_valid_ipv6_address(ip) or is_valid_ipv4_address(ip) )
-
 
 def devlist(vendor=None, product=None, gps=None, include=None):
     '''
@@ -226,6 +320,10 @@ def devlist(vendor=None, product=None, gps=None, include=None):
         if serialdev == gps_devstring:
             print("kbutils.devlist is skipping ignored/GPS device string {0}".format(serialdev)) #TODO remove debugging print
             continue
+        elif (DEV_ENABLE_SL_NODETEST and issl_nodetest(serialdev)):
+            devlist.append([serialdev, "Silabs NodeTest", ""])
+        elif (DEV_ENABLE_SL_BEEHIVE and issl_beehive(serialdev)):
+            devlist.append([serialdev, "BeeHive SG", ""])
         elif (DEV_ENABLE_ZIGDUINO and iszigduino(serialdev)):
             devlist.append([serialdev, "Zigduino", ""])
         elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
@@ -244,7 +342,7 @@ def devlist(vendor=None, product=None, gps=None, include=None):
 
     if include is not None:
         # Ugly nested load, so we don't load this class when unneeded!
-        import dev_sewio #use isSewio, getFirmwareVersion
+        from . import dev_sewio #use isSewio, getFirmwareVersion
         for ipaddr in filter(isIpAddr, include):
             if dev_sewio.isSewio(ipaddr):
                 devlist.append([ipaddr, "Sewio Open-Sniffer v{0}".format(dev_sewio.getFirmwareVersion(ipaddr)), dev_sewio.getMacAddr(ipaddr)])
@@ -254,15 +352,12 @@ def devlist(vendor=None, product=None, gps=None, include=None):
     
     return devlist
 
-
 def get_serial_devs(seriallist):
     global DEV_ENABLE_FREAKDUINO, DEV_ENABLE_ZIGDUINO
     #TODO Continue moving code from line 163:181 here, yielding results
 
-
 def isSerialDeviceString(s):
     return ( ( s.count('/') + s.count('tty') ) > 0 )
-
 
 def get_serial_ports(include=None):
     '''
@@ -278,11 +373,10 @@ def get_serial_ports(include=None):
         by the normal search. This may be useful if we're not including some
         oddly named serial port which you have a KillerBee device on. Optional.
     '''
-    seriallist = glob.glob("/dev/ttyUSB*") + glob.glob("/dev/tty.usbserial*")  #TODO make cross platform globing/winnt
+    seriallist = glob.glob("/dev/ttyUSB*") + glob.glob("/dev/tty.usbserial*") + glob.glob("/dev/ttyACM*") #TODO make cross platform globing/winnt
     if include is not None:
         seriallist = list( set(seriallist).union(set(filter(isSerialDeviceString, include))) )
     return seriallist
-
 
 def isgoodfetccspi(serialdev):
     '''
@@ -295,60 +389,62 @@ def isgoodfetccspi(serialdev):
                 is the subtype, and is 0 for telosb devices and 1 for apimote devices.
     '''
     #TODO reduce code, perhaps into loop iterating over board configs
-    from GoodFETCCSPI import GoodFETCCSPI
+    from .GoodFETCCSPI import GoodFETCCSPI
     os.environ["platform"] = ""
     # First try tmote detection
-    os.environ["board"] = "telosb" #set enviroment variable for GoodFET code to use
-    gf = GoodFETCCSPI()
-    try:
-        gf.serInit(port=serialdev, attemptlimit=2)
-    except serial.serialutil.SerialException as e:
-        raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
-    if gf.connected == 1:
-        #print "TelosB/Tmote attempts: found %s on %s" % (gf.identstr(), serialdev)
-        # now check if ccspi app is installed
-        out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
-        gf.serClose()        
-        if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
-            return True, 0
+    if DEV_ENABLE_TELOSB:
+        os.environ["board"] = "telosb" #set enviroment variable for GoodFET code to use
+        gf = GoodFETCCSPI()
+        try:
+            gf.serInit(port=serialdev, attemptlimit=2)
+        except serial.serialutil.SerialException as e:
+            raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
+        if gf.connected == 1:
+            #print "TelosB/Tmote attempts: found %s on %s" % (gf.identstr(), serialdev)
+            # now check if ccspi app is installed
+            out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
+            gf.serClose()
+            if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
+                return True, 0
     # Try apimote v2 detection
-    os.environ["board"] = "apimote2" #set enviroment variable for GoodFET code to use
-    gf = GoodFETCCSPI()
-    try:
-        gf.serInit(port=serialdev, attemptlimit=2)
-        #gf.setup()
-    except serial.serialutil.SerialException as e:
-        raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)    
-    if gf.connected == 1:
-        #print "ApiMotev2+ attempts: found %s on %s" % (gf.identstr(), serialdev)
-        # now check if ccspi app is installed
-        out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
-        gf.serClose()        
-        if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
-            return True, 2
+    if DEV_ENABLE_APIMOTE2:
+        os.environ["board"] = "apimote2" #set enviroment variable for GoodFET code to use
+        gf = GoodFETCCSPI()
+        try:
+            gf.serInit(port=serialdev, attemptlimit=2)
+            #gf.setup()
+        except serial.serialutil.SerialException as e:
+            raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
+        if gf.connected == 1:
+            #print "ApiMotev2+ attempts: found %s on %s" % (gf.identstr(), serialdev)
+            # now check if ccspi app is installed
+            out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
+            gf.serClose()
+            if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
+                return True, 2
     # Then try apimote v1 detection
-    os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
-    gf = GoodFETCCSPI()
-    try:
-        #TODO note that in ApiMote v1, this connect appears to be tricky sometimes
-        #     thus attempt limit is raised to 4 for now
-        #     manually verify the hardware is working by using direct GoodFET client commands, such as:
-        #       export board=apimote1; ./goodfet.ccspi info; ./goodfet.ccspi spectrum
-        gf.serInit(port=serialdev, attemptlimit=4)
-        #gf.setup()
-        #print "Found %s on %s" % (gf.identstr(), serialdev)
-    except serial.serialutil.SerialException as e:
-        raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)    
-    if gf.connected == 1:
-        #print "ApiMotev1 attempts: found %s on %s" % (gf.identstr(), serialdev)
-        # now check if ccspi app is installed
-        out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
-        gf.serClose()        
-        if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
-            return True, 1
+    if DEV_ENABLE_APIMOTE1:
+        os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
+        gf = GoodFETCCSPI()
+        try:
+            #TODO note that in ApiMote v1, this connect appears to be tricky sometimes
+            #     thus attempt limit is raised to 4 for now
+            #     manually verify the hardware is working by using direct GoodFET client commands, such as:
+            #       export board=apimote1; ./goodfet.ccspi info; ./goodfet.ccspi spectrum
+            gf.serInit(port=serialdev, attemptlimit=4)
+            #gf.setup()
+            #print "Found %s on %s" % (gf.identstr(), serialdev)
+        except serial.serialutil.SerialException as e:
+            raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
+        if gf.connected == 1:
+            #print "ApiMotev1 attempts: found %s on %s" % (gf.identstr(), serialdev)
+            # now check if ccspi app is installed
+            out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
+            gf.serClose()
+            if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
+                return True, 1
     # Nothing found
     return False, None
-
 
 def iszigduino(serialdev):
     '''
@@ -360,7 +456,7 @@ def iszigduino(serialdev):
     @returns: Boolean with the fist element==True if it is a goodfet atmel128 device.
     '''
     # TODO why does this only work every-other time zbid is invoked?
-    from GoodFETatmel128 import GoodFETatmel128rfa1
+    from .GoodFETatmel128 import GoodFETatmel128rfa1
     os.environ["platform"] = "zigduino"
     gf = GoodFETatmel128rfa1()
     try:
@@ -373,7 +469,54 @@ def iszigduino(serialdev):
         if (gf.app == gf.ATMELRADIOAPP) and (gf.verb == 0x10): #check if ATMELRADIOAPP exists           
             return True
     return False
+    
+def issl_nodetest(serialdev):
+    '''
+    Determine if a given serial device is a Silabs dev board NodeTest loaded (https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf)
+    @type serialdev: String
+    @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
+    @rtype: Boolean
+    '''
+    s = serial.Serial(port=serialdev, baudrate=115200, timeout=.1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+    #time.sleep(.5)
+    # send RX stop in case it was left running
+    s.write('\re\r')
+    # get anything in the buffers
+    for x in range(5):
+        s.readline()
+    s.write('version\r')
+    version = None
+    for i in range(5):
+        d= s.readline()
+        if 'Node Test Application' in d:
+            version = d
+            break
+    s.close()
+    return (version is not None)
 
+def issl_beehive(serialdev):
+    '''
+    Determine if a given serial device is a BeeHive SG - contact Adam Laurie <adam@algroup.co.uk> for more info
+    @type serialdev: String
+    @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
+    @rtype: Boolean
+    '''
+    s = serial.Serial(port=serialdev, baudrate=115200, timeout=.5, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+    #time.sleep(.5)
+    # send RX stop in case it was left running
+    s.write('\rrx 0\r')
+    # get anything in the buffers
+    while s.in_waiting:
+        d = s.readline()
+    s.write('\r')
+    version = None
+    for i in range(5):
+        d= s.readline()
+        if 'BeeHive SG' in d:
+            version = d
+            break
+    s.close()
+    return (version is not None)
 
 def isfreakduino(serialdev):
     '''
@@ -397,29 +540,28 @@ def isfreakduino(serialdev):
     s.close()
     return (version is not None)
 
-
 def search_usb(device):
-    '''
+    """
     Takes either None, specifying that any USB device in the
     global vendor and product lists are acceptable, or takes
     a string that identifies a device in the format
     <BusNumber>:<DeviceNumber>, and returns the pyUSB objects
     for bus and device that correspond to the identifier string.
-    '''
+    """
     if device == None:
         busNum = None
         devNum = None
     else:
         if ':' not in device:
             raise KBInterfaceError("USB device format expects <BusNumber>:<DeviceNumber>, but got {0} instead.".format(device))
-        busNum, devNum = map(int, device.split(':', 1))
+        busNum, devNum = list(map(int, device.split(':', 1)))
     if USBVER == 0:
         busses = usb.busses()
         for bus in busses:
             dev = search_usb_bus_v0x(bus, busNum, devNum)
             if dev != None:
                 return (bus, dev)
-        return None #Note, can't expect a tuple returned
+        return None  # NOTE: can't expect a tuple returned
     elif USBVER == 1:
         return usb.core.find(custom_match=findFromListAndBusDevId(busNum, devNum, usbVendorList, usbProductList)) #backend=backend, 
     else:
@@ -451,7 +593,7 @@ def hexdump(src, length=16):
     '''
     FILTER = ''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
     result = []
-    for i in xrange(0, len(src), length):
+    for i in range(0, len(src), length):
        chars = src[i:i+length]
        hex = ' '.join(["%02x" % ord(x) for x in chars])
        printable = ''.join(["%s" % ((ord(x) <= 127 and FILTER[ord(x)]) or '.') for x in chars])
@@ -466,7 +608,7 @@ def randbytes(size):
     @param size: Length of random data to return.
     @rtype: String
     '''
-    return ''.join(chr(random.randrange(0,256)) for i in xrange(size))
+    return ''.join(chr(random.randrange(0,256)) for i in range(size))
 
 
 def randmac(length=8):
@@ -500,16 +642,16 @@ def randmac(length=8):
 
 
 def makeFCS(data):
-    """
+    '''
     Do a CRC-CCITT Kermit 16bit on the data given
     Implemented using pseudocode from: June 1986, Kermit Protocol Manual
     See also: http://regregex.bbcmicro.net/crc-catalogue.htm#crc.cat.kermit
 
     @return: a CRC that is the FCS for the frame, as two hex bytes in
         little-endian order.
-    """
+    '''
     crc = 0
-    for i in xrange(len(data)):
+    for i in range(len(data)):
         c = ord(data[i])
         # if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
         q = (crc ^ c) & 15				#Do low-order 4 bits
@@ -520,34 +662,37 @@ def makeFCS(data):
 
 
 class KBException(Exception):
-    """
+    '''
     Base class for all KillerBee specific exceptions.
-    """
+    '''
     pass
 
 
 class KBInterfaceError(KBException):
-    """
+    '''
     Custom exception for KillerBee having issues communicating
     with an interface, such as opening a port, syncing with the firmware, etc.
-    """
+    '''
     pass
 
 
 def pyusb_1x_patch():
-    """
+    '''
     Monkey-patch pyusb 1.x for API compatibility
+    '''
 
+    '''
     In pyusb v1.0.0b2 (git dac78933), they removed the "length" parameter
     to usb.util.get_string(). We'll monkey-patch older versions so we don't
     have to ever pass this argument.
-    """
-    if 'length' in inspect.getargspec(usb.util.get_string).args:
-        print 'Monkey-patching usb.util.get_string()'
+    '''
+    if 'length' in inspect.getfullargspec(usb.util.get_string).args:
+        print('Monkey-patching usb.util.get_string()', file=sys.stderr)
         def get_string(dev, index, langid = None):
             return usb.util.zzz__get_string(dev, 255, index, langid)
         usb.util.zzz__get_string = usb.util.get_string
         usb.util.get_string = get_string
+
 
 if USBVER == 1:
     pyusb_1x_patch()

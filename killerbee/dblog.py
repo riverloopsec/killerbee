@@ -1,4 +1,4 @@
-from config import *
+from .config import *
 import MySQLdb
 
 class DBReader:
@@ -33,7 +33,7 @@ class DBReader:
         else: return
 
 class DBLogger:
-    def __init__(self, datasource=None, channel=None):
+    def __init__(self, datasource=None, channel=None, page=0):
         self.conn = None
 
         if datasource == None: #datasource must be provided if DBLogger is desired
@@ -41,11 +41,13 @@ class DBLogger:
 
         self.db = None
         self.channel = channel
+        self.page = page
 
         # Initalize the connection
         try:
             self.db = MySQLdb.connect(user=DB_USER, passwd=DB_PASS, db=DB_NAME, host=DB_HOST, port=DB_PORT)
-        except Exception as (errno, errmsg):
+        except Exception as xxx_todo_changeme:
+            (errno, errmsg) = xxx_todo_changeme.args
             raise Exception("DBLogger was unable to connect to the database: " \
                             +"(error %d): %s (Note: connection values should be in config.py)." % (errno,errmsg))
         if self.db == None: #this backup check may be redundant
@@ -55,18 +57,19 @@ class DBLogger:
         # Set the ds_id attribute to correspond to the requested data source name
         self.conn.execute("SELECT ds_id FROM datasources WHERE ds_name LIKE %s LIMIT 1", (datasource,))
         if self.conn.rowcount == 1: self.ds_id = self.conn.fetchone()
-        else: print "No datasource found matching name:", datasource
+        else: print("No datasource found matching name:", datasource)
 
     def close(self):
         if self.conn != None:
             self.conn.close()
             self.conn = None
 
-    def set_channel(self, chan):
+    def set_channel(self, chan, page):
         self.channel = chan
+        self.page = page
 
     def add_packet(self, full=None, scapy=None,
-                   bytes=None, rssi=None, location=None, datetime=None, channel=None):
+                   bytes=None, rssi=None, location=None, datetime=None, channel=None, page=0):
         if (self.conn==None): raise Exception("DBLogger requires active connection status.")
         # Use values in 'full' parameter to provide data for undefined other parameters
         if bytes == None and 'bytes' in full: bytes = full['bytes']
@@ -106,11 +109,13 @@ class DBLogger:
         sql.append("db_datetime=NOW()")
         if datetime != None: sql.append("cap_datetime='%s'" % str(datetime))
         if self.channel != None: sql.append("channel=%d" % self.channel)
+        if self.page: sql.append("page=%d" % self.page)
         if srcdevid != None: sql.append("source=%d" % srcdevid)
         if destdevid != None: sql.append("dest=%d" % destdevid)
         if rssi != None: sql.append("rssi=%d" % rssi)
         if loc_id != None: sql.append("loc_id=%d" % loc_id)
-        if channel != None: sql.append("channel=%d" % channel)
+        if channel != None: sql.append("channel=%d" % channel) # TODO: bug? why is this in here twice?
+        if page: sql.append("page=%d" % page) # TODO: bug? 
         sql.append("fcf_panidcompress=%d" % scapy.fcf_panidcompress)
         sql.append("fcf_ackreq=%d" % scapy.fcf_ackreq)
         sql.append("fcf_pending=%d" % scapy.fcf_pending)

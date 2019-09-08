@@ -29,7 +29,7 @@ def display_details(routerdata):
     stackprofile = ord(stackprofilever) & 0x0f
     stackver = (ord(stackprofilever) & 0xf0) >>4
 
-    print "New Network: PANID 0x%02X%02X  Source 0x%02X%02X"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1]))
+    print("New Network: PANID 0x%02X%02X  Source 0x%02X%02X"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1])))
 
     try:
         extpanidstr=""
@@ -41,10 +41,10 @@ def display_details(routerdata):
         sys.stdout.write("\tExt PANID: Unknown")
 
     try:
-        print "\tStack Profile: %s"%stackprofile_map[stackprofile]
+        print("\tStack Profile: %s"%stackprofile_map[stackprofile])
         stackprofilestr = stackprofile_map[stackprofile]
     except KeyError:
-        print "\tStack Profile: Unknown (%d)"%stackprofile
+        print("\tStack Profile: Unknown (%d)"%stackprofile)
         stackprofilestr = "Unknown (%d)"%stackprofile
 
     try:
@@ -59,6 +59,7 @@ def display_details(routerdata):
     if args.csvfile is not None:
         csvfile.write("0x%02X%02X,0x%02X%02X,%s,%s,%s,%d\n"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1]), extpanidstr, stackprofilestr, stackverstr, channel))
 
+
 def response_handler(stumbled, packet, channel):
     global args
     d154 = Dot154PacketParser()
@@ -70,9 +71,6 @@ def response_handler(stumbled, packet, channel):
 
     # Check if this is a beacon frame
     if (fcf & DOT154_FCF_TYPE_MASK) == DOT154_FCF_TYPE_BEACON:
-        if args.verbose:
-            print "Received frame is a beacon."
-
         # The 6th element offset in the Dot154PacketParser.pktchop() method
         # contains the beacon data in its own list.  Extract the Ext PAN ID.
         spanid = pktdecode[4][::-1]
@@ -80,16 +78,26 @@ def response_handler(stumbled, packet, channel):
         beacondata = pktdecode[6]
         extpanid = beacondata[6][::-1]
         stackprofilever = beacondata[4]
+        assocPermit = struct.unpack("<H", beacondata[0])[0] & 0x8000
 
-        key = ''.join([spanid, source])
+        key = b''.join([spanid, source])
         value = [spanid, source, extpanid, stackprofilever, channel]
         if not key in stumbled:
             if args.verbose:
-                print("Beacon represents new network.")
+                if assocPermit:
+                    print("Beacon represents new network - ### Permitting new associations ###.")
+                else:
+                    print("Beacon represents new network - not accepting new associations.")
                 #print hexdump(packet)
                 #print pktdecode
             stumbled[key] = value
             display_details(value)
+        else:
+            if args.verbose:
+                if assocPermit:
+                    print("Received frame is a beacon - ### Permitting new associations ###.")
+                else:
+                    print("Received frame is a beacon - not accepting new associations.")
         return value
 
     if args.verbose:
@@ -114,13 +122,13 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--gps', '--ignore', action='append', dest='ignore')
     parser.add_argument('-s', '--delay', action='store', type=float, dest='delay', default=2.0)
     parser.add_argument('-v', '--verbose', action='store_true')
-    parser.add_argument('-c', '--channel', action='store', type=int, dest='channel', default=None)
+    parser.add_argument('-c', '--channel', action='store', type=int, default=None)
     parser.add_argument('-w', '--file', action='store', dest='csvfile', default=None)
     parser.add_argument('-D', action='store_true', dest='showdev')
     args = parser.parse_args()
 
     if args.showdev:
-        show_dev(include=[args.devstring])
+        show_dev()
         sys.exit(0)
 
     if args.csvfile is not None:
@@ -129,9 +137,9 @@ if __name__ == '__main__':
         except Exception as e:
             print("Issue opening CSV output file: {0}.".format(e))
         csvfile.write("panid,source,extpanid,stackprofile,stackversion,channel\n")
-    
+
     # Beacon frame
-    beacon = "\x03\x08\x00\xff\xff\xff\xff\x07"
+    beacon = b'\x03\x08\x00\xff\xff\xff\xff\x07'
     # Immutable strings - split beacon around sequence number field
     beaconp1 = beacon[0:2]
     beaconp2 = beacon[3:]
@@ -144,36 +152,47 @@ if __name__ == '__main__':
 
     signal.signal(signal.SIGINT, interrupt)
     print("zbstumbler: Transmitting and receiving on interface \'{0}\'".format(kb.get_dev_info()[0]))
-    
+
     # Sequence number of beacon request frame
     seqnum = 0
-    if args.channel is not None:
+    if args.channel:
         channel = args.channel
         kb.set_channel(channel)
     else:
         channel = 11
 
+    # check if device is a Sewio Open Sniffer
+    isSewio = False
+    if (s for s in kb.get_dev_info() if 'Sewio' in s):
+        isSewio = True
+
     # Loop injecting and receiving packets
     while 1:
         if channel > 26:
-            channel = 11
+            if isSewio:
+                if channel > 131:
+                    channel = 0
+                elif channel < 128:
+                    channel = 128
+            else:
+                channel = 11
 
         if seqnum > 255:
             seqnum = 0
-    
-        if args.channel is None:
+
+        if not args.channel:
             if args.verbose:
                 print("Setting channel to {0}.".format(channel))
             try:
                 kb.set_channel(channel)
-            except Exception, e:
+            except Exception as e:
                 print("ERROR: Failed to set channel to {0}. ({1})".format(channel, e))
                 sys.exit(-1)
-    
+
         if args.verbose:
             print("Transmitting beacon request.")
 
-        beaconinj = ''.join([beaconp1, "%c" % seqnum, beaconp2])
+        beaconinj = b''.join([beaconp1, b'%c' % seqnum, beaconp2])
 
         # Process packets for arg_delay seconds looking for the beacon
         # response frame.
@@ -182,7 +201,7 @@ if __name__ == '__main__':
         try:
             txcount+=1
             kb.inject(beaconinj)
-        except Exception, e:
+        except Exception as e:
             print("ERROR: Unable to inject packet: {0}".format(e))
             sys.exit(-1)
 
@@ -194,10 +213,10 @@ if __name__ == '__main__':
                 rxcount += 1
                 if args.verbose:
                     print("Received frame.")#, time.time()-start
-                networkdata = response_handler(stumbled, recvpkt[0], channel) 
+                networkdata = response_handler(stumbled, recvpkt[0], channel)
 
-        kb.sniffer_off()    
+        kb.sniffer_off()
         seqnum += 1
-        if args.channel is None:
+        if not args.channel:
             channel += 1
 

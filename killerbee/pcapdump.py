@@ -9,7 +9,7 @@ PCAPH_THISZONE  = 0
 PCAPH_SIGFIGS   = 0
 PCAPH_SNAPLEN   = 65535
 
-DOT11COMMON_TAG = 000002
+DOT11COMMON_TAG = 0o00002
 GPS_TAG		= 30002
 
 class PcapReader:
@@ -118,7 +118,7 @@ class PcapDumper:
         if ppi: from killerbee.pcapdlt import DLT_PPI
         self.ppi = ppi
 
-        if isinstance(savefile, basestring):
+        if isinstance(savefile, str):
             self.__fh = open(savefile, mode='wb')
         elif hasattr(savefile, 'write'):
             self.__fh = savefile
@@ -126,7 +126,8 @@ class PcapDumper:
             raise ValueError("Unsupported type for 'savefile' argument")
 
         self.datalink = datalink
-        self.__fh.write(''.join([
+        #TODO: Ensure this isn't printing out things prefixed with 'b' characters.
+        self.__fh.write(b"".join([
             struct.pack("I", PCAPH_MAGIC_NUM), 
             struct.pack("H", PCAPH_VER_MAJOR),
             struct.pack("H", PCAPH_VER_MINOR),
@@ -142,6 +143,7 @@ class PcapDumper:
     def __exit__(self, *exinfo):
         self.close()
 
+    #TODO: fix freq_mhz for subGHz which end up as float
     def pcap_dump(self, packet, ts_sec=None, ts_usec=None, orig_len=None, 
                   freq_mhz = None, ant_dbm = None, location = None):
         '''
@@ -172,10 +174,10 @@ class PcapDumper:
             #CACE PPI Field 802.11-Common
             pph_len += 24 #802.11-common header and data
             rf_freq_mhz = 0x0000
-            if freq_mhz is not None: rf_freq_mhz = freq_mhz
+            if freq_mhz is not None: rf_freq_mhz = int(freq_mhz) #TODO: fix for float
             rf_ant_dbm = 0
             if ant_dbm is not None: rf_ant_dbm = ant_dbm
-            caceppi_f80211common = ''.join([
+            caceppi_f80211common = b"".join([
                 struct.pack("<H", DOT11COMMON_TAG), #2 = Field Type 802.11-Common
                 struct.pack("<H", 20),              #20 = 802.11-Common length in bytes
                 struct.pack("<Q", 0),               #FSF-Timer
@@ -207,7 +209,7 @@ class PcapDumper:
                 else:
                     raise Exception("Altitude value is out of expected range: %.8f" % lon)
                 # Build Geolocation PPI Header
-                caceppi_fgeolocation = ''.join([
+                caceppi_fgeolocation = b"".join([
                     struct.pack("<H", GPS_TAG),  #2 = Field Type 802.11-Common
                     struct.pack("<H", 20),       #20 = 802.11-Common length in bytes
                     struct.pack("<B", 1),        #Geotag Version
@@ -220,7 +222,7 @@ class PcapDumper:
                     ])
 
             #CACE PPI Header
-            caceppi_hdr = ''.join([
+            caceppi_hdr = b"".join([
                 struct.pack("<B", 0),		     #PPH version
                 struct.pack("<B", 0x00),         #PPH flags
                 struct.pack("<H", pph_len),	     #PPH len
@@ -262,7 +264,7 @@ class PcapDumper:
         # Specially for handling FIFO needs:
         try:
             self.__fh.flush()
-        except IOError, e:
+        except IOError as e:
             raise e
 
 

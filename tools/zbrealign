@@ -15,7 +15,7 @@ from killerbee import *
 try:
 	from scapy.all import *
 except ImportError:
-	print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
+	print('This tool requires Scapy to be installed (specifically scapy-com edition).')
 	from sys import exit
 	exit(-1)
 
@@ -49,6 +49,7 @@ if __name__ == '__main__':
     # Command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--channel', '-c', action='store', dest='channel', required=True, type=int, default=11)
+    parser.add_argument('-z', '--subghz_page', action='store', type=int, default=0)
     parser.add_argument('-i', '--interface', action='store', dest='devstring', default=None)
     parser.add_argument('-p', '--panid', help="The current PAN ID of the victim PAN", action='store', required=True, type=tohex)
     parser.add_argument('-s', '--coordinator', help="Realignment packet coordinator short address", action='store', required=True, type=tohex)
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--device', help="Destination device long address", action='store', required=True, type=tohex)
     parser.add_argument('-e', '--deviceshort', help="Realignment packet device short address", action='store', required=True, type=tohex)
     parser.add_argument('-q', '--srcseq', action='store', default=254, type=int)
-    parser.add_argument('-z', '--srcseqzbnwk', action='store', default=254, type=int)
+    parser.add_argument('-b', '--srcseqzbnwk', action='store', default=254, type=int)
     parser.add_argument('--newchannel', help="The channel to re-align the PAN with", action='store', required=True, type=int)
     parser.add_argument('--newpanid', help="The new PANID to re-alight the target PAN with", action='store', required=True, type=tohex)
     parser.add_argument('--numloops', action='store', default=1, type=int)
@@ -66,7 +67,7 @@ if __name__ == '__main__':
     #TODO: seqnums for each direction
 
     kb = KillerBee(device=args.devstring)
-    kb.set_channel(args.channel)
+    kb.set_channel(args.channel, page=args.subghz_page)
 
     seqnummac = args.srcseq
 
@@ -78,4 +79,3 @@ if __name__ == '__main__':
             seqnummac = 0
         kb.inject(sp2) # already made it a string to get around limitation in dot14d4
         sleep(0.005)
-

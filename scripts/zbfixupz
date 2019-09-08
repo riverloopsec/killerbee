@@ -10,11 +10,11 @@ in Wireshark, etc.
 '''
 
 def usage():
-    print >>sys.stderr, """
+    print("""
 zbfixupz - Remove the trailing byte in libpcap packet captures to fix an earlier zbdump bug.  You only need to use this script if you have an older libpcap packet capture from zbdump that is giving you FCS errors.  Thanks to Tyler N. for the help in resolving this.                       jwright@willhackforsushi.com
 
 Usage: zbconvert [-n] [-i input] [-o output] [-c count]
-    """
+    """, file=sys.stderr)
 
 
 # Global
@@ -39,17 +39,17 @@ while len(sys.argv) > 1:
  
 
 if arg_infile == None or arg_outfile == None:
-    print >>sys.stderr, "ERROR: Must specify an input file (-i) and an output file (-o)."
+    print("ERROR: Must specify an input file (-i) and an output file (-o).", file=sys.stderr)
     usage()
     sys.exit(1)
 
 if arg_noclobber:
     if os.path.exists(arg_outfile):
-        print >>sys.stderr, "ERROR: Output file \"%s\" already exists." % arg_outfile
+        print("ERROR: Output file \"%s\" already exists." % arg_outfile, file=sys.stderr)
         sys.exit(1)
 
 if not os.path.exists(arg_infile):
-    print >>sys.stderr, "ERROR: Input file \"%s\" does not exist." % arg_infile
+    print("ERROR: Input file \"%s\" does not exist." % arg_infile, file=sys.stderr)
     sys.exit(1)
 
 
@@ -72,4 +72,4 @@ while arg_count != packetcount:
 
 incap.close()
 outcap.close()
-print "Converted %d packets." % packetcount
+print("Converted %d packets." % packetcount)

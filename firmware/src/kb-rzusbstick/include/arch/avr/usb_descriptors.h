@@ -120,6 +120,8 @@
 }
 
 #define USB_PN_LENGTH         10
+
+#ifdef BOOT_VER_MAJ
 #define USB_PRODUCT_NAME \
 { Usb_unicode('K') \
  ,Usb_unicode('I') \
@@ -130,8 +132,22 @@
  ,Usb_unicode('B') \
  ,Usb_unicode('0') \
  ,Usb_unicode('0') \
- ,Usb_unicode('1') \
+ ,Usb_unicode('T') \
 }
+#else
+#define USB_PRODUCT_NAME \
+{ Usb_unicode('K') \
+ ,Usb_unicode('I') \
+ ,Usb_unicode('L') \
+ ,Usb_unicode('L') \
+ ,Usb_unicode('E') \
+ ,Usb_unicode('R') \
+ ,Usb_unicode('B') \
+ ,Usb_unicode('0') \
+ ,Usb_unicode('0') \
+ ,Usb_unicode('6') \
+}
+#endif
 
 #define USB_SN_LENGTH         0x0D
               // Serial Number should be at least 12 characters long

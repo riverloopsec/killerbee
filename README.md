@@ -1,46 +1,53 @@
 KillerBee
 ================
 
-This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4 networks.
+KillerBee is a Framework and Tools for Testing & Auditing ZigBee and IEEE 802.15.4 Networks
 
 MAINTAINERS/LICENSE
 ================
 
-Distributed under a BSD license, see LICENSE for details.
+Distributed under a BSD license, see LICENSE.txt for details.
 All Rights Reserved.
 
 The main toolkit was/is authored by:
 + 2009, Joshua Wright <jwright@willhackforsushi.com>
-+ 2010-2017, Ryan Speers <ryan@riverloopsecurity.com>
++ 2010-2019, Ryan Speers <ryan@riverloopsecurity.com>
 + 2010-2011, Ricky Melgares <ricky@riverloopsecurity.com>
 
 We appreciate the many contributers to the framework, including the following who have contributed capabilities:
 + Anonymous Contributors
 + Spencer McIntyre (scapy extension)
 + Bryan Halfpap <Bryanhalf@gmail.com> (additional tools)
++ Travis Goodspeed
++ Mike Kershaw (dragorn)
++ Chris Wang (aikiba)
++ Nick DePetrillo
++ Ed Skoudis
++ Matt Carpenter
++ Sergey Bratus (research support at Dartmouth)
++ Jeff Spielberg
++ Scytmo (bug fixes and CC2530/1 EMK board support)
++ Adam Laurie/rfidiot (APS crypto implementation, firmware, DFU & BOOTLOADER, SubGHZ, SiLabs NodeTest)
++ Steve Martin
++ Jan Rude (whoot)
 
 REQUIREMENTS
 ================
-KillerBee is developed and tested on Linux systems. Some users also run on OSX.
-Windows support may be added in the future.
+
+KillerBee is developed and tested on Linux systems.
+MacOS usage is possible but not supported.
 
 We have striven to use a minimum number of software dependencies, however, it
-is necessary to install the following Python modules before installation:
-
-+ serial
-+ usb
-+ crypto  (for some functions)
-+ pygtk   (for use of tools that have GUIs)
-+ cairo   (for use of tools that have GUIs)
-+ scapy-com (for some tools which utilize 802.15.4 Scapy extensions)
+is necessary to install the following Python modules before installation.
+The install will detect and prompt you for what is needed.
 
 On Ubuntu systems, you can install the needed dependencies with the following
 commands:
 
 ```
 # apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
-# hg clone https://bitbucket.org/secdev/scapy-com
-# cd scapy-com
+# git clone https://github.com/secdev/scapy
+# cd scapy
 # python setup.py install
 ```
 
@@ -64,29 +71,6 @@ Install KillerBee with the following command:
 # python setup.py install
 ```
 
-RUNNING IN DOCKER
-================
-
-An alternative to the above installation steps is to run in a docker container.
-
-To make an instance, run the following in the KillerBee directory where there is
-a Dockerfile to base from:
-```
-$ docker build -t killerbee .
-```
-
-To use the image, run the following. If you wish to use a device, you must first
-know the path of any USB dongles which you want to expose into the docker image.
-```
-$ docker run -i -t killerbee
-```
-
-It is often helpful to also mount the current directory where you are working:
-```
-$ docker run -v "`pwd`":/root -i -t killerbee
-```
-
-
 DIRECTORIES
 ================
 The directory structure for the KillerBee code is described as follows:
@@ -101,17 +85,16 @@ The directory structure for the KillerBee code is described as follows:
 REQUIRED HARDWARE
 ================
 The KillerBee framework is being expanded to support multiple devices.
-Currently there is support for the River Loop ApiMote,
-Atmel RZ RAVEN USB Stick, MoteIV Tmote Sky, TelosB mote, and Sewino Sniffer.
+Currently there is support for the River Loop ApiMote, Atmel RZ RAVEN USB Stick,
+MoteIV Tmote Sky, TelosB mote, Sewio Sniffer, and various hardware running Silicon Labs Node Test firmware.
 
-Support for Freaklab's Freakduino with added hardware
-and the Dartmouth arduino sketch, Zigduino, and Sewio Sniffer board
-is available but are not listed below as they are not maintained.
+Support for Freaklab's Freakduino with added hardware & the Dartmouth arduino sketch
+and Zigduino boards are available but are not listed below as they are not maintained.
+You must enable these to be searched for in `killerbee/config.py` and then reinstall KillerBee.
 
 ApiMote v4beta (and v3):
 ----------------
-The devices typically come preloaded and do not need to be reflashed for basic
-use.
+The devices typically come preloaded and do not need to be reflashed for basic use.
 
 The hardware is open-source at https://github.com/riverloopsec/apimote.
 It is available assembled by contacting team at riverloopsecurity dot com.
@@ -142,7 +125,6 @@ These boards can be obtained via multiple distributors, however
 stated that their "clone" of the original hardware is compatible.
 We have not tested nor do we endorse any specific "clone".
 
-
 Atmel RZ RAVEN USB Stick:
 ----------------
 See http://www.atmel.com/tools/RZUSBSTICK.aspx.
@@ -165,21 +147,35 @@ devices on the network.
 
 In order to get the full functionality included in KillerBee, the RZ RAVEN USB
 Stick must be flashed with the custom firmware included in the `firmware/ `
-directory. _See `firmware/README.md` for details._
+directory. _See [firmware/README.md](firmware/README.md) for details._
 
-Sewio OpenSniffer
+Silicon Labs Node Test 2.4GHz & SubGHz:
+----------------
+See [SiLabs AN1019](https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf).
+
+This is a firmware image for a huge variety of hardware platforms, supporting EM250, EM375, EFR32, etc., and provides for (with appropriate radio part) the following frequencies:
++ 2.4 GHz (ch 11-26)
++ 863-917 MHz (pages 28-31, ch 0-26)
+
+You must enable these to be searched for in `killerbee/config.py` and then reinstall KillerBee.
+See [firmware/README.md](firmware/README.md) for installation details.
+
+_NOTE: This is a SNIFFER only implementation which will only read packets with a good FCS, and although the firmware has injection capability, it adds a 2 byte counter to the end of every packet, rendering it useless for all practical purposes. If you are interested in an INJECTION and BAD FCS capable device, contact the author, Adam Laurie - adam at algroup.co.uk_
+
+Sewio Open Sniffer
 ----------------
 
-This hardware supports both 900 MHz as well as the 2.4 GHz channels.
+This hardware supports 784 MHz, 868 MHz, 915 MHz as well as the 2.4 GHz channels.
 
 The early hardware supports sniffing.
 The gen3 hardware, firmware version 0.9.0+, supports injection and jamming.
 
 To use this, you must:
- - configure your computer to be on the 10.10.10.0/24 network, to communicate with the device's default IP
- - provide the `-i 10.10.10.2` or similar flags to utilities so it detects this device
+ - configure your computer to the IP address 10.10.10.1, to communicate with the device's default IP (10.10.10.2).
+ - provide the `-i 10.10.10.2` or similar flags to utilities so it detects this device.
 
-_This is currently supported for beta._
+This can be done automatically with the configration script `scripts/configure_sewio.py connect`.
+
 
 TOOLS
 ================
@@ -187,7 +183,6 @@ KillerBee includes several tools designed to attack ZigBee and IEEE 802.15.4
 networks, built using the KillerBee framework.  Each tool has its own usage
 instructions documented by running the tool with the "-h" argument, and
 summarized below.
-
 
 + zbid         -  Identifies available interfaces that can be used by KillerBee
                 and associated tools.
@@ -231,17 +226,15 @@ summarized below.
 + zbdsniff     -  Captures ZigBee traffic, looking for NWK frames and over-the-air
                 key provisioning.  When a key is found, zbdsniff prints the
                 key to stdout.  The sample packet capture
-                sample/zigbee-network-key-ota.dcf can be used to demonstrate
+                `sample/zigbee-network-key-ota.dcf` can be used to demonstrate
                 this functionality.
 + zbfind       -  A GTK GUI application for tracking the location of an IEEE
-                802.15.4 transmitter by measuring RSSI.  Zbfind can be passive
+                802.15.4 transmitter by measuring RSSI. zbfind can be passive
                 in discovery (only listen for packets) or it can be active by
                 sending Beacon Request frames and recording the responses from
                 ZigBee routers and coordinators.
                 If you get a bunch of errors after starting this tool, make
-                sure your DISPLAY variable is set properly.  If you know how
-                to catch these errors to display a reasonable error message,
-                please drop me a note.
+                sure your `DISPLAY` variable is set properly.
 + zbgoodfind   -  Implements a key search function using an encrypted packet
                 capture and memory dump from a legitimate ZigBee or IEEE
                 802.15.4 device.  This tool accompanies Travis Goodspeed's
@@ -258,6 +251,7 @@ summarized below.
                 installed to run this.
 + zbscapy      -  Provides an interactive Scapy shell for interacting via a
                 KillerBee interface. Scapy must be installed to run this.
++ kbbootloader -  Switches device into DFU/BOOTLOADER mode (if device is capable)
 
 Additional tools, that are for special cases or are not stable, are stored in
     the Api-Do project repository: http://code.google.com/p/zigbee-security/
@@ -285,8 +279,7 @@ The pdf/ directory will have a file called "api.pdf" which includes the
 framework documentation.
 
 To get started using the KillerBee framework, take a look at the included tools
-(zbdump and zbreplay are good examples to get started) and the simple test
-cases in the t/ directory.
+(zbdump and zbreplay are good examples to get started).
 
 Since KillerBee is a Python library, it integrates well with other Python
 software as well.  For example, the Sulley library is a fuzzing framework
@@ -297,23 +290,10 @@ mechanism for generating and transmitting malformed ZigBee data to a target.
 
 QUESTIONS/COMMENTS/CONCERNS
 ==============
-Please us the ticketing system at https://github.com/riverloopsec/killerbee/issues.
+Please use the ticketing system at https://github.com/riverloopsec/killerbee/issues.
 
-The original version was written by: jwright@willhackforsushi.com
-The current version, fixes, etc are handled by: ryan@riverloopsecurity.com
-Additional Tools/Fixes by bryanhalf@gmail.com and other fine individuals.
+The original version was written by: jwright@willhackforsushi.com.
+The current version, fixes, etc are handled by: ryan@riverloopsecurity.com.
+(See the list above for all contributors/credits.)
 
-THANKS
-==============
-A word of thanks to several folks who helped out with this project:
-
-+ Travis Goodspeed (TelosB firmware based on GoodFET)
-+ Mike Kershaw (dragorn)
-+ Chris Wang (aikiba)
-+ Nick DePetrillo
-+ Ed Skoudis
-+ Matt Carpenter
-+ Sergey Bratus (research support at Dartmouth)
-+ Jeff Spielberg (River Loop Security)
-+ Scytmo (bug fixes and CC2530/1 EMK board support)
-+ null0x00 (Sewio injection/jamming)
+For contributors/developers, see `DEVELOPMENT.md` for details and guidance.

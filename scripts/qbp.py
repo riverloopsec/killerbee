@@ -2,10 +2,10 @@
 from killerbee import *
 import sys
 
-print "QuahogCon Badge Pwn (qbp) - jwright@willhackforsushi.com"
+print("QuahogCon Badge Pwn (qbp) - jwright@willhackforsushi.com")
 
 if len(sys.argv) == 1:
-    print """
+    print("""
 Usage: qbp [mode]
 
 Mode is one of:
@@ -18,7 +18,7 @@ Mode is one of:
     human   - Become a human
 
 Packets get sent 5 times, for good measure.
-"""
+""")
 else:
     
     modes = {
@@ -32,8 +32,8 @@ else:
     kb = KillerBee()
     kb.set_channel(26)
     try:
-        for i in xrange(0,5):
+        for i in range(0,5):
             kb.inject(modes[sys.argv[1]])
             time.sleep(.2)
     except:
-        print "Something got messed up, please check your mode designation"
+        print("Something got messed up, please check your mode designation")

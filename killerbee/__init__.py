@@ -2,51 +2,49 @@ import struct
 import glob
 from warnings import warn
 
-from pcapdump import *
-from daintree import *
-from pcapdlt import *
+from .pcapdump import *
+from .daintree import *
+from .pcapdlt import *
 
-from kbutils import *      #provides serial, usb, USBVER
-from zigbeedecode import * #would like to import only within killerbee class
-from dot154decode import * #would like to import only within killerbee class
-from config import *       #to get DEV_ENABLE_* variables
+from .kbutils import *      #provides serial, usb, USBVER
+from .zigbeedecode import * #would like to import only within killerbee class
+from .dot154decode import * #would like to import only within killerbee class
+from .config import *       #to get DEV_ENABLE_* variables
 
 # Utility Functions
-def getKillerBee(channel):
+def getKillerBee(channel, page= 0):
     '''
-    Returns an instance of a KillerBee device, setup on the given channel.
+    Returns an instance of a KillerBee device, setup on the given channel/page.
     Error handling for KillerBee creation and setting of the channel is wrapped
     and will raise an Exception().
-    @return: A KillerBee instance initialized to the given channel.
+    @return: A KillerBee instance initialized to the given channel/page.
     '''
     kb = KillerBee()
     if kb is None:
         raise Exception("Failed to create a KillerBee instance.")
     try:
-        kb.set_channel(channel)
+        kb.set_channel(channel, page)
     except Exception as e:
-        raise Exception('Error: Failed to set channel to %d' % channel, e)
+        raise Exception('Error: Failed to set channel to %d/%d' % (channel, page), e)
     return kb
 
 def kb_dev_list(vendor=None, product=None):
     '''Deprecated. Use show_dev or call kbutils.devlist.'''
     return kbutils.devlist(vendor=None, product=None)
 
-
 def show_dev(vendor=None, product=None, gps=None, include=None):
-    """
+    '''
     A basic function to output the device listing.
     Placed here for reuse, as many tool scripts were implementing it.
     @param gps: Provide device names in this argument (previously known as
         'gps') which you wish to not be enumerated. Aka, exclude these items.
     @param include: Provide device names in this argument if you would like only
         these to be enumerated. Aka, include only these items.
-    """
-    fmt = "{: >14} {: <30} {: >10}"
-    print(fmt.format("Dev", "Product String", "Serial Number"))
+    '''
+    fmt_str = "{: >14} {: <25} {: >10}"
+    print(fmt_str.format("Dev", "Product String", "Serial Number"))
     for dev in kbutils.devlist(vendor=vendor, product=product, gps=gps, include=include):
-        print(fmt.format(dev[0], dev[1], dev[2]))
-
+        print(fmt_str.format(dev[0], dev[1], dev[2] if dev[2] is not None else ""))
 
 # KillerBee Class
 class KillerBee:
@@ -55,14 +53,15 @@ class KillerBee:
         Instantiates the KillerBee class.
 
         @type device:   String
-        @param device:  Device identifier, either USB vendor:product, serial device node, or IP address
+        @param device:  Device identifier, which is either USB `<BusNumber>:<DeviceNumber>`,
+            serial device path (e.g., `/dev/ttyUSB0`), or IP address.
+            The format needed depends on the device's firmware and connectivity to the host system.
         @type datasource: String
-        @param datasource: A known datasource type that is used
-        by dblog to record how the data was captured.
+        @param datasource: A known data-source type that is used by dblog to record how the data was captured.
         @type gps: String
-        @param gps: Optional serial device identifier for an attached GPS
-            unit. If provided, or if global variable has previously been set, 
-            KillerBee skips that device in initalization process.
+        @param gps: Optional serial device identifier for an attached GPS unit.
+            If provided, or if global variable has previously been set,
+            KillerBee skips that device in initialization process.
         @return: None
         @rtype: None
         '''
@@ -79,10 +78,10 @@ class KillerBee:
         # discovery, just connecting to defined addresses, so we'll check
         # first to see if we have an IP address given as our device parameter.
         if (device is not None) and kbutils.isIpAddr(device):
-            from dev_sewio import isSewio
+            from .dev_sewio import isSewio
             if isSewio(device):
-                from dev_sewio import SEWIO
-                self.driver = SEWIO(dev=device) #give it the ip address
+                from .dev_sewio import SEWIO
+                self.driver = SEWIO(dev=device)  # give it the ip address
             else: del isSewio
 
         # Figure out a device is one is not set, trying USB devices next
@@ -109,18 +108,18 @@ class KillerBee:
 
             if self.dev is not None:
                 if self.__device_is(RZ_USB_VEND_ID, RZ_USB_PROD_ID):
-                    from dev_rzusbstick import RZUSBSTICK
+                    from .dev_rzusbstick import RZUSBSTICK
                     self.driver = RZUSBSTICK(self.dev, self.__bus)
                 elif self.__device_is(ZN_USB_VEND_ID, ZN_USB_PROD_ID):
                     raise KBInterfaceError("Zena firmware not yet implemented.")
                 elif self.__device_is(CC2530_USB_VEND_ID, CC2530_USB_PROD_ID):
-                    from dev_cc253x import CC253x
+                    from .dev_cc253x import CC253x
                     self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2530)
                 elif self.__device_is(CC2531_USB_VEND_ID, CC2531_USB_PROD_ID):
-                    from dev_cc253x import CC253x
+                    from .dev_cc253x import CC253x
                     self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2531)
                 else:
-                    raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x.".format(self.dev.idVendor, self.dev.idProduct))
+                    raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x." % (self.dev.idVendor, self.dev.idProduct))
 
         # Figure out a device from serial if one is not set
         #TODO be able to try more than one serial device here (merge with devlist code somehow)
@@ -142,22 +141,28 @@ class KillerBee:
                 self.dev = device
                 if (self.dev == gps_devstring):
                     pass
+                elif (DEV_ENABLE_SL_NODETEST and kbutils.issl_nodetest(self.dev)):
+                    from .dev_sl_nodetest import SL_NODETEST
+                    self.driver = SL_NODETEST(self.dev)
+                elif (DEV_ENABLE_SL_BEEHIVE and kbutils.issl_beehive(self.dev)):
+                    from .dev_sl_beehive import SL_BEEHIVE
+                    self.driver = SL_BEEHIVE(self.dev)
                 elif (DEV_ENABLE_ZIGDUINO and kbutils.iszigduino(self.dev)):
-                    from dev_zigduino import ZIGDUINO
+                    from .dev_zigduino import ZIGDUINO
                     self.driver = ZIGDUINO(self.dev)
                 elif (DEV_ENABLE_FREAKDUINO and kbutils.isfreakduino(self.dev)):
-                    from dev_freakduino import FREAKDUINO
+                    from .dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
                 else:
                     gfccspi,subtype = isgoodfetccspi(self.dev)
                     if gfccspi and subtype == 0:
-                        from dev_telosb import TELOSB
+                        from .dev_telosb import TELOSB
                         self.driver = TELOSB(self.dev)
                     elif gfccspi and subtype == 1:
-                        from dev_apimote import APIMOTE
+                        from .dev_apimote import APIMOTE
                         self.driver = APIMOTE(self.dev, revision=1)
                     elif gfccspi and subtype == 2:
-                        from dev_apimote import APIMOTE
+                        from .dev_apimote import APIMOTE
                         self.driver = APIMOTE(self.dev, revision=2)
                     else:
                         raise KBInterfaceError("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
@@ -168,7 +173,7 @@ class KillerBee:
         # Start a connection to the remote packet logging server, if able:
         if datasource is not None:
             try:
-                import dblog
+                from . import dblog
                 self.dblog = dblog.DBLogger(datasource)
             except Exception as e:
                 warn("Error initializing DBLogger (%s)." % e)
@@ -218,13 +223,20 @@ class KillerBee:
         '''
         return self.driver.capabilities.check(capab)
 
-    def is_valid_channel(self, channel):
+    def is_valid_channel(self, channel, page=0):
         '''
         Use the driver's capabilities class to determine if a requested channel number
         is within the capabilities of that device.
         @rtype: Boolean
         '''
-        return self.driver.capabilities.is_valid_channel(channel)
+        return self.driver.capabilities.is_valid_channel(channel, page)
+
+    def frequency(self, channel= None, page= None):
+        '''
+        Use the driver's capabilities class to convert channel and page to actual frequency in KHz
+        @rtype: Integer
+        '''
+        return self.driver.capabilities.frequency(channel, page)
 
     def get_capabilities(self):
         '''
@@ -234,7 +246,44 @@ class KillerBee:
         '''
         return self.driver.capabilities.getlist()
 
-    def sniffer_on(self, channel=None):
+    def enter_bootloader(self):
+        '''
+        Starts the bootloader
+        @rtype: None
+        '''
+        return self.driver.enter_bootloader()
+
+    def get_bootloader_version(self):
+        '''
+        Gets the bootloader major and minor version.
+        @rtype:  List
+        @return: Returns a list: [Major, Minor]
+        '''
+        return self.driver.get_bootloader_version()
+
+    def get_bootloader_signature(self):
+        '''
+        Gets the bootloader chip signature.
+        @rtype:  List
+        @return: Returns a list: [Low, Mid, High]
+        '''
+        return self.driver.get_bootloader_signature()
+
+    def bootloader_sign_on(self):
+        '''
+        @rtype: String
+        @return: Bootloader sign_on message
+        '''
+        return self.driver.bootloader_sign_on()
+
+    def bootloader_start_application(self):
+        '''
+        Instructs the bootloader to exit and run the app
+        '''
+
+        return self.driver.bootloader_start_application()
+
+    def sniffer_on(self, channel=None, page= 0):
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.  Will set the command mode to Air Capture if it is not already
@@ -243,7 +292,7 @@ class KillerBee:
         @param channel: Sets the channel, optional
         @rtype: None
         '''
-        return self.driver.sniffer_on(channel)
+        return self.driver.sniffer_on(channel, page)
 
     def sniffer_off(self):
         '''
@@ -257,37 +306,46 @@ class KillerBee:
     @property
     def channel(self):
         """Getter function for the channel that was last set on the device."""
-        # Driver must have this variable name set in it's set_channel function
+        # Driver must have this variable name set in its set_channel function
         return self.driver._channel
 
-    def set_channel(self, channel):
+    @property
+    def page(self):
+        """Getter function for the page that was last set on the device."""
+        # Driver must have this variable name set in its set_channel function
+        return self.driver._page
+
+    def set_channel(self, channel, page=0):
         '''
-        Sets the radio interface to the specifid channel. Currently, support is
-        limited to 2.4 GHz channels 11 - 26.
+        Sets the radio interface to the specifid channel & page (subghz)
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the page, optional
         @rtype: None
         '''
-        if not self.is_valid_channel(channel):
+        if not self.is_valid_channel(channel, page):
             raise ValueError('Invalid channel ({0}) for this device'.format(channel))
         if hasattr(self, "dblog"):
-            self.dblog.set_channel(channel)
-        self.driver.set_channel(channel)
+            self.dblog.set_channel(channel, page)
+        self.driver.set_channel(channel, page)
 
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
         @type packet: String
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type channel: Integer
+        @param page: Sets the subghz page, optional
         @type count: Integer
         @param count: Transmits a specified number of frames, def=1
         @type delay: Float
         @param delay: Delay between each frame, def=1
         @rtype: None
         '''
-        return self.driver.inject(packet, channel, count, delay)
+        return self.driver.inject(packet, channel, count, delay, page)
 
     def pnext(self, timeout=100):
         '''
@@ -299,22 +357,23 @@ class KillerBee:
         '''
         return self.driver.pnext(timeout)
 
-    def jammer_on(self, channel=None, method=None):
+    def jammer_on(self, channel=None):
         '''
-        Attempts jamming against 802.15.4 frames on the given channel.
+        Attempts reflexive jamming on all 802.15.4 frames.
+        Targeted frames must be >12 bytes for reliable jamming in current firmware.
         @type channel: Integer
         @param channel: Sets the channel, optional.
-        @type method: String
-        @param method: Sets which method the jammer should use.
-            The driver must raise a ValueError exception if it doesn't know the given type.
-            If a value is not provided, the driver may pick their default method.
         @rtype: None
         '''
-        return self.driver.jammer_on(channel=channel, method=method)
+        return self.driver.jammer_on(channel=channel)
 
-    def jammer_off(self):
+    def jammer_off(self, channel=None):
         '''
-        Instruct the device to stop jamming.
+        End reflexive jamming on all 802.15.4 frames.
+        Targeted frames must be >12 bytes for reliable jamming in current firmware.
+        @type channel: Integer
+        @param channel: Sets the channel, optional.
         @rtype: None
         '''
-        return self.driver.jammer_off()
+        return self.driver.jammer_off(channel=channel)
+

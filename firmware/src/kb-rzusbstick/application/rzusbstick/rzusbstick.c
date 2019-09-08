@@ -47,12 +47,16 @@
 #define BLOCK_COUNT_2 (AC_ACDU_FIFO_SIZE + NWK_EVENT_FIFO_SIZE)
 /*================================= TYEPDEFS         =========================*/
 /*================================= GLOBAL VARIABLES =========================*/
+bool Blink_Blue_LED= false;
+bool Blink_Green_LED= false;
 /*================================= LOCAL VARIABLES  =========================*/
 static vrt_mem_partition_desc_t partition1;
 static uint8_t partition_buffer1[BLOCK_SIZE_1 * BLOCK_COUNT_1];
 
 static vrt_mem_partition_desc_t partition2;
 static uint8_t partition_buffer2[BLOCK_SIZE_2 * BLOCK_COUNT_2];
+
+static uint16_t loop_count = 0;
 /*================================= PROTOTYPES       =========================*/
 bool avr_init(void);
 static void error_handler(void);
@@ -126,21 +130,35 @@ int main(void) {
     /* Disable modules that are not needed any more. */
     eep_deinit();
     
-    LED_ORANGE_ON();
-        
     /* Enable interrupts. */
     sei();
+
+    /* Disable bootloader */
+    uint8_t volatile magic_value;
+    EEGET(magic_value, EE_BOOT_MAGIC_ADR);
+    if (magic_value != 0x00)
+        EEPUT(EE_BOOT_MAGIC_ADR, 0x00);
     
-	/* Endless application loop. */
-	for(;;) {
-        /* Dispatch events from the event queue. */
-		vrt_dispatch_event();
+    /* Endless application loop. */
+    for(;;++loop_count) {
+    /* Dispatch events from the event queue. */
+        vrt_dispatch_event();
         
         /* Poll modules that require this. */
         vrt_timer_task();
         usb_task();
         air_capture_task();
         cmd_if_task();
+
+        /* show we're alive */
+        if (Blink_Green_LED && loop_count % 8192 == 0)
+            LED_GREEN_TOGGLE();
+        if (!Blink_Green_LED)
+            LED_GREEN_ON();
+
+        /* show errors */
+        if (Blink_Blue_LED && loop_count % 8192 == 0)
+            LED_BLUE_TOGGLE();
 	}
 }
 /* EOF */

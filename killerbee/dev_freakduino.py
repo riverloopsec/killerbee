@@ -10,7 +10,7 @@ import time
 import struct
 from datetime import datetime, date
 from datetime import time as dttime
-from kbutils import KBCapabilities, makeFCS
+from .kbutils import KBCapabilities, makeFCS
 
 MODE_NONE    = 0x01
 MODE_SNIFF   = 0x02
@@ -24,6 +24,7 @@ class FREAKDUINO:
         @rtype: None
         '''
         self._channel = None
+        self._page = 0
         self.handle = None
         self.dev = serialpath
         self.date = None
@@ -88,7 +89,7 @@ class FREAKDUINO:
         Ex: If provided cmdstr = "C!N" it will send "SC!N", telling the device to turn on sniffing ("N"),
         and it expects to receive a confirmation back "&C!N" to confirm success.
         '''
-        print "Flushing out of buffer:", self.handle.inWaiting()
+        print("Flushing out of buffer:", self.handle.inWaiting())
         self.handle.flushInput()
         if len(cmdstr) > 3:
             raise Exception("Command string is less than minimum length (S%s)." % cmdstr)
@@ -97,16 +98,16 @@ class FREAKDUINO:
         # TODO ugly and unreliable:
         # This should just wait for a & and then parse things after it,
         # however it seems sometimes you have to resend the command or something.
-        print "Line:", self.handle.readline(eol='&')
+        print("Line:", self.handle.readline(eol='&'))
         counter = 0
         char = self.handle.read()
         while (char != '&'):
-            print self.handle.inWaiting(), "Waiting...", char
+            print(self.handle.inWaiting(), "Waiting...", char)
             time.sleep(0.01)
             if (counter > 8):
                 self.__send_cmd(cmdstr, arg)
                 counter = 0
-                print "Resend Response Line:", self.handle.readline(eol='&')
+                print("Resend Response Line:", self.handle.readline(eol='&'))
             else: counter += 1
             char = self.handle.read()
         response = ''
@@ -114,10 +115,10 @@ class FREAKDUINO:
             response += self.handle.read()
 
         if response == cmdstr[:3]:
-            print "Got a response:", response, "matches", cmdstr
+            print("Got a response:", response, "matches", cmdstr)
             return True
         else:
-            print "Invalid response:", response, cmdstr[:3]
+            print("Invalid response:", response, cmdstr[:3])
             return False
 
     # Send the command for the Dartmouth-mod Freakduino to dump data logged in EEPROM
@@ -125,19 +126,21 @@ class FREAKDUINO:
         self.__send_cmd("C!D")
 
     # KillerBee expects the driver to implement this function
-    def sniffer_on(self, channel=None):
+    def sniffer_on(self, channel=None, page=0):
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.  Will set the command mode to Air Capture if it is not already
         set.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         #TODO implement mode change to start sniffer sending packets to us
         self.__send_cmd("C!N")
@@ -157,11 +160,13 @@ class FREAKDUINO:
         self.__stream_open = False
 
     # KillerBee expects the driver to implement this function
-    def set_channel(self, channel):
+    def set_channel(self, channel, page=0):
         '''
         Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SETCHAN)
@@ -172,15 +177,19 @@ class FREAKDUINO:
             self.__send_cmd("C!C %d" % channel)
         else:
             raise Exception('Invalid channel')
+        if page:
+            raise Exception('SubGHz not supported')
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
         @type packet: String
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @type count: Integer
         @param count: Transmits a specified number of frames, def=1
         @type delay: Float
@@ -195,7 +204,7 @@ class FREAKDUINO:
             raise Exception('Packet too long')
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         # Append two bytes to be replaced with FCS by firmware.
         packet = ''.join([packet, "\x00\x00"])
@@ -262,7 +271,7 @@ class FREAKDUINO:
             if frame[-2:] == makeFCS(frame[:-2]): validcrc = True
             else: validcrc = False
         except:
-            print "Error parsing stream received from device:", pdata, data
+            print("Error parsing stream received from device:", pdata, data)
             return None
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
@@ -277,7 +286,7 @@ class FREAKDUINO:
             timestr = "%08d" % (struct.unpack('L', data[1])[0]) #in format hhmmsscc
             time = dttime(int(timestr[:2]), int(timestr[2:4]), int(timestr[4:6]), int(timestr[6:]))
         except:
-            print "Issue with time format:", timestr, data
+            print("Issue with time format:", timestr, data)
             time = None
         if self.date == None: self.date = date.utcnow().date()
         if time == None or time == dttime.min: time = (datetime.utcnow()).time()
@@ -295,9 +304,9 @@ class FREAKDUINO:
         date = str(struct.unpack('L', ldata[12:16])[0])
         self.date = datetime.date(date[-2:], date[-4:-2], date[:-4])
         #TODO parse data formats (lon=-7228745 lat=4370648 alt=3800 age=63 date=70111 time=312530)
-        print self.lon, self.lat, self.alt, self.date
+        print(self.lon, self.lat, self.alt, self.date)
 
-    def ping(self, da, panid, sa, channel=None):
+    def ping(self, da, panid, sa, channel=None, page=0):
         '''
         Not yet implemented.
         @return: None
@@ -305,11 +314,13 @@ class FREAKDUINO:
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel=None, method=None):
+    def jammer_on(self, channel=None, page=0):
         '''
         Not yet implemented.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
@@ -318,12 +329,12 @@ class FREAKDUINO:
             self._set_mode(RZ_CMD_MODE_AC)
 
         if channel != None:
-            self.set_channel(channel)
+            self.set_channel(channel, page)
 
         #TODO implement
         raise Exception('Not yet implemented')
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self, channel=None, page=0):
         '''
         Not yet implemented.
         @return: None

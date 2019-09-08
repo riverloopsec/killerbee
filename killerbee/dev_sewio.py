@@ -13,18 +13,19 @@ import os
 import time
 import struct
 import time
-import urllib2
 import re
+import binascii
+from urllib.request import urlopen
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR, timeout as error_timeout
 from struct import unpack
 
 from datetime import datetime, timedelta
-from kbutils import KBCapabilities, makeFCS, isIpAddr, KBInterfaceError
+from .kbutils import KBCapabilities, makeFCS, isIpAddr, KBInterfaceError
 
 DEFAULT_IP = "10.10.10.2"   #IP address of the sniffer
 DEFAULT_GW = "10.10.10.1"   #IP address of the default gateway
 DEFAULT_UDP = 17754         #"Remote UDP Port"
-TESTED_FW_VERS = ["0.5", "0.9.0"]  #Firmware versions tested with the current version of this client device connector
+TESTED_FW_VERS = ["0.5", "0.9.0"]    #Firmware versions tested with the current version of this client device connector
 
 NTP_DELTA = 70*365*24*60*60 #datetime(1970, 1, 1, 0, 0, 0) - datetime(1900, 1, 1, 0, 0, 0)
 
@@ -44,16 +45,14 @@ Similar code from Wireshark source:
 '''
 def ntp_to_system_time(secs, msecs):
     """convert a NTP time to system time"""
-    #print "Secs:", secs, msecs
-    #print "\tUTC:", datetime.utcfromtimestamp(secs - 2208988800)
+    #print("Secs:", secs, msecs)
+    #print("\tUTC:", datetime.utcfromtimestamp(secs - 2208988800))
     return datetime.utcfromtimestamp(secs - 2208988800)
-
 
 def getFirmwareVersion(ip):
     try:
-        #TODO: Have timeout handled sooner
-        html = urllib2.urlopen("http://{0}/".format(ip), timeout=1)
-        data = html.read()
+        html = urlopen("http://{0}/".format(ip))
+        data = html.read().decode('UTF-8')
         # First try for the "old" web UI parsing:
         fw = re.search(r'Firmware version ([0-9.]+)', data)
         if fw is not None:
@@ -61,7 +60,7 @@ def getFirmwareVersion(ip):
         else:
             # Detect using the new method, credit to the opensniffer python code
             # Find index of slave IP address
-            index = data.find(ip)
+            index = data.find('ip')
             # Find index of parenthesis
             indexEnd = data.find(')', index) - 1
             # Find index of comma before parenthesis
@@ -74,16 +73,15 @@ def getFirmwareVersion(ip):
         print("Unable to connect to IP {0} (error: {1}).".format(ip, e))
     return None
 
-
 def getMacAddr(ip):
     '''
     Returns a string for the MAC address of the sniffer.
     '''
     try:
-        html = urllib2.urlopen("http://{0}/".format(ip))
+        html = urlopen("http://{0}/".format(ip))
         # Yup, we're going to have to steal the status out of a JavaScript variable
         #var values = removeSSItag('<!--#pindex-->STOPPED,00:1a:b6:00:0a:a4,...
-        res = re.search(r'<!--#pindex-->[A-Z]+,((?:[0-9a-f]{2}:){5}[0-9a-f]{2})', html.read())
+        res = re.search(r'<!--#pindex-->[A-Z]+,((?:[0-9a-f]{2}:){5}[0-9a-f]{2})', html.read().decode('UTF-8'))
         if res is None:
             raise KBInterfaceError("Unable to parse the sniffer's MAC address.")
         return res.group(1)
@@ -91,10 +89,8 @@ def getMacAddr(ip):
         print("Unable to connect to IP {0} (error: {1}).".format(ip, e))
     return None
 
-
 def isSewio(dev):
     return ( isIpAddr(dev) and getFirmwareVersion(dev) != None )
-
 
 class SEWIO:
     def __init__(self, dev=DEFAULT_IP, recvport=DEFAULT_UDP, recvip=DEFAULT_GW):
@@ -110,9 +106,10 @@ class SEWIO:
         @rtype: None
         '''
         self._channel = None
+        self._page = 0
         self._modulation = 0 #unknown, will be set by change channel currently
-        self.handle = None
-        self.dev = dev
+        self._handle = None
+        self._dev = dev
         
         #TODO The receive port and receive IP address are currently not 
         # obtained from or verified against the Sewio sniffer, nor are they
@@ -120,18 +117,19 @@ class SEWIO:
         self.udp_recv_port = recvport
         self.udp_recv_ip   = recvip
 
-        self.__revision_num = getFirmwareVersion(self.dev)
+        self.__revision_num = getFirmwareVersion(self._dev)
         if self.__revision_num not in TESTED_FW_VERS:
             print("WARNING: Firmware revision {0} reported by the sniffer is not currently supported. Errors may occur and dev_sewio.py may need updating.".format(self.__revision_num))
 
-        self.handle = socket(AF_INET, SOCK_DGRAM)
-        self.handle.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        self._handle = socket(AF_INET, SOCK_DGRAM)
+        self._handle.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         try:
-            self.handle.bind((self.udp_recv_ip, self.udp_recv_port))
+            self._handle.bind((self.udp_recv_ip, self.udp_recv_port))
         except Exception as e:
             print(e)
             print("ERROR: Attempted to bind on UDP {}:{}, but failed.".format(self.udp_recv_ip, self.udp_recv_port))
             print("ERROR: Is that a correct local IP in your environment? Is the port free?")
+            sys.exit(1)
 
         self.__stream_open = False
         self.capabilities = KBCapabilities()
@@ -140,8 +138,8 @@ class SEWIO:
     def close(self):
         '''Actually close the receiving UDP socket.'''
         self.sniffer_off()  # turn sniffer off if it's currently running
-        self.handle.close() # socket.close()
-        self.handle = None
+        self._handle.close() # socket.close()
+        self._handle = None
 
     def check_capability(self, capab):
         return self.capabilities.check(capab)
@@ -159,6 +157,8 @@ class SEWIO:
         self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
         self.capabilities.setcapab(KBCapabilities.FREQ_900, True)
+        self.capabilities.setcapab(KBCapabilities.FREQ_868, True)
+        self.capabilities.setcapab(KBCapabilities.FREQ_784, True)
         if ( self.__revision_num == "0.9.0" ):
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
             self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
@@ -171,23 +171,23 @@ class SEWIO:
         @rtype: List
         @return: List of 3 strings identifying device.
         '''
-        return [self.dev, "Sewio Open-Sniffer v{0}".format(self.__revision_num), getMacAddr(self.dev)]
+        return [self._dev, "Sewio Open-Sniffer v{0}".format(self.__revision_num), getMacAddr(self._dev)]
 
     def __make_rest_call(self, path, fetch=True):
-        """
+        '''
         Wrapper to the sniffer's RESTful services.
         Reports URL/HTTP errors as KBInterfaceErrors.
         @rtype: If fetch==True, returns a String of the page. Otherwise, it
             returns True if an HTTP 200 code was received.
-        """
+        '''
         try:
-            html = urllib2.urlopen("http://{0}/{1}".format(self.dev, path))
+            html = urlopen("http://{0}/{1}".format(self._dev, path))
             if fetch:
-                return html.read()
+                return html.read().decode('utf-8')
             else:
                 return (html.getcode() == 200)
         except Exception as e:
-            raise KBInterfaceError("Unable to preform a call to {0}/{1} (error: {2}).".format(self.dev, path, e))
+            raise KBInterfaceError("Unable to preform a call to {0}/{1} (error: {2}).".format(self._dev, path, e))
 
     def __sniffer_status(self):
         '''
@@ -202,8 +202,7 @@ class SEWIO:
         if res is None:
             raise KBInterfaceError("Unable to parse the sniffer's current status.")
         # RUNNING means it's sniffing, STOPPED means it's not.
-        #print("INFO: Status detected as {}".format(res.group(1)))
-        return res.group(1) == "RUNNING"
+        return (res.group(1) == "RUNNING")
 
     def __sync_status(self):
         '''
@@ -212,7 +211,7 @@ class SEWIO:
         '''
         self.__stream_open = self.__sniffer_status()
 
-    def __sniffer_channel(self):
+    def __sniffer_channel(self, page=0):
         '''
         Because the firmware accepts only toggle commands for sniffer on/off,
         we need to check what state it's in before taking action. It's also
@@ -228,12 +227,14 @@ class SEWIO:
         return int(res.group(1))
 
     # KillerBee expects the driver to implement this function
-    def sniffer_on(self, channel=None):
+    def sniffer_on(self, channel=None, page=0):
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
@@ -243,7 +244,7 @@ class SEWIO:
         self.__sync_status()
         if self.__stream_open == False:
             if channel != None:
-                self.set_channel(channel)
+                self.set_channel(channel, page)
             
             if not self.__make_rest_call('status.cgi?p=2', fetch=False):
                 raise KBInterfaceError("Error instructing sniffer to start capture.")
@@ -252,7 +253,7 @@ class SEWIO:
             self.__sync_status()
             if not self.__stream_open:
                 raise KBInterfaceError("Sniffer did not turn on capture.")
-
+                
     # KillerBee expects the driver to implement this function
     def sniffer_off(self):
         '''
@@ -270,56 +271,75 @@ class SEWIO:
             self.__sync_status()
             if self.__stream_open:
                 raise KBInterfaceError("Sniffer did not turn off capture.")
-    
+   
+    #TODO: convert to channel/page for subghz
     @staticmethod
-    def __get_default_modulation(channel):
+    def __get_default_modulation(channel, page=0):
         '''
         Return the Sewio-specific string value representing the modulation which
-        should be chosen to be IEEE 802.15.4 complinating for a given channel
+        should be chosen to be IEEE 802.15.4 complinating for a given channel 
         number.
         Captured values from sniffing Sewio web interface, unsure why these
-        are encoded in this way.
+        are done as such.
         Available modulations are listed at:
         http://www.sewio.net/open-sniffer/develop/http-rest-interface/
         @rtype: String, or None if unable to determine modulation
         '''
-        if channel >= 11 or channel <= 26: return '0'   #O-QPSK 250 kb/s 2.4GHz
-        elif channel >= 1 or channel <= 10: return 'c'  #O-QPSK 250 kb/s 915MHz
-        elif channel >= 128 or channel <= 131: return '1c' #O-QPSK 250 kb/s 760MHz
-        elif channel == 0: return '0'                   #O-QPSK 100 kb/s 868MHz
+        if channel == 0: return '0'                     #BPSK 20 kb/s 868MHz
+        elif channel >= 11 and channel <= 26: return '0' #O-QPSK 250 kb/s 2.4GHz
+        elif channel >= 1 and channel <= 10: return '04'  #O-QPSK 250 kb/s 915MHz
+        elif channel >= 128 and channel <= 131: return '1c' #O-QPSK 250 kb/s 780MHz
         else: return None                               #Error status
 
     # KillerBee expects the driver to implement this function
-    def set_channel(self, channel):
+    def set_channel(self, channel, page=0):
         '''
         Sets the radio interface to the specified channel, and the matching modulation setting.
         @type channel: Integer
         @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device (but TODO: should be?)
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SETCHAN)
 
-        if self.capabilities.is_valid_channel(channel):
+        if self.capabilities.is_valid_channel(channel, page):
             # We only need to update our channel if it doesn't match the currently reported one.
             curChannel = self.__sniffer_channel()
             if channel != curChannel:
-                self.modulation = self.__get_default_modulation(channel)
-                print("Setting to channel {0}, modulation {1}.".format(channel, self.modulation))
+                self._modulation = self.__get_default_modulation(channel)
+                print("Setting to channel {0}, modulation {1}.".format(channel, self._modulation))
                 # Examples captured in fw v0.5 sniffing:
                 #   channel 6, 250 compliant: http://10.10.10.2/settings.cgi?chn=6&modul=c&rxsens=0
                 #   channel 12, 250 compliant: http://10.10.10.2/settings.cgi?chn=12&modul=0&rxsens=0
                 #   chinese 0, 780 MHz, 250 compliant: http://10.10.10.2/settings.cgi?chn=128&modul=1c&rxsens=0
                 #   chinese 3, 786 MHz, 250 compliant: http://10.10.10.2/settings.cgi?chn=131&modul=1c&rxsens=0
+                #   europe 0, 868 MHz, 20 compliant: http://10.10.10.2/settings.cgi?chn=0&modul=00&rxsens=0
                 #rxsens 0 is normal, 3 is high sensitivity to receive at
-                self.__make_rest_call("settings.cgi?chn={0}&modul={1}&rxsens=3".format(channel, self.modulation), fetch=False)
+                self.__make_rest_call("settings.cgi?chn={0}&modul={1}&rxsens=3".format(channel, self._modulation), fetch=False)
                 self._channel = self.__sniffer_channel()
             else:
                 self._channel = curChannel
         else:
             raise Exception('Invalid channel number ({0}) was provided'.format(channel))
 
+    @staticmethod
+    def __get_tx_level(channel):
+        '''
+        Return the Sewio-specific string value representing the transmitted power (tx) level which
+        should be chosen to be IEEE 802.15.4 complinating for a given channel number.
+        Available tx levels are listed at:
+        http://www.sewio.net/open-sniffer/develop/http-rest-interface/
+        @rtype: String, or None if unable to determine modulation
+        '''
+        if channel == 0: return 'a0'                        # 11 dBm
+        elif channel >= 11 and channel <= 26: return '0'    # 3.0 dBm
+        elif channel >= 1 and channel <= 10: return 'c0'    # 11 dBm
+        elif channel >= 128 and channel <= 131: return 'c1' # 11 dBm
+        else: return None                                   # Error status
+
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0):
+    def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
         @type packet: String
@@ -328,8 +348,8 @@ class SEWIO:
         @param channel: Sets the channel, optional
         @type count: Integer
         @param count: Transmits a specified number of frames, def=1
-        @type delay: Float
-        @param delay: Delay between each frame, def=0
+        @type delay: Integer
+        @param delay: Delay (in ms) between each frame, def=1
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.INJECT)
@@ -342,16 +362,23 @@ class SEWIO:
         if channel != None:
             self.set_channel(channel)
 
+        if isinstance(delay, float):
+            # converting to milliseconds
+            delay = round(delay * 1000)
+
+        if delay == 0:
+            delay = 1
+
         # Example of packet injection:
         #   Auto CRC ON
-        # http://10.10.10.2/inject.cgi?chn=15&modul=0&txlevel=0&rxen=0&nrepeat=1&tspace=1&autocrc=1&spayload=010203&len=3
-
-        packet_length = len(packet)
-        packet = packet.encode('hex')  # API accepts string hex payload, but the byte length of the un-encoded frame.
+        #   Rx Enable after injection
+        # http://10.10.10.2/inject.cgi?chn=15&modul=0&txlevel=0&rxen=1&nrepeat=1&tspace=1&autocrc=1&spayload=23C800ADBA0000FFFFC28BC3834C5DC3AFC2A21300018E67&len=24
+        packet = packet.hex()      # API accepts string hex payload
+        packet_length = int(len(packet)/2)  # but the packet length is half the hex payload length (verified with web proxy)
 
         self.__make_rest_call(
-            "inject.cgi?chn={0}&modul=0&txlevel=0&rxen=1&nrepeat={1}&tspace={2}&autocrc=1&spayload={3}&len={4}".format(
-                self._channel, count, delay, packet, packet_length
+            "inject.cgi?chn={0}&modul={1}&txlevel={2}&rxen=1&nrepeat={3}&tspace={4}&autocrc=1&spayload={5}&len={6}".format(
+                self._channel, self._modulation, self.__get_tx_level(self._channel), count, delay, packet.upper(), packet_length
             )
         )
 
@@ -433,18 +460,18 @@ class SEWIO:
             self.sniffer_on() #start sniffing
 
         # Use socket timeouts to implement the timeout
-        self.handle.settimeout(timeout / 1000000.0) # it takes seconds
+        self._handle.settimeout(timeout / 1000000.0) # it takes seconds
 
         frame = None
         donetime = datetime.utcnow() + timedelta(microseconds=timeout)
         while True:
             try:
-                data, addr = self.handle.recvfrom(1024)
+                data, addr = self._handle.recvfrom(1024)
             except error_timeout:
                 return None
             # Ensure it's data coming from the right place, for now we just
             #  check the sending IP address. Ex: addr = ('10.10.10.2', 17754)
-            if addr[0] != self.dev:
+            if addr[0] != self._dev:
                 continue
             # Dissect the UDP packet
             (frame, ch, validcrc, rssi, lqival, recdtime) = self.__parse_zep_v2(data)
@@ -469,43 +496,47 @@ class SEWIO:
             else:           result['dbm'] = rssi
         return result
 
-    def jammer_on(self, channel=None, method=None):
+    def jammer_on(self, channel=None, page=0, mode=None):
         '''
         Transmit a constant jamming signal following the given mode.
         @type channel: Integer
         @param channel: Sets the channel, optional
-        @type method: String
-        @param method: One of the mode values supported by the device:
+        @type mode: String
+        @param mode: One of the mode values supported by the device:
             "1" - PRBS: AAAA...
             "2" - PRBS: 0000...
             "3" - PRBS: FFFF...
-            "4" - Fc - 0.5 MHz
-            "5" - Fc + 0.5 MHz
+            "4" - CW: Fc - 0.1 MHz
+            "8" - CW: Fc + 0.1 MHz
+            "c" - CW: Fc - 0.25 MHz
+            "10" - CW: Fc + 0.25 MHz
+            "20" - CW: Fc - 0.5 MHz
+            "40" - CW: Fc + 0.5 MHz
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
-        if method is not None and method not in ["1","2","3","4","5"]:
-            raise ValueError("Jamming method is unsupported by this driver.")
-        elif method is None:
-            method = "1"  #default to 1
+
+        if mode is None:
+            mode = "1"  #default to 1
+        elif mode not in ['1','2','3','4','8','c','10','20','40']:
+            raise ValueError("Jamming mode is unsupported by this driver.")
+
+        if ((channel >= 11 and channel <=26) and mode in ['4','8','c','10']) or (not (channel >= 11 and channel <=26) and mode in ['20','40']):
+            raise ValueError("Jamming mode is unsupported by this channel.")
 
         if channel != None:
             self.set_channel(channel)
 
         # Parameter enumeration
         # http://10.10.10.2/test.cgi?chn=15&mode=1&module=0&txlevel=0
-        #
-        # txlevel
-        #   0 - 3.0 dBm
-        #   2 - 2.3 dBm
-        #   4 - 1.3 dBm
-        #   6 - 0.0 dBm
-        #   9 - -3.0 dBm
-        #   c - -7.0 dBm
-        #   f - -17.0 dBm        
-    
-        if not self.__make_rest_call("test.cgi?chn={0}&mode={1}&module=0&txlevel=0".format(self._channel, method), fetch=False):
-            raise KBInterfaceError("Error instructing sniffer to start jamming.")
+        # http://10.10.10.2/test.cgi?chn=0&mode=10&txlevel=a0
+        if mode in ["1","2","3"]:
+            if not self.__make_rest_call("test.cgi?chn={0}&mode={1}&modul={2}&txlevel={3}".format(self._channel, mode, self._modulation, self.__get_tx_level(self._channel)), fetch=False):
+                raise KBInterfaceError("Error instructing sniffer to start jamming.")
+        else:
+            if not self.__make_rest_call("test.cgi?chn={0}&mode={1}&txlevel={2}".format(self._channel, mode, self.__get_tx_level(self._channel)), fetch=False):
+                raise KBInterfaceError("Error instructing sniffer to start jamming.")
+
 
     def jammer_off(self):
         '''

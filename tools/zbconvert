@@ -33,7 +33,7 @@ if not os.path.exists(args.infile):
 outcap = None
 try:
     pr = PcapReader(args.infile)
-except Exception, e:
+except Exception as e:
     if e.args == ('Unsupported pcap header format or version',):
         # Input file was not pcap, open it as SNA
         incap = DainTreeReader(args.infile)
