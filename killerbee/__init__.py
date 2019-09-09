@@ -28,9 +28,9 @@ def getKillerBee(channel, page= 0):
         raise Exception('Error: Failed to set channel to %d/%d' % (channel, page), e)
     return kb
 
-def kb_dev_list(vendor=None, product=None):
+def kb_dev_list(vendor=None, product=None, gps=None, include=None):
     '''Deprecated. Use show_dev or call kbutils.devlist.'''
-    return kbutils.devlist(vendor=None, product=None)
+    return kbutils.devlist(vendor=vendor, product=product, gps=gps, include=include)
 
 def show_dev(vendor=None, product=None, gps=None, include=None):
     '''
@@ -231,7 +231,7 @@ class KillerBee:
         '''
         return self.driver.capabilities.is_valid_channel(channel, page)
 
-    def frequency(self, channel= None, page= None):
+    def frequency(self, channel=None, page=None):
         '''
         Use the driver's capabilities class to convert channel and page to actual frequency in KHz
         @rtype: Integer

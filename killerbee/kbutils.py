@@ -100,64 +100,57 @@ class KBCapabilities:
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
 
-    def frequency(self, channel=None, page=None):
+    def frequency(self, channel=None, page=0):
         '''
         Return actual frequency of channel/page in KHz
         '''
-        #TODO: FREQ_900
         if not self.is_valid_channel(channel, page):
             return 0
 
-        # Check if device is Sewio, since this device doesn't support pages
-        from .dev_sewio import isSewio
-        if isSewio(ipaddr):
-            if channel == 0: 
+        # Sewio doesn't support pages, so we need to check for channels
+        if page == 0:
+            #FREQ_868
+            if channel == 0:
                 base = 868000
-                step = 1000
+                step = 0
                 first = 0
-            elif channel >= 11 and channel <= 26: 
-                base = 2400000
-                step = 5000
-                first = 10
+            #FREQ_915
             elif channel >= 1 and channel <= 10: 
-                base = 904000
+                base = 906000
                 step = 2000
-                first = 0
+                first = 1
+            #FREQ_784
             elif channel >= 128 and channel <= 131:
                 base = 780000
                 step = 2000
                 first = 128
             else:
                 #FREQ_2400
-                base = 2405000
-                step = 5000
+                base = 240500
+                step = 500
                 first = 11
-        else:
-            #FREQ_2400
-            if page == 0:
-                base = 2405000
-                step = 5000
-                first = 11
-            #FREQ_863
-            if page == 28:
-                base = 863250
-                step = 200
-                first = 0
-            #FREQ_868
-            if page == 29:
-                base = 868650
-                step = 200
-                first = 0
-            #FREQ_870
-            if page == 30:
-                base = 870250
-                step = 200
-                first = 0
-            #FREQ_915
-            if page == 31:
+        #FREQ_863
+        elif page == 28:
+            base = 863250
+            step = 200
+            first = 0
+        #FREQ_868
+        elif page == 29:
+            base = 868650
+            step = 200
+            first = 0
+        #FREQ_870
+        if page == 30:
+            base = 870250
+            step = 200
+            first = 0
+        #FREQ_915
+        elif page == 31:
                 base = 915350
                 step = 200
                 first = 0
+        #TODO: FREQ_900
+
         return (channel - first) * step + base
 
     def is_valid_channel(self, channel, page=0):
@@ -166,28 +159,27 @@ class KBCapabilities:
         @rtype: Boolean
         '''
         # if sub-ghz, check that page and channel and capability match
-        if page:
-            if page == 28 and (channel > 26 or not self.check(self.FREQ_863)):
-                return False
-            if page == 29 and (channel > 8 or not self.check(self.FREQ_868)):
-                return False
-            if page == 30 and (channel > 26 or not self.check(self.FREQ_870)):
-                return False
-            if page == 31 and (channel > 26 or not self.check(self.FREQ_915)):
-                return False
-            if page < 28 or page > 31:
-                return False
-            return True
-
-        if (channel >= 11 and channel <= 26) and self.check(self.FREQ_2400):
-            return True
-        elif (channel >= 1 and channel <= 10) and self.check(self.FREQ_900):
-            return True
-        elif (channel == 0) and self.check(self.FREQ_868):
-            return True
-        elif (channel >= 128 and channel <= 131) and self.check(self.FREQ_784):
-            return True
-        return False
+        if page == 0:
+            if (channel == 0) and self.check(self.FREQ_868):
+                return True
+            elif (channel >= 1 and channel <= 10) and self.check(self.FREQ_900):
+                return True
+            elif (channel >= 11 and channel <= 26) and self.check(self.FREQ_2400):
+                return True
+            elif (channel >= 128 and channel <= 131) and self.check(self.FREQ_784):
+                return True
+            return False
+        elif page == 28 and (channel > 26 or not self.check(self.FREQ_863)):
+            return False
+        elif page == 29 and (channel > 8 or not self.check(self.FREQ_868)):
+            return False
+        elif page == 30 and (channel > 26 or not self.check(self.FREQ_870)):
+            return False
+        elif page == 31 and (channel > 26 or not self.check(self.FREQ_915)):
+            return False
+        elif page < 28 or page > 31:
+            return False
+        return True
 
 class findFromList(object):
     '''
@@ -342,13 +334,13 @@ def devlist(vendor=None, product=None, gps=None, include=None):
 
     if include is not None:
         # Ugly nested load, so we don't load this class when unneeded!
-        from . import dev_sewio #use isSewio, getFirmwareVersion
-        for ipaddr in filter(isIpAddr, include):
-            if dev_sewio.isSewio(ipaddr):
-                devlist.append([ipaddr, "Sewio Open-Sniffer v{0}".format(dev_sewio.getFirmwareVersion(ipaddr)), dev_sewio.getMacAddr(ipaddr)])
-            #NOTE: Enumerations of other IP connected sniffers go here.
+        from .dev_sewio import isSewio,getFirmwareVersion,getMacAddr
+        if filter(isIpAddr, include):
+            if isSewio(include):
+                devlist.append([include, "Sewio Open-Sniffer v{0}".format(getFirmwareVersion(include)), getMacAddr(include)])
+                # NOTE: Enumerations of other IP connected sniffers go here.
             else:
-                print("kbutils.devlist has an unknown type of IP sniffer device ({0}).".format(ipaddr))
+                print("kbutils.devlist has an unknown type of IP sniffer device ({0}).".format(include))
     
     return devlist
 

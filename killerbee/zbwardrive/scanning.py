@@ -79,7 +79,7 @@ def doScan(zbdb, currentGPS, verbose=False, dblog=False, agressive=False, stayti
 
     # Much of this code adapted from killerbee/tools/zbstumbler:main
     # Could build this with Scapy but keeping manual construction for performance
-    beacon = "\x03\x08\x00\xff\xff\xff\xff\x07" #beacon frame
+    beacon = b'\x03\x08\x00\xff\xff\xff\xff\x07' #beacon frame
     beaconp1 = beacon[0:2]  #beacon part before seqnum field
     beaconp2 = beacon[3:]   #beacon part after seqnum field
     seqnum = 0              #seqnum to use (will cycle)
@@ -99,7 +99,7 @@ def doScan(zbdb, currentGPS, verbose=False, dblog=False, agressive=False, stayti
         if verbose:
             print('Injecting a beacon request on channel %d.' % channel)
         try:
-            beaconinj = beaconp1 + "%c" % seqnum + beaconp2
+            beaconinj = b''.join([beaconp1, b'%c' % seqnum, beaconp2])
             kbscan.inject(beaconinj)
         except Exception as e:
             raise Exception('Unable to inject packet (%s).' % e)

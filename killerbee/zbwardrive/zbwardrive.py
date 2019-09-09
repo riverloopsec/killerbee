@@ -47,9 +47,9 @@ def gpsdPoller(currentGPS):
 # startScan
 # Detects attached interfaces
 # Initiates scanning using doScan()
-def startScan(zbdb, currentGPS, verbose=False, dblog=False, agressive=False, include=[], ignore=None):
+def startScan(zbdb, currentGPS, verbose=False, dblog=False, agressive=False, dev=None, ignore=None):
     try:
-        kb = KillerBee()
+        kb = KillerBee(device=dev)
     except USBError as e:
         if e.args[0].find('Operation not permitted') >= 0:
             print('Error: Permissions error, try running using sudo.')
@@ -60,7 +60,7 @@ def startScan(zbdb, currentGPS, verbose=False, dblog=False, agressive=False, inc
         #print 'Error: Missing KillerBee USB hardware:', e
         print('Error: Issue starting KillerBee instance:', e)
         return False
-    for kbdev in kbutils.devlist(gps=ignore, include=include):
+    for kbdev in kbutils.devlist(gps=ignore, include=dev):
         print('Found device at %s: \'%s\'' % (kbdev[0], kbdev[1]))
         zbdb.store_devices(
             kbdev[0], #devid
