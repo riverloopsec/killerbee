@@ -17,8 +17,8 @@ def interrupt(signum, frame):
     try:
         kb.jammer_off()
         print('\nDone.')
-    except:
-        print("\nAborted!")
+    except Exception as e:
+        print(e)
     sys.exit(0)
 
 # Command-line arguments
@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring')
 parser.add_argument('-c', '-f', '--channel', action='store', type=int, default=None)
 parser.add_argument('-z', '--subghz_page', action='store', type=int, default=0)
-parser.add_argument('-m', '--mode', action='store', type=str, default=None)
+parser.add_argument('-m', '--mode', action='store', type=str, default=1)
 parser.add_argument('-D', action='store_true', dest='showdev')
 args = parser.parse_args()
 
@@ -46,11 +46,11 @@ if not kb.is_valid_channel(args.channel, args.subghz_page):
     sys.exit(1)
 kb.set_channel(args.channel, page=args.subghz_page)
 
-print("zbjammer: jamming channel", args.channel)
 print("*** WARNING: this may not actually work on your hardware! Check with spectrum analyser!")
 print("*** NOTICE: it is your responsibility to comply with local law. Please check radio spectrum laws in your area before")
 input("    proceeding. Hit <ENTER> to continue or CTL-C to abort.")
-if not kb.jammer_on(args.mode):
+print("\nzbjammer: jamming channel", args.channel)
+if not kb.jammer_on(mode=args.mode):
     while 42:
         pass
 else:

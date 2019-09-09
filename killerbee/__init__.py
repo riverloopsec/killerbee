@@ -357,7 +357,7 @@ class KillerBee:
         '''
         return self.driver.pnext(timeout)
 
-    def jammer_on(self, channel=None):
+    def jammer_on(self, channel=None, page=0, mode=1):
         '''
         Attempts reflexive jamming on all 802.15.4 frames.
         Targeted frames must be >12 bytes for reliable jamming in current firmware.
@@ -367,7 +367,7 @@ class KillerBee:
         '''
         return self.driver.jammer_on(channel=channel)
 
-    def jammer_off(self, channel=None):
+    def jammer_off(self, channel=None, page=0):
         '''
         End reflexive jamming on all 802.15.4 frames.
         Targeted frames must be >12 bytes for reliable jamming in current firmware.

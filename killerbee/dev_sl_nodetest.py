@@ -275,7 +275,7 @@ class SL_NODETEST:
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel=None, page=0):
+    def jammer_on(self, channel=None, page=0, mode=1):
         '''
         Not yet implemented.
         @type channel: Integer

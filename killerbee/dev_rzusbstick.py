@@ -394,7 +394,7 @@ class RZUSBSTICK:
         '''
         self._close_stream()
 
-    def jammer_on(self, channel=None, page=0):
+    def jammer_on(self, channel=None, page=0, mode=1):
         '''
         @type channel: Integer
         @param channel: Sets the channel, optional

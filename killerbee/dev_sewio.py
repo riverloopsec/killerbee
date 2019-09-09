@@ -496,7 +496,7 @@ class SEWIO:
             else:           result['dbm'] = rssi
         return result
 
-    def jammer_on(self, channel=None, page=0, mode=None):
+    def jammer_on(self, channel=None, page=0, mode=1):
         '''
         Transmit a constant jamming signal following the given mode.
         @type channel: Integer
@@ -516,16 +516,14 @@ class SEWIO:
         '''
         self.capabilities.require(KBCapabilities.PHYJAM)
 
-        if mode is None:
-            mode = "1"  #default to 1
-        elif mode not in ['1','2','3','4','8','c','10','20','40']:
-            raise ValueError("Jamming mode is unsupported by this driver.")
-
-        if ((channel >= 11 and channel <=26) and mode in ['4','8','c','10']) or (not (channel >= 11 and channel <=26) and mode in ['20','40']):
-            raise ValueError("Jamming mode is unsupported by this channel.")
-
         if channel != None:
             self.set_channel(channel)
+
+        if mode not in [1,2,3,4,8,'c',10,20,40]:
+            raise ValueError("Jamming mode is unsupported by this driver.")
+
+        if ((self._channel >= 11 and self._channel <= 26) and mode in [4,8,'c',10]) or (not (self._channel >= 11 and self._channel <= 26) and mode in [20,40]):
+            raise ValueError("Jamming mode {} is unsupported by channel {}.".format(mode, self._channel))
 
         # Parameter enumeration
         # http://10.10.10.2/test.cgi?chn=15&mode=1&module=0&txlevel=0
@@ -538,7 +536,7 @@ class SEWIO:
                 raise KBInterfaceError("Error instructing sniffer to start jamming.")
 
 
-    def jammer_off(self):
+    def jammer_off(self, channel=None, page=0):
         '''
         Instruct the device to stop jamming.
         @type channel: Integer
