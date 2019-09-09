@@ -155,68 +155,62 @@ if __name__ == '__main__':
 
     # Sequence number of beacon request frame
     seqnum = 0
+    channel_list = list(range(11, 27)) # channels 11-26
     if args.channel:
-        channel = args.channel
-        kb.set_channel(channel)
+        channel_list = [args.channel]
+        kb.set_channel(args.channel)
     else:
-        channel = 11
-
-    # check if device is a Sewio Open Sniffer
-    isSewio = False
-    if (s for s in kb.get_dev_info() if 'Sewio' in s):
-        isSewio = True
+        # check if device supports SubGhz
+        if kb.check_capability(KBCapabilities.FREQ_868): # channel 0
+            channel_list.append(0)
+        if kb.check_capability(KBCapabilities.FREQ_900): # channels 1-10
+            FREQ_900 = list(range(1, 11))
+            channel_list.extend(FREQ_900)
+        if kb.check_capability(KBCapabilities.FREQ_784): # channels 128-131
+            FREQ_784 = list(range(128, 132))
+            channel_list.extend(FREQ_784)
+        channel_list.sort()
 
     # Loop injecting and receiving packets
-    while 1:
-        if channel > 26:
-            if isSewio:
-                if channel > 131:
-                    channel = 0
-                elif channel < 128:
-                    channel = 128
-            else:
-                channel = 11
+    while True:
+        for channel in channel_list:
+            if seqnum > 255:
+                seqnum = 0
 
-        if seqnum > 255:
-            seqnum = 0
+            if not args.channel:
+                if args.verbose:
+                    print("Setting channel to {0}.".format(channel))
+                try:
+                    kb.set_channel(channel)
+                except Exception as e:
+                    print("ERROR: Failed to set channel to {0}. ({1})".format(channel, e))
+                    sys.exit(-1)
 
-        if not args.channel:
             if args.verbose:
-                print("Setting channel to {0}.".format(channel))
+                print("Transmitting beacon request.")
+
+            beaconinj = b''.join([beaconp1, b'%c' % seqnum, beaconp2])
+
+            # Process packets for arg_delay seconds looking for the beacon
+            # response frame.
+            start = time.time()
+
             try:
-                kb.set_channel(channel)
+                txcount+=1
+                kb.inject(beaconinj)
             except Exception as e:
-                print("ERROR: Failed to set channel to {0}. ({1})".format(channel, e))
+                print("ERROR: Unable to inject packet: {0}".format(e))
                 sys.exit(-1)
 
-        if args.verbose:
-            print("Transmitting beacon request.")
+            while (start+args.delay > time.time()):
+                # Does not block
+                recvpkt = kb.pnext()
+                # Check for empty packet (timeout) and valid FCS
+                if recvpkt != None and recvpkt[1]:
+                    rxcount += 1
+                    if args.verbose:
+                        print("Received frame.")#, time.time()-start
+                    networkdata = response_handler(stumbled, recvpkt[0], channel)
 
-        beaconinj = b''.join([beaconp1, b'%c' % seqnum, beaconp2])
-
-        # Process packets for arg_delay seconds looking for the beacon
-        # response frame.
-        start = time.time()
-
-        try:
-            txcount+=1
-            kb.inject(beaconinj)
-        except Exception as e:
-            print("ERROR: Unable to inject packet: {0}".format(e))
-            sys.exit(-1)
-
-        while (start+args.delay > time.time()):
-            # Does not block
-            recvpkt = kb.pnext()
-            # Check for empty packet (timeout) and valid FCS
-            if recvpkt != None and recvpkt[1]:
-                rxcount += 1
-                if args.verbose:
-                    print("Received frame.")#, time.time()-start
-                networkdata = response_handler(stumbled, recvpkt[0], channel)
-
-        kb.sniffer_off()
-        seqnum += 1
-        if not args.channel:
-            channel += 1
-
+            kb.sniffer_off()
+            seqnum += 1
