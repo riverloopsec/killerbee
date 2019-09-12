@@ -335,13 +335,16 @@ def devlist(vendor=None, product=None, gps=None, include=None):
     if include is not None:
         # Ugly nested load, so we don't load this class when unneeded!
         from .dev_sewio import isSewio,getFirmwareVersion,getMacAddr
-        if filter(isIpAddr, include):
-            if isSewio(include):
-                devlist.append([include, "Sewio Open-Sniffer v{0}".format(getFirmwareVersion(include)), getMacAddr(include)])
-                # NOTE: Enumerations of other IP connected sniffers go here.
+        for addr in include:
+            if filter(isIpAddr, addr):
+                if isSewio(addr):
+                    devlist.append([addr, "Sewio Open-Sniffer v{0}".format(getFirmwareVersion(addr)), getMacAddr(addr)])
+                    # NOTE: Enumerations of other IP connected sniffers go here.
+                else:
+                    print("kbutils.devlist has an unknown type of IP sniffer device ({0}).".format(addr))
             else:
-                print("kbutils.devlist has an unknown type of IP sniffer device ({0}).".format(include))
-    
+                print("kbutils.devlist has an unknown type of sniffer device ({0}).".format(addr))
+
     return devlist
 
 def get_serial_devs(seriallist):
@@ -644,7 +647,7 @@ def makeFCS(data):
     '''
     crc = 0
     for i in range(len(data)):
-        c = ord(data[i])
+        c = ord(chr(data[i]))
         # if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
         q = (crc ^ c) & 15				#Do low-order 4 bits
         crc = (crc // 16) ^ (q * 4225)

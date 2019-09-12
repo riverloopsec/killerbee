@@ -255,10 +255,10 @@ class SL_BEEHIVE:
             tosend = maxp
         else:
             tosend = len(packet) 
-        self.__send_cmd("setTxPayload", "00 %02x%s" % ((len(packet)), packet[:tosend].encode('hex')))
+        self.__send_cmd("setTxPayload", "00 %02x%s" % ((len(packet)), packet[:tosend].hex()))
         if len(packet) > maxp:
-            self.__send_cmd("setTxPayload", "%d %s" % (tosend + 1, packet[tosend:].encode('hex')))
-        #print 'sending', len(packet), 'bytes:', packet.encode('hex')
+            self.__send_cmd("setTxPayload", "%d %s" % (tosend + 1, packet[tosend:].hex()))
+        #print 'sending', len(packet), 'bytes:', packet.hex()
         for pnum in range(0, count):
             self.__send_cmd("tx", "1", confirm= False)
             time.sleep(delay)

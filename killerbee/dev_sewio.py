@@ -412,12 +412,12 @@ class SEWIO:
             raise Exception("Can not parse provided data as ZEP due to incorrect preamble or unsupported version.")
         if zeptype == 1: #data
             (ch, devid, crcmode, lqival, ntpsec, ntpnsec, seqnum, length) = unpack(">BHBBIII10xB", data[4:32])
-            #print "Data ZEP:", ch, devid, crcmode, lqival, ntpsec, ntpnsec, seqnum, length
+            #print("Data ZEP:", ch, devid, crcmode, lqival, ntpsec, ntpnsec, seqnum, length)
             #We could convert the NTP timestamp received to system time, but the
             # Sewio firmware uses "relative timestamping" where it begins at 0 each time
             # the sniffer is started. Thus, it isn't that useful to us, so we just add the
             # time the packet is received at the host instead.
-            #print "\tConverted time:", ntp_to_system_time(ntpsec, ntpnsec)
+            #print("\tConverted time:", ntp_to_system_time(ntpsec, ntpnsec))
             recdtime = datetime.utcnow()
             #The LQI comes in ZEP, but the RSSI comes in the first byte of the FCS,
             # if the FCS was correct. If the byte is 0xb1, Wireshark appears to do 0xb1-256 = -79 dBm.
@@ -430,8 +430,8 @@ class SEWIO:
             # A length vs len(frame) check is not used here but is an 
             #  additional way to verify that all is good (length == len(frame)).
             if crcmode == 0:
-                validcrc = ((ord(data[-1]) & 0x80) == 0x80)
-                rssi = ord(data[-2])
+                validcrc = ((ord(chr(data[-1])) & 0x80) == 0x80)
+                rssi = ord(chr(data[-2]))
                 # We have to trust the sniffer that the FCS was OK, so we compute
                 #  what a good FCS should be and patch it back into the packet.
                 frame = frame[:-2] + makeFCS(frame[:-2])

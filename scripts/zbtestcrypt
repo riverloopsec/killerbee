@@ -95,7 +95,7 @@ if __name__ == '__main__':
         try:
             nwk_key= args.network_key.replace(':','')
             nwk_key= nwk_key.decode('hex')
-            print(' NWK_KEY:', nwk_key.encode('hex').upper())
+            print(' NWK_KEY:', nwk_key.hex().upper())
         except:
             print("ERROR: Invalid NWK_KEY", file=sys.stderr)
             exit(True)
@@ -109,7 +109,7 @@ if __name__ == '__main__':
         try:
             link_key= args.link_key.replace(':','')
             link_key= link_key.decode('hex')
-            print('LINK_KEY:', link_key.encode('hex').upper())
+            print('LINK_KEY:', link_key.hex().upper())
         except:
             print("ERROR: Invalid LINK_KEY", file=sys.stderr)
             exit(True)
@@ -218,7 +218,7 @@ if __name__ == '__main__':
                 if args.verbose:
                     print('     ', repr(decrypted))
                 if args.verbose > 1:
-                    print(' HEX:', str(decrypted).encode('hex'))
+                    print(' HEX:', str(decrypted).hex())
 
                 # If we have an APS layer and it's encrypted, build new packet with ZigbeeNWK so we can decrypt it
                 if ZigbeeAppDataPayload in decrypted and ZigbeeSecurityHeader in decrypted and decrypted[ZigbeeSecurityHeader].data != '':
@@ -241,7 +241,7 @@ if __name__ == '__main__':
                     if args.verbose:
                         print('        ', repr(tmppkt))
                     if args.verbose > 1:
-                        print(' HEX:', str(tmppkt).encode('hex'))
+                        print(' HEX:', str(tmppkt).hex())
                     stat, app_decrypt= crypt(tmppkt)
                     if stat:
                         aps_passed += 1
@@ -249,7 +249,7 @@ if __name__ == '__main__':
                         if args.verbose:
                             print('        ', repr(app_decrypt))
                         if args.verbose > 1:
-                            print(' HEX:', str(app_decrypt).encode('hex'))
+                            print(' HEX:', str(app_decrypt).hex())
                     else:
                         aps_failed += 1
                         print('         FAILED:', app_decrypt)
@@ -335,5 +335,5 @@ if __name__ == '__main__':
         print()
         print('%d key(s) found:' % len(transport_keys))
         for key in transport_keys:
-            print('  packet: %d\n    type: %s\n     key: %s (%s)\n     seq: %d\n     src: %s\n    dest: %s' % (key[0], key[1], key[2].encode('hex'), key[2][::-1].encode('hex'), key[3], key[4], key[5]))
+            print('  packet: %d\n    type: %s\n     key: %s (%s)\n     seq: %d\n     src: %s\n    dest: %s' % (key[0], key[1], key[2].hex(), key[2][::-1].hex(), key[3], key[4], key[5]))
     exit(False)

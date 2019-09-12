@@ -35,19 +35,19 @@ class SymbolTable:
         try:
             c.execute("select adr,memory from symbols where name=?",(name,));
             for row in c:
-                #print "Found it.";
+                #print("Found it.";)
                 sys.stdout.flush();
                 return row[0];
-            #print "No dice.";
+            #print("No dice.";)
         except:# sqlite3.OperationalError:
-            #print "SQL error.";
+            #print("SQL error.";)
             return eval(name);
         return eval(name);
     def define(self,adr,name,comment="",memory="vn",size=16):
         self.db.execute("insert into symbols(adr,name,memory,size,comment)"
                         "values(?,?,?,?,?);", (
                 adr,name,memory,size,comment));
-        #print "Set %s=%s." % (name,adr);
+        #print("Set %s=%s." % (name,adr);)
 class GoodFETbtser:
     """py-bluez class for emulating py-serial."""
     def __init__(self,btaddr):
@@ -81,7 +81,7 @@ class GoodFETbtser:
         #str="";
         #while not str.endswith("goodfet.sf.net/"):
         #    str=self.read(64);
-        #    print str;
+        #    print(str);
         
         # Instead, just return and hope for the best.
         return;
@@ -171,7 +171,7 @@ class GoodFET:
                 try:
                     if hwid.index('FTDI')==0:
                         port=comport;
-                        #print "Using FTDI port %s" % port
+                        #print("Using FTDI port %s" % port)
                 except:
                     #Do nothing.
                     a=1;
@@ -193,7 +193,7 @@ class GoodFET:
         while connected==0:
             while self.verb!=0x7F or self.data!="http://goodfet.sf.net/":
             #while self.data!="http://goodfet.sf.net/":
-                #print "'%s'!=\n'%s'" % (self.data,"http://goodfet.sf.net/");
+                #print("'%s'!=\n'%s'" % (self.data,"http://goodfet.sf.net/");)
                 if attemptlimit is not None and attempts >= attemptlimit:
                     return
                 elif attempts==2 and os.environ.get("board")!='telosb':
@@ -212,7 +212,7 @@ class GoodFET:
                 
                 #TelosB reset, prefer software to I2C SPST Switch.
                 if (os.environ.get("board")=='telosb'):
-                    #print "TelosB Reset";
+                    #print("TelosB Reset";)
                     self.telosBReset();
                 elif (os.environ.get("board")=='z1'):
                     self.bslResetZ1(invokeBSL=0);
@@ -241,13 +241,13 @@ class GoodFET:
                 #time.sleep(60);
                 attempts=attempts+1;
                 self.readcmd(); #Read the first command.
-                #print "Got %02x,%02x:'%s'" % (self.app,self.verb,self.data);
+                #print("Got %02x,%02x:'%s'" % (self.app,self.verb,self.data);)
                 if self.verb!=0x7f:
                     #Retry again. This usually times out, but helps connect.
                     self.readcmd();
-                    #print "Retry got %02x,%02x:'%s'" % (self.app,self.verb,self.data);
+                    #print("Retry got %02x,%02x:'%s'" % (self.app,self.verb,self.data);)
             #Here we have a connection, but maybe not a good one.
-            #print "We have a connection."
+            #print("We have a connection.")
             connected=1;
         if attempts >= 100:
             print("")	# Add a newline
@@ -338,7 +338,7 @@ class GoodFET:
         recbuf = 0
         for i in range(7,-1,-1):
             s = ((data >> i) & 0x01)
-            #print s
+            #print(s)
             if i < 1:
                 r = not self.picROMclock(s, True)
             else:
@@ -367,7 +367,7 @@ class GoodFET:
         
     #This seems more reliable when slowed.
     def picROMclock(self, masterout, slow = True):
-        #print "setting masterout to "+str(masterout)
+        #print("setting masterout to "+str(masterout))
         self.serialport.setRTS(masterout)
         self.serialport.setDTR(1)
         #time.sleep(0.02)
@@ -377,7 +377,7 @@ class GoodFET:
         return self.serialport.getCTS()
 
     def picROMfastclock(self, masterout):
-        #print "setting masterout to "+str(masterout)
+        #print("setting masterout to "+str(masterout))
         self.serialport.setRTS(masterout)
         self.serialport.setDTR(1)
         self.serialport.setDTR(0)
@@ -425,7 +425,7 @@ class GoodFET:
         #if data!=None:
         #    count=len(data); #Initial count ignored.
         
-        #print "TX %02x %02x %04x" % (app,verb,count);
+        #print("TX %02x %02x %04x" % (app,verb,count);)
         
         #little endian 16-bit length
         self.serialport.write(chr(count&0xFF));
@@ -434,14 +434,14 @@ class GoodFET:
         if self.verbose:
             print("Tx: ( 0x%02x, 0x%02x, 0x%04x )" % ( app, verb, count ))
         
-        #print "count=%02x, len(data)=%04x" % (count,len(data));
+        #print("count=%02x, len(data)=%04x" % (count,len(data));)
         
         if count!=0:
             if(isinstance(data,list)):
                 for i in range(0,count):
-                #print "Converting %02x at %i" % (data[i],i)
+                #print("Converting %02x at %i" % (data[i],i))
                     data[i]=chr(data[i]);
-            #print type(data);
+            #print(type(data));
             outstr=''.join(data);
             self.serialport.write(outstr);
         if not self.besilent:
@@ -453,9 +453,9 @@ class GoodFET:
         """Read a reply from the GoodFET."""
         while True:#self.serialport.inWaiting(): # Loop while input data is available
             try:
-                #print "Reading...";
+                #print("Reading...";)
                 self.app=ord(self.serialport.read(1));
-                #print "APP=%02x" % self.app;
+                #print("APP=%02x" % self.app;)
                 self.verb=ord(self.serialport.read(1));
                 
                 #Fixes an obscure bug in the TelosB.
@@ -463,7 +463,7 @@ class GoodFET:
                     while self.verb==0x00:
                         self.verb=ord(self.serialport.read(1));
                 
-                #print "VERB=%02x" % self.verb;
+                #print("VERB=%02x" % self.verb;)
                 self.count=(
                     ord(self.serialport.read(1))
                     +(ord(self.serialport.read(1))<<8)
@@ -489,7 +489,7 @@ class GoodFET:
             except TypeError:
                 if self.connected:
                     print("Warning: waiting for serial read timed out (most likely).");
-                    #print "This shouldn't happen after syncing.  Exiting for safety.";                    
+                    #print("This shouldn't happen after syncing.  Exiting for safety.";                    )
                     #sys.exit(-1)
                 return self.data;
 

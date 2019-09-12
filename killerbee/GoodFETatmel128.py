@@ -124,14 +124,14 @@ class GoodFETatmel128rfa1(GoodFETAVR):
         self.serialport.write(chr(count>>8));
         if count > 0:
             if self.verbose:
-                print("sending: %s" %outstr.encode("hex"))
+                print("sending: %s" %outstr.hex())
             self.serialport.write(outstr);
 
 
         if not self.besilent:
             out = self.readcmd()
             if out and self.verbose:
-                print("read: " + out.encode("hex"))
+                print("read: " + out.hex())
             return out
         else:
             return None
@@ -198,7 +198,7 @@ class GoodFETatmel128rfa1(GoodFETAVR):
         self.data = None
         self.writecmd(self.ATMELRADIOAPP,0x02,len(data),data);
         toret=0;
-        #print self.data.encode("hex")
+        #print self.data.hex()
         if self.data:
             #for i in range(0,bytes):
             #    toret=toret|(ord(self.data[i+1])<<(8*i));

@@ -468,12 +468,12 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
 
     if verbose > 2:
         print("Decrypt Details:")
-        print("\tKey:            " + key.encode('hex'))
-        print("\tNonce:          " + nonce.encode('hex'))
-        print("\tZigbeeData:     " + zigbeeData.encode('hex'))
-        print("\tDecrypted Data: " + payload.encode('hex'))
-        print("\tEncrypted Data: " + encrypted.encode('hex'))
-        print("\tMic:            " + pkt.mic.encode('hex'))
+        print("\tKey:            " + key.hex())
+        print("\tNonce:          " + nonce.hex())
+        print("\tZigbeeData:     " + zigbeeData.hex())
+        print("\tDecrypted Data: " + payload.hex())
+        print("\tEncrypted Data: " + encrypted.hex())
+        print("\tMic:            " + pkt.mic.hex())
 
     frametype = pkt[ZigbeeNWK].frametype
     if frametype == 0 and micCheck == 1:
@@ -552,12 +552,12 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
 
     if verbose > 2:
         print("Encrypt Details:")
-        print("\tKey:            " + key.encode('hex'))
-        print("\tNonce:          " + nonce.encode('hex'))
-        print("\tZigbeeData:     " + zigbeeData.encode('hex'))
-        print("\tDecrypted Data: " + decrypted.encode('hex'))
-        print("\tEncrypted Data: " + payload.encode('hex'))
-        print("\tMic:            " + mic.encode('hex'))
+        print("\tKey:            " + key.hex())
+        print("\tNonce:          " + nonce.hex())
+        print("\tZigbeeData:     " + zigbeeData.hex())
+        print("\tDecrypted Data: " + decrypted.hex())
+        print("\tEncrypted Data: " + payload.hex())
+        print("\tMic:            " + mic.hex())
 
     # According to comments in e.g. https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-zbee-security.c nwk_seclevel is not used any more but
     # we should reconstruct and return what was asked for anyway.

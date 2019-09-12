@@ -53,7 +53,7 @@ def associate_response_handle(packet):
         # Offset to Command Type, check to be 0x02 for assoc response type
         if packet[21] == '\x02':
             if packet[24] != '\x00':
-                print(("Association response status was not successful. Received {0}.".format(struct.unpack('B', packet[24])[0])))
+                print("Association response status was not successful. Received {0}.".format(struct.unpack('B', packet[24])[0]))
                 return None
             # Offset to Response Assigned Short Addr (in assoc response type)
             return packet[22:24] #device's short address, as binary string
@@ -130,12 +130,12 @@ while len(sys.argv) > 1:
         arg_sleep = float(sys.argv.pop(1))
     if op == '-a':
         arg_IEE64addr = binascii.unhexlify(sys.argv.pop(1))
-        #print "reverse_addr:%s" % arg_IEE64addr[::-1].encode('hex')
+        #print "reverse_addr:%s" % arg_IEE64addr[::-1].hex()
         arg_IEE64addr = arg_IEE64addr[::-1] #hack to switch endian
     if op == '-p':
         arg_panID = binascii.unhexlify(sys.argv.pop(1))
         arg_panID = arg_panID[::-1] #hack to swap endian
-        #print "reverse_panid:%s" % arg_panID.encode('hex')
+        #print "reverse_panid:%s" % arg_panID.hex()
     if op == '-z':
         arg_IEEEcoord = sys.argv.pop(1)
     if op == '-y':
@@ -220,7 +220,7 @@ if value != None:
         if recvpkt != None and recvpkt['validcrc']:
             receivedKey = transport_response_handle(recvpkt['bytes']) 
             if receivedKey != None:
-                print("Received key: {0}".format(receivedKey.encode("hex")))
+                print("Received key: {0}".format(receivedKey.hex()))
                 kb.close()
                 sys.exit(0)
 

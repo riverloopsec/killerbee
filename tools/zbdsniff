@@ -38,7 +38,7 @@ def sniffNetworkKey(pkts, key, verbose):
             nwk = p.getlayer("ZigbeeNWK")
             if nwk.source is not None and nwk.ext_src is not None:
                 if not nwk.source in addrMap and verbose:
-                    print(("[+] Extended Source: " + ":".join("{:02x}".format(ord(ch)) for ch in raw(nwk)[8:16]) + " mapped to " + hex(nwk.source)))
+                    print("[+] Extended Source: " + ":".join("{:02x}".format(ord(ch)) for ch in raw(nwk)[8:16]) + " mapped to " + hex(nwk.source))
                 addrMap[nwk.source] = raw(nwk)[8:16]
             if (p.haslayer("ZigbeeSecurityHeader") and p.haslayer("ZigbeeAppDataPayload")):
                 sec = p.getlayer("ZigbeeSecurityHeader")

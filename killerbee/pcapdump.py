@@ -253,12 +253,12 @@ class PcapDumper:
             output_list.append(caceppi_f80211common)
 
         output_list.append(packet)
-        output = ''.join(output_list)
+        output = b''.join(output_list)
 
         #DEBUG Output:
-        #print "Pcap:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in output])
-        #print "PPI:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in (caceppi_hdr + caceppi_f80211common)])
-        #print "802154:", packet.encode("hex")
+        #print("Pcap:", '\\x'+'\\x'.join(["%02x" % ord(chr(x)) for x in output]))
+        #print("PPI:", '\\x'+'\\x'.join(["%02x" % ord(chr(x)) for x in (caceppi_hdr + caceppi_f80211common)]))
+        #print("802154:", packet.hex())
 
         self.__fh.write(output)
         # Specially for handling FIFO needs:

@@ -24,7 +24,7 @@ if __name__=='__main__':
                         help='Initiate capture on channels where packets were seen, even if no beacon response was received')
     parser.add_argument('-g', '--gps', dest='gps', action='store_true',
                         help='Connect to gpsd and grab location data as available to enhance PCAPs')
-    parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring')
+    parser.add_argument('-i', '--iface', '--dev', action='append', dest='include')
     #TODO make it be able to ignore a list!
     parser.add_argument('--ignore', action='store', dest='ignore', default=None)
     args = parser.parse_args()
@@ -45,7 +45,7 @@ if __name__=='__main__':
         zbdb = ZBScanDB()
         #TODO check return value from startScan
         startScan(zbdb, currentGPS, verbose=args.verbose, dblog=args.dblog, 
-            agressive=args.agressive, dev=args.devstring, ignore=args.ignore)
+            agressive=args.agressive, ignore=args.ignore, include=args.include)
         zbdb.close()
 
     except KeyboardInterrupt:
