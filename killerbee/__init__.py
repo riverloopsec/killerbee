@@ -12,7 +12,7 @@ from .dot154decode import * #would like to import only within killerbee class
 from .config import *       #to get DEV_ENABLE_* variables
 
 # Utility Functions
-def getKillerBee(channel, page= 0):
+def getKillerBee(channel, page=0):
     '''
     Returns an instance of a KillerBee device, setup on the given channel/page.
     Error handling for KillerBee creation and setting of the channel is wrapped
@@ -231,7 +231,7 @@ class KillerBee:
         '''
         return self.driver.capabilities.is_valid_channel(channel, page)
 
-    def frequency(self, channel=None, page=None):
+    def frequency(self, channel=None, page=0):
         '''
         Use the driver's capabilities class to convert channel and page to actual frequency in KHz
         @rtype: Integer
@@ -283,7 +283,7 @@ class KillerBee:
 
         return self.driver.bootloader_start_application()
 
-    def sniffer_on(self, channel=None, page= 0):
+    def sniffer_on(self, channel=None, page=0):
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.  Will set the command mode to Air Capture if it is not already

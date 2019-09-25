@@ -9,30 +9,30 @@ def create_beacon(panid, coordinator, epanid):
     '''Doing a raw packet creation.'''
     beacon = [
         # FRAME CONTROL
-        "\x00", # FCF for beacon 0x00
-        "\x80", # src addressing mode: short/16-bit 0x0002 (this is the only FCF flag marked)
-        "\xd8", # Sequence number for 802.15.4 layer
-        str(struct.pack("H", panid)), # 2-byte shortcode of panid
-        str(struct.pack("H", coordinator)), # only some implementations make it 0000 "\x00\x00", # Source address 0
-        #"\x11\x11",
+        b"\x00", # FCF for beacon 0x00
+        b"\x80", # src addressing mode: short/16-bit 0x0002 (this is the only FCF flag marked)
+        b"\xd8", # Sequence number for 802.15.4 layer
+        struct.pack("<H", panid), # 2-byte shortcode of panid
+        struct.pack("<H", coordinator), # only some implementations make it 0000 "\x00\x00", # Source address 0
+        #b"\x11\x11",
         # SUPERFRAME
-        "\xff\xcf", # beacon interval, superframe interval, final cap slot, jbattery extension, pan coordinator (true!), association permit (true)
+        b"\xff\xcf", # beacon interval, superframe interval, final cap slot, jbattery extension, pan coordinator (true!), association permit (true)
         # GTS
-        "\x00",
+        b"\x00",
         #Pending addresses
-        "\x00",
+        b"\x00",
         # bullshit zigbee layer packet
-        "\x00\x22\x8c",
+        b"\x00\x22\x8c",
         # Extended PAN ID (Zigbee NWK layer)
-        str(struct.pack("L", epanid)),
-        "\xff\xff\xff\x00"
+        struct.pack("L", epanid),
+        b"\xff\xff\xff\x00"
     ]
-    return ''.join(beacon)
+    return b''.join(beacon)
 
 
 def response_handler(packet, channel):
     if len(packet) > 7:
-        if packet[7] == '\x07': # is it a beacon request?
+        if packet[7] == b'\x07': # is it a beacon request?
             sp = create_beacon(spanid, args.coordinator, args.epanid) # respond to the beacon request.
             kb.sniffer_off()
             kb.inject(sp)

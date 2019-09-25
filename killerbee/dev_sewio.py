@@ -430,8 +430,8 @@ class SEWIO:
             # A length vs len(frame) check is not used here but is an 
             #  additional way to verify that all is good (length == len(frame)).
             if crcmode == 0:
-                validcrc = ((ord(chr(data[-1])) & 0x80) == 0x80)
-                rssi = ord(chr(data[-2]))
+                validcrc = ((data[-1] & 0x80) == 0x80)
+                rssi = data[-2]
                 # We have to trust the sniffer that the FCS was OK, so we compute
                 #  what a good FCS should be and patch it back into the packet.
                 frame = frame[:-2] + makeFCS(frame[:-2])

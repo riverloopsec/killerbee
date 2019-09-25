@@ -2,6 +2,7 @@ DEFAULT_KB_CHANNEL = 11
 DEFAULT_KB_PAGE = None
 DEFAULT_KB_DEVICE = None
 
+from scapy import plist
 from scapy.config import conf
 setattr(conf, 'killerbee_channel', DEFAULT_KB_CHANNEL)
 setattr(conf, 'killerbee_page', DEFAULT_KB_PAGE)
