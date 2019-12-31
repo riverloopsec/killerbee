@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 # GoodFET SPI and SPIFlash Client Library
-# 
+#
 # (C) 2009 Travis Goodspeed <travis at radiantmachines.com>
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, cStringIO, struct, glob, os;
+import sys, time, string, struct, glob, os
 
-from GoodFET import GoodFET;
+from .GoodFET import GoodFET
 
 class GoodFETAVR(GoodFET):
-    AVRAPP=0x32;
-    APP=AVRAPP;
+    AVRAPP=0x32
+    APP=AVRAPP
     AVRVendors={0x1E: "Atmel",
                 0x00: "Locked",
-                };
-    
+                }
+
     #List imported from http://avr.fenceline.de/device_data.html
     AVRDevices={
         0x9003: "ATtiny10",
@@ -81,83 +81,83 @@ class GoodFETAVR(GoodFET):
         0x9302: "ATmega85",
         0x9305: "ATmega83",
         0x9601: "ATmega603",
-        
+
         #These are missing from the Fenceline DB.
         0x960a: "ATmega644P",
-        };
-    
+        }
+
     def setup(self):
         """Move the FET into the AVR application."""
         self.writecmd(self.AVRAPP,0x10,0,self.data); #SPI/SETUP
-    
+
     def trans(self,data):
         """Exchange data by AVR.
         Input should probably be 4 bytes."""
-        self.data=data;
-        self.writecmd(self.AVRAPP,0x00,len(data),data);
-        return self.data;
+        self.data=data
+        self.writecmd(self.AVRAPP,0x00,len(data),data)
+        return self.data
 
     def start(self):
         """Start the connection."""
-        self.writecmd(self.AVRAPP,0x20,0,None);
+        self.writecmd(self.AVRAPP,0x20,0,None)
     def forcestart(self):
         """Forcibly start a connection."""
-        
+
         for i in range(0x880,0xfff):
             #self.glitchVoltages(0x880, i);
-            self.start();
-            bits=self.lockbits();
-            print "At %04x, Lockbits: %02x" % (i,bits);
-            if(bits==0xFF): return;
+            self.start()
+            bits=self.lockbits()
+            print("At %04x, Lockbits: %02x" % (i,bits))
+            if(bits==0xFF): return
     def erase(self):
         """Erase the target chip."""
-        self.writecmd(self.AVRAPP,0xF0,0,None);
+        self.writecmd(self.AVRAPP,0xF0,0,None)
     def lockbits(self):
         """Read the target's lockbits."""
-        self.writecmd(self.AVRAPP,0x82,0,None);
-        return ord(self.data[0]);
+        self.writecmd(self.AVRAPP,0x82,0,None)
+        return ord(self.data[0])
     def setlockbits(self,bits=0x00):
         """Read the target's lockbits."""
-        self.writecmd(self.AVRAPP,0x92,1,[bits]);
-        return self.lockbits();
+        self.writecmd(self.AVRAPP,0x92,1,[bits])
+        return self.lockbits()
     def lock(self):
-        self.setlockbits(0xFC);
+        self.setlockbits(0xFC)
     def eeprompeek(self, adr):
         """Read a byte of the target's EEPROM."""
         self.writecmd(self.AVRAPP,0x81 ,2,
                       [ (adr&0xFF), (adr>>8)]
                       );#little-endian address
-        return ord(self.data[0]);
+        return ord(self.data[0])
     def flashpeek(self, adr):
         """Read a byte of the target's Flash memory."""
         self.writecmd(self.AVRAPP,0x02 ,2,
                       [ (adr&0xFF), (adr>>8)]
                       );#little-endian address
-        return ord(self.data[0]);
+        return ord(self.data[0])
     def flashpeekblock(self, adr):
         """Read a byte of the target's Flash memory."""
         self.writecmd(self.AVRAPP,0x02 ,4,
                       [ (adr&0xFF), (adr>>8) &0xFF, 0x80, 0x00]
-                      );
-        return self.data;
-    
+                      )
+        return self.data
+
     def eeprompoke(self, adr, val):
         """Write a byte of the target's EEPROM."""
         self.writecmd(self.AVRAPP,0x91 ,3,
                       [ (adr&0xFF), (adr>>8), val]
                       );#little-endian address
-        return ord(self.data[0]);
-    
+        return ord(self.data[0])
+
     def identstr(self):
         """Return an identifying string."""
-        self.writecmd(self.AVRAPP,0x83,0, None);
-        vendor=self.AVRVendors.get(ord(self.data[0]));
-        deviceid=(ord(self.data[1])<<8)+ord(self.data[2]);
-        device=self.AVRDevices.get(deviceid);
-        
+        self.writecmd(self.AVRAPP,0x83,0, None)
+        vendor=self.AVRVendors.get(ord(self.data[0]))
+        deviceid=(ord(self.data[1])<<8)+ord(self.data[2])
+        device=self.AVRDevices.get(deviceid)
+
         #Return hex if device is unknown.
         #They are similar enough that it needn't be known.
         if device==None:
-            device=("0x%04x" % deviceid);
-        
-        return "%s %s" % (vendor,device);
+            device=("0x%04x" % deviceid)
+
+        return "%s %s" % (vendor,device)

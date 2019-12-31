@@ -11,7 +11,7 @@ triggers = []
 #  initiate a pcap and online database capture.
 def startCapture(zbdb, channel, dblog=False, gps=False):
     '''
-    Before calling, you should have already ensured the channel or the 
+    Before calling, you should have already ensured the channel or the
     channel which the key is associated with does not already have an active
     capture occuring.
     '''
@@ -20,9 +20,9 @@ def startCapture(zbdb, channel, dblog=False, gps=False):
     capChan = channel
     key = "CH%d" % channel
     if nextDev == None:
-        print 'Cap%s: No free device to use for capture.' % key
+        print('Cap%s: No free device to use for capture.' % key)
         return None
-    print 'Cap%s: Launching a capture on channel %s.' % (key, capChan)
+    print('Cap%s: Launching a capture on channel %s.' % (key, capChan))
     signal.signal(signal.SIGINT, interrupt)
     trigger = threading.Event()
     triggers.append(trigger)
@@ -41,6 +41,7 @@ def interrupt(signum, frame):
 #TODO change to multiprocessing, with the db having shared state
 class CaptureThread(threading.Thread):
     def __init__(self, channel, devstring, trigger, dblog=False, gps=None):
+        from killerbee.pcapdlt import DLT_IEEE802_15_4
         self.channel = channel
         self.rf_freq_mhz = (channel - 10) * 5 + 2400
         self.devstring = devstring
@@ -62,7 +63,7 @@ class CaptureThread(threading.Thread):
             self.kb = KillerBee(device=self.devstring)
         self.kb.set_channel(self.channel)
         self.kb.sniffer_on()
-        print "Capturing on \'%s\' at channel %d." % (self.kb.get_dev_info()[0], self.channel)
+        print("Capturing on \'%s\' at channel %d." % (self.kb.get_dev_info()[0], self.channel))
         # loop capturing packets to dblog and file
         while not self.trigger.is_set():
             packet = self.kb.pnext()
@@ -74,11 +75,11 @@ class CaptureThread(threading.Thread):
                     if self.currentGPS != None and 'lat' in self.currentGPS:
                         # We use the existince of the 'lat' key to promise ourselves
                         # that the lat, lng, and alt keys are there.
-                        self.pd.pcap_dump(packet[0], 
-                              freq_mhz=self.rf_freq_mhz, ant_dbm=packet['dbm'], 
+                        self.pd.pcap_dump(packet[0],
+                              freq_mhz=self.rf_freq_mhz, ant_dbm=packet['dbm'],
                               location=(self.currentGPS['lng'], self.currentGPS['lat'], self.currentGPS['alt'])   )
                     else:
-                        self.pd.pcap_dump(packet[0], freq_mhz=self.rf_freq_mhz, 
+                        self.pd.pcap_dump(packet[0], freq_mhz=self.rf_freq_mhz,
                                           ant_dbm=packet['dbm'])
                 except IOError as e:
                     #TODO replace this with code that ensures the captures exit before the manager
@@ -94,5 +95,5 @@ class CaptureThread(threading.Thread):
         self.kb.sniffer_off()
         self.kb.close()
         self.pd.close()
-        print "%d packets captured on channel %d." % (self.packetcount, self.channel)
+        print("%d packets captured on channel %d." % (self.packetcount, self.channel))
 

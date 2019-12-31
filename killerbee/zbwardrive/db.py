@@ -6,7 +6,7 @@ import string
 
 class ZBScanDB:
     """
-    API to interact with the "database" storing information 
+    API to interact with the "database" storing information
     for the zbscanning program.
     """
 
@@ -51,14 +51,14 @@ class ZBScanDB:
     # Return the channel of the network identified by key,
     # or None if it doesn't exist in the DB.
     def get_networks_channel(self, key):
-        #print "Looking up channel for network with key of %s" % (key)
+        #print("Looking up channel for network with key of %s" % (key))
         for chan, data in self.channels:
             if data[0] == key: return chan
         return None
 
     def channel_status_logging(self, chan):
         '''
-        Returns False if we have not seen the network or are not currently 
+        Returns False if we have not seen the network or are not currently
         logging it's channel, and returns True if we are currently logging it.
         @return boolean
         '''

@@ -4,7 +4,7 @@ try:
     import usb.util
     USBVER=1
     import sys
-    print >>sys.stderr, "Warning: You are using pyUSB 1.x, support is in beta."
+    print("Warning: You are using pyUSB 1.x, support is in beta.", file=sys.stderr)
 except ImportError:
     import usb
     #print("Warning: You are using pyUSB 0.x, future deprecation planned.")
@@ -13,7 +13,7 @@ except ImportError:
 import time
 import struct
 from datetime import datetime
-from kbutils import KBCapabilities
+from .kbutils import KBCapabilities
 
 # Functions for RZUSBSTICK, not all are implemented in firmware
 # Functions not used are commented out but retained for prosperity
@@ -62,7 +62,7 @@ RZ_RESP_PRITMITIVE_UNKNOWN  = 0x8C #: RZUSB Response: Primitive Unknown Error
 RZ_RESP_COMMAND_UNKNOWN     = 0x8D #: RZUSB Response: Command Unknown Error
 RZ_RESP_BUSY_SCANING        = 0x8E #: RZUSB Response: Busy Scanning Error
 RZ_RESP_BUSY_CAPTURING      = 0x8F #: RZUSB Response: Busy Capturing Error
-RZ_RESP_OUT_OF_MEMORY       = 0x90 #: RZUSB Response: Out of Memory Error 
+RZ_RESP_OUT_OF_MEMORY       = 0x90 #: RZUSB Response: Out of Memory Error
 RZ_RESP_BUSY_JAMMING        = 0x91 #: RZUSB Response: Busy Jamming Error
 RZ_RESP_NOT_INITIALIZED     = 0x92 #: RZUSB Response: Not Initialized Error
 RZ_RESP_NOT_IMPLEMENTED     = 0x93 #: RZUSB Response: Opcode Not Implemented Error
@@ -263,7 +263,7 @@ class RZUSBSTICK:
     def __usb_read(self):
         '''
         Read data from the USB device opened as self.handle.
-        
+
         @rtype: String
         @param data: The data received from the USB endpoint
         '''
@@ -271,28 +271,28 @@ class RZUSBSTICK:
         if USBVER == 0: # TODO: UNTESTED!!!!
             try:
                 response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
-            except usb.USBError, e:
+            except usb.USBError as e:
                 if e.args != ('No error',): # http://bugs.debian.org/476796
                     raise e
         else: #pyUSB 1.x
             try:
                 response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, timeout=500)
-                #print 'response length:', len(response)
-                #print response
+                #print('response length:', len(response))
+                #print(response)
                 #response = ''.join([chr(x) for x in response])
                 #response = response.pop()
             except usb.core.USBError as e:
                 if e.errno != 110: #Not Operation timed out
-                    print "Error args:", e.args
+                    print("Error args:", e.args)
                     raise e
                 elif e.errno == 110:
-                    print "DEBUG: Received operation timed out error ...attempting to continue."
+                    print("DEBUG: Received operation timed out error ...attempting to continue.")
         return response
 
     def __usb_write(self, endpoint, data, expected_response=RZ_RESP_SUCCESS):
         '''
         Write data to the USB device opened as self.handle.
-        
+
         @type endpoint: Integer
         @param endpoint: The USB endpoint to write to
         @param expected_response: The desired response - defaults to RZ_RESP_SUCCESS
@@ -304,7 +304,7 @@ class RZUSBSTICK:
                 self.handle.bulkWrite(endpoint, data)
                 # Returns a tuple, first value is an int as the RZ_RESP_* code
 #                response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
-            except usb.USBError, e:
+            except usb.USBError as e:
                 if e.args != ('No error',): # http://bugs.debian.org/476796
                     raise e
 #            time.sleep(0.0005)
@@ -322,13 +322,13 @@ class RZUSBSTICK:
 #                response = response.pop()
             except usb.core.USBError as e:
                 if e.errno != 110: #Not Operation timed out
-                    print "Error args:", e.args
+                    print("Error args:", e.args)
                     raise e
                 elif e.errno == 110:
-                    print "DEBUG: Received operation timed out error ...attempting to continue."
+                    print("DEBUG: Received operation timed out error ...attempting to continue.")
         #time.sleep(0.0005)
         response = self.__usb_read()
-        #print 'response 0: %x' % response[0]
+        #print('response 0: %x' % response[0])
         if response[0] != expected_response:
             if response[0] in RESPONSE_MAP:
                 raise Exception("Error: %s" % RESPONSE_MAP[response[0]])
@@ -498,7 +498,7 @@ class RZUSBSTICK:
     def inject(self, packet, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
-        @type packet: String
+        @type packet: Bytes
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
@@ -524,10 +524,10 @@ class RZUSBSTICK:
             self.set_channel(channel, page)
 
         # Append two bytes to be replaced with FCS by firmware.
-        packet += "\x00\x00"
+        packet += b"\x00\x00"
 
-        for pnum in xrange(count):
-            # Format for packet is opcode RZ_CMD_INJECT_FRAME, one-byte length, 
+        for pnum in range(count):
+            # Format for packet is opcode RZ_CMD_INJECT_FRAME, one-byte length,
             # packet data
             self.__usb_write(RZ_USB_COMMAND_EP, struct.pack("BB", RZ_CMD_INJECT_FRAME, len(packet)) + packet)
             time.sleep(delay)
@@ -607,7 +607,7 @@ class RZUSBSTICK:
                 # The last byte of frame data is the link quality indicator
                 ret['lqi'] = framedata[-1]
                 # Convert the framedata to a string for the return value
-                ret[0] = ''.join(framedata[:-1])
+                ret[0] = b''.join(framedata[:-1])
                 ret['bytes'] = ret[0]
                 return ret
             else:

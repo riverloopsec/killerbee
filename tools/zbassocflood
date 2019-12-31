@@ -8,7 +8,7 @@ from killerbee import *
 
 
 def usage():
-    print >>sys.stderr, """
+    print("""
 zbassocflood: Transmit a flood of associate requests to a target network.
 jwright@willhackforsushi.com
 
@@ -16,13 +16,13 @@ Usage: zbassocflood [-pcDis] [-i devnumstring] [-p PANID] [-c channel]
                         [-s per-packet delay/float]
 
 e.x. zbassocflood -p 0xBAAD -c 11 -s 0.1
-    """
+    """)
 
 def interrupt(signum, frame):
     global kb
     global txcount
     kb.close()
-    print "\nSent %d associate requests."%txcount
+    print("\nSent %d associate requests."%txcount)
     sys.exit(0)
 
 # Watch for an association response
@@ -109,20 +109,20 @@ if __name__ == '__main__':
             sys.exit(0)
 
     if not arg_channel:
-        print("Must specify a channel with -c")
+        print("Must specify a channel with -c", file=sys.stderr)
         usage()
         sys.exit(-1)
 
     if not arg_panid:
-        print("Must specify a PANID with -p")
+        print("Must specify a PANID with -p", file=sys.stderr)
         usage()
         sys.exit(-1)
 
     kb = KillerBee(device=arg_devstring)
     signal.signal(signal.SIGINT, interrupt)
 
-    print "zbassocflood: Transmitting and receiving on interface \'%s\'" % kb.get_dev_info()[0]
-    
+    print("zbassocflood: Transmitting and receiving on interface \'%s\'" % kb.get_dev_info()[0])
+
     # Sequence number of assoc frame
     kb.set_channel(arg_channel)
 
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     while 1:
         if seqnum > 254:  # 254 to accommodate datareq
             seqnum = 0
-    
+
         mac = randmac()
 
         assocreqp[1] = "%c" % seqnum
@@ -164,17 +164,15 @@ if __name__ == '__main__':
 
             # Send the data request frame
             kb.inject(datareqinj)
-        except Exception, e:
-            print "ERROR: Unable to inject packet"
-            print e
+        except Exception as e:
+            print("ERROR: Unable to inject packet: {0}".format(e))
             sys.exit(-1)
 
         try:
             # Listen for the ACK response
             seq = watchforaresp(kb, arg_framedelay*10)
-        except Exception, e:
-            print "ERROR: Unable to handle response processing."
-            print e
+        except Exception as e:
+            print("ERROR: Unable to handle response processing: {0}".format(e))
             sys.exit(-1)
 
         try:
@@ -191,8 +189,7 @@ if __name__ == '__main__':
             txcount+=1
             time.sleep(arg_framedelay)
         except Exception, e:
-            print "ERROR: Unable to handle ACK response."
-            print e
+            print("ERROR: Unable to handle ACK response: {0}".format(e))
             sys.exit(-1)
 
         seqnum += 1

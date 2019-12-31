@@ -1,4 +1,3 @@
-from __future__ import print_function
 import sys
 
 # Import USB support depending on version of pyUSB
@@ -206,7 +205,7 @@ def devlist_usb_v1x(vendor=None, product=None):
     else:               vendor = [vendor]
     if product == None: product = usbProductList
     else:               product = [product]
-    devs = usb.core.find(find_all=True, custom_match=findFromList(vendor, product)) #backend=backend, 
+    devs = usb.core.find(find_all=True, custom_match=findFromList(vendor, product)) #backend=backend,
     try:
         for dev in devs:
             # Note, can use "{0:03d}:{1:03d}" to get the old format,
@@ -258,15 +257,15 @@ def isIpAddr(ip):
 
 def devlist(vendor=None, product=None, gps=None, include=None):
     '''
-    Return device information for all present devices, 
+    Return device information for all present devices,
     filtering if requested by vendor and/or product IDs on USB devices, and
     running device fingerprint functions on serial devices.
     @type gps: String
     @param gps: Optional serial device identifier for an attached GPS
-        unit. If provided, or if global variable has previously been set, 
+        unit. If provided, or if global variable has previously been set,
         KillerBee skips that device in device enumeration process.
     @type include: List of Strings
-    @param include: Optional list of device handles to be appended to the 
+    @param include: Optional list of device handles to be appended to the
         normally found devices. This is useful for providing IP addresses for
         remote scanners.
     @rtype: List
@@ -316,8 +315,8 @@ def devlist(vendor=None, product=None, gps=None, include=None):
                 devlist.append([ipaddr, "Sewio Open-Sniffer v{0}".format(dev_sewio.getFirmwareVersion(ipaddr)), dev_sewio.getMacAddr(ipaddr)])
             #NOTE: Enumerations of other IP connected sniffers go here.
             else:
-                print(("kbutils.devlist has an unknown type of IP sniffer device ({0}).".format(ipaddr)))
-    
+                print("kbutils.devlist has an unknown type of IP sniffer device ({0}).".format(ipaddr))
+
     return devlist
 
 def get_serial_devs(seriallist):
@@ -334,7 +333,7 @@ def get_serial_ports(include=None):
     interested in, aka USB serial devices using FTDI chips such as the TelosB,
     ApiMote, etc. This should handle returning a list of devices regardless of
     the *nix it is running on. Support for more *nix and winnt needed.
-    
+
     @type include: List of Strings, or None
     @param include: A list of device strings, of which any which appear to be
         serial device handles will be added to the set of serial ports returned
@@ -434,10 +433,10 @@ def iszigduino(serialdev):
     if gf.connected == 1:
         out = gf.writecmd(gf.ATMELRADIOAPP, 0x10, 0, None)
         gf.serClose()
-        if (gf.app == gf.ATMELRADIOAPP) and (gf.verb == 0x10): #check if ATMELRADIOAPP exists           
+        if (gf.app == gf.ATMELRADIOAPP) and (gf.verb == 0x10): #check if ATMELRADIOAPP exists
             return True
     return False
-    
+
 def issl_nodetest(serialdev):
     '''
     Determine if a given serial device is a Silabs dev board NodeTest loaded (https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf)
@@ -531,7 +530,7 @@ def search_usb(device):
                 return (bus, dev)
         return None  # NOTE: can't expect a tuple returned
     elif USBVER == 1:
-        return usb.core.find(custom_match=findFromListAndBusDevId(busNum, devNum, usbVendorList, usbProductList)) #backend=backend, 
+        return usb.core.find(custom_match=findFromListAndBusDevId(busNum, devNum, usbVendorList, usbProductList)) #backend=backend,
     else:
         raise Exception("USB version expected to be 0.x or 1.x.")
 
@@ -545,7 +544,7 @@ def search_usb_bus_v0x(bus, busNum, devNum):
             if devNum == None:
                 return dev
             elif busNum == int(bus.dirname) and devNum == int(dev.filename):
-                #print "Choose device", bus.dirname, dev.filename, "to initialize KillerBee instance on."
+                #print("Choose device", bus.dirname, dev.filename, "to initialize KillerBee instance on.")
                 return dev
     return None
 
@@ -563,8 +562,8 @@ def hexdump(src, length=16):
     result = []
     for i in range(0, len(src), length):
        chars = src[i:i+length]
-       hex = ' '.join(["%02x" % ord(x) for x in chars])
-       printable = ''.join(["%s" % ((ord(x) <= 127 and FILTER[ord(x)]) or '.') for x in chars])
+       hex = ' '.join(["%02x" % x for x in chars])
+       printable = ''.join(["%s" % ((x <= 127 and FILTER[x]) or '.') for x in chars])
        result.append("%04x:  %-*s  %s\n" % (i, length*3, hex, printable))
     return ''.join(result)
 
@@ -581,10 +580,10 @@ def randbytes(size):
 
 def randmac(length=8):
     '''
-    Returns a random MAC address using a list valid OUI's from ZigBee device 
+    Returns a random MAC address using a list valid OUI's from ZigBee device
     manufacturers.  Data is returned in air-format byte order (LSB first).
     @type length: String
-    @param length: Optional length of MAC address, def=8.  
+    @param length: Optional length of MAC address, def=8.
         Minimum address return length is 3 bytes for the valid OUI.
     @rtype: String
     @returns: A randomized MAC address in a little-endian byte string.

@@ -9,9 +9,10 @@ import argparse
 import threading
 from threading import Event
 import logging
+import struct
 from time import sleep
 
-from killerbee import *
+from killerbee import KillerBee
 
 
 def create_beacon(panid, coordinator, epanid):
@@ -49,7 +50,7 @@ def get_spanids():
         try:
             recvpkt = listen.pnext()
         except:
-            print "Warning: Issue recieving packet."
+            print("Warning: Issue recieving packet.")
             pass  # TODO: Should this be continue instead?
         # Check for empty packet (timeout) and valid FCS
         if recvpkt != None and recvpkt['validcrc']:
@@ -57,11 +58,11 @@ def get_spanids():
             try:
                 canidate = struct.unpack('H', recvpkt['bytes'][3:5])[0]
             except:
-                print recvpkt['bytes'][3:5]
+                print(recvpkt['bytes'][3:5])
                 pass
             if canidate != None and canidate != spanid:
                 # OK we got a packet, lets go back up and send out a beacon$
-                print "Got beacon from {0}".format(hex(spanid))
+                print("Got beacon from {0}".format(hex(spanid)))
                 spanid = canidate
                 # Now start sending beacons on the gathered Source PAN ID by informing the other thread:
                 threading.spanid = spanid
@@ -71,7 +72,7 @@ def get_spanids():
         # TODO: Isolate the issue and file a bug.
         restart_threshold += 1
         if restart_threshold >= 15:
-            print "Crash is assumed - restarting sniffer interface.",
+            print("Crash is assumed - restarting sniffer interface.",)
             listen.sniffer_off()
             listen.sniffer_on()
             restart_threshold = 0
@@ -81,12 +82,12 @@ def get_spanids():
 def inject():
     while not continue_execution.isSet():
         sleep(args.sleep)  # Added sleep as it seems we were overwhelming USB lib.
-        sp = create_beacon(threading.spanid, args.coordinator, args.epanid) 
+        sp = create_beacon(threading.spanid, args.coordinator, args.epanid)
         #TODO: Is there any need for: args.devleave, args.coordinator, args.device)
         try:
             kb.inject(sp) #create_beacon returns a string
         except:
-            print "! - Injection Error, try slowing the rate of broadcast",
+            print("! - Injection Error, try slowing the rate of broadcast",)
             pass
     pass
 
@@ -140,5 +141,5 @@ if __name__ == '__main__':
             getem2.join(timeout=1)
         except KeyboardInterrupt:
             continue_execution.set()
-            
-    # cleanup (not yet required since Killerbee() re-initializes interface for rzusbsticks) 
+
+    # cleanup (not yet required since Killerbee() re-initializes interface for rzusbsticks)

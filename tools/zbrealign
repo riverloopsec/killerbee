@@ -15,7 +15,7 @@ from killerbee import *
 try:
 	from scapy.all import *
 except ImportError:
-	print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
+	print('This tool requires Scapy to be installed (specifically scapy-com edition).')
 	from sys import exit
 	exit(-1)
 
@@ -29,17 +29,17 @@ def create_coord_realign(panid, coordinator, device, newchannel, newpanid, seqnu
     b.fcf_pending = 0 # shall be set to zero
     b.fcf_ackreq = 0 # shall be set to zero
     #b.seqnum = seqnum
-    b.src_panid = panid 
+    b.src_panid = panid
     b.dest_panid = 65535
     b.cmd_id = 8 # Realignment Command
     b.channel = newchannel # gotta change the channel
     b.dest_addr = args.device #coordinator
-    b.src_addr = args.longcoord #panid#coordinator    
+    b.src_addr = args.longcoord #panid#coordinator
     pkt = str(b)
     #TODO: Update scapy-com to support the needed fields:
     # direct support for this in Dot15d4 was lacking - add required fields manually until I can patch.
-    pkt = pkt[:24] + struct.pack('<H',newpanid) + pkt[26:] # the NEW PAN ID 
-    pkt = pkt[:29] + struct.pack('<H',args.deviceshort)  + pkt[31:] # short address of realignment message target 
+    pkt = pkt[:24] + struct.pack('<H',newpanid) + pkt[26:] # the NEW PAN ID
+    pkt = pkt[:29] + struct.pack('<H',args.deviceshort)  + pkt[31:] # short address of realignment message target
     pkt = pkt[:26] + struct.pack('<H',args.coordinator) + pkt[28:] # The short address of the coordinator (new)
     return pkt
 
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--device', help="Destination device long address", action='store', required=True, type=tohex)
     parser.add_argument('-e', '--deviceshort', help="Realignment packet device short address", action='store', required=True, type=tohex)
     parser.add_argument('-q', '--srcseq', action='store', default=254, type=int)
-    parser.add_argument('-z', '--srcseqzbnwk', action='store', default=254, type=int)
+    parser.add_argument('-n', '--srcseqzbnwk', action='store', default=254, type=int)
     parser.add_argument('--newchannel', help="The channel to re-align the PAN with", action='store', required=True, type=int)
     parser.add_argument('--newpanid', help="The new PANID to re-alight the target PAN with", action='store', required=True, type=tohex)
     parser.add_argument('--numloops', action='store', default=1, type=int)

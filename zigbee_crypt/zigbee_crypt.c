@@ -37,7 +37,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	/* Cipher Instance. */
 	gcry_cipher_hd_t	cipher_hd;
 
-	if (!PyArg_ParseTuple(args, "s#s#is#s#",
+	if (!PyArg_ParseTuple(args, "y#y#iy#y#",
 								&pZkey, &sizeZkey,
 								&pNonce, &sizeNonce,
 								&sizeMIC,
@@ -207,7 +207,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	/* Done with the CTR Cipher. */
 	gcry_cipher_close(cipher_hd);
 
-	res = Py_BuildValue("(s#s#)", pEncrypted, sizeUnencryptedData, pEncMIC, sizeMIC);
+	res = Py_BuildValue("(y#y#)", pEncrypted, sizeUnencryptedData, pEncMIC, sizeMIC);
 	free(pEncrypted);
 	return res;
 };
@@ -230,7 +230,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	char				*pUnencrypted;
 	char				cipher_in[ZBEE_SEC_CONST_BLOCKSIZE];
 	char				cipher_out[ZBEE_SEC_CONST_BLOCKSIZE];
-	if (!PyArg_ParseTuple(args, "s#s#s#s#s#",
+	if (!PyArg_ParseTuple(args, "y#y#y#y#y#",
 								&pZkey, &sizeZkey,
 								&pNonce, &sizeNonce,
 								&pOldMIC, &sizeMIC,
@@ -423,7 +423,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	if (memcmp(cipher_out, pUnencMIC, sizeMIC) == 0) {
 		j = 1;
 	}
-	res = Py_BuildValue("(s#i)", pUnencrypted, sizeEncryptedData, j);
+	res = Py_BuildValue("(y#i)", pUnencrypted, sizeEncryptedData, j);
 	free(pUnencrypted);
 	return res;
 };
@@ -536,7 +536,7 @@ zbee_sec_hash(char *input, int input_len, char *output)
 
 /*FUNCTION:------------------------------------------------------
  *  NAME
- *      zbee_sec_key_hash
+ *      zigbee_sec_key_hash
  *  DESCRIPTION
  *      ZigBee Keyed Hash Function. Described in ZigBee specification
  *      section B.1.4, and in FIPS Publication 198. Strictly speaking
@@ -552,7 +552,6 @@ zbee_sec_hash(char *input, int input_len, char *output)
  */
 static PyObject *zigbee_sec_key_hash(PyObject *self, PyObject *args) {
 	const char			*key;
-	int					sizeKey;
 	const char           input;
 
     char          hash_in[2*ZBEE_SEC_CONST_BLOCKSIZE];
@@ -561,7 +560,7 @@ static PyObject *zigbee_sec_key_hash(PyObject *self, PyObject *args) {
     static const char ipad = 0x36;
     static const char opad = 0x5c;
 
-	if (!PyArg_ParseTuple(args, "s#c", &key, &sizeKey, &input)) {
+	if (!PyArg_ParseTuple(args, "yc", &key, &input)) {
 		return NULL;
 	}
 
@@ -578,25 +577,55 @@ static PyObject *zigbee_sec_key_hash(PyObject *self, PyObject *args) {
     /* Hash the contents of hash_in to get the final result. */
     zbee_sec_hash(hash_in, 2*ZBEE_SEC_CONST_BLOCKSIZE, hash_out);
 
-	return Py_BuildValue("s", hash_out);
-} /* zbee_sec_key_hash */
+	return Py_BuildValue("y", hash_out);
+} /* zigbee_sec_key_hash */
 
 
 
 static PyMethodDef zigbee_crypt_Methods[] = {
 	{ "decrypt_ccm", zigbee_crypt_decrypt_ccm, METH_VARARGS, "decrypt_ccm(key, nonce, mic, encrypted_payload, zigbee_data)\nDecrypt data with a 0, 32, 64, or 128-bit MIC\n\n@type key: String\n@param key: 16-byte decryption key\n@type nonce: String\n@param nonce: 13-byte nonce\n@type mic: String\n@param mic: 4-16 byte message integrity check (MIC)\n@type encrypted_payload: String\n@param encrypted_payload: The encrypted data to decrypt\n@type zigbee_data: String\n@param zigbee_data: The zigbee data within the frame, without the encrypted payload, MIC, or FCS" },
 	{ "encrypt_ccm", zigbee_crypt_encrypt_ccm, METH_VARARGS, "encrypt_ccm(key, nonce, mic_size, decrypted_payload, zigbee_data)\nEncrypt data with a 0, 32, 64, or 128-bit MIC\n\n@type key: String\n@param key: 16-byte decryption key\n@type nonce: String\n@param nonce: 13-byte nonce\n@type mic_size: Integer\n@param mic_size: the size in bytes of the desired MIC\n@type decrypted_payload: String\n@param decrypted_payload: The decrypted data to encrypt\n@type zigbee_data: String\n@param zigbee_data: The zigbee data within the frame, without the decrypted payload, MIC or FCS" },
-	{ "sec_key_hash", zigbee_sec_key_hash, METH_VARARGS, "sec_key_hash(key, input)\nHash the supplied key as per ZigBee Cryptographic Hash (B.1.3 and B.6).\n\n@type key: String\n@param key: 16-byte key to hash\n@type input: Char\n@param input: Character terminator for key" },
+	{ "sec_key_hash", zigbee_sec_key_hash, METH_VARARGS, "sec_key_hash(key, input)\nHash the supplied key as per ZigBee Cryptographic Hash (B.1.3 and B.6).\n\n@type key: Bytes\n@param key: 16-byte key to hash\n@type input: Char\n@param input: Character terminator for key" },
 	{ NULL, NULL, 0, NULL },
 };
 
-PyMODINIT_FUNC initzigbee_crypt(void) {
-	(void) Py_InitModule("zigbee_crypt", zigbee_crypt_Methods);
+#if PY_MAJOR_VERSION >= 3
+    #define MOD_INIT(name) PyMODINIT_FUNC PyInit_##name(void)
+#else
+    #define MOD_INIT(name) PyMODINIT_FUNC init##name(void)
+#endif
+
+MOD_INIT(zigbee_crypt) {
+    PyObject *m;
+
+	#if PY_MAJOR_VERSION >= 3
+		static struct PyModuleDef moduledef = {
+			PyModuleDef_HEAD_INIT,
+			"zigbee_crypt",       /* m_name */
+			"Zigbee Encrption and Decryption functions",  /* m_doc */
+			-1,                   /* m_size */
+			zigbee_crypt_Methods, /* m_methods */
+			NULL,                 /* m_reload */
+			NULL,                 /* m_traverse */
+			NULL,                 /* m_clear */
+			NULL,                 /* m_free */
+		};
+		m = PyModule_Create(&moduledef);
+	#else
+		m = Py_InitModule3("zigbee_crypt", zigbee_crypt_Methods);
+	#endif
+
+    return m;
 }
 
-int main(int argc, char *argv[]) {
-	Py_SetProgramName(argv[0]);
+int main(const int argc, const char *argv[]) {
+	wchar_t* name;
+	name = Py_DecodeLocale(argv[0], NULL);
+	Py_SetProgramName(name);
+
 	Py_Initialize();
-	initzigbee_crypt();
+	MOD_INIT();
+
+	PyMem_RawFree(name);
 	return 0;
 }

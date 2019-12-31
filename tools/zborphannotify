@@ -9,12 +9,12 @@ from time import sleep
 
 import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)  # suppress annoying Scapy IPv6 warning
-from killerbee import *
+from killerbee import KillerBee
 
 try:
-    from scapy.all import *
+    from scapy.all import Dot15d4, Dot15d4Cmd
 except ImportError:
-    print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
+    print('This tool requires Scapy to be installed (specifically scapy-com edition).')
     from sys import exit
     exit(-1)
 
@@ -67,6 +67,6 @@ if __name__ == '__main__':
         seqnummac += 1
         if seqnummac > 255:
             seqnummac = 0
-        print sp.summary()
-        kb.inject(str(sp))
+        print(sp.summary())
+        kb.inject(bytes(str(sp), 'utf-8'))
         sleep(0.005)

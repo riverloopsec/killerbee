@@ -16,9 +16,9 @@ import os
 import time
 import struct
 import time
-from datetime import datetime, timedelta
-from kbutils import KBCapabilities, makeFCS
-from GoodFETCCSPI import GoodFETCCSPI
+from .datetime import datetime, timedelta
+from .kbutils import KBCapabilities, makeFCS
+from .GoodFETCCSPI import GoodFETCCSPI
 
 # Default revision of the ApiMote. This is liable to change at any time
 # as new ApiMote versions are released. Automatic recognition would be nice.
@@ -33,7 +33,7 @@ class APIMOTE:
         @type dev:   String
         @param dev:  Serial device identifier (ex /dev/ttyUSB0)
         @type revision: Integer
-        @param revision: The revision number for the ApiMote, which is used by 
+        @param revision: The revision number for the ApiMote, which is used by
             the called GoodFET libraries to properly communicate with
             and configure the hardware.
         @return: None
@@ -107,9 +107,9 @@ class APIMOTE:
 
         if channel != None:
             self.set_channel(channel, page)
-        
+
         self.handle.CC_RFST_RX()
-        #print "Sniffer started (listening as %010x on %i MHz)" % (self.handle.RF_getsmac(), self.handle.RF_getfreq()/10**6);
+        #print("Sniffer started (listening as %010x on %i MHz)" % (self.handle.RF_getsmac(), self.handle.RF_getfreq()/10**6))
 
         self.__stream_open = True
 
@@ -207,7 +207,7 @@ class APIMOTE:
         result['dbm'] = rssi - 45 #TODO tune specifically to the Apimote platform (does ext antenna need to different?)
         result['datetime'] = datetime.utcnow()
         return result
- 
+
     def ping(self, da, panid, sa, channel=None, page=0):
         '''
         Not yet implemented.

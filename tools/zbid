@@ -10,7 +10,7 @@ serial device which should be ignored by KillerBee.
 import sys
 import argparse
 
-from killerbee import show_dev
+from killerbee.killerbee import show_dev
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)

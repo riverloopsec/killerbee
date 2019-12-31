@@ -1,3 +1,4 @@
+import binascii
 import struct
 import time
 from datetime import datetime
@@ -72,7 +73,7 @@ class PcapReader:
         Wrapper for pcap_next to mimic method for Daintree SNA.  See pcap_next()
         '''
         return self.pcap_next()
- 
+
     def pcap_next(self):
         '''
         Retrieves the next packet from the capture file.  Returns a list of
@@ -91,8 +92,8 @@ class PcapReader:
             return [None,None]
 
         rechdr = [
-                float("%s.%s"%(rechdrtmp[0],rechdrtmp[1])), 
-                rechdrtmp[2], 
+                float("%s.%s"%(rechdrtmp[0],rechdrtmp[1])),
+                rechdrtmp[2],
                 rechdrtmp[3]
                 ]
         if rechdr[1] > rechdr[2] or rechdr[1] > self._pcaphsnaplen or rechdr[2] > self._pcaphsnaplen:
@@ -126,9 +127,8 @@ class PcapDumper:
             raise ValueError("Unsupported type for 'savefile' argument")
 
         self.datalink = datalink
-        #TODO: Ensure this isn't printing out things prefixed with 'b' characters.
-        self.__fh.write(b"".join([
-            struct.pack("I", PCAPH_MAGIC_NUM), 
+        self.__fh.write(b''.join([
+            struct.pack("I", PCAPH_MAGIC_NUM),
             struct.pack("H", PCAPH_VER_MAJOR),
             struct.pack("H", PCAPH_VER_MINOR),
             struct.pack("I", PCAPH_THISZONE),
@@ -144,7 +144,7 @@ class PcapDumper:
         self.close()
 
     #TODO: fix freq_mhz for subGHz which end up as float
-    def pcap_dump(self, packet, ts_sec=None, ts_usec=None, orig_len=None, 
+    def pcap_dump(self, packet, ts_sec=None, ts_usec=None, orig_len=None,
                   freq_mhz = None, ant_dbm = None, location = None):
         '''
         Appends a new packet to the libpcap file.  Optionally specify ts_sec
@@ -229,9 +229,9 @@ class PcapDumper:
                 struct.pack("<I", self.datalink) #Field
                 ])
 
-        if ts_sec == None or ts_usec == None: 
-            dt = datetime.now() 
-            ts_sec = int(dt.strftime('%s')) 
+        if ts_sec == None or ts_usec == None:
+            dt = datetime.now()
+            ts_sec = int(dt.strftime('%s'))
             ts_usec = dt.microsecond
 
         plen = len(packet)
@@ -253,12 +253,12 @@ class PcapDumper:
             output_list.append(caceppi_f80211common)
 
         output_list.append(packet)
-        output = ''.join(output_list)
+        output = b''.join(output_list)
 
         #DEBUG Output:
-        #print "Pcap:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in output])
-        #print "PPI:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in (caceppi_hdr + caceppi_f80211common)])
-        #print "802154:", packet.encode("hex")
+        #print("Pcap:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in output]))
+        #print("PPI:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in (caceppi_hdr + caceppi_f80211common)]))
+        #print("802154:", binascii.hexlify(packet))
 
         self.__fh.write(output)
         # Specially for handling FIFO needs:
@@ -266,7 +266,6 @@ class PcapDumper:
             self.__fh.flush()
         except IOError as e:
             raise e
-
 
     def close(self):
         '''

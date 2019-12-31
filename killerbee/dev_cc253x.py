@@ -2,12 +2,11 @@
 CC253x support is contributed by Scytmo.
 """
 
-from __future__ import print_function
 import sys
 import struct
 import time
 from datetime import datetime
-from kbutils import KBCapabilities, makeFCS
+from .kbutils import KBCapabilities, makeFCS
 
 # Import USB support depending on version of pyUSB
 try:
@@ -228,16 +227,16 @@ class CC253x:
             if len(pdata) < 64:
 
                 if len(pdata) < 2:
-                    #print "ERROR: Very short frame"
+                    #print("ERROR: Very short frame")
                     return None
 
                 framelen = ord(framedata[1])
                 if len(framedata) - 3 != framelen:
-                    #print "ERROR: Bad frame length: expected {0}, got {1}".format(framelen, len(framedata))
+                    #print("ERROR: Bad frame length: expected {0}, got {1}".format(framelen, len(framedata)))
                     return None
 
                 if framedata[0] != '\x00':
-                    #print "Not a capture frame:", framedata
+                    #print("Not a capture frame:", framedata)
                     return None
 
                 payloadlen = ord(framedata[7]) # Includes TI format FCS

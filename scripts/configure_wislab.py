@@ -16,8 +16,7 @@ def getFirmwareVersion(ip):
         if fw is not None:
             return fw.group(1)
     except Exception as e:
-        print("Unable to connect to the sniffer. You may need to manually configure the device and host interface, or check your parameters to this script.")
-        print(e)
+        print("Unable to connect to the sniffer. You may need to manually configure the device and host interface, or check your parameters to this script.\n{0}".format(e))
     return None
 
 def connect(iface, hostip, wislabip):
@@ -40,7 +39,7 @@ def connect(iface, hostip, wislabip):
     else:
         print("Unable to connect to the sniffer. You may need to manually configure the device and host interface, or check your parameters to this script.")
     return False
-    
+
 def disconnect(iface, hostip, wislabip):
     print("The easiest way to disconnect on most Linux variants is to unplug the network cable.")
     #TODO

@@ -44,11 +44,11 @@ if __name__=='__main__':
 
         zbdb = ZBScanDB()
         #TODO check return value from startScan
-        startScan(zbdb, currentGPS, verbose=args.verbose, dblog=args.dblog, 
+        startScan(zbdb, currentGPS, verbose=args.verbose, dblog=args.dblog,
             agressive=args.agressive, ignore=args.ignore, include=args.include)
         zbdb.close()
 
     except KeyboardInterrupt:
-        print 'Shutting down'
+        print('Shutting down')
         if zbdb != None: zbdb.close()
         if gpsp != None: gpsp.terminate()
