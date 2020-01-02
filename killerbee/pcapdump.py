@@ -9,7 +9,7 @@ PCAPH_THISZONE  = 0
 PCAPH_SIGFIGS   = 0
 PCAPH_SNAPLEN   = 65535
 
-DOT11COMMON_TAG = 000002
+DOT11COMMON_TAG = 0o00002
 GPS_TAG		= 30002
 
 class PcapReader:
@@ -118,7 +118,7 @@ class PcapDumper:
         if ppi: from killerbee.pcapdlt import DLT_PPI
         self.ppi = ppi
 
-        if isinstance(savefile, basestring):
+        if isinstance(savefile, str):
             self.__fh = open(savefile, mode='wb')
         elif hasattr(savefile, 'write'):
             self.__fh = savefile
@@ -263,7 +263,7 @@ class PcapDumper:
         # Specially for handling FIFO needs:
         try:
             self.__fh.flush()
-        except IOError, e:
+        except IOError as e:
             raise e
 
 

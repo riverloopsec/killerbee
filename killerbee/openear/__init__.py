@@ -4,5 +4,5 @@
 #import struct
 #import bitstring
 
-from capture import *
+from .capture import *
 

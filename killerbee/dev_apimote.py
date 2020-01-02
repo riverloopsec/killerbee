@@ -17,8 +17,8 @@ import time
 import struct
 import time
 from datetime import datetime, timedelta
-from kbutils import KBCapabilities, makeFCS
-from GoodFETCCSPI import GoodFETCCSPI
+from .kbutils import KBCapabilities, makeFCS
+from .GoodFETCCSPI import GoodFETCCSPI
 
 # Default revision of the ApiMote. This is liable to change at any time
 # as new ApiMote versions are released. Automatic recognition would be nice.
