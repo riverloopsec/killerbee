@@ -360,54 +360,57 @@ def isgoodfetccspi(serialdev):
     from GoodFETCCSPI import GoodFETCCSPI
     os.environ["platform"] = ""
     # First try tmote detection
-    os.environ["board"] = "telosb" #set enviroment variable for GoodFET code to use
-    gf = GoodFETCCSPI()
-    try:
-        gf.serInit(port=serialdev, attemptlimit=2)
-    except serial.serialutil.SerialException as e:
-        raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
-    if gf.connected == 1:
-        #print "TelosB/Tmote attempts: found %s on %s" % (gf.identstr(), serialdev)
-        # now check if ccspi app is installed
-        out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
-        gf.serClose()        
-        if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
-            return True, 0
+    if DEV_ENABLE_TELOSB:
+        os.environ["board"] = "telosb" #set enviroment variable for GoodFET code to use
+        gf = GoodFETCCSPI()
+        try:
+            gf.serInit(port=serialdev, attemptlimit=2)
+        except serial.serialutil.SerialException as e:
+            raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
+        if gf.connected == 1:
+            #print "TelosB/Tmote attempts: found %s on %s" % (gf.identstr(), serialdev)
+            # now check if ccspi app is installed
+            out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
+            gf.serClose()
+            if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
+                return True, 0
     # Try apimote v2 detection
-    os.environ["board"] = "apimote2" #set enviroment variable for GoodFET code to use
-    gf = GoodFETCCSPI()
-    try:
-        gf.serInit(port=serialdev, attemptlimit=2)
-        #gf.setup()
-    except serial.serialutil.SerialException as e:
-        raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)    
-    if gf.connected == 1:
-        #print "ApiMotev2+ attempts: found %s on %s" % (gf.identstr(), serialdev)
-        # now check if ccspi app is installed
-        out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
-        gf.serClose()        
-        if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
-            return True, 2
+    if DEV_ENABLE_APIMOTE2:
+        os.environ["board"] = "apimote2" #set enviroment variable for GoodFET code to use
+        gf = GoodFETCCSPI()
+        try:
+            gf.serInit(port=serialdev, attemptlimit=2)
+            #gf.setup()
+        except serial.serialutil.SerialException as e:
+            raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
+        if gf.connected == 1:
+            #print "ApiMotev2+ attempts: found %s on %s" % (gf.identstr(), serialdev)
+            # now check if ccspi app is installed
+            out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
+            gf.serClose()
+            if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
+                return True, 2
     # Then try apimote v1 detection
-    os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
-    gf = GoodFETCCSPI()
-    try:
-        #TODO note that in ApiMote v1, this connect appears to be tricky sometimes
-        #     thus attempt limit is raised to 4 for now
-        #     manually verify the hardware is working by using direct GoodFET client commands, such as:
-        #       export board=apimote1; ./goodfet.ccspi info; ./goodfet.ccspi spectrum
-        gf.serInit(port=serialdev, attemptlimit=4)
-        #gf.setup()
-        #print "Found %s on %s" % (gf.identstr(), serialdev)
-    except serial.serialutil.SerialException as e:
-        raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)    
-    if gf.connected == 1:
-        #print "ApiMotev1 attempts: found %s on %s" % (gf.identstr(), serialdev)
-        # now check if ccspi app is installed
-        out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
-        gf.serClose()        
-        if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
-            return True, 1
+    if DEV_ENABLE_APIMOTE1:
+        os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
+        gf = GoodFETCCSPI()
+        try:
+            #TODO note that in ApiMote v1, this connect appears to be tricky sometimes
+            #     thus attempt limit is raised to 4 for now
+            #     manually verify the hardware is working by using direct GoodFET client commands, such as:
+            #       export board=apimote1; ./goodfet.ccspi info; ./goodfet.ccspi spectrum
+            gf.serInit(port=serialdev, attemptlimit=4)
+            #gf.setup()
+            #print "Found %s on %s" % (gf.identstr(), serialdev)
+        except serial.serialutil.SerialException as e:
+            raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
+        if gf.connected == 1:
+            #print "ApiMotev1 attempts: found %s on %s" % (gf.identstr(), serialdev)
+            # now check if ccspi app is installed
+            out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
+            gf.serClose()
+            if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
+                return True, 1
     # Nothing found
     return False, None
 
