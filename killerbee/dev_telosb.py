@@ -62,7 +62,7 @@ class TELOSB:
     # KillerBee expects the driver to implement this function
     #def get_dev_info(self, dev, bus):
     def get_dev_info(self):
-	'''
+        '''
         Returns device information in a list identifying the device.
         @rtype: List
         @return: List of 3 strings identifying device.

@@ -188,13 +188,13 @@ class GoodFET:
                     print("See the GoodFET FAQ about missing info flash.");
                     self.serialport.timeout = 0.2;
                 elif attempts == 100:
-		    print("Tried 100 times to connect and failed.")
-		    sys.stdout.write("Continuing to try forever.")	# No newline
-		    sys.stdout.flush()
-		    self.verbose=True	# Something isn't going right, give the user more info
+                    print("Tried 100 times to connect and failed.")
+                    sys.stdout.write("Continuing to try forever.")  # No newline
+                    sys.stdout.flush()
+                    self.verbose=True   # Something isn't going right, give the user more info
                 elif attempts > 100 and attempts % 10 == 0:
-		    sys.stdout.write('.')
-		    sys.stdout.flush()
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
                 #self.serialport.flushInput()
                 #self.serialport.flushOutput()
                 
@@ -237,8 +237,8 @@ class GoodFET:
             #Here we have a connection, but maybe not a good one.
             #print "We have a connection."
             connected=1;
-	    if attempts >= 100:
-		print("")	# Add a newline
+        if attempts >= 100:
+            print("")   # Add a newline
             olds=self.infostring();
             clocking=self.monitorclocking();
             for foo in range(1,30):
