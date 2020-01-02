@@ -179,7 +179,7 @@ class GoodFET:
         attempts=0;
         connected=0;
         while connected==0:
-            while self.verb!=0x7F or self.data!="http://goodfet.sf.net/":
+            while self.verb!=0x7F or self.data!=b"http://goodfet.sf.net/":
             #while self.data!="http://goodfet.sf.net/":
                 #print "'%s'!=\n'%s'" % (self.data,"http://goodfet.sf.net/");
                 if attemptlimit is not None and attempts >= attemptlimit:
@@ -218,10 +218,10 @@ class GoodFET:
                     #Drop DTR, which is !RST, low to begin the app.
                     self.serialport.setDTR(0);
                 
-                #self.serialport.write(chr(0x80));
-                #self.serialport.write(chr(0x80));
-                #self.serialport.write(chr(0x80));
-                #self.serialport.write(chr(0x80));
+                #self.serialport.write(bytes([0x80]));
+                #self.serialport.write(bytes([0x80]));
+                #self.serialport.write(bytes([0x80]));
+                #self.serialport.write(bytes([0x80]));
                 
                 
                 #self.serialport.flushInput()
@@ -407,8 +407,8 @@ class GoodFET:
 
     def writecmd(self, app, verb, count=0, data=[]):
         """Write a command and some data to the GoodFET."""
-        self.serialport.write(chr(app));
-        self.serialport.write(chr(verb));
+        self.serialport.write(bytes([app]));
+        self.serialport.write(bytes([verb]));
         
         #if data!=None:
         #    count=len(data); #Initial count ignored.
@@ -416,8 +416,8 @@ class GoodFET:
         #print "TX %02x %02x %04x" % (app,verb,count);
         
         #little endian 16-bit length
-        self.serialport.write(chr(count&0xFF));
-        self.serialport.write(chr(count>>8));
+        self.serialport.write(bytes([count&0xFF]));
+        self.serialport.write(bytes([count>>8]));
 
         if self.verbose:
             print("Tx: ( 0x%02x, 0x%02x, 0x%04x )" % ( app, verb, count ))
@@ -625,10 +625,10 @@ class GoodFET:
         rates=self.baudrates;
         self.data=[baud];
         print("Changing FET baud.")
-        self.serialport.write(chr(0x00));
-        self.serialport.write(chr(0x80));
-        self.serialport.write(chr(1));
-        self.serialport.write(chr(baud));
+        self.serialport.write(bytes([0x00]));
+        self.serialport.write(bytes([0x80]));
+        self.serialport.write(bytes([1]));
+        self.serialport.write(bytes([baud]));
         
         print("Changed host baud.")
         self.serialport.baudrate = rates[baud];
