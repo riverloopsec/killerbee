@@ -9,8 +9,8 @@ import time
 import struct
 import time
 from datetime import datetime, timedelta
-from kbutils import KBCapabilities, makeFCS
-from GoodFETCCSPI import GoodFETCCSPI
+from .kbutils import KBCapabilities, makeFCS
+from .GoodFETCCSPI import GoodFETCCSPI
 
 CC2420_REG_SYNC = 0x14
 

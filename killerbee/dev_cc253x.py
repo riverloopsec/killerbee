@@ -2,12 +2,12 @@
 CC253x support is contributed by Scytmo.
 """
 
-from __future__ import print_function
+
 import sys
 import struct
 import time
 from datetime import datetime
-from kbutils import KBCapabilities, makeFCS
+from .kbutils import KBCapabilities, makeFCS
 
 # Import USB support depending on version of pyUSB
 try:

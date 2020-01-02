@@ -1,4 +1,4 @@
-from config import *
+from .config import *
 import MySQLdb
 
 class DBReader:
@@ -46,7 +46,8 @@ class DBLogger:
         # Initalize the connection
         try:
             self.db = MySQLdb.connect(user=DB_USER, passwd=DB_PASS, db=DB_NAME, host=DB_HOST, port=DB_PORT)
-        except Exception as (errno, errmsg):
+        except Exception as xxx_todo_changeme:
+            (errno, errmsg) = xxx_todo_changeme.args
             raise Exception("DBLogger was unable to connect to the database: " \
                             +"(error %d): %s (Note: connection values should be in config.py)." % (errno,errmsg))
         if self.db == None: #this backup check may be redundant
@@ -56,7 +57,7 @@ class DBLogger:
         # Set the ds_id attribute to correspond to the requested data source name
         self.conn.execute("SELECT ds_id FROM datasources WHERE ds_name LIKE %s LIMIT 1", (datasource,))
         if self.conn.rowcount == 1: self.ds_id = self.conn.fetchone()
-        else: print "No datasource found matching name:", datasource
+        else: print("No datasource found matching name:", datasource)
 
     def close(self):
         if self.conn != None:

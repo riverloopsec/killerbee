@@ -10,7 +10,7 @@ import time
 import struct
 from datetime import datetime, date
 from datetime import time as dttime
-from kbutils import KBCapabilities, makeFCS
+from .kbutils import KBCapabilities, makeFCS
 
 MODE_NONE    = 0x01
 MODE_SNIFF   = 0x02
@@ -286,13 +286,13 @@ class SL_BEEHIVE:
         #print packet
         rssi, frame, validcrc = self.__dissect_pkt(packet)
         if not frame:
-            print "Error parsing stream received from device:", packet
+            print("Error parsing stream received from device:", packet)
 
         # Parse received data as <rssi>!<time>!<packtlen>!<frame>
         try:
             rssi = int(rssi)
         except:
-            print "Error parsing stream received from device:", packet
+            print("Error parsing stream received from device:", packet)
             return None
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.

@@ -14,8 +14,8 @@ import time
 import struct
 import time
 from datetime import datetime, date, timedelta
-from kbutils import KBCapabilities, makeFCS
-from GoodFETatmel128 import GoodFETatmel128rfa1
+from .kbutils import KBCapabilities, makeFCS
+from .GoodFETatmel128 import GoodFETatmel128rfa1
 
 ATMEL_REG_SYNC = 0x0B
 
