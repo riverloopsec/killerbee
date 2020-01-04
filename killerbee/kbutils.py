@@ -620,8 +620,7 @@ def makeFCS(data):
         little-endian order.
     '''
     crc = 0
-    for i in range(len(data)):
-        c = ord(data[i])
+    for c in bytearray(data):
         #if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
         q = (crc ^ c) & 15				#Do low-order 4 bits
         crc = (crc // 16) ^ (q * 4225)
