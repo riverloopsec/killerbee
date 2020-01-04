@@ -41,7 +41,7 @@ from killerbee import *
 from types import *
 
 if gtk.pygtk_version < (2,3,93):
-    print "PyGtk 2.3.93 or later required"
+    print("PyGtk 2.3.93 or later required")
     raise SystemExit
 
 try:
@@ -718,7 +718,7 @@ class ZBFindUI:
 
             self.updatelist = [ ]
 
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
             sys.stderr.write("Could not open the window.  Check $DISPLAY.\n")
             sys.exit(-1)
@@ -894,9 +894,9 @@ class ZBPoller(Thread):
         beaconinj = ''.join([beaconp1, "%c"%self.seq, beaconp2])
         try:
             self.kb.inject(beaconinj)
-        except Exception, e:
-            print "ERROR: Unable to inject packet"
-            print e
+        except Exception as e:
+            print("ERROR: Unable to inject packet")
+            print(e)
 
         if self.seq > 255:
             self.seq = 0
@@ -941,7 +941,7 @@ class ZBPoller(Thread):
                     # TODO: Add debug message mode in case users want these otherwise-useless debug msgs
                     #print "we may have crashed -- i toggled the interface"
                     thresh = 0
-            except Exception,e:
+            except Exception as e:
                 traceback.print_exc()
                 continue
 
@@ -958,9 +958,9 @@ class ZBPoller(Thread):
             rssi = (3*packetlist[2])-91
             try:
                 packet = d154.pktchop(packetlist[0])
-            except Exception,e:
+            except Exception as e:
                 traceback.print_exc()
-                print "bad packetchop!!"
+                print("bad packetchop!!")
                 continue
 
 
@@ -1103,7 +1103,7 @@ class ZBPoller(Thread):
         try:
             self.stopthread.set()
             sys.exit(0)
-        except Exception, e:
+        except Exception as e:
             traceback.print_exc()
             sys.exit(1)
 
@@ -1128,5 +1128,5 @@ if __name__ == "__main__":
         zbpoll.stop()
         zbpoll.join()
         
-    except Exception,e:
+    except Exception as e:
         traceback.print_exc()

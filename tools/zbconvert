@@ -22,18 +22,18 @@ parser.add_argument('-c', '--count', action='store', type=int, default=-1)
 args = parser.parse_args()
 
 if args.noclobber and os.path.exists(args.outfile):
-    print >>sys.stderr, "ERROR: Output file \"%s\" already exists." % args.outfile
+    print("ERROR: Output file \"%s\" already exists." % args.outfile, file=sys.stderr)
     sys.exit(1)
 
 if not os.path.exists(args.infile):
-    print >>sys.stderr, "ERROR: Input file \"%s\" does not exist." % args.infile
+    print("ERROR: Input file \"%s\" does not exist." % args.infile, file=sys.stderr)
     sys.exit(1)
 
 # Check if the input file is libpcap; if not, assume SNA.
 outcap = None
 try:
     pr = PcapReader(args.infile)
-except Exception, e:
+except Exception as e:
     if e.args == ('Unsupported pcap header format or version',):
         # Input file was not pcap, open it as SNA
         incap = DainTreeReader(args.infile)
@@ -56,5 +56,5 @@ while args.count != packetcount:
 
 incap.close()
 outcap.close()
-print("Converted {0} packets.".format(packetcount))
+print(("Converted {0} packets.".format(packetcount)))
 
