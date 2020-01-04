@@ -79,7 +79,7 @@ def __kb_recv(kb, count = 0, store = 1, prn = None, lfilter = None, stop_filter 
             packet = kb.pnext() # int(remain * 1000) to convert to seconds
             if packet == None: continue
             if verbose > 1:
-                os.write(1, "*")
+                os.write(1, b"*")
             packet = Dot15d4(packet[0])
             if lfilter and not lfilter(packet):
                 continue
@@ -260,7 +260,7 @@ def kbwrpcap(save_file, pkts):
     """
     pd = PcapDumper(DLT_IEEE802_15_4, save_file, ppi=False)
     for packet in pkts:
-        pd.pcap_dump(str(packet))
+        pd.pcap_dump(bytes(packet))
     pd.close()
 
 @conf.commands.register
@@ -293,7 +293,7 @@ def kbwrdain(save_file, pkts):
     """
     dt = DainTreeDumper(save_file)
     for packet in pkts:
-        dt.pwrite(str(packet))
+        dt.pwrite(bytes(packet))
     dt.close()
 
 @conf.commands.register
@@ -330,7 +330,7 @@ def kbgetnetworkkey(pkts):
     if not isinstance(pkts, Gen):
         pkts = SetGen(pkts)
     for packet in pkts:
-        packet = str(packet)
+        packet = bytes(packet)
         zmac = Dot154PacketParser()
         znwk = ZigBeeNWKPacketParser()
         zaps = ZigBeeAPSPacketParser()
@@ -454,7 +454,7 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
     crop_size = len(pkt.mic) + len(pkt.data)
 
     # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
-    sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
+    sec_ctrl_byte = bytes(pkt[ZigbeeSecurityHeader])[0:1]
     if ZigbeeAppDataPayload in pkt:
         nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
         zigbeeData = pkt[ZigbeeAppDataPayload].do_build()
@@ -535,7 +535,7 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
         decrypted = data
 
     # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
-    sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
+    sec_ctrl_byte = bytes(pkt[ZigbeeSecurityHeader])[0:1]
     if ZigbeeAppDataPayload in pkt:
         nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
         zigbeeData = pkt[ZigbeeAppDataPayload].do_build()
