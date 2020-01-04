@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 zbreplay: replay ZigBee/802.15.4 network traffic from libpcap or Daintree files

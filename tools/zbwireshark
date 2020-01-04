@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Sends sniffed IEEE 802.15.4 packets to Wireshark via a named pipe.

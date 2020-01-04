@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 zbdump - a tcpdump-like tool for ZigBee/IEEE 802.15.4 networks

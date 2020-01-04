@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 This tool sends beacon request frames, similar to zbstumbler, as it cycles
 through the 802.15.4 channels, and uses the responses and other observed
