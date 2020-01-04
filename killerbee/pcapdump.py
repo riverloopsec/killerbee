@@ -126,7 +126,7 @@ class PcapDumper:
             raise ValueError("Unsupported type for 'savefile' argument")
 
         self.datalink = datalink
-        self.__fh.write(''.join([
+        self.__fh.write(b"".join([
             struct.pack("I", PCAPH_MAGIC_NUM), 
             struct.pack("H", PCAPH_VER_MAJOR),
             struct.pack("H", PCAPH_VER_MINOR),
@@ -176,7 +176,7 @@ class PcapDumper:
             if freq_mhz is not None: rf_freq_mhz = int(freq_mhz) #TODO: fix for float
             rf_ant_dbm = 0
             if ant_dbm is not None: rf_ant_dbm = ant_dbm
-            caceppi_f80211common = ''.join([
+            caceppi_f80211common = b"".join([
                 struct.pack("<H", DOT11COMMON_TAG), #2 = Field Type 802.11-Common
                 struct.pack("<H", 20),              #20 = 802.11-Common length in bytes
                 struct.pack("<Q", 0),               #FSF-Timer
@@ -208,7 +208,7 @@ class PcapDumper:
                 else:
                     raise Exception("Altitude value is out of expected range: %.8f" % lon)
                 # Build Geolocation PPI Header
-                caceppi_fgeolocation = ''.join([
+                caceppi_fgeolocation = b"".join([
                     struct.pack("<H", GPS_TAG),  #2 = Field Type 802.11-Common
                     struct.pack("<H", 20),       #20 = 802.11-Common length in bytes
                     struct.pack("<B", 1),        #Geotag Version
@@ -221,7 +221,7 @@ class PcapDumper:
                     ])
 
             #CACE PPI Header
-            caceppi_hdr = ''.join([
+            caceppi_hdr = b"".join([
                 struct.pack("<B", 0),		     #PPH version
                 struct.pack("<B", 0x00),         #PPH flags
                 struct.pack("<H", pph_len),	     #PPH len
@@ -252,7 +252,7 @@ class PcapDumper:
             output_list.append(caceppi_f80211common)
 
         output_list.append(packet)
-        output = ''.join(output_list)
+        output = b''.join(output_list)
 
         #DEBUG Output:
         #print "Pcap:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in output])
