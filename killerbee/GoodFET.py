@@ -94,7 +94,7 @@ class GoodFET:
     app=0;
     verb=0;
     count=0;
-    data="";
+    data=b"";
     verbose=False
     
     GLITCHAPP=0x71;
@@ -218,15 +218,6 @@ class GoodFET:
                     #Drop DTR, which is !RST, low to begin the app.
                     self.serialport.setDTR(0);
                 
-                #self.serialport.write(bytes([0x80]));
-                #self.serialport.write(bytes([0x80]));
-                #self.serialport.write(bytes([0x80]));
-                #self.serialport.write(bytes([0x80]));
-                
-                
-                #self.serialport.flushInput()
-                #self.serialport.flushOutput()
-                #time.sleep(60);
                 attempts=attempts+1;
                 self.readcmd(); #Read the first command.
                 #print "Got %02x,%02x:'%s'" % (self.app,self.verb,self.data);
@@ -407,17 +398,15 @@ class GoodFET:
 
     def writecmd(self, app, verb, count=0, data=[]):
         """Write a command and some data to the GoodFET."""
-        self.serialport.write(bytes([app]));
-        self.serialport.write(bytes([verb]));
-        
+        self.serialport.write(bytearray([app, verb]))
+
         #if data!=None:
         #    count=len(data); #Initial count ignored.
         
         #print "TX %02x %02x %04x" % (app,verb,count);
         
         #little endian 16-bit length
-        self.serialport.write(bytes([count&0xFF]));
-        self.serialport.write(bytes([count>>8]));
+        self.serialport.write(bytearray([count & 0xFF, count >> 8]))
 
         if self.verbose:
             print("Tx: ( 0x%02x, 0x%02x, 0x%04x )" % ( app, verb, count ))
@@ -425,13 +414,11 @@ class GoodFET:
         #print "count=%02x, len(data)=%04x" % (count,len(data));
         
         if count!=0:
-            if(isinstance(data,list)):
-                for i in range(0,count):
-                #print "Converting %02x at %i" % (data[i],i)
-                    data[i]=chr(data[i]);
-            #print type(data);
-            outstr=''.join(data);
-            self.serialport.write(outstr);
+            if isinstance(data, (list, bytearray)):
+                out = bytearray(data[:count])
+            else:
+                out = b''.join(data)
+            self.serialport.write(out)
         if not self.besilent:
             return self.readcmd()
         else:
@@ -472,7 +459,7 @@ class GoodFET:
                         
                     sys.stdout.flush();
                 else:
-                    self.data=self.serialport.read(self.count);
+                    self.data=bytearray(self.serialport.read(self.count));
                     return self.data;
             except TypeError:
                 if self.connected:
@@ -625,11 +612,8 @@ class GoodFET:
         rates=self.baudrates;
         self.data=[baud];
         print("Changing FET baud.")
-        self.serialport.write(bytes([0x00]));
-        self.serialport.write(bytes([0x80]));
-        self.serialport.write(bytes([1]));
-        self.serialport.write(bytes([baud]));
-        
+        self.serialport.write(bytearray([0x00, 0x80, 1, baud]))
+
         print("Changed host baud.")
         self.serialport.baudrate = rates[baud];
         time.sleep(1);
@@ -673,7 +657,7 @@ class GoodFET:
         self.monitorclocking();
 
     def monitorecho(self):
-        data="The quick brown fox jumped over the lazy dog.";
+        data=b"The quick brown fox jumped over the lazy dog.";
         self.writecmd(self.MONITORAPP,0x81,len(data),data);
         if self.data!=data:
             if self.verbose:
@@ -688,7 +672,7 @@ class GoodFET:
 
     def testleds(self):
         print("Flashing LEDs")
-        self.writecmd(self.MONITORAPP,0xD0,0,"")
+        self.writecmd(self.MONITORAPP,0xD0,0,b"")
         try:
             print("Flashed %d LED." % ord(self.data))
         except:

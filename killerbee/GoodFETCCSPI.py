@@ -39,7 +39,7 @@ class GoodFETCCSPI(GoodFET):
     def trans8(self,byte):
         """Read and write 8 bits by CCSPI."""
         data=self.CCSPItrans([byte]);
-        return ord(data[0]);
+        return data[0];
     
     def trans(self,data):
         """Exchange data by CCSPI."""
@@ -50,7 +50,7 @@ class GoodFETCCSPI(GoodFET):
         """Strobes a strobe register, returning the status."""
         data=[reg];
         self.trans(data);
-        return ord(self.data[0]);
+        return self.data[0];
     def CC_RFST_IDLE(self):
         """Switch the radio to idle mode, clearing overflows and errors."""
         self.strobe(0x06); #SRXOFF
@@ -77,11 +77,11 @@ class GoodFETCCSPI(GoodFET):
         
         self.writecmd(self.CCSPIAPP,0x02,len(data),data);
         try:
-            toret=( ord(self.data[2]) + (ord(self.data[1])<<8) );
+            toret = (self.data[2] + (self.data[1] << 8))
         except Exception as e:
             print("issue in peeking for a register")
             print(e)
-            toret=( (ord(self.data[1])<<8) );
+            toret = self.data[1] << 8
         return toret;
     def poke(self,reg,val,bytes=2):
         """Write a CCSPI Register."""
@@ -202,7 +202,7 @@ class GoodFETCCSPI(GoodFET):
         """Get a packet from the radio.  Returns None if none is
         waiting."""
         
-        data="\0";
+        data=bytearray([0]);
         self.data=data;
         self.writecmd(self.CCSPIAPP,0x80,len(data),data);
         buffer=self.data;
@@ -211,7 +211,7 @@ class GoodFETCCSPI(GoodFET):
         if(len(buffer)==0):
             return None;
         
-        return buffer;
+        return bytes(buffer);
     def RF_rxpacketrepeat(self):
         """Gets packets from the radio, ignoring all future requests so as
         not to waste time.  Call RF_rxpacket() after this."""
@@ -223,7 +223,7 @@ class GoodFETCCSPI(GoodFET):
         """Get and decrypt a packet from the radio.  Returns None if
         none is waiting."""
         
-        data="\0";
+        data=bytearray([0]);
         self.data=data;
         self.writecmd(self.CCSPIAPP,0x90,len(data),data);
         buffer=self.data;
@@ -251,7 +251,7 @@ class GoodFETCCSPI(GoodFET):
     def RF_reflexjam_autoack(self):
         """Place the device into reflexive jamming mode
            and that also sends a forged ACK if needed."""
-        data = "";
+        data = b""
         self.writecmd(self.CCSPIAPP,0xA1,len(data),data);
         print("Got:", data, "and", self.data)
         return;
