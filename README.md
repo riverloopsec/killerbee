@@ -1,7 +1,7 @@
 KillerBee
 ================
 
-This is KillerBee - Framework and Tools for Attacking ZigBee and IEEE 802.15.4 networks.
+KillerBee is a Framework and Tools for Testing & Auditing ZigBee and IEEE 802.15.4 Networks
 
 MAINTAINERS/LICENSE
 ================
