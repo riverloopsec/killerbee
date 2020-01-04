@@ -14,7 +14,7 @@ from killerbee import *
 try:
     from scapy.all import *
 except ImportError:
-    print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
+    print('This tool requires Scapy to be installed (specifically scapy-com edition).')
     from sys import exit
     exit(-1)
 
@@ -52,8 +52,8 @@ if __name__ == '__main__':
     parser.add_argument('--numloops', action='store', default=1, type=int)
     args = parser.parse_args()
 
-    print("Expecting {2:#016x} to be the coordinator on network (PAN ID) {0:#04x}, located on channel {1}.".format(args.panid, args.channel, args.coordinator))
-    print("The device to disassociate is {0:#016x}.".format(args.device))
+    print(("Expecting {2:#016x} to be the coordinator on network (PAN ID) {0:#04x}, located on channel {1}.".format(args.panid, args.channel, args.coordinator)))
+    print(("The device to disassociate is {0:#016x}.".format(args.device)))
     #print("The device to disassociate is {0:#016x} with short address {1:#04x}.".format(args.device, args.deviceshort))
     #TODO: seqnums for each direction
 
@@ -67,6 +67,6 @@ if __name__ == '__main__':
         seqnummac += 1
         if seqnummac > 255:
             seqnummac = 0
-        print sp.summary()
+        print(sp.summary())
         kb.inject(str(sp))
         sleep(0.005)

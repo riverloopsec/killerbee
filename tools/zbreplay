@@ -19,7 +19,7 @@ def interrupt(signum, frame):
     kb.close()
     if cap:
         cap.close()
-    print("{0} packets transmitted".format(packetcount))
+    print(("{0} packets transmitted".format(packetcount)))
     sys.exit(0)
 
 def packet_ack(packet):
@@ -55,11 +55,11 @@ if args.showdev:
     sys.exit(0)
 
 if args.channel == None:
-    print >>sys.stderr, "ERROR: Must specify a channel."
+    print("ERROR: Must specify a channel.", file=sys.stderr)
     sys.exit(1)
 
 if args.pcapfile == None and args.dsnafile == None:
-    print >>sys.stderr, "ERROR: Must specify a file with frames to replay using -r (libpcap) or -R (Daintree SNA)"
+    print("ERROR: Must specify a file with frames to replay using -r (libpcap) or -R (Daintree SNA)", file=sys.stderr)
     sys.exit(1)
 elif args.pcapfile is not None:
     savefile = args.pcapfile
@@ -71,12 +71,12 @@ elif args.dsnafile is not None:
 kb = KillerBee(device=args.devstring)
 signal.signal(signal.SIGINT, interrupt)
 if not kb.is_valid_channel(args.channel, args.subghz_page):
-    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel/page for the selected device."
+    print("ERROR: Must specify a valid IEEE 802.15.4 channel/page for the selected device.", file=sys.stderr)
     kb.close()
     sys.exit(1)
 kb.set_channel(args.channel, page=args.subghz_page)
 
-print("zbreplay: retransmitting frames from \'{0}\' on interface \'{1}\' with a delay of {2} seconds.".format(savefile, kb.get_dev_info()[0], args.sleep))
+print(("zbreplay: retransmitting frames from \'{0}\' on interface \'{1}\' with a delay of {2} seconds.".format(savefile, kb.get_dev_info()[0], args.sleep)))
 
 while args.count != packetcount:
     try:
@@ -92,4 +92,4 @@ while args.count != packetcount:
 kb.close()
 cap.close()
 
-print("{0} packets transmitted".format(packetcount))
+print(("{0} packets transmitted".format(packetcount)))

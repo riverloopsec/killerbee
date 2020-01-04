@@ -18,24 +18,24 @@ def test_functions():
         sleep(1)
         kb = KillerBee()
     except:
-        print 'Could not activate bootloader - may be already running...'
+        print('Could not activate bootloader - may be already running...')
     
     # Get the bootloader version
-    print 'version:',
+    print('version:', end=' ')
     ver = kb.get_bootloader_version()
-    print '%02x - %02x' % (ver[0], ver[1])
+    print('%02x - %02x' % (ver[0], ver[1]))
 
     # Get AT90USB1287 signature
-    print 'AT90USB1287 signature:', 
+    print('AT90USB1287 signature:', end=' ') 
     sig = kb.get_bootloader_signature()
-    print '%02x - %02x - %02x' % (sig[0], sig[1], sig[2])
+    print('%02x - %02x - %02x' % (sig[0], sig[1], sig[2]))
 
     # Get identifier string
-    print 'identifier string',
+    print('identifier string', end=' ')
     arr = kb.bootloader_sign_on()
     # return is an array of bytes with 1st byte being length
     st = ''.join([chr(x) for x in arr[1:]])
-    print "(%d bytes):" % arr[0], st
+    print("(%d bytes):" % arr[0], st)
 
     # Read the fuses
     #fuses = kb.read_fuses()
@@ -76,6 +76,6 @@ if __name__ == '__main__':
         kb = KillerBee()
         kb.enter_bootloader()
     except:
-	print 'Could not activate bootloader - may be already running...'
+	print('Could not activate bootloader - may be already running...')
 
 
