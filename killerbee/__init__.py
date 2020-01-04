@@ -9,7 +9,10 @@ from pcapdlt import *
 from kbutils import *      #provides serial, usb, USBVER
 from zigbeedecode import * #would like to import only within killerbee class
 from dot154decode import * #would like to import only within killerbee class
-from config import *       #to get DEV_ENABLE_* variables
+# for backwards compatibility
+from config import (DEV_ENABLE_SL_NODETEST, DEV_ENABLE_SL_BEEHIVE, DEV_ENABLE_FREAKDUINO, DEV_ENABLE_ZIGDUINO, DB_HOST,
+                    DB_NAME, DB_PASS, DB_PORT, DB_USER)
+import config  # to get DEV_ENABLE_* variables
 
 # Utility Functions
 def getKillerBee(channel, page= 0):
@@ -141,16 +144,16 @@ class KillerBee:
                 self.dev = device
                 if (self.dev == gps_devstring):
                     pass
-                elif (DEV_ENABLE_SL_NODETEST and kbutils.issl_nodetest(self.dev)):
+                elif ((config.DEV_ENABLE_SL_NODETEST or DEV_ENABLE_SL_NODETEST) and kbutils.issl_nodetest(self.dev)):
                     from dev_sl_nodetest import SL_NODETEST
                     self.driver = SL_NODETEST(self.dev)
-                elif (DEV_ENABLE_SL_BEEHIVE and kbutils.issl_beehive(self.dev)):
+                elif ((config.DEV_ENABLE_SL_BEEHIVE or DEV_ENABLE_SL_BEEHIVE) and kbutils.issl_beehive(self.dev)):
                     from dev_sl_beehive import SL_BEEHIVE
                     self.driver = SL_BEEHIVE(self.dev)
-                elif (DEV_ENABLE_ZIGDUINO and kbutils.iszigduino(self.dev)):
+                elif ((config.DEV_ENABLE_ZIGDUINO or DEV_ENABLE_ZIGDUINO) and kbutils.iszigduino(self.dev)):
                     from dev_zigduino import ZIGDUINO
                     self.driver = ZIGDUINO(self.dev)
-                elif (DEV_ENABLE_FREAKDUINO and kbutils.isfreakduino(self.dev)):
+                elif ((config.DEV_ENABLE_FREAKDUINO or DEV_ENABLE_FREAKDUINO) and kbutils.isfreakduino(self.dev)):
                     from dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
                 else:

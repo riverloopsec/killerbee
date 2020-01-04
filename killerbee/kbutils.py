@@ -21,7 +21,7 @@ import random
 import inspect
 from struct import pack
 
-from config import *       #to get DEV_ENABLE_* variables
+import config
 
 # Known devices by USB ID:
 RZ_USB_VEND_ID      = 0x03EB
@@ -288,13 +288,13 @@ def devlist(vendor=None, product=None, gps=None, include=None):
         if serialdev == gps_devstring:
             print("kbutils.devlist is skipping ignored/GPS device string {0}".format(serialdev)) #TODO remove debugging print
             continue
-        elif (DEV_ENABLE_SL_NODETEST and issl_nodetest(serialdev)):
+        elif (config.DEV_ENABLE_SL_NODETEST and issl_nodetest(serialdev)):
             devlist.append([serialdev, "Silabs NodeTest", ""])
-        elif (DEV_ENABLE_SL_BEEHIVE and issl_beehive(serialdev)):
+        elif (config.DEV_ENABLE_SL_BEEHIVE and issl_beehive(serialdev)):
             devlist.append([serialdev, "BeeHive SG", ""])
-        elif (DEV_ENABLE_ZIGDUINO and iszigduino(serialdev)):
+        elif (config.DEV_ENABLE_ZIGDUINO and iszigduino(serialdev)):
             devlist.append([serialdev, "Zigduino", ""])
-        elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
+        elif (config.DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
             #TODO maybe move support for freakduino into goodfetccspi subtype==?
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
         else:
@@ -360,7 +360,7 @@ def isgoodfetccspi(serialdev):
     from GoodFETCCSPI import GoodFETCCSPI
     os.environ["platform"] = ""
     # First try tmote detection
-    if DEV_ENABLE_TELOSB:
+    if config.DEV_ENABLE_TELOSB:
         os.environ["board"] = "telosb" #set enviroment variable for GoodFET code to use
         gf = GoodFETCCSPI()
         try:
@@ -375,7 +375,7 @@ def isgoodfetccspi(serialdev):
             if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
                 return True, 0
     # Try apimote v2 detection
-    if DEV_ENABLE_APIMOTE2:
+    if config.DEV_ENABLE_APIMOTE2:
         os.environ["board"] = "apimote2" #set enviroment variable for GoodFET code to use
         gf = GoodFETCCSPI()
         try:
@@ -391,7 +391,7 @@ def isgoodfetccspi(serialdev):
             if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
                 return True, 2
     # Then try apimote v1 detection
-    if DEV_ENABLE_APIMOTE1:
+    if config.DEV_ENABLE_APIMOTE1:
         os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
         gf = GoodFETCCSPI()
         try:
