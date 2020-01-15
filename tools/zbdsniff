@@ -31,7 +31,7 @@ KEY_TYPE = [
 
 def sniffNetworkKey(pkts, key, verbose):
     addrMap = dict()
-    keyHash = sec_key_hash(key.encode('latin-1'), b'\0')
+    keyHash = keyHash = sec_key_hash(key, b'\0')
 
     for p in pkts:
         if (p.haslayer("ZigbeeNWK")):
