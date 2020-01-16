@@ -93,7 +93,7 @@ setup  (name        = 'killerbee',
                    'tools/zbwardrive', 'tools/zbopenear', 'tools/zbfakebeacon',
                    'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign', 'tools/zbcat', 
                    'tools/zbjammer', 'tools/kbbootloader'],
-        install_requires=['pyserial>=2.0', 'pyusb', 'pycrypto', 'rangeparser',
+        install_requires=['pyserial>=2.0', 'pyusb', 'pycrypto', 'rangeparser'],
                           #'git+https://github.com/secdev/scapy.git#egg=scapy'],
         # NOTE: pygtk doesn't install via distutils on non-Windows hosts
         ext_modules = [zigbee_crypt],
