@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # NOTE: See the README file for a list of dependencies to install.
 
 from __future__ import print_function  # needed for py2.7 to use print() as called below
@@ -87,11 +88,11 @@ setup  (name        = 'killerbee',
         license   = 'LICENSE.txt',
         packages  = ['killerbee', 'killerbee.openear', 'killerbee.zbwardrive'],
         requires = ['Crypto', 'usb', 'gtk', 'cairo', 'rangeparser'], # Not causing setup to fail, not sure why
-        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay', 
-                   'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood', 
-                   'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey', 
+        scripts = ['tools/zbdump', 'tools/zbgoodfind', 'tools/zbid', 'tools/zbreplay',
+                   'tools/zbconvert', 'tools/zbdsniff', 'tools/zbstumbler', 'tools/zbassocflood',
+                   'tools/zbfind', 'tools/zbscapy', 'tools/zbwireshark', 'tools/zbkey',
                    'tools/zbwardrive', 'tools/zbopenear', 'tools/zbfakebeacon',
-                   'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign', 'tools/zbcat', 
+                   'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign', 'tools/zbcat',
                    'tools/zbjammer', 'tools/kbbootloader'],
         install_requires=['pyserial>=2.0', 'pyusb', 'pycrypto', 'rangeparser'],
                           #'git+https://github.com/secdev/scapy.git#egg=scapy'],

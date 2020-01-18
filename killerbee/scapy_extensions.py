@@ -241,13 +241,16 @@ def kbrdpcap(filename, count = -1, skip = 0, nofcs=False):
 
     try:
         while 1:
-            packet = cap.next()
+            packet = cap.pnext()
             packetcount += 1
-            if packet == None:
+            if packet[1] == None:
                 break
             if skip > 0 and packetcount <= skip:
                 continue
-            lst.append(packet)
+            if nofcs:
+                lst.append(Dot15d4(packet[1]))
+            else:
+                lst.append(Dot15d4FCS(packet[1]))
             if count > 0 and packetcount >= count:
                 break
     except StopIteration:
