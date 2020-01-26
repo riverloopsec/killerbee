@@ -1,7 +1,7 @@
 # GoodFETclient to interface zigduino/atmel128 radio
 # forked by bx from code by neighbor Travis Goodspeed
 from .GoodFETAVR import GoodFETAVR
-import sys, binascii, os, array, time, glob, struct
+import sys, os, time, glob, struct
 
 fmt = ("B", "<H", None, "<L")
 

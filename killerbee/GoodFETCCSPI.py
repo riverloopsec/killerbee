@@ -5,7 +5,7 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, io, struct, glob, os;
+import time
 
 from .GoodFET import GoodFET;
 

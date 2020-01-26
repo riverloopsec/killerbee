@@ -5,8 +5,6 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, io, struct, glob, os;
-
 from .GoodFET import GoodFET;
 
 class GoodFETAVR(GoodFET):

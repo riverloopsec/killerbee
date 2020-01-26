@@ -5,7 +5,7 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, io, struct, glob, os;
+import sys, time, struct, glob, os;
 import sqlite3;
 
 fmt = ("B", "<H", None, "<L")
