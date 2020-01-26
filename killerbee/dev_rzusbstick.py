@@ -1,4 +1,5 @@
 # Import USB support depending on version of pyUSB
+from __future__ import print_function
 try:
     import usb.core
     import usb.util

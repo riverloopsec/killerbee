@@ -3,6 +3,7 @@ CC253x support is contributed by Scytmo.
 """
 
 
+from __future__ import print_function
 import sys
 import struct
 import time

@@ -128,9 +128,9 @@ class gpsjson(gpscommon):
         def asciify(d):
             "De-Unicodify everything so we can copy dicts into Python objects."
             t = {}
-            for (k, v) in list(d.items()):
+            for (k, v) in d.items():
                 ka = k.encode("ascii")
-                if type(v) == type("x"):
+                if type(v) == type(u"x"):
                     va = v.encode("ascii")
                 elif type(v) == type({}):
                     va = asciify(v)

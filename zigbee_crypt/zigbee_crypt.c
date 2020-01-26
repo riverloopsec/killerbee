@@ -611,7 +611,11 @@ static PyObject *zigbee_sec_key_hash(PyObject *self, PyObject *args) {
     /* Hash the contents of hash_in to get the final result. */
     zbee_sec_hash(hash_in, 2*ZBEE_SEC_CONST_BLOCKSIZE, hash_out);
 
+#if PY_MAJOR_VERSION >= 3
 	return Py_BuildValue("y", hash_out);
+#else
+	return Py_BuildValue("s", hash_out);
+#endif
 } /* zbee_sec_key_hash */
 
 

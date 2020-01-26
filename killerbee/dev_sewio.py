@@ -13,7 +13,12 @@ import os
 import time
 import struct
 import time
-import urllib.request, urllib.error, urllib.parse
+
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
+
 import re
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR, timeout as error_timeout
 from struct import unpack
@@ -50,7 +55,7 @@ def ntp_to_system_time(secs, msecs):
 
 def getFirmwareVersion(ip):
     try:
-        html = urllib.request.urlopen("http://{0}/".format(ip))
+        html = urlopen("http://{0}/".format(ip))
         fw = re.search(r'Firmware version ([0-9.]+)', html.read())
         if fw is not None:
             return fw.group(1)
@@ -63,7 +68,7 @@ def getMacAddr(ip):
     Returns a string for the MAC address of the sniffer.
     '''
     try:
-        html = urllib.request.urlopen("http://{0}/".format(ip))
+        html = urlopen("http://{0}/".format(ip))
         # Yup, we're going to have to steal the status out of a JavaScript variable
         #var values = removeSSItag('<!--#pindex-->STOPPED,00:1a:b6:00:0a:a4,...
         res = re.search(r'<!--#pindex-->[A-Z]+,((?:[0-9a-f]{2}:){5}[0-9a-f]{2})', html.read())
@@ -153,7 +158,7 @@ class SEWIO:
             returns True if an HTTP 200 code was received.
         '''
         try:
-            html = urllib.request.urlopen("http://{0}/{1}".format(self.dev, path))
+            html = urlopen("http://{0}/{1}".format(self.dev, path))
             if fetch:
                 return html.read()
             else:

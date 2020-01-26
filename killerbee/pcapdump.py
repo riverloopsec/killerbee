@@ -9,7 +9,7 @@ PCAPH_THISZONE  = 0
 PCAPH_SIGFIGS   = 0
 PCAPH_SNAPLEN   = 65535
 
-DOT11COMMON_TAG = 0o00002
+DOT11COMMON_TAG = 2
 GPS_TAG		= 30002
 
 class PcapReader:
@@ -103,6 +103,13 @@ class PcapReader:
         return [rechdr, frame]
 
 
+def is_string(s):
+    try:
+        return isinstance(s, basestring)
+    except NameError:
+        return isinstance(s, str)
+
+
 class PcapDumper:
     def __init__(self, datalink, savefile, ppi = False):
         '''
@@ -118,7 +125,7 @@ class PcapDumper:
         if ppi: from killerbee.pcapdlt import DLT_PPI
         self.ppi = ppi
 
-        if isinstance(savefile, str):
+        if is_string(savefile):
             self.__fh = open(savefile, mode='wb')
         elif hasattr(savefile, 'write'):
             self.__fh = savefile

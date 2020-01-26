@@ -5,7 +5,11 @@
 from __future__ import print_function
 
 import datetime
-import queue
+
+try:
+    from queue import Queue, Empty
+except ImportError:
+    from Queue import Queue, Empty
 import signal
 import threading
 
@@ -37,7 +41,7 @@ class LocationThread(threading.Thread):
     def __init__(self):
         global active_queues
         threading.Thread.__init__(self)
-        self.mesg = queue.Queue()
+        self.mesg = Queue()
         active_queues.append(self.mesg)
 
     def run(self):
@@ -49,7 +53,7 @@ class LocationThread(threading.Thread):
         while(1):
             try:
                 message = self.mesg.get(timeout=.00001)
-            except queue.Empty:
+            except Empty:
                 pass
             if message == "shutdown":
                 break
@@ -75,7 +79,7 @@ class CaptureThread(threading.Thread):
     def __init__(self, dev, channel, pd):
         global active_queues
         threading.Thread.__init__(self)
-        self.mesg = queue.Queue()
+        self.mesg = Queue()
         active_queues.append(self.mesg)
         self.channel = channel
         self.freq = (channel - 10) * 5 + 2400
@@ -95,7 +99,7 @@ class CaptureThread(threading.Thread):
         while (True):
             try:
                 message = self.mesg.get(timeout=.00001)
-            except queue.Empty:
+            except Empty:
                 pass
             if message == "shutdown":
                 break

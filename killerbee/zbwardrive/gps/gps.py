@@ -322,6 +322,8 @@ class gps(gpsdata, gpsjson):
         else:
             return self.response
 
+    next = __next__
+
     def stream(self, flags=0, outfile=None):
         "Ask gpsd to stream reports at your client."
         if (flags & (WATCH_JSON|WATCH_OLDSTYLE|WATCH_NMEA|WATCH_RAW)) == 0:
