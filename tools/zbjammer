@@ -5,6 +5,7 @@ zbjammer: enable Zigbee jamming (firmware option)
 rfidiot <adam@algroup.co.uk>
 """
 
+from __future__ import print_function
 import sys
 import time
 import signal

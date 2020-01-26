@@ -3,6 +3,7 @@
 # Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2015
 
 #TODO: Reduce the usage of globals
+from __future__ import print_function
 import signal
 import sys
 import argparse

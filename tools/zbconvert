@@ -7,6 +7,7 @@ Note: timestamps are not preserved in the conversion process. Sorry.
 (jwright@willhackforsushi.com)
 '''
 
+from __future__ import print_function
 import sys
 import os.path
 import argparse

@@ -7,6 +7,7 @@ Compatible with Wireshark 1.1.2 and later (jwright@willhackforsushi.com)
 The -p flag adds CACE PPI headers to the PCAP (ryan@rmspeers.com)
 '''
 
+from __future__ import print_function
 import sys
 import signal
 import argparse
