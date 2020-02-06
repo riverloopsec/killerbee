@@ -560,7 +560,7 @@ def hexdump(src, length=16):
     @param length: Optional length of data for a single row of output, def=16
     @rtype: String
     '''
-    FILTER = ''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
+    FILTER = b''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
     result = []
     for i in range(0, len(src), length):
        chars = src[i:i+length]
