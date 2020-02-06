@@ -2,6 +2,7 @@
 # Contributed by: mandar.satam@gmail.com
 # Edited by:      ryan@riverloopsecurity.com
 # Version:        BETA
+from __future__ import print_function
 
 import sys
 import signal
@@ -91,7 +92,7 @@ def isAckFor(packet, lastseq):
 
 
 def getAckByte(packet):
-    return packet[2]
+    return packet[2:3]
 
 # Command-line arguments
 arg_channel = None
