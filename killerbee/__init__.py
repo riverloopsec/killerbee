@@ -12,9 +12,8 @@ from .dot154decode import * #would like to import only within killerbee class
 # for backwards compatibility
 from .config import (DEV_ENABLE_SL_NODETEST, DEV_ENABLE_SL_BEEHIVE, DEV_ENABLE_FREAKDUINO, DEV_ENABLE_ZIGDUINO, DB_HOST,
                     DB_NAME, DB_PASS, DB_PORT, DB_USER)
-import killerbee.config  # to get DEV_ENABLE_* variables
+import killerbee.config as config  # to get DEV_ENABLE_* variables
 
-config = killerbee.config
 
 # Utility Functions
 def getKillerBee(channel, page= 0):
