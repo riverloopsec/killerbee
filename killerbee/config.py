@@ -15,6 +15,7 @@ DB_PASS             = ""
 # If marked False, KillerBee will not try to
 #  detect or load drivers for that device.
 # Useful for disabling uncommon devices.
+DEV_ENABLE_RASPBEE = True
 DEV_ENABLE_FREAKDUINO = False
 DEV_ENABLE_SL_NODETEST = False
 DEV_ENABLE_SL_BEEHIVE = False

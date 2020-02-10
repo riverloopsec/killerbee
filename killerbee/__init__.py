@@ -144,6 +144,9 @@ class KillerBee:
                 self.dev = device
                 if (self.dev == gps_devstring):
                     pass
+                elif (config.DEV_ENABLE_RASPBEE and kbutils.is_raspbee(self.dev)):
+                    from dev_sl_nodetest import SL_NODETEST
+                    self.driver = SL_NODETEST(self.dev)
                 elif ((config.DEV_ENABLE_SL_NODETEST or DEV_ENABLE_SL_NODETEST) and kbutils.issl_nodetest(self.dev)):
                     from dev_sl_nodetest import SL_NODETEST
                     self.driver = SL_NODETEST(self.dev)
