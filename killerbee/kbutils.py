@@ -16,6 +16,7 @@ except ImportError:
 
 import serial
 import os
+import struct
 import glob
 import time
 import random
@@ -657,6 +658,10 @@ def pyusb_1x_patch():
             return usb.util.zzz__get_string(dev, 255, index, langid)
         usb.util.zzz__get_string = usb.util.get_string
         usb.util.get_string = get_string
+
+
+def bytearray_to_bytes(b):
+    return b"".join(struct.pack('B', value) for value in b)
 
 
 if USBVER == 1:

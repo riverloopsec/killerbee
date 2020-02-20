@@ -8,6 +8,7 @@
 import sys, time, string, io, struct, glob, os;
 
 from .GoodFET import GoodFET;
+from .kbutils import bytearray_to_bytes
 
 class GoodFETCCSPI(GoodFET):
     CCSPIAPP=0x51;
@@ -211,7 +212,7 @@ class GoodFETCCSPI(GoodFET):
         if(len(buffer)==0):
             return None;
         
-        return bytes(buffer);
+        return bytearray_to_bytes(buffer);
     def RF_rxpacketrepeat(self):
         """Gets packets from the radio, ignoring all future requests so as
         not to waste time.  Call RF_rxpacket() after this."""
