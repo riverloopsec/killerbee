@@ -1,3 +1,4 @@
+from __future__ import print_function
 """
 CC253x support is contributed by Scytmo.
 """
@@ -7,7 +8,7 @@ import sys
 import struct
 import time
 from datetime import datetime
-from .kbutils import KBCapabilities, makeFCS
+from .kbutils import KBCapabilities, makeFCS, bytearray_to_bytes
 
 # Import USB support depending on version of pyUSB
 try:
@@ -206,12 +207,11 @@ class CC253x:
             self.sniffer_on() #start sniffing
 
         ret = None
-        framedata = []
+        framedata = bytearray()
         explen = 0 # expected remaining packet length
         while True:
             pdata = None
             try:
-
                 pdata = self.dev.read(self._data_ep, self._maxPacketSize, timeout=timeout)
             except usb.core.USBError as e:
                 if e.errno != 110: #Operation timed out
@@ -222,25 +222,21 @@ class CC253x:
                     return None
 
             # Accumulate in 'framedata' until we have an entire frame
-            for byteval in pdata:
-                framedata.append(struct.pack("B", byteval))
+            framedata.extend(pdata)
 
             if len(pdata) < 64:
 
                 if len(pdata) < 2:
-                    #print "ERROR: Very short frame"
                     return None
 
-                framelen = ord(framedata[1])
+                framelen = framedata[1]
                 if len(framedata) - 3 != framelen:
-                    #print "ERROR: Bad frame length: expected {0}, got {1}".format(framelen, len(framedata))
                     return None
 
-                if framedata[0] != '\x00':
-                    #print "Not a capture frame:", framedata
+                if framedata[0] != 0:
                     return None
 
-                payloadlen = ord(framedata[7]) # Includes TI format FCS
+                payloadlen = framedata[7] # Includes TI format FCS
                 payload = framedata[8:]
 
                 if len(payload) != payloadlen:
@@ -251,9 +247,9 @@ class CC253x:
                 # in last two bytes of framedata. Note that we remove these before return of the frame.
 
                 # RSSI is signed value, offset by 73 (see CC2530 data sheet for offset)
-                rssi = struct.unpack("b", framedata[-2])[0] - 73
+                rssi = struct.unpack("b", framedata[-2:-1])[0] - 73
 
-                fcsx = ord(framedata[-1])
+                fcsx = framedata[-1]
                 # validcrc is the bit 7 in fcsx
                 validcrc  = (fcsx & 0x80) == 0x80
                 # correlation value is bits 0-6 in fcsx
@@ -266,9 +262,9 @@ class CC253x:
                 # Convert the framedata to a string for the return value, and replace the TI FCS with a real FCS
                 # if the radio told us that the FCS had passed validation.
                 if validcrc:
-                    ret[0] = ''.join(payload[:-2]) + makeFCS(payload[:-2])
+                    ret[0] = bytearray_to_bytes(payload[:-2]) + makeFCS(payload[:-2])
                 else:
-                    ret[0] = ''.join(payload)
+                    ret[0] = bytearray_to_bytes(payload)
                 ret['bytes'] = ret[0]
                 return ret
 
