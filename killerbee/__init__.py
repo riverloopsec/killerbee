@@ -44,7 +44,8 @@ def show_dev(vendor=None, product=None, gps=None, include=None):
     fmt = "{: >14} {: <20} {: >10}"
     print((fmt.format("Dev", "Product String", "Serial Number")))
     for dev in kbutils.devlist(vendor=vendor, product=product, gps=gps, include=include):
-        print((fmt.format(dev[0], dev[1], dev[2])))
+        # Using None as a format value is an TypeError in python3
+        print((fmt.format(dev[0], dev[1], str(dev[2]))))
 
 # KillerBee Class
 class KillerBee:
