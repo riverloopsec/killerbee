@@ -13,13 +13,16 @@ import os
 import time
 import struct
 import time
-import urllib2
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 import re
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR, timeout as error_timeout
 from struct import unpack
 
 from datetime import datetime, timedelta
-from kbutils import KBCapabilities, makeFCS, isIpAddr, KBInterfaceError
+from .kbutils import KBCapabilities, makeFCS, isIpAddr, KBInterfaceError
 
 DEFAULT_IP = "10.10.10.2"   #IP address of the sniffer
 DEFAULT_GW = "10.10.10.1"   #IP address of the default gateway
@@ -44,8 +47,8 @@ Similar code from Wireshark source:
 '''
 def ntp_to_system_time(secs, msecs):
     """convert a NTP time to system time"""
-    print "Secs:", secs, msecs
-    print "\tUTC:", datetime.utcfromtimestamp(secs - 2208988800)
+    print("Secs:", secs, msecs)
+    print("\tUTC:", datetime.utcfromtimestamp(secs - 2208988800))
     return datetime.utcfromtimestamp(secs - 2208988800)
 
 def getFirmwareVersion(ip):
@@ -331,12 +334,10 @@ class SEWIO:
             raise Exception("Can not parse provided data as ZEP due to incorrect preamble or unsupported version.")
         if zeptype == 1: #data
             (ch, devid, crcmode, lqival, ntpsec, ntpnsec, seqnum, length) = unpack(">BHBBIII10xB", data[4:32])
-            #print "Data ZEP:", ch, devid, crcmode, lqival, ntpsec, ntpnsec, seqnum, length
             #We could convert the NTP timestamp received to system time, but the
             # Sewio firmware uses "relative timestamping" where it begins at 0 each time
             # the sniffer is started. Thus, it isn't that useful to us, so we just add the
             # time the packet is received at the host instead.
-            #print "\tConverted time:", ntp_to_system_time(ntpsec, ntpnsec)
             recdtime = datetime.utcnow()
             #The LQI comes in ZEP, but the RSSI comes in the first byte of the FCS,
             # if the FCS was correct. If the byte is 0xb1, Wireshark appears to do 0xb1-256 = -79 dBm.
@@ -394,7 +395,7 @@ class SEWIO:
                 continue
             # Dissect the UDP packet
             (frame, ch, validcrc, rssi, lqival, recdtime) = self.__parse_zep_v2(data)
-            print "Valid CRC", validcrc, "LQI", lqival, "RSSI", rssi
+            print("Valid CRC", validcrc, "LQI", lqival, "RSSI", rssi)
             if frame == None or (ch is not None and ch != self._channel):
                 #TODO this maybe should be an error condition, instead of ignored?
                 print("ZEP parsing issue (bytes length={0}, channel={1}).".format(len(frame) if frame is not None else None, ch))

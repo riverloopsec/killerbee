@@ -26,10 +26,10 @@ def display_details(routerdata):
                     1:"ZigBee 2004",
                     2:"ZigBee 2006/2007"}
     spanid, source, extpanid, stackprofilever, channel = routerdata
-    stackprofile = ord(stackprofilever) & 0x0f
-    stackver = (ord(stackprofilever) & 0xf0) >>4
+    stackprofile = stackprofilever & 0x0f
+    stackver = (stackprofilever & 0xf0) >>4
 
-    print "New Network: PANID 0x%02X%02X  Source 0x%02X%02X"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1]))
+    print("New Network: PANID 0x%02X%02X  Source 0x%02X%02X"%(spanid[0], spanid[1], source[0], source[1]))
 
     try:
         extpanidstr=""
@@ -41,10 +41,10 @@ def display_details(routerdata):
         sys.stdout.write("\tExt PANID: Unknown")
 
     try:
-        print "\tStack Profile: %s"%stackprofile_map[stackprofile]
+        print("\tStack Profile: %s"%stackprofile_map[stackprofile])
         stackprofilestr = stackprofile_map[stackprofile]
     except KeyError:
-        print "\tStack Profile: Unknown (%d)"%stackprofile
+        print("\tStack Profile: Unknown (%d)"%stackprofile)
         stackprofilestr = "Unknown (%d)"%stackprofile
 
     try:
@@ -80,7 +80,7 @@ def response_handler(stumbled, packet, channel):
         stackprofilever = beacondata[4]
         assocPermit = struct.unpack("<H", beacondata[0])[0] & 0x8000
 
-        key = ''.join([spanid, source])
+        key = b''.join([spanid, source])
         value = [spanid, source, extpanid, stackprofilever, channel]
         if not key in stumbled:
             if args.verbose:
@@ -88,8 +88,6 @@ def response_handler(stumbled, packet, channel):
                     print("Beacon represents new network - ### Permitting new associations ###.")
                 else:
                     print("Beacon represents new network - not accepting new associations.")
-                #print hexdump(packet)
-                #print pktdecode
             stumbled[key] = value
             display_details(value)
         else:
@@ -174,7 +172,7 @@ if __name__ == '__main__':
                 print("Setting channel to {0}.".format(channel))
             try:
                 kb.set_channel(channel)
-            except Exception, e:
+            except Exception as e:
                 print("ERROR: Failed to set channel to {0}. ({1})".format(channel, e))
                 sys.exit(-1)
 
@@ -190,7 +188,7 @@ if __name__ == '__main__':
         try:
             txcount+=1
             kb.inject(beaconinj)
-        except Exception, e:
+        except Exception as e:
             print("ERROR: Unable to inject packet: {0}".format(e))
             sys.exit(-1)
 

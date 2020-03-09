@@ -10,7 +10,7 @@ import time
 import struct
 from datetime import datetime, date
 from datetime import time as dttime
-from kbutils import KBCapabilities, makeFCS
+from .kbutils import KBCapabilities, makeFCS
 
 MODE_NONE    = 0x01
 MODE_SNIFF   = 0x02
@@ -79,7 +79,6 @@ class FREAKDUINO:
         if arg != None: self.handle.write(arg)
         self.handle.write('\r')
 
-        #print "Sent S%s" % (cmdstr)
         self.handle.flush()
 
     # Deprecated due to unreliability
@@ -89,7 +88,7 @@ class FREAKDUINO:
         Ex: If provided cmdstr = "C!N" it will send "SC!N", telling the device to turn on sniffing ("N"),
         and it expects to receive a confirmation back "&C!N" to confirm success.
         '''
-        print "Flushing out of buffer:", self.handle.inWaiting()
+        print("Flushing out of buffer:", self.handle.inWaiting())
         self.handle.flushInput()
         if len(cmdstr) > 3:
             raise Exception("Command string is less than minimum length (S%s)." % cmdstr)
@@ -98,16 +97,16 @@ class FREAKDUINO:
         # TODO ugly and unreliable:
         # This should just wait for a & and then parse things after it,
         # however it seems sometimes you have to resend the command or something.
-        print "Line:", self.handle.readline(eol='&')
+        print("Line:", self.handle.readline(eol='&'))
         counter = 0
         char = self.handle.read()
         while (char != '&'):
-            print self.handle.inWaiting(), "Waiting...", char
+            print(self.handle.inWaiting(), "Waiting...", char)
             time.sleep(0.01)
             if (counter > 8):
                 self.__send_cmd(cmdstr, arg)
                 counter = 0
-                print "Resend Response Line:", self.handle.readline(eol='&')
+                print("Resend Response Line:", self.handle.readline(eol='&'))
             else: counter += 1
             char = self.handle.read()
         response = ''
@@ -115,10 +114,10 @@ class FREAKDUINO:
             response += self.handle.read()
 
         if response == cmdstr[:3]:
-            print "Got a response:", response, "matches", cmdstr
+            print("Got a response:", response, "matches", cmdstr)
             return True
         else:
-            print "Invalid response:", response, cmdstr[:3]
+            print("Invalid response:", response, cmdstr[:3])
             return False
 
     # Send the command for the Dartmouth-mod Freakduino to dump data logged in EEPROM
@@ -271,7 +270,7 @@ class FREAKDUINO:
             if frame[-2:] == makeFCS(frame[:-2]): validcrc = True
             else: validcrc = False
         except:
-            print "Error parsing stream received from device:", pdata, data
+            print("Error parsing stream received from device:", pdata, data)
             return None
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
@@ -286,7 +285,7 @@ class FREAKDUINO:
             timestr = "%08d" % (struct.unpack('L', data[1])[0]) #in format hhmmsscc
             time = dttime(int(timestr[:2]), int(timestr[2:4]), int(timestr[4:6]), int(timestr[6:]))
         except:
-            print "Issue with time format:", timestr, data
+            print("Issue with time format:", timestr, data)
             time = None
         if self.date == None: self.date = date.utcnow().date()
         if time == None or time == dttime.min: time = (datetime.utcnow()).time()
@@ -304,7 +303,7 @@ class FREAKDUINO:
         date = str(struct.unpack('L', ldata[12:16])[0])
         self.date = datetime.date(date[-2:], date[-4:-2], date[:-4])
         #TODO parse data formats (lon=-7228745 lat=4370648 alt=3800 age=63 date=70111 time=312530)
-        print self.lon, self.lat, self.alt, self.date
+        print(self.lon, self.lat, self.alt, self.date)
 
     def ping(self, da, panid, sa, channel=None, page=0):
         '''

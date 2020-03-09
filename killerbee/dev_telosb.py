@@ -9,8 +9,8 @@ import time
 import struct
 import time
 from datetime import datetime, timedelta
-from kbutils import KBCapabilities, makeFCS
-from GoodFETCCSPI import GoodFETCCSPI
+from .kbutils import KBCapabilities, makeFCS
+from .GoodFETCCSPI import GoodFETCCSPI
 
 CC2420_REG_SYNC = 0x14
 
@@ -62,7 +62,7 @@ class TELOSB:
     # KillerBee expects the driver to implement this function
     #def get_dev_info(self, dev, bus):
     def get_dev_info(self):
-	'''
+        '''
         Returns device information in a list identifying the device.
         @rtype: List
         @return: List of 3 strings identifying device.
@@ -90,7 +90,6 @@ class TELOSB:
             self.set_channel(channel, page)
         
         self.handle.CC_RFST_RX();
-        #print "Sniffer started (listening as %010x on %i MHz)" % (self.handle.RF_getsmac(), self.handle.RF_getfreq()/10**6);
 
         self.__stream_open = True
 

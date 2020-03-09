@@ -17,8 +17,8 @@ import time
 import struct
 import time
 from datetime import datetime, timedelta
-from kbutils import KBCapabilities, makeFCS
-from GoodFETCCSPI import GoodFETCCSPI
+from .kbutils import KBCapabilities, makeFCS
+from .GoodFETCCSPI import GoodFETCCSPI
 
 # Default revision of the ApiMote. This is liable to change at any time
 # as new ApiMote versions are released. Automatic recognition would be nice.
@@ -109,7 +109,6 @@ class APIMOTE:
             self.set_channel(channel, page)
         
         self.handle.CC_RFST_RX()
-        #print "Sniffer started (listening as %010x on %i MHz)" % (self.handle.RF_getsmac(), self.handle.RF_getfreq()/10**6);
 
         self.__stream_open = True
 

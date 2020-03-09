@@ -10,7 +10,7 @@ import time
 import struct
 from datetime import datetime, date
 from datetime import time as dttime
-from kbutils import KBCapabilities, makeFCS
+from .kbutils import KBCapabilities, makeFCS
 
 MODE_NONE    = 0x01
 MODE_SNIFF   = 0x02
@@ -94,13 +94,11 @@ class SL_BEEHIVE:
         if send_return:
             self.handle.write('\r')
         #time.sleep(0.1)
-        #print "Sent %s" % (cmdstr)
         time.sleep(extra_delay)
         if confirm:
             ret= False
             for x in range(100):
                 d= self.handle.readline().strip()
-                #print 'got', d
                 if d[-1:] == '>':
                     ret= True
                     break
@@ -160,7 +158,6 @@ class SL_BEEHIVE:
             self.__send_cmd("rx", "1", confirm= False)
             for x in range(5):
                 d = self.handle.readline()
-                #print 'got', d
                 if 'Rx:Enabled' in d:
                     self.mode = MODE_SNIFF
                     self.__stream_open = True
@@ -258,7 +255,6 @@ class SL_BEEHIVE:
         self.__send_cmd("setTxPayload", "00 %02x%s" % ((len(packet)), packet[:tosend].encode('hex')))
         if len(packet) > maxp:
             self.__send_cmd("setTxPayload", "%d %s" % (tosend + 1, packet[tosend:].encode('hex')))
-        #print 'sending', len(packet), 'bytes:', packet.encode('hex')
         for pnum in range(0, count):
             self.__send_cmd("tx", "1", confirm= False)
             time.sleep(delay)
@@ -279,20 +275,18 @@ class SL_BEEHIVE:
 
         self.handle.timeout=timeout         # Allow pySerial to handle timeout
         packet = self.handle.readline().strip()
-        #print 'reading'
         if packet == '':
             return None   # Sense timeout case and return
 
-        #print packet
         rssi, frame, validcrc = self.__dissect_pkt(packet)
         if not frame:
-            print "Error parsing stream received from device:", packet
+            print("Error parsing stream received from device:", packet)
 
         # Parse received data as <rssi>!<time>!<packtlen>!<frame>
         try:
             rssi = int(rssi)
         except:
-            print "Error parsing stream received from device:", packet
+            print("Error parsing stream received from device:", packet)
             return None
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.

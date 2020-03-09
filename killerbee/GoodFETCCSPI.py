@@ -5,9 +5,9 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, cStringIO, struct, glob, os;
+import sys, time, string, io, struct, glob, os;
 
-from GoodFET import GoodFET;
+from .GoodFET import GoodFET;
 
 class GoodFETCCSPI(GoodFET):
     CCSPIAPP=0x51;
@@ -50,7 +50,7 @@ class GoodFETCCSPI(GoodFET):
         """Strobes a strobe register, returning the status."""
         data=[reg];
         self.trans(data);
-        return ord(self.data[0]);
+        return self.data[0]
     def CC_RFST_IDLE(self):
         """Switch the radio to idle mode, clearing overflows and errors."""
         self.strobe(0x06); #SRXOFF
@@ -77,21 +77,21 @@ class GoodFETCCSPI(GoodFET):
         
         self.writecmd(self.CCSPIAPP,0x02,len(data),data);
         try:
-            toret=( ord(self.data[2]) + (ord(self.data[1])<<8) );
+            toret=(self.data[2] + (self.data[1]<<8) );
         except Exception as e:
-            print "issue in peeking for a register"
-            print e
-            toret=( (ord(self.data[1])<<8) );
+            print("issue in peeking for a register")
+            print(e)
+            toret=(self.data[1]<<8);
         return toret;
     def poke(self,reg,val,bytes=2):
         """Write a CCSPI Register."""
         data=[reg,(val>>8)&0xFF,val&0xFF];
         self.writecmd(self.CCSPIAPP,0x03,len(data),data);
         if self.peek(reg,bytes)!=val and reg!=0x18:
-            print "Warning, failed to set r%02x=0x%04x, got %02x." %(
+            print("Warning, failed to set r%02x=0x%04x, got %02x." %(
                 reg,
                 val,
-                self.peek(reg,bytes));
+                self.peek(reg,bytes)));
             return False;
         return True;
     
@@ -135,12 +135,12 @@ class GoodFETCCSPI(GoodFET):
     
     def RF_setkey(self,key):
         """Sets the first key for encryption to the given argument."""
-        print "ERROR: Forgot to set the key.";
+        print("ERROR: Forgot to set the key.")
         
         return;
     def RF_setnonce(self,key):
         """Sets the first key for encryption to the given argument."""
-        print "ERROR: Forgot to set the nonce.";
+        print("ERROR: Forgot to set the nonce.")
         
         return;
     
@@ -163,7 +163,7 @@ class GoodFETCCSPI(GoodFET):
     def RF_setchan(self,channel):
         """Set the ZigBee/802.15.4 channel number."""
         if channel < 11 or channel > 26:
-            print "Only 802.15.4 channels 11 to 26 are currently supported.";
+            print("Only 802.15.4 channels 11 to 26 are currently supported.")
         else:
             self.RF_setfreq( ( (channel-11)*5 + 2405 ) * 1000000 );
     def RF_getsmac(self):
@@ -202,7 +202,7 @@ class GoodFETCCSPI(GoodFET):
         """Get a packet from the radio.  Returns None if none is
         waiting."""
         
-        data="\0";
+        data=bytearray([0]);
         self.data=data;
         self.writecmd(self.CCSPIAPP,0x80,len(data),data);
         buffer=self.data;
@@ -253,12 +253,12 @@ class GoodFETCCSPI(GoodFET):
            and that also sends a forged ACK if needed."""
         data = "";
         self.writecmd(self.CCSPIAPP,0xA1,len(data),data);
-        print "Got:", data, "and", self.data
+        print("Got:", data, "and", self.data)
         return;
 
     def RF_modulated_spectrum(self):
         """Hold a carrier wave on the present frequency."""
-        # print "Don't know how to hold a carrier.";
+        # print("Don't know how to hold a carrier.")
         # 33.1 p.55:
         #  reset chip
         #  SXOSCON
@@ -266,28 +266,23 @@ class GoodFETCCSPI(GoodFET):
         #  STXON                            0x04
 
         mdmctrl1=self.peek(0x12);
-        #print "mdmctrl1 was %04x" % mdmctrl1;
         mdmctrl1=mdmctrl1|0x00c0;  #MDMCTRL1.TX_MODE = 3
         self.poke(0x12, mdmctrl1); #MDMCTRL1
 
         mdmctrl1=self.peek(0x12);
-        #print "mdmctrl1 is %04x" % mdmctrl1;
 
         # http://e2e.ti.com/support/low_power_rf/f/155/t/15914.aspx?PageIndex=2
         #   suggests this
         self.strobe(0x02);         #STXCAL
-        #print "STXCAL status: %s" % self.status()
 
         # is this necessary?
         self.strobe(0x09);         #SFLUSHTX
-        #print "SFLUSHTX status: %s" % self.status()
 
         self.strobe(0x04);         #STXON
-        #print "STXON status: %s" % self.status()
 
     def RF_carrier(self):
         """Hold a carrier wave on the present frequency."""
-        # print "Don't know how to hold a carrier.";
+        # print("Don't know how to hold a carrier.")
         # 33.1 p.54:
         #  reset chip
         #  SXOSCON
@@ -296,26 +291,20 @@ class GoodFETCCSPI(GoodFET):
         #  STXON                            0x04
 
         mdmctrl1=self.peek(0x12);
-        #print "mdmctrl1 was %04x" % mdmctrl1;
         mdmctrl1=mdmctrl1|0x0080; 
         mdmctrl1=mdmctrl1&0x0080;  #MDMCTRL1.TX_MODE = 2
         self.poke(0x12, mdmctrl1); #MDMCTRL1
 
         mdmctrl1=self.peek(0x12);
-        #print "mdmctrl1 is %04x" % mdmctrl1;
 
         self.poke(0x2E, 0x1800);   #DACTST
         dactst=self.peek(0x2E);
-        #print "dactst is %04x" % dactst;
 
         # see above for why this is here
         self.strobe(0x02);         #STXCAL
-        #print "STXCAL status: %s" % self.status()
         self.strobe(0x09);         #SFLUSHTX
-        #print "SFLUSHTX status: %s" % self.status()
 
         self.strobe(0x04);         #STXON
-        #print "STXON status: %s" % self.status()
 
     def RF_promiscuity(self,promiscuous=1):
         mdmctrl0=self.peek(0x11);
@@ -366,7 +355,7 @@ class GoodFETCCSPI(GoodFET):
         self.poke(0x03,choice);
         self.maclen=len;
     def printpacket(self,packet,prefix="#"):
-        print self.packet2str(packet,prefix);
+        print(self.packet2str(packet,prefix))
     def packet2str(self,packet,prefix="#"):
         s="";
         i=0;
@@ -378,9 +367,9 @@ class GoodFETCCSPI(GoodFET):
         try:
             from scapy.all import Dot15d4
         except ImportError:
-            print "To use packet disection, Scapy must be installed and have the Dot15d4 extension present."
-            print "try: hg clone http://hg.secdev.org/scapy-com";
-            print "     sudo ./setup.py install";
+            print("To use packet disection, Scapy must be installed and have the Dot15d4 extension present.")
+            print("try: hg clone http://hg.secdev.org/scapy-com")
+            print("     sudo ./setup.py install")
         self.printpacket(packet);
         try:
             scapyd = Dot15d4(packet[1:]);

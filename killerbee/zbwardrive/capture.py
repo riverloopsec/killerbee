@@ -20,9 +20,9 @@ def startCapture(zbdb, channel, dblog=False, gps=False):
     capChan = channel
     key = "CH%d" % channel
     if nextDev == None:
-        print 'Cap%s: No free device to use for capture.' % key
+        print('Cap%s: No free device to use for capture.' % key)
         return None
-    print 'Cap%s: Launching a capture on channel %s.' % (key, capChan)
+    print('Cap%s: Launching a capture on channel %s.' % (key, capChan))
     signal.signal(signal.SIGINT, interrupt)
     trigger = threading.Event()
     triggers.append(trigger)
@@ -62,7 +62,7 @@ class CaptureThread(threading.Thread):
             self.kb = KillerBee(device=self.devstring)
         self.kb.set_channel(self.channel)
         self.kb.sniffer_on()
-        print "Capturing on \'%s\' at channel %d." % (self.kb.get_dev_info()[0], self.channel)
+        print("Capturing on \'%s\' at channel %d." % (self.kb.get_dev_info()[0], self.channel))
         # loop capturing packets to dblog and file
         while not self.trigger.is_set():
             packet = self.kb.pnext()
@@ -94,5 +94,5 @@ class CaptureThread(threading.Thread):
         self.kb.sniffer_off()
         self.kb.close()
         self.pd.close()
-        print "%d packets captured on channel %d." % (self.packetcount, self.channel)
+        print("%d packets captured on channel %d." % (self.packetcount, self.channel))
 

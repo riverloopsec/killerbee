@@ -5,9 +5,9 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, cStringIO, struct, glob, os;
+import sys, time, string, io, struct, glob, os;
 
-from GoodFET import GoodFET;
+from .GoodFET import GoodFET;
 
 class GoodFETAVR(GoodFET):
     AVRAPP=0x32;
@@ -107,7 +107,7 @@ class GoodFETAVR(GoodFET):
             #self.glitchVoltages(0x880, i);
             self.start();
             bits=self.lockbits();
-            print "At %04x, Lockbits: %02x" % (i,bits);
+            print("At %04x, Lockbits: %02x" % (i,bits))
             if(bits==0xFF): return;
     def erase(self):
         """Erase the target chip."""

@@ -17,7 +17,7 @@ def interrupt(signum, frame):
     try:
         kb.jammer_off()
     except:
-        print "\nAborted!"
+        print("\nAborted!")
     sys.exit(0)
 
 # Command-line arguments
@@ -33,24 +33,24 @@ if args.showdev:
     sys.exit(0)
 
 if args.channel == None:
-    print >>sys.stderr, "ERROR: Must specify a channel."
+    print("ERROR: Must specify a channel.", file=sys.stderr)
     sys.exit(1)
 
 kb = KillerBee(device=args.devstring)
 signal.signal(signal.SIGINT, interrupt)
 if not kb.is_valid_channel(args.channel, args.subghz_page):
-    print >>sys.stderr, "ERROR: Must specify a valid IEEE 802.15.4 channel/page for the selected device."
+    print("ERROR: Must specify a valid IEEE 802.15.4 channel/page for the selected device.", file=sys.stderr)
     kb.close()
     sys.exit(1)
 kb.set_channel(args.channel, page=args.subghz_page)
 
-print "zbjammer: jamming channel", args.channel
-print "*** WARNING: this may not actually work on your hardware! Check with spectrum analyser!"
-print "*** NOTICE: it is your responsibility to comply with local law. Please check radio spectrum laws in your area before"
+print("zbjammer: jamming channel", args.channel)
+print("*** WARNING: this may not actually work on your hardware! Check with spectrum analyser!")
+print("*** NOTICE: it is your responsibility to comply with local law. Please check radio spectrum laws in your area before")
 raw_input("    proceeding. Hit <ENTER> to continue or CTL-C to abort.")
 if not kb.jammer_on():
     while 42:
         pass
 else:
-    print 'ERROR: could not set jammer mode!'
+    print('ERROR: could not set jammer mode!')
     sys.exit(1)

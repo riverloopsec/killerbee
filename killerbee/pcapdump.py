@@ -9,7 +9,7 @@ PCAPH_THISZONE  = 0
 PCAPH_SIGFIGS   = 0
 PCAPH_SNAPLEN   = 65535
 
-DOT11COMMON_TAG = 000002
+DOT11COMMON_TAG = 0o0002
 GPS_TAG		= 30002
 
 class PcapReader:
@@ -118,7 +118,7 @@ class PcapDumper:
         if ppi: from killerbee.pcapdlt import DLT_PPI
         self.ppi = ppi
 
-        if isinstance(savefile, basestring):
+        if isinstance(savefile, str):
             self.__fh = open(savefile, mode='wb')
         elif hasattr(savefile, 'write'):
             self.__fh = savefile
@@ -126,7 +126,7 @@ class PcapDumper:
             raise ValueError("Unsupported type for 'savefile' argument")
 
         self.datalink = datalink
-        self.__fh.write(''.join([
+        self.__fh.write(b''.join([
             struct.pack("I", PCAPH_MAGIC_NUM), 
             struct.pack("H", PCAPH_VER_MAJOR),
             struct.pack("H", PCAPH_VER_MINOR),
@@ -254,16 +254,11 @@ class PcapDumper:
         output_list.append(packet)
         output = ''.join(output_list)
 
-        #DEBUG Output:
-        #print "Pcap:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in output])
-        #print "PPI:", '\\x'+'\\x'.join(["%02x" % ord(x) for x in (caceppi_hdr + caceppi_f80211common)])
-        #print "802154:", packet.encode("hex")
-
         self.__fh.write(output)
         # Specially for handling FIFO needs:
         try:
             self.__fh.flush()
-        except IOError, e:
+        except IOError as e:
             raise e
 
 

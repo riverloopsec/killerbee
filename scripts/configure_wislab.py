@@ -6,7 +6,10 @@ Configure the Wislab 802.15.4 sniffer.
 
 import argparse
 import subprocess
-import urllib2
+try: 
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
 import re
 
 def getFirmwareVersion(ip):

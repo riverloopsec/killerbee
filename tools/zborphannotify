@@ -14,7 +14,7 @@ from killerbee import *
 try:
     from scapy.all import *
 except ImportError:
-    print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
+    print('This tool requires Scapy to be installed (specifically scapy-com edition).')
     from sys import exit
     exit(-1)
 
@@ -67,6 +67,6 @@ if __name__ == '__main__':
         seqnummac += 1
         if seqnummac > 255:
             seqnummac = 0
-        print sp.summary()
+        print(sp.summary())
         kb.inject(str(sp))
         sleep(0.005)

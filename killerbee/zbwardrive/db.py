@@ -51,7 +51,6 @@ class ZBScanDB:
     # Return the channel of the network identified by key,
     # or None if it doesn't exist in the DB.
     def get_networks_channel(self, key):
-        #print "Looking up channel for network with key of %s" % (key)
         for chan, data in self.channels:
             if data[0] == key: return chan
         return None

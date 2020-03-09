@@ -356,7 +356,7 @@ if __name__ == '__main__':
         if switch == '-v':
             verbose = True
     if len(arguments) > 2:
-        print 'Usage: gps.py [-v] [host [port]]'
+        print('Usage: gps.py [-v] [host [port]]')
         sys.exit(1)
 
     opts = { "verbose" : verbose }
@@ -369,6 +369,6 @@ if __name__ == '__main__':
     session.set_raw_hook(lambda s: sys.stdout.write(s.strip() + "\n"))
     session.stream(WATCH_ENABLE|WATCH_NEWSTYLE)
     for report in session:
-        print report
+        print(report)
 
 # gps.py ends here

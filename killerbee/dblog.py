@@ -24,7 +24,6 @@ class DBReader:
         else: return None
 
     def query(self, sql):
-        #print "Query was", sql
         self.conn.execute(sql)
         if self.conn.rowcount >= 1:
             row = self.conn.fetchone()
@@ -47,9 +46,10 @@ class DBLogger:
         # Initalize the connection
         try:
             self.db = MySQLdb.connect(user=DB_USER, passwd=DB_PASS, db=DB_NAME, host=DB_HOST, port=DB_PORT)
-        except Exception as (errno, errmsg):
+        except Exception as e:
             raise Exception("DBLogger was unable to connect to the database: " \
-                            +"(error %d): %s (Note: connection values should be in config.py)." % (errno,errmsg))
+                            +"(error %d): %s (Note: connection values should be in config.py)." \
+                            +"error %s" % e)
         if self.db == None: #this backup check may be redundant
             raise Exception("DBLogger: Unable to connect to database.")
         self.conn = self.db.cursor()
@@ -57,7 +57,7 @@ class DBLogger:
         # Set the ds_id attribute to correspond to the requested data source name
         self.conn.execute("SELECT ds_id FROM datasources WHERE ds_name LIKE %s LIMIT 1", (datasource,))
         if self.conn.rowcount == 1: self.ds_id = self.conn.fetchone()
-        else: print "No datasource found matching name:", datasource
+        else: print("No datasource found matching name:", datasource)
 
     def close(self):
         if self.conn != None:
@@ -88,8 +88,6 @@ class DBLogger:
             from scapy.all import Dot15d4
             scapy = Dot15d4(bytes)
         #from kbutils import hexdump
-        #print "Before", hexdump(bytes)
-        #print "Scapyd", hexdump(str(scapy))
         #scapy.show2()
 
         # This try/except logic is dumb, but Scapy will just throw an exception if the field doesn't exist
@@ -149,7 +147,6 @@ class DBLogger:
 
     def add_device(self, shortaddr, panid):
         if (self.conn==None): raise Exception("DBLogger requires active connection status.")
-        #print "DEBUG: Looking for addr, panid:", shortaddr, panid
         self.conn.execute("SELECT dev_id FROM devices WHERE %s AND %s LIMIT 1" % \
                             ( ("short_addr = '%04x'" % shortaddr) if shortaddr != None else "short_addr IS NULL" , \
                               ("pan_id = '%04x'" % panid) if panid != None else "pan_id IS NULL" ))
@@ -157,7 +154,6 @@ class DBLogger:
         if (res != None):
             return res #device already exists
         else:
-            #print "Found New Device: %04x on %04x." % (shortaddr, panid) #TODO make print when verbose only
             self.conn.execute("INSERT INTO devices SET %s, %s" % \
                              (("short_addr = '%04x'" % shortaddr) if shortaddr != None else "short_addr = NULL" , \
                               ("pan_id = '%04x'" % panid) if panid != None else "pan_id = NULL" ))
@@ -170,7 +166,6 @@ class DBLogger:
         if packetbytes != None:
             sql = sql + ", packetbytes=%s"
             params = (MySQLdb.Binary(packetbytes), )
-        #print "INSERTING SQL: ", sql
         self.conn.execute(sql, params)
         if self.conn.rowcount != 1: raise Exception("DBLogger: Insert did not succeed.")
         self.db.commit()

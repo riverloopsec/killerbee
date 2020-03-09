@@ -33,17 +33,17 @@ class gpscommon:
             except ValueError:
                 raise socket.error, "nonnumeric port"
         #if self.verbose > 0:
-        #    print 'connect:', (host, port)
+        #    print('connect:', (host, port))
         msg = "getaddrinfo returns an empty list"
         self.sock = None
         for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
             af, socktype, proto, canonname, sa = res
             try:
                 self.sock = socket.socket(af, socktype, proto)
-                #if self.debuglevel > 0: print 'connect:', (host, port)
+                #if self.debuglevel > 0: print('connect:', (host, port))
                 self.sock.connect(sa)
             except socket.error, msg:
-                #if self.debuglevel > 0: print 'connect fail:', (host, port)
+                #if self.debuglevel > 0: print('connect fail:', (host, port))
                 self.close()
                 continue
             break

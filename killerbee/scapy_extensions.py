@@ -12,10 +12,11 @@ from scapy.packet import Gen, Raw
 from scapy.all import *
 # This line will allow KillerBee's pcap reader to overwrite scapy's reader that is imported on the
 # above line, per suggestion from cutaway at https://code.google.com/p/killerbee/issues/detail?id=28:
+
 from killerbee import *
 
 import os, time, struct
-from kbutils import randmac
+from .kbutils import randmac
 
 import logging
 log_killerbee = logging.getLogger('scapy.killerbee')
@@ -135,7 +136,7 @@ def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None
 
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = loop, count = count, verbose = verbose, realtime = realtime)
     if verbose:
-        print "\nSent %i packets." % pkts_out
+        print("\nSent %i packets." % pkts_out)
     kb.close()
 
 @conf.commands.register
@@ -179,11 +180,11 @@ def kbsrp(pkt, channel = None, page = 0, inter = 0, count = 0, iface = None, sto
 
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = 0, count = None, verbose = verbose, realtime = realtime)
     if verbose:
-        print "\nSent %i packets." % pkts_out
+        print("\nSent %i packets." % pkts_out)
 
     pkts_in = __kb_recv(kb, count = count, store = store, prn = prn, lfilter = lfilter, verbose = verbose, timeout = timeout)
     if verbose:
-        print "\nReceived %i packets." % len(pkts_in)
+        print("\nReceived %i packets." % len(pkts_in))
     return plist.PacketList(pkts_in, 'Results')
 
 @conf.commands.register
@@ -467,13 +468,13 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
     (payload, micCheck) = zigbee_crypt.decrypt_ccm(key, nonce, pkt.mic, encrypted, zigbeeData)
 
     if verbose > 2:
-        print "Decrypt Details:"
-        print "\tKey:            " + key.encode('hex')
-        print "\tNonce:          " + nonce.encode('hex')
-        print "\tZigbeeData:     " + zigbeeData.encode('hex')
-        print "\tDecrypted Data: " + payload.encode('hex')
-        print "\tEncrypted Data: " + encrypted.encode('hex')
-        print "\tMic:            " + pkt.mic.encode('hex')
+        print("Decrypt Details:")
+        print("\tKey:            " + key.encode('hex'))
+        print("\tNonce:          " + nonce.encode('hex'))
+        print("\tZigbeeData:     " + zigbeeData.encode('hex'))
+        print("\tDecrypted Data: " + payload.encode('hex'))
+        print("\tEncrypted Data: " + encrypted.encode('hex'))
+        print("\tMic:            " + pkt.mic.encode('hex'))
 
     frametype = pkt[ZigbeeNWK].frametype
     if frametype == 0 and micCheck == 1:
@@ -551,13 +552,13 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
     (payload, mic) = zigbee_crypt.encrypt_ccm(key, nonce, miclen, decrypted, zigbeeData)
 
     if verbose > 2:
-        print "Encrypt Details:"
-        print "\tKey:            " + key.encode('hex')
-        print "\tNonce:          " + nonce.encode('hex')
-        print "\tZigbeeData:     " + zigbeeData.encode('hex')
-        print "\tDecrypted Data: " + decrypted.encode('hex')
-        print "\tEncrypted Data: " + payload.encode('hex')
-        print "\tMic:            " + mic.encode('hex')
+        print("Encrypt Details:")
+        print("\tKey:            " + key.encode('hex'))
+        print("\tNonce:          " + nonce.encode('hex'))
+        print("\tZigbeeData:     " + zigbeeData.encode('hex'))
+        print("\tDecrypted Data: " + decrypted.encode('hex'))
+        print("\tEncrypted Data: " + payload.encode('hex'))
+        print("\tMic:            " + mic.encode('hex'))
 
     # According to comments in e.g. https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-zbee-security.c nwk_seclevel is not used any more but
     # we should reconstruct and return what was asked for anyway.

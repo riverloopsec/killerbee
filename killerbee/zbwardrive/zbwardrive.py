@@ -8,8 +8,8 @@ from time import sleep
 from usb import USBError
 
 from killerbee import KillerBee, kbutils
-from db import ZBScanDB
-from scanning import doScan
+from .db import ZBScanDB
+from .scanning import doScan
 
 # GPS Poller
 def gpsdPoller(currentGPS):
@@ -29,19 +29,15 @@ def gpsdPoller(currentGPS):
                 lat = gpsd.fix.latitude
                 lng = gpsd.fix.longitude
                 alt = gpsd.fix.altitude
-                #print 'latitude    ' , lat
-                #print 'longitude   ' , lng
                 #TODO do we want to use the GPS time in any way?
-                #print 'time utc    ' , gpsd.utc,' + ', gpsd.fix.time
-                #print 'altitude (m)' , alt
                 currentGPS['lat'] = lat
                 currentGPS['lng'] = lng
                 currentGPS['alt'] = alt
             else:
-                print "Waiting for a GPS fix."
+                print("Waiting for a GPS fix.")
                 #TODO timeout lat/lng/alt values if too old...?
     except KeyboardInterrupt:
-        print "Got KeyboardInterrupt in gpsdPoller, returning."
+        print("Got KeyboardInterrupt in gpsdPoller, returning.")
         return
 
 # startScan
@@ -50,18 +46,17 @@ def gpsdPoller(currentGPS):
 def startScan(zbdb, currentGPS, verbose=False, dblog=False, agressive=False, include=[], ignore=None):
     try:
         kb = KillerBee()
-    except USBError, e:
+    except USBError as e:
         if e.args[0].find('Operation not permitted') >= 0:
-            print 'Error: Permissions error, try running using sudo.'
+            print('Error: Permissions error, try running using sudo.')
         else:
-            print 'Error: USBError:', e
+            print('Error: USBError:', e)
         return False
-    except Exception, e:
-        #print 'Error: Missing KillerBee USB hardware:', e
-        print 'Error: Issue starting KillerBee instance:', e
+    except Exception as e:
+        print('Error: Issue starting KillerBee instance:', e)
         return False
     for kbdev in kbutils.devlist(gps=ignore, include=include):
-        print 'Found device at %s: \'%s\'' % (kbdev[0], kbdev[1])
+        print('Found device at %s: \'%s\'' % (kbdev[0], kbdev[1]))
         zbdb.store_devices(
             kbdev[0], #devid
             kbdev[1], #devstr

@@ -49,6 +49,6 @@ if __name__=='__main__':
         zbdb.close()
 
     except KeyboardInterrupt:
-        print 'Shutting down'
+        print('Shutting down')
         if zbdb != None: zbdb.close()
         if gpsp != None: gpsp.terminate()

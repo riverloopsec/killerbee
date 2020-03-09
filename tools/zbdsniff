@@ -105,6 +105,7 @@ if __name__ == '__main__':
         try:
             pkts = kbrdpcap(fname)
         except Exception as e:
+            print("Exception: ", e)
             print("ERROR: Input file \"{}\" is not able to be loaded. Is it a PCAP file? Daintree support was removed in KillerBee 2.7.1".format(fname), file=sys.stderr)
             continue
         sniffNetworkKey(pkts, options.transportKey, options.verbose)

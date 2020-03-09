@@ -4,16 +4,15 @@ try:
     import usb.util
     USBVER=1
     import sys
-    print >>sys.stderr, "Warning: You are using pyUSB 1.x, support is in beta."
+    print("Warning: You are using pyUSB 1.x, support is in beta.", file=sys.stderr)
 except ImportError:
     import usb
-    #print("Warning: You are using pyUSB 0.x, future deprecation planned.")
     USBVER=0
 
 import time
 import struct
 from datetime import datetime
-from kbutils import KBCapabilities
+from .kbutils import KBCapabilities
 
 # Functions for RZUSBSTICK, not all are implemented in firmware
 # Functions not used are commented out but retained for prosperity
@@ -271,22 +270,20 @@ class RZUSBSTICK:
         if USBVER == 0: # TODO: UNTESTED!!!!
             try:
                 response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
-            except usb.USBError, e:
+            except usb.USBError as e:
                 if e.args != ('No error',): # http://bugs.debian.org/476796
                     raise e
         else: #pyUSB 1.x
             try:
                 response = self.dev.read(RZ_USB_RESPONSE_EP, self.dev.bMaxPacketSize0, timeout=500)
-                #print 'response length:', len(response)
-                #print response
                 #response = ''.join([chr(x) for x in response])
                 #response = response.pop()
             except usb.core.USBError as e:
                 if e.errno != 110: #Not Operation timed out
-                    print "Error args:", e.args
+                    print("Error args:", e.args)
                     raise e
                 elif e.errno == 110:
-                    print "DEBUG: Received operation timed out error ...attempting to continue."
+                    print("DEBUG: Received operation timed out error ...attempting to continue.")
         return response
 
     def __usb_write(self, endpoint, data, expected_response=RZ_RESP_SUCCESS):
@@ -304,7 +301,7 @@ class RZUSBSTICK:
                 self.handle.bulkWrite(endpoint, data)
                 # Returns a tuple, first value is an int as the RZ_RESP_* code
 #                response = self.handle.bulkRead(RZ_USB_RESPONSE_EP, 1)[0]
-            except usb.USBError, e:
+            except usb.USBError as e:
                 if e.args != ('No error',): # http://bugs.debian.org/476796
                     raise e
 #            time.sleep(0.0005)
@@ -322,13 +319,12 @@ class RZUSBSTICK:
 #                response = response.pop()
             except usb.core.USBError as e:
                 if e.errno != 110: #Not Operation timed out
-                    print "Error args:", e.args
+                    print("Error args:", e.args)
                     raise e
                 elif e.errno == 110:
-                    print "DEBUG: Received operation timed out error ...attempting to continue."
+                    print("DEBUG: Received operation timed out error ...attempting to continue.")
         #time.sleep(0.0005)
         response = self.__usb_read()
-        #print 'response 0: %x' % response[0]
         if response[0] != expected_response:
             if response[0] in RESPONSE_MAP:
                 raise Exception("Error: %s" % RESPONSE_MAP[response[0]])
