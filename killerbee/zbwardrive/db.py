@@ -25,7 +25,7 @@ class ZBScanDB:
     # Returns the devid of a device marked 'Free',
     # or None if there are no Free devices in the DB.
     def get_devices_nextFree(self):
-        for devid, dev in self.devices.items():
+        for devid, dev in list(self.devices.items()):
             if dev[2] == 'Free':
                 return devid
 
@@ -63,7 +63,7 @@ class ZBScanDB:
         '''
         if chan == None: raise Exception("None given for channel number")
         elif chan not in self.channels: raise Exception("Invalid channel")
-        for dev in self.devices.values():
+        for dev in list(self.devices.values()):
             if dev[3] == chan and dev[2] == 'Capture':
                 return True
         return False

@@ -1,4 +1,4 @@
-import config
+from .config import *
 import MySQLdb
 
 class DBReader:
@@ -6,8 +6,8 @@ class DBReader:
         self.conn = None
         self.db = None
         # Initalize the connection
-        self.db = MySQLdb.connect(user=config.DB_USER, passwd=config.DB_PASS, db=config.DB_NAME, host=config.DB_HOST,
-                                  port=config.DB_PORT)
+        self.db = MySQLdb.connect(user=DB_USER, passwd=DB_PASS, db=DB_NAME, host=DB_HOST,
+                                  port=DB_PORT)
         if self.db == None:
             raise Exception("DBLogger: Unable to connect to database.")
         self.conn = self.db.cursor()

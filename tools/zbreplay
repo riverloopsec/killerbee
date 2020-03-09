@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 zbreplay: replay ZigBee/802.15.4 network traffic from libpcap or Daintree files
@@ -19,7 +19,7 @@ def interrupt(signum, frame):
     kb.close()
     if cap:
         cap.close()
-    print("{0} packets transmitted".format(packetcount))
+    print(("{0} packets transmitted".format(packetcount)))
     sys.exit(0)
 
 def packet_ack(packet):
@@ -76,7 +76,7 @@ if not kb.is_valid_channel(args.channel, args.subghz_page):
     sys.exit(1)
 kb.set_channel(args.channel, page=args.subghz_page)
 
-print("zbreplay: retransmitting frames from \'{0}\' on interface \'{1}\' with a delay of {2} seconds.".format(savefile, kb.get_dev_info()[0], args.sleep))
+print(("zbreplay: retransmitting frames from \'{0}\' on interface \'{1}\' with a delay of {2} seconds.".format(savefile, kb.get_dev_info()[0], args.sleep)))
 
 while args.count != packetcount:
     try:
@@ -92,4 +92,4 @@ while args.count != packetcount:
 kb.close()
 cap.close()
 
-print("{0} packets transmitted".format(packetcount))
+print(("{0} packets transmitted".format(packetcount)))

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Convert Daintree SNA files to libpcap format and vice-versa.
@@ -56,5 +56,5 @@ while args.count != packetcount:
 
 incap.close()
 outcap.close()
-print("Converted {0} packets.".format(packetcount))
+print(("Converted {0} packets.".format(packetcount)))
 

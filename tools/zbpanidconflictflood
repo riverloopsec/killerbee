@@ -1,6 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2015
+
+from __future__ import print_function
 
 #TODO: Reduce the usage of globals
 import signal
@@ -70,7 +72,7 @@ def get_spanids():
         # TODO: Isolate the issue and file a bug.
         restart_threshold += 1
         if restart_threshold >= 15:
-            print("Crash is assumed - restarting sniffer interface.")
+            print("Crash is assumed - restarting sniffer interface.", end=' ')
             listen.sniffer_off()
             listen.sniffer_on()
             restart_threshold = 0
@@ -85,7 +87,7 @@ def inject():
         try:
             kb.inject(sp) #create_beacon returns a string
         except:
-            print("! - Injection Error, try slowing the rate of broadcast")
+            print("! - Injection Error, try slowing the rate of broadcast", end=' ')
             pass
     pass
 

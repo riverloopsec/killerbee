@@ -2,12 +2,16 @@
 # ZBScanner
 # rmelgares 2011
 # Promiscious capture on multiple channels at once
+from __future__ import print_function
 
-import gps, time, os, signal, sys, operator, threading
-import string, socket, struct, datetime
+import datetime
+import queue
+import signal
+import threading
+
+import gps
 
 from killerbee import *
-import Queue
 
 # Globals
 session = ""
@@ -24,7 +28,7 @@ last_seen = ""
 
 def broadcast_event(data):
     ''' Send broadcast data to all active threads '''
-    print("\nShutting down threads.")
+    print("\nShutting down threads.") 
     for q in active_queues:
         q.put(data)
 
@@ -33,7 +37,7 @@ class LocationThread(threading.Thread):
     def __init__(self):
         global active_queues
         threading.Thread.__init__(self)
-        self.mesg = Queue.Queue()
+        self.mesg = queue.Queue()
         active_queues.append(self.mesg)
 
     def run(self):
@@ -45,7 +49,7 @@ class LocationThread(threading.Thread):
         while(1):
             try:
                 message = self.mesg.get(timeout=.00001)
-            except Queue.Empty:
+            except queue.Empty:
                 pass
             if message == "shutdown":
                 break
@@ -61,7 +65,7 @@ class LocationThread(threading.Thread):
             else:
                 end_time = datetime.datetime.utcnow()
                 elapsed_time = end_time - last_seen
-                print(chr(0x1b) + "[2;5fElapsed time since last location change: %s" % str(elapsed_time))
+                print(chr(0x1b) + "[2;5fElapsed time since last location change: %s" % str(elapsed_time)) 
             print(chr(0x1b) + "[3;5fLat: %f, Long: %f, Alt: %f." % (latitude, longitude, altitude))
             time.sleep(1)
  
@@ -71,7 +75,7 @@ class CaptureThread(threading.Thread):
     def __init__(self, dev, channel, pd):
         global active_queues
         threading.Thread.__init__(self)
-        self.mesg = Queue.Queue()
+        self.mesg = queue.Queue()
         active_queues.append(self.mesg)
         self.channel = channel
         self.freq = (channel - 10) * 5 + 2400
@@ -91,7 +95,7 @@ class CaptureThread(threading.Thread):
         while (True):
             try:
                 message = self.mesg.get(timeout=.00001)
-            except Queue.Empty:
+            except queue.Empty:
                 pass
             if message == "shutdown":
                 break
@@ -100,7 +104,7 @@ class CaptureThread(threading.Thread):
                 self.packetcount+=1
                 if arg_gps:
                     gpsdata = (longitude, latitude, altitude)
-                    self.pd.pcap_dump(packet['bytes'], ant_dbm=packet['dbm'], freq_mhz=self.freq, location=map(float, gpsdata))
+                    self.pd.pcap_dump(packet['bytes'], ant_dbm=packet['dbm'], freq_mhz=self.freq, location=list(map(float, gpsdata)))
                     if arg_db:self.kb.dblog.add_packet(full=packet, location=gpsdata)
                 else:
                     self.pd.pcap_dump(packet['bytes'])
@@ -150,11 +154,11 @@ def main(args):
     if len(kbdev_info) < 1:
         exit(1)
     if arg_gps == True:
-        print("Initializing GPS device %s ... "% (arg_gps_devstring))
+        print("Initializing GPS device %s ... "% (arg_gps_devstring), end=' ')
         session = gps.gps()
         session.poll()
         session.stream()
-        print("Waiting for fix... ")
+        print("Waiting for fix... ", end=' ')
         while(session.fix.mode == 1):
             session.poll()
         print("Fix acquired!")

@@ -522,7 +522,7 @@ class RZUSBSTICK:
         # Append two bytes to be replaced with FCS by firmware.
         packet += "\x00\x00"
 
-        for pnum in xrange(count):
+        for pnum in range(count):
             # Format for packet is opcode RZ_CMD_INJECT_FRAME, one-byte length, 
             # packet data
             self.__usb_write(RZ_USB_COMMAND_EP, struct.pack("BB", RZ_CMD_INJECT_FRAME, len(packet)) + packet)
@@ -554,7 +554,7 @@ class RZUSBSTICK:
                 except usb.USBError as e:
                     if e.args != ('No error',): # http://bugs.debian.org/476796
                         if e.args[0] != "Connection timed out": # USB timeout issue
-                            print("Error args: {}".format(e.args))
+                            print(("Error args: {}".format(e.args)))
                             raise e
                         else:
                             return None
@@ -563,7 +563,7 @@ class RZUSBSTICK:
                     pdata = self.dev.read(RZ_USB_PACKET_EP, self.dev.bMaxPacketSize0, timeout=timeout)
                 except usb.core.USBError as e:
                     if e.errno != 110: #Operation timed out
-                        print("Error args: {}".format(e.args))
+                        print(("Error args: {}".format(e.args)))
                         raise e
                         #TODO error handling enhancements for USB 1.0
                     else:

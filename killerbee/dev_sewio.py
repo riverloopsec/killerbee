@@ -53,12 +53,12 @@ def ntp_to_system_time(secs, msecs):
 
 def getFirmwareVersion(ip):
     try:
-        html = urllib2.urlopen("http://{0}/".format(ip))
+        html = urllib.request.urlopen("http://{0}/".format(ip))
         fw = re.search(r'Firmware version ([0-9.]+)', html.read())
         if fw is not None:
             return fw.group(1)
     except Exception as e:
-        print("Unable to connect to IP {0} (error: {1}).".format(ip, e))
+        print(("Unable to connect to IP {0} (error: {1}).".format(ip, e)))
     return None
 
 def getMacAddr(ip):
@@ -66,7 +66,7 @@ def getMacAddr(ip):
     Returns a string for the MAC address of the sniffer.
     '''
     try:
-        html = urllib2.urlopen("http://{0}/".format(ip))
+        html = urllib.request.urlopen("http://{0}/".format(ip))
         # Yup, we're going to have to steal the status out of a JavaScript variable
         #var values = removeSSItag('<!--#pindex-->STOPPED,00:1a:b6:00:0a:a4,...
         res = re.search(r'<!--#pindex-->[A-Z]+,((?:[0-9a-f]{2}:){5}[0-9a-f]{2})', html.read())
@@ -74,7 +74,7 @@ def getMacAddr(ip):
             raise KBInterfaceError("Unable to parse the sniffer's MAC address.")
         return res.group(1)
     except Exception as e:
-        print("Unable to connect to IP {0} (error: {1}).".format(ip, e))
+        print(("Unable to connect to IP {0} (error: {1}).".format(ip, e)))
     return None
 
 def isSewio(dev):
@@ -107,7 +107,7 @@ class SEWIO:
 
         self.__revision_num = getFirmwareVersion(self.dev)
         if self.__revision_num not in TESTED_FW_VERS:
-            print("Warning: Firmware revision {0} reported by the sniffer is not currently supported. Errors may occur and dev_sewio.py may need updating.".format(self.__revision_num))
+            print(("Warning: Firmware revision {0} reported by the sniffer is not currently supported. Errors may occur and dev_sewio.py may need updating.".format(self.__revision_num)))
 
         self.handle = socket(AF_INET, SOCK_DGRAM)
         self.handle.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -156,7 +156,7 @@ class SEWIO:
             returns True if an HTTP 200 code was received.
         '''
         try:
-            html = urllib2.urlopen("http://{0}/{1}".format(self.dev, path))
+            html = urllib.request.urlopen("http://{0}/{1}".format(self.dev, path))
             if fetch:
                 return html.read()
             else:
@@ -283,7 +283,7 @@ class SEWIO:
             curChannel = self.__sniffer_channel()
             if channel != curChannel:
                 self.modulation = self.__get_default_modulation(channel)
-                print("Setting to channel {0}, modulation {1}.".format(channel, self.modulation))
+                print(("Setting to channel {0}, modulation {1}.".format(channel, self.modulation)))
                 # Examples captured in fw v0.5 sniffing:
                 #   channel 6, 250 compliant: http://10.10.10.2/settings.cgi?chn=6&modul=c&rxsens=0
                 #   channel 12, 250 compliant: http://10.10.10.2/settings.cgi?chn=12&modul=0&rxsens=0
@@ -398,7 +398,7 @@ class SEWIO:
             print("Valid CRC", validcrc, "LQI", lqival, "RSSI", rssi)
             if frame == None or (ch is not None and ch != self._channel):
                 #TODO this maybe should be an error condition, instead of ignored?
-                print("ZEP parsing issue (bytes length={0}, channel={1}).".format(len(frame) if frame is not None else None, ch))
+                print(("ZEP parsing issue (bytes length={0}, channel={1}).".format(len(frame) if frame is not None else None, ch)))
                 continue
             break
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Transmit beacon request frames to the broadcast address while
@@ -29,7 +29,7 @@ def display_details(routerdata):
     stackprofile = stackprofilever & 0x0f
     stackver = (stackprofilever & 0xf0) >>4
 
-    print("New Network: PANID 0x%02X%02X  Source 0x%02X%02X"%(spanid[0], spanid[1], source[0], source[1]))
+    print("New Network: PANID 0x%02X%02X  Source 0x%02X%02X"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1])))
 
     try:
         extpanidstr=""
@@ -48,13 +48,13 @@ def display_details(routerdata):
         stackprofilestr = "Unknown (%d)"%stackprofile
 
     try:
-        print("\tStack Version: {0}".format(stackver_map[stackver]))
+        print(("\tStack Version: {0}".format(stackver_map[stackver])))
         stackverstr = stackver_map[stackprofile]
     except KeyError:
-        print("\tStack Version: Unknown ({0})".format(stackver))
+        print(("\tStack Version: Unknown ({0})".format(stackver)))
         stackverstr = "Unknown (%d)"%stackver
 
-    print("\tChannel: {0}".format(channel))
+    print(("\tChannel: {0}".format(channel)))
 
     if args.csvfile is not None:
         csvfile.write("0x%02X%02X,0x%02X%02X,%s,%s,%s,%d\n"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1]), extpanidstr, stackprofilestr, stackverstr, channel))
@@ -99,7 +99,7 @@ def response_handler(stumbled, packet, channel):
         return value
 
     if args.verbose:
-        print("Received frame is not a beacon (FCF={0}).".format(pktdecode[0].encode('hex')))
+        print(("Received frame is not a beacon (FCF={0}).".format(pktdecode[0].encode('hex'))))
 
     return None
 
@@ -110,7 +110,7 @@ def interrupt(signum, frame):
     if args.csvfile is not None:
         csvfile.close()
     kb.close()
-    print("\n{0} packets transmitted, {1} responses.".format(txcount, rxcount))
+    print(("\n{0} packets transmitted, {1} responses.".format(txcount, rxcount)))
     sys.exit(0)
 
 if __name__ == '__main__':
@@ -133,7 +133,7 @@ if __name__ == '__main__':
         try:
             csvfile = open(args.csvfile, 'w')
         except Exception as e:
-            print("Issue opening CSV output file: {0}.".format(e))
+            print(("Issue opening CSV output file: {0}.".format(e)))
         csvfile.write("panid,source,extpanid,stackprofile,stackversion,channel\n")
 
     # Beacon frame
@@ -145,11 +145,11 @@ if __name__ == '__main__':
     try:
         kb = KillerBee(device=args.devstring)
     except KBInterfaceError as e:
-        print("Interface Error: {0}".format(e))
+        print(("Interface Error: {0}".format(e)))
         sys.exit(-1)
 
     signal.signal(signal.SIGINT, interrupt)
-    print("zbstumbler: Transmitting and receiving on interface \'{0}\'".format(kb.get_dev_info()[0]))
+    print(("zbstumbler: Transmitting and receiving on interface \'{0}\'".format(kb.get_dev_info()[0])))
 
     # Sequence number of beacon request frame
     seqnum = 0
@@ -169,7 +169,7 @@ if __name__ == '__main__':
 
         if not args.channel:
             if args.verbose:
-                print("Setting channel to {0}.".format(channel))
+                print(("Setting channel to {0}.".format(channel)))
             try:
                 kb.set_channel(channel)
             except Exception as e:

@@ -1,4 +1,7 @@
-import gps, os, time
+import os
+import time
+
+import gps
 
 session = gps.gps()
 session.poll()

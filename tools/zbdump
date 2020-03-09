@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 zbdump - a tcpdump-like tool for ZigBee/IEEE 802.15.4 networks
@@ -27,7 +27,7 @@ def interrupt(signum, frame):
         pd.close()
     if dt:
         dt.close()
-    print("\n{0} packets captured".format(packetcount))
+    print(("\n{0} packets captured".format(packetcount)))
     sys.exit(0)
 
 # PcapDumper, only used if -w is specified
@@ -88,7 +88,7 @@ kb.sniffer_on()
 
 #rf_freq_mhz = (args.channel - 10) * 5 + 2400
 rf_freq_mhz = kb.frequency(args.channel, args.subghz_page) / 1000.0
-print("zbdump: listening on \'{0}\', channel {1}, page {2} ({3} MHz), link-type DLT_IEEE802_15_4, capture size 127 bytes".format(kb.get_dev_info()[0], args.channel, args.subghz_page, rf_freq_mhz))
+print(("zbdump: listening on \'{0}\', channel {1}, page {2} ({3} MHz), link-type DLT_IEEE802_15_4, capture size 127 bytes".format(kb.get_dev_info()[0], args.channel, args.subghz_page, rf_freq_mhz)))
 
 while args.count != packetcount:
     packet = kb.pnext()
@@ -112,5 +112,5 @@ if pd:
 if dt:
     dt.close()
 
-print("{0} packets captured".format(packetcount))
+print(("{0} packets captured".format(packetcount)))
 

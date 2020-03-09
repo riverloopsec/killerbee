@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 zbjammer: enable Zigbee jamming (firmware option)
@@ -47,7 +47,7 @@ kb.set_channel(args.channel, page=args.subghz_page)
 print("zbjammer: jamming channel", args.channel)
 print("*** WARNING: this may not actually work on your hardware! Check with spectrum analyser!")
 print("*** NOTICE: it is your responsibility to comply with local law. Please check radio spectrum laws in your area before")
-raw_input("    proceeding. Hit <ENTER> to continue or CTL-C to abort.")
+input("    proceeding. Hit <ENTER> to continue or CTL-C to abort.")
 if not kb.jammer_on():
     while 42:
         pass

@@ -80,7 +80,7 @@ def __kb_recv(kb, count = 0, store = 1, prn = None, lfilter = None, stop_filter 
             packet = kb.pnext() # int(remain * 1000) to convert to seconds
             if packet == None: continue
             if verbose > 1:
-                os.write(1, "*")
+                os.write(1, b"*")
             packet = Dot15d4(packet[0])
             if lfilter and not lfilter(packet):
                 continue
@@ -261,7 +261,7 @@ def kbwrpcap(save_file, pkts):
     """
     pd = PcapDumper(DLT_IEEE802_15_4, save_file, ppi=False)
     for packet in pkts:
-        pd.pcap_dump(str(packet))
+        pd.pcap_dump(bytes(packet))
     pd.close()
 
 @conf.commands.register
@@ -294,7 +294,7 @@ def kbwrdain(save_file, pkts):
     """
     dt = DainTreeDumper(save_file)
     for packet in pkts:
-        dt.pwrite(str(packet))
+        dt.pwrite(bytes(packet))
     dt.close()
 
 @conf.commands.register
@@ -316,9 +316,9 @@ def kbkeysearch(packet, searchdata, ispath = True, skipfcs = True, raw = False):
     while (offset < (searchdatalen - 16)):
         if d.decrypt(packet, searchdata[offset:offset+16]) != '':
             if raw:
-                return ''.join(searchdata[offset + i] for i in xrange(0, 16))
+                return ''.join(searchdata[offset + i] for i in range(0, 16))
             else:
-                return ':'.join("%02x" % ord(searchdata[offset + i]) for i in xrange(0, 16))
+                return ':'.join("%02x" % ord(searchdata[offset + i]) for i in range(0, 16))
         else:
             offset+=1
     return None
@@ -331,7 +331,7 @@ def kbgetnetworkkey(pkts):
     if not isinstance(pkts, Gen):
         pkts = SetGen(pkts)
     for packet in pkts:
-        packet = str(packet)
+        packet = bytes(packet)
         zmac = Dot154PacketParser()
         znwk = ZigBeeNWKPacketParser()
         zaps = ZigBeeAPSPacketParser()
@@ -390,9 +390,9 @@ def kbgetnetworkkey(pkts):
             dst_mac_bytes = []
             src_mac_bytes = []
             key = {}
-            key['key'] = ':'.join("%02x" % ord(networkkey[x]) for x in xrange(16))
-            key['dst'] = ':'.join("%02x" % ord(destaddr[x]) for x in xrange(8))
-            key['src'] = ':'.join("%02x" % ord(srcaddr[x]) for x in xrange(8))
+            key['key'] = ':'.join("%02x" % ord(networkkey[x]) for x in range(16))
+            key['dst'] = ':'.join("%02x" % ord(destaddr[x]) for x in range(8))
+            key['src'] = ':'.join("%02x" % ord(srcaddr[x]) for x in range(8))
             return key
         except:
             continue
@@ -455,7 +455,7 @@ def kbdecrypt(source_pkt, key = None, verbose = None, doMicCheck = False):
     crop_size = len(pkt.mic) + len(pkt.data)
 
     # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
-    sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
+    sec_ctrl_byte = bytes(pkt[ZigbeeSecurityHeader])[0:1]
     if ZigbeeAppDataPayload in pkt:
         nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
         zigbeeData = pkt[ZigbeeAppDataPayload].do_build()
@@ -536,7 +536,7 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
         decrypted = data
 
     # create NONCE (for crypt) and zigbeeData (for MIC) according to packet type
-    sec_ctrl_byte = str(pkt[ZigbeeSecurityHeader])[0]
+    sec_ctrl_byte = bytes(pkt[ZigbeeSecurityHeader])[0:1]
     if ZigbeeAppDataPayload in pkt:
         nonce = struct.pack('L',source_pkt[ZigbeeNWK].ext_src)+struct.pack('I',source_pkt[ZigbeeSecurityHeader].fc) + sec_ctrl_byte
         zigbeeData = pkt[ZigbeeAppDataPayload].do_build()

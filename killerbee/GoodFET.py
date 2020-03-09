@@ -60,14 +60,14 @@ class GoodFETbtser:
                 if name=='RN42-A94A':
                     btaddr=addr;
                 
-            print("Please set $GOODFET to the address of your device.")
+            print("Please set $GOODFET to the address of your device.");
             sys.exit();
-        print("Identified GoodFET at %s" % btaddr)
+        print("Identified GoodFET at %s" % btaddr);
 
         # Manually use the portnumber.
         port=1;
         
-        print("Connecting to %s on port %i." % (btaddr, port))
+        print("Connecting to %s on port %i." % (btaddr, port));
         sock=bluetooth.BluetoothSocket(bluetooth.RFCOMM);
         self.sock=sock;
         sock.connect((btaddr,port));
@@ -102,7 +102,7 @@ class GoodFET:
     app=0;
     verb=0;
     count=0;
-    data="";
+    data=b"";
     verbose=False
     
     GLITCHAPP=0x71;
@@ -117,7 +117,7 @@ class GoodFET:
     def name2adr(self,name):
         return self.symbols.get(name);
     def timeout(self):
-        print("timeout\n")
+        print("timeout\n");
     def serInit(self, port=None, timeout=2, attemptlimit=None):
         """Open a serial port of some kind."""
         import re;
@@ -140,7 +140,7 @@ class GoodFET:
         fixserial=False;
         
         if os.name=='nt' and sys.version.find('64 bit')!=-1:
-            print("WARNING: PySerial requires a 32-bit Python build in Windows.")
+            print("WARNING: PySerial requires a 32-bit Python build in Windows.");
         
         if port is None and os.environ.get("GOODFET")!=None:
             glob_list = glob.glob(os.environ.get("GOODFET"));
@@ -190,13 +190,13 @@ class GoodFET:
                 if attemptlimit is not None and attempts >= attemptlimit:
                     return
                 elif attempts==2 and os.environ.get("board")!='telosb':
-                    print("See the GoodFET FAQ about missing info flash.")
+                    print("See the GoodFET FAQ about missing info flash.");
                     self.serialport.timeout = 0.2;
                 elif attempts == 100:
                     print("Tried 100 times to connect and failed.")
-                    sys.stdout.write("Continuing to try forever.")	# No newline
+                    sys.stdout.write("Continuing to try forever.")  # No newline
                     sys.stdout.flush()
-                    self.verbose=True	# Something isn't going right, give the user more info
+                    self.verbose=True   # Something isn't going right, give the user more info
                 elif attempts > 100 and attempts % 10 == 0:
                     sys.stdout.write('.')
                     sys.stdout.flush()
@@ -226,6 +226,7 @@ class GoodFET:
                 #self.serialport.flushInput()
                 #self.serialport.flushOutput()
                 #time.sleep(60);
+
                 attempts=attempts+1;
                 self.readcmd(); #Read the first command.
                 if self.verb!=0x7f:
@@ -234,17 +235,17 @@ class GoodFET:
             #Here we have a connection, but maybe not a good one.
             connected=1;
         if attempts >= 100:
-            print("")	# Add a newline
+            print("")   # Add a newline
             olds=self.infostring();
             clocking=self.monitorclocking();
             for foo in range(1,30):
                 if not self.monitorecho():
                     if self.verbose:
                         print("Comm error on %i try, resyncing out of %s." % (foo,
-                                                                              clocking))
+                                                                              clocking));
                     connected=0;
                     break;
-        if self.verbose: print("Connected after %02i attempts." % attempts)
+        if self.verbose: print("Connected after %02i attempts." % attempts);
         self.mon_connected();
         self.serialport.timeout = 12;
     def serClose(self):
@@ -396,7 +397,7 @@ class GoodFET:
 
     def getbuffer(self,size=0x1c00):
         writecmd(0,0xC2,[size&0xFF,(size>>16)&0xFF]);
-        print("Got %02x%02x buffer size." % (self.data[1],self.data[0]))
+        print("Got %02x%02x buffer size." % (self.data[1],self.data[0]));
 
     def writecmd(self, app, verb, count=0, data=[]):
         """Write a command and some data to the GoodFET."""
@@ -484,10 +485,10 @@ class GoodFET:
         """Time the execution of a verb."""
         if data==None: data=[];
         self.data=[app&0xff, verb&0xFF]+data;
-        print("Timing app %02x verb %02x." % (app,verb))
+        print("Timing app %02x verb %02x." % (app,verb));
         self.writecmd(self.GLITCHAPP,0x82,len(self.data),self.data);
         time=ord(self.data[0])+(ord(self.data[1])<<8);
-        print("Timed to be %i." % time)
+        print("Timed to be %i." % time);
         return time;
     def glitchVoltages(self,low=0x0880, high=0x0fff):
         """Set glitching voltages. (0x0fff is max.)"""
@@ -506,7 +507,7 @@ class GoodFET:
     def silent(self,s=0):
         """Transmissions halted when 1."""
         self.besilent=s;
-        print("besilent is %i" % self.besilent)
+        print("besilent is %i" % self.besilent);
         self.writecmd(0,0xB0,1,[s]);
     connected=0;
     def mon_connected(self):
@@ -541,7 +542,7 @@ class GoodFET:
         return self.MONpeek8(address)+(self.MONpeek8(address+1)<<8);
     def eeprompeek(self,address):
         """Read a word of memory from the monitor."""
-        print("EEPROM peeking not supported for the monitor.")
+        print("EEPROM peeking not supported for the monitor.");
         #return self.MONpeek8(address)+(self.MONpeek8(address+1)<<8);
     def peekbysym(self,name):
         """Read a value by its symbol name."""
@@ -570,20 +571,20 @@ class GoodFET:
         """Set a secret word for later retreival.  Used by glitcher."""
         #self.eeprompoke(0,value);
         #self.eeprompoke(1,value);
-        print("Secret setting is not yet suppored for this target.")
-        print("Aborting.")
+        print("Secret setting is not yet suppored for this target.");
+        print("Aborting.");
         
     def getsecret(self):
         """Get a secret word.  Used by glitcher."""
         #self.eeprompeek(0);
-        print("Secret getting is not yet suppored for this target.")
-        print("Aborting.")
+        print("Secret getting is not yet suppored for this target.");
+        print("Aborting.");
         sys.exit();
     
     def dumpmem(self,begin,end):
         i=begin;
         while i<end:
-            print("%04x %04x" % (i, self.MONpeek16(i)))
+            print("%04x %04x" % (i, self.MONpeek16(i)));
             i+=2;
     def monitor_ram_pattern(self):
         """Overwrite all of RAM with 0xBEEF."""
@@ -614,13 +615,13 @@ class GoodFET:
         self.serialport.flushInput()
         self.serialport.flushOutput()
         
-        print("Baud is now %i." % rates[baud])
+        print("Baud is now %i." % rates[baud]);
         return;
     def readbyte(self):
         return ord(self.serialport.read(1));
     def findbaud(self):
         for r in self.baudrates:
-            print("\nTrying %i" % r)
+            print("\nTrying %i" % r);
             self.serialport.baudrate = r;
             #time.sleep(1);
             self.serialport.flushInput()
@@ -630,24 +631,24 @@ class GoodFET:
                 self.readbyte();
             
             print("Read %02x %02x %02x %02x" % (
-                self.readbyte(),self.readbyte(),self.readbyte(),self.readbyte()))
+                self.readbyte(),self.readbyte(),self.readbyte(),self.readbyte()));
 
     def monitortest(self):
         """Self-test several functions through the monitor."""
-        print("Performing monitor self-test.")
+        print("Performing monitor self-test.");
         self.monitorclocking();
         for f in range(0,3000):
             a=self.MONpeek16(0x0c00);
             b=self.MONpeek16(0x0c02);
             if a!=0x0c04 and a!=0x0c06:
-                print("ERROR Fetched %04x, %04x" % (a,b))
+                print("ERROR Fetched %04x, %04x" % (a,b));
             self.pokebyte(0x0021,0); #Drop LED
             if self.MONpeek8(0x0021)!=0:
-                print("ERROR, P1OUT not cleared.")
+                print("ERROR, P1OUT not cleared.");
             self.pokebyte(0x0021,1); #Light LED
             if not self.monitorecho():
-                print("Echo test failed.")
-        print("Self-test complete.")
+                print("Echo test failed.");
+        print("Self-test complete.");
         self.monitorclocking();
 
     def monitorecho(self):
@@ -655,13 +656,13 @@ class GoodFET:
         self.writecmd(self.MONITORAPP,0x81,len(data),data);
         if self.data!=data:
             if self.verbose:
-                print("Comm error recognized by monitorecho(), got:\n%s" % self.data)
+                print("Comm error recognized by monitorecho(), got:\n%s" % self.data);
             return 0;
         return 1;
 
     def monitor_info(self):
-        print("GoodFET with %s MCU" % self.infostring())
-        print("Clocked at %s" % self.monitorclocking())
+        print("GoodFET with %s MCU" % self.infostring());
+        print("Clocked at %s" % self.monitorclocking());
         return 1;
 
     def testleds(self):
@@ -716,34 +717,34 @@ class GoodFET:
             b=self.MONpeek8(0xff1);
             return "%02x%02x" % (a,b);
     def lock(self):
-        print("Locking Unsupported.")
+        print("Locking Unsupported.");
     def erase(self):
-        print("Erasure Unsupported.")
+        print("Erasure Unsupported.");
     def setup(self):
         return;
     def start(self):
         return;
     def test(self):
-        print("Unimplemented.")
+        print("Unimplemented.");
         return;
     def status(self):
-        print("Unimplemented.")
+        print("Unimplemented.");
         return;
     def halt(self):
-        print("Unimplemented.")
+        print("Unimplemented.");
         return;
     def resume(self):
-        print("Unimplemented.")
+        print("Unimplemented.");
         return;
     def getpc(self):
-        print("Unimplemented.")
+        print("Unimplemented.");
         return 0xdead;
     def flash(self,file):
         """Flash an intel hex file to code memory."""
-        print("Flash not implemented.")
+        print("Flash not implemented.");
     def dump(self,file,start=0,stop=0xffff):
         """Dump an intel hex file from code memory."""
-        print("Dump not implemented.")
+        print("Dump not implemented.");
     def peek32(self,address, memory="vn"):
         """Peek 32 bits."""
         return (self.peek16(address,memory)+
@@ -757,7 +758,7 @@ class GoodFET:
         return self.MONpeek8(address); #monitor
     def peekblock(self,address,length,memory="vn"):
         """Return a block of data."""
-        data=list(range(0,length))
+        data=list(range(0,length));
         for foo in range(0,length):
             data[foo]=self.peek8(address+foo,memory);
         return data;

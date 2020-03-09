@@ -8,6 +8,7 @@
 import sys, time, string, io, struct, glob, os;
 
 from .GoodFET import GoodFET;
+from .kbutils import bytearray_to_bytes
 
 class GoodFETCCSPI(GoodFET):
     CCSPIAPP=0x51;
@@ -39,7 +40,7 @@ class GoodFETCCSPI(GoodFET):
     def trans8(self,byte):
         """Read and write 8 bits by CCSPI."""
         data=self.CCSPItrans([byte]);
-        return ord(data[0]);
+        return data[0];
     
     def trans(self,data):
         """Exchange data by CCSPI."""
@@ -50,7 +51,7 @@ class GoodFETCCSPI(GoodFET):
         """Strobes a strobe register, returning the status."""
         data=[reg];
         self.trans(data);
-        return self.data[0]
+        return self.data[0];
     def CC_RFST_IDLE(self):
         """Switch the radio to idle mode, clearing overflows and errors."""
         self.strobe(0x06); #SRXOFF
@@ -77,11 +78,11 @@ class GoodFETCCSPI(GoodFET):
         
         self.writecmd(self.CCSPIAPP,0x02,len(data),data);
         try:
-            toret=(self.data[2] + (self.data[1]<<8) );
+            toret = (self.data[2] + (self.data[1] << 8))
         except Exception as e:
             print("issue in peeking for a register")
             print(e)
-            toret=(self.data[1]<<8);
+            toret = self.data[1] << 8
         return toret;
     def poke(self,reg,val,bytes=2):
         """Write a CCSPI Register."""
@@ -135,12 +136,12 @@ class GoodFETCCSPI(GoodFET):
     
     def RF_setkey(self,key):
         """Sets the first key for encryption to the given argument."""
-        print("ERROR: Forgot to set the key.")
+        print("ERROR: Forgot to set the key.");
         
         return;
     def RF_setnonce(self,key):
         """Sets the first key for encryption to the given argument."""
-        print("ERROR: Forgot to set the nonce.")
+        print("ERROR: Forgot to set the nonce.");
         
         return;
     
@@ -163,7 +164,7 @@ class GoodFETCCSPI(GoodFET):
     def RF_setchan(self,channel):
         """Set the ZigBee/802.15.4 channel number."""
         if channel < 11 or channel > 26:
-            print("Only 802.15.4 channels 11 to 26 are currently supported.")
+            print("Only 802.15.4 channels 11 to 26 are currently supported.");
         else:
             self.RF_setfreq( ( (channel-11)*5 + 2405 ) * 1000000 );
     def RF_getsmac(self):
@@ -197,7 +198,7 @@ class GoodFETCCSPI(GoodFET):
         self.writecmd(self.CCSPIAPP,0x85,len(data),data);
         return;
     
-    lastpacket=range(0,0xff);
+    lastpacket=list(range(0,0xff));
     def RF_rxpacket(self):
         """Get a packet from the radio.  Returns None if none is
         waiting."""
@@ -211,7 +212,7 @@ class GoodFETCCSPI(GoodFET):
         if(len(buffer)==0):
             return None;
         
-        return buffer;
+        return bytearray_to_bytes(buffer);
     def RF_rxpacketrepeat(self):
         """Gets packets from the radio, ignoring all future requests so as
         not to waste time.  Call RF_rxpacket() after this."""
@@ -223,7 +224,7 @@ class GoodFETCCSPI(GoodFET):
         """Get and decrypt a packet from the radio.  Returns None if
         none is waiting."""
         
-        data="\0";
+        data=bytearray([0]);
         self.data=data;
         self.writecmd(self.CCSPIAPP,0x90,len(data),data);
         buffer=self.data;
@@ -251,7 +252,7 @@ class GoodFETCCSPI(GoodFET):
     def RF_reflexjam_autoack(self):
         """Place the device into reflexive jamming mode
            and that also sends a forged ACK if needed."""
-        data = "";
+        data = b""
         self.writecmd(self.CCSPIAPP,0xA1,len(data),data);
         print("Got:", data, "and", self.data)
         return;
@@ -355,7 +356,7 @@ class GoodFETCCSPI(GoodFET):
         self.poke(0x03,choice);
         self.maclen=len;
     def printpacket(self,packet,prefix="#"):
-        print(self.packet2str(packet,prefix))
+        print(self.packet2str(packet,prefix));
     def packet2str(self,packet,prefix="#"):
         s="";
         i=0;
@@ -368,8 +369,8 @@ class GoodFETCCSPI(GoodFET):
             from scapy.all import Dot15d4
         except ImportError:
             print("To use packet disection, Scapy must be installed and have the Dot15d4 extension present.")
-            print("try: hg clone http://hg.secdev.org/scapy-com")
-            print("     sudo ./setup.py install")
+            print("try: hg clone http://hg.secdev.org/scapy-com");
+            print("     sudo ./setup.py install");
         self.printpacket(packet);
         try:
             scapyd = Dot15d4(packet[1:]);

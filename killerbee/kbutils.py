@@ -1,4 +1,5 @@
 from __future__ import print_function
+
 import sys
 
 # Import USB support depending on version of pyUSB
@@ -14,13 +15,14 @@ except ImportError:
 
 import serial
 import os
+import struct
 import glob
 import time
 import random
 import inspect
 from struct import pack
 
-from .config import *
+from .config import *       #to get DEV_ENABLE_* variables
 
 # Known devices by USB ID:
 RZ_USB_VEND_ID      = 0x03EB
@@ -517,7 +519,7 @@ def search_usb(device):
     else:
         if ':' not in device:
             raise KBInterfaceError("USB device format expects <BusNumber>:<DeviceNumber>, but got {0} instead.".format(device))
-        busNum, devNum = map(int, device.split(':', 1))
+        busNum, devNum = list(map(int, device.split(':', 1)))
     if USBVER == 0:
         busses = usb.busses()
         for bus in busses:
@@ -553,9 +555,9 @@ def hexdump(src, length=16):
     @param length: Optional length of data for a single row of output, def=16
     @rtype: String
     '''
-    FILTER = ''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
+    FILTER = b''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
     result = []
-    for i in xrange(0, len(src), length):
+    for i in range(0, len(src), length):
        chars = src[i:i+length]
        hex = ' '.join(["%02x" % ord(x) for x in chars])
        printable = ''.join(["%s" % ((ord(x) <= 127 and FILTER[ord(x)]) or '.') for x in chars])
@@ -570,7 +572,7 @@ def randbytes(size):
     @param size: Length of random data to return.
     @rtype: String
     '''
-    return ''.join(chr(random.randrange(0,256)) for i in xrange(size))
+    return ''.join(chr(random.randrange(0,256)) for i in range(size))
 
 
 def randmac(length=8):
@@ -650,6 +652,10 @@ def pyusb_1x_patch():
             return usb.util.zzz__get_string(dev, 255, index, langid)
         usb.util.zzz__get_string = usb.util.get_string
         usb.util.get_string = get_string
+
+
+def bytearray_to_bytes(b):
+    return b"".join(struct.pack('B', value) for value in b)
 
 
 if USBVER == 1:

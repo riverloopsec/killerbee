@@ -109,7 +109,7 @@ class Dot154PacketParser:
         #    A[0] is for authenticity check, A[1] is for the first block of data,
         #    A[2] is for the 2nd block of data, if C > 16
         self.__crypt_A_i = []
-        for i in xrange(0, (1+1+(len(C)/16))):
+        for i in range(0, (1+1+(len(C)/16))):
             self.__crypt_A_i.append(flags + nonce + struct.pack(">H",i))
 
         # 5. Decrypt cipherText producing plainText (observed)
@@ -123,7 +123,7 @@ class Dot154PacketParser:
 
         # 7. Compute MIC (T) observed as S_0 XOR U
         T_obs = []
-        for i in xrange(0,len(S_0[0:8])):
+        for i in range(0,len(S_0[0:8])):
             T_obs.append((ord(S_0[i]) ^ ord(U[i])))
 
         # Convert T_obs back into a string (please, I need Python help)
@@ -152,7 +152,7 @@ class Dot154PacketParser:
 
         # 13. Calculate the MIC (T) calculated with CBC-MAC
         iv = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-        for i in xrange(0, len(B)/16):
+        for i in range(0, len(B)/16):
             crypt = AES.new(key, AES.MODE_CBC, iv)
             Bn = B[i*16:(i*16)+16]
             iv = crypt.encrypt(Bn)

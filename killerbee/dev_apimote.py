@@ -169,7 +169,7 @@ class APIMOTE:
 
         self.handle.RF_autocrc(1)               #let radio add the CRC
         for pnum in range(0, count):
-            gfready = [ord(x) for x in packet]  #convert packet string to GoodFET expected integer format
+            gfready = list(bytearray(packet))  #convert packet string to GoodFET expected integer format
             gfready.insert(0, len(gfready)+2)   #add a length that leaves room for CRC
             self.handle.RF_txpacket(gfready)
             time.sleep(1)

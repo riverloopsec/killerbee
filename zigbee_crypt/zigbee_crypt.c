@@ -638,9 +638,7 @@ ZIGBEE_CRYPT_INIT
 {
     PyObject *module;
     ZIGBEE_MOD_DEF
-#if PY_MAJOR_VERSION >= 3
     return module;
-#endif
 }
 
 

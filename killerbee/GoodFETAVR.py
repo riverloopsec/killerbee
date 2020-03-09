@@ -107,7 +107,7 @@ class GoodFETAVR(GoodFET):
             #self.glitchVoltages(0x880, i);
             self.start();
             bits=self.lockbits();
-            print("At %04x, Lockbits: %02x" % (i,bits))
+            print("At %04x, Lockbits: %02x" % (i,bits));
             if(bits==0xFF): return;
     def erase(self):
         """Erase the target chip."""

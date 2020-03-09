@@ -17,7 +17,7 @@ def gpsdPoller(currentGPS):
     @type currentGPS multiprocessing.Manager dict manager
     @arg currentGPS store relavent pieces of up-to-date GPS info
     '''
-    import gps
+    from . import gps
     gpsd = gps.gps()
     gpsd.poll()
     gpsd.stream()

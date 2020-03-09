@@ -27,7 +27,7 @@ class GoodFETatmel128rfa1(GoodFETAVR):
             import serial;
 
             if os.name=='nt' and sys.version.find('64 bit')!=-1:
-                print("WARNING: PySerial requires a 32-bit Python build in Windows.")
+                print("WARNING: PySerial requires a 32-bit Python build in Windows.");
 
             if port is None and os.environ.get("GOODFET")!=None:
                 glob_list = glob.glob(os.environ.get("GOODFET"));
@@ -81,7 +81,7 @@ class GoodFETatmel128rfa1(GoodFETAVR):
                     attempts=attempts+1;
                     self.readcmd(); #Read the first command.
                     if self.verbose:
-                        print("Got %02x,%02x:'%s'" % (self.app,self.verb,self.data))
+                        print("Got %02x,%02x:'%s'" % (self.app,self.verb,self.data));
 
                 #Here we have a connection, but maybe not a good one.
                 for foo in range(1,30):
@@ -94,7 +94,7 @@ class GoodFETatmel128rfa1(GoodFETAVR):
                         self.connected = 1
                         break
             if self.verbose:
-                print("Connected after %02i attempts." % attempts)
+                print("Connected after %02i attempts." % attempts);
             self.serialport.timeout = 12;
 
     def serClose(self):
@@ -174,7 +174,7 @@ class GoodFETatmel128rfa1(GoodFETAVR):
                 print("# DEBUG 0x%x" % struct.unpack(fmt[self.count-1], self.serialport.read(self.count))[0])
             elif self.verb==0xFD:
                         #Do nothing, just wait so there's no timeout.
-                print("# NOP.")
+                print("# NOP.");
             return ""
         else:
             self.data=self.serialport.read(self.count);
@@ -221,7 +221,7 @@ class GoodFETatmel128rfa1(GoodFETAVR):
             print("Warning, failed to set r%02x=%02x, got %02x." %(
                 reg,
                 val,
-                newval))
+                newval));
 
         return;
 

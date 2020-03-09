@@ -1,4 +1,6 @@
 #!/usr/bin/python
+from __future__ import print_function
+
 import sys
 import random
 import signal
@@ -47,13 +49,13 @@ def keysearch(packet, searchdata):
     searchdatalen = len(searchdata)
     while (offset < (searchdatalen - 16)):
         if arg_verbose:
-	        print("Calling decrypt with key:")
-	        for i in xrange(0,16):
-	            print("%02x" % ord(searchdata[offset+i]))
+	        print("Calling decrypt with key:", end=' ')
+	        for i in range(0,16):
+	            print("%02x" % ord(searchdata[offset+i]), end=' ')
         guesses += 1
         if d.decrypt(packet, searchdata[offset:offset+16]) != '':
-            print("Key found after %d guesses: " % guesses)
-            for i in xrange(0,15):
+            print("Key found after %d guesses: " % guesses, end=' ')
+            for i in range(0,15):
                 sys.stdout.write("%02x:" % ord(searchdata[offset+i]))
             print("%02x" % ord(searchdata[offset+15]))
             return True

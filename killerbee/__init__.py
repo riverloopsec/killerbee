@@ -9,7 +9,7 @@ from .pcapdlt import *
 from .kbutils import *      #provides serial, usb, USBVER
 from .zigbeedecode import * #would like to import only within killerbee class
 from .dot154decode import * #would like to import only within killerbee class
-from .config import *       # to get DEV_ENABLE_* variables
+from .config import *       #to get DEV_ENABLE_* variables
 
 # Utility Functions
 def getKillerBee(channel, page= 0):
@@ -42,9 +42,10 @@ def show_dev(vendor=None, product=None, gps=None, include=None):
         these to be enumerated. Aka, include only these items.
     '''
     fmt = "{: >14} {: <20} {: >10}"
-    print(fmt.format("Dev", "Product String", "Serial Number"))
+    print((fmt.format("Dev", "Product String", "Serial Number")))
     for dev in kbutils.devlist(vendor=vendor, product=product, gps=gps, include=include):
-        print(fmt.format(str(dev[0]), str(dev[1]), str(dev[2])))
+        # Using None as a format value is an TypeError in python3
+        print((fmt.format(dev[0], dev[1], str(dev[2]))))
 
 # KillerBee Class
 class KillerBee:
@@ -141,16 +142,16 @@ class KillerBee:
                 self.dev = device
                 if (self.dev == gps_devstring):
                     pass
-                elif ((config.DEV_ENABLE_SL_NODETEST or DEV_ENABLE_SL_NODETEST) and kbutils.issl_nodetest(self.dev)):
+                elif (DEV_ENABLE_SL_NODETEST and kbutils.issl_nodetest(self.dev)):
                     from .dev_sl_nodetest import SL_NODETEST
                     self.driver = SL_NODETEST(self.dev)
-                elif ((config.DEV_ENABLE_SL_BEEHIVE or DEV_ENABLE_SL_BEEHIVE) and kbutils.issl_beehive(self.dev)):
+                elif (DEV_ENABLE_SL_BEEHIVE and kbutils.issl_beehive(self.dev)):
                     from .dev_sl_beehive import SL_BEEHIVE
                     self.driver = SL_BEEHIVE(self.dev)
-                elif ((config.DEV_ENABLE_ZIGDUINO or DEV_ENABLE_ZIGDUINO) and kbutils.iszigduino(self.dev)):
-                    from dev_zigduino import ZIGDUINO
+                elif (DEV_ENABLE_ZIGDUINO and kbutils.iszigduino(self.dev)):
+                    from .dev_zigduino import ZIGDUINO
                     self.driver = ZIGDUINO(self.dev)
-                elif ((config.DEV_ENABLE_FREAKDUINO or DEV_ENABLE_FREAKDUINO) and kbutils.isfreakduino(self.dev)):
+                elif (DEV_ENABLE_FREAKDUINO and kbutils.isfreakduino(self.dev)):
                     from .dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
                 else:
@@ -173,7 +174,7 @@ class KillerBee:
         # Start a connection to the remote packet logging server, if able:
         if datasource is not None:
             try:
-                import dblog
+                from . import dblog
                 self.dblog = dblog.DBLogger(datasource)
             except Exception as e:
                 warn("Error initializing DBLogger (%s)." % e)
