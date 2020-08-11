@@ -15,10 +15,10 @@ DB_PASS             = ""
 # If marked False, KillerBee will not try to
 #  detect or load drivers for that device.
 # Useful for disabling uncommon devices.
-DEV_ENABLE_FREAKDUINO = True 
-DEV_ENABLE_SL_NODETEST = True
-DEV_ENABLE_SL_BEEHIVE = True
-DEV_ENABLE_ZIGDUINO = True
-DEV_ENABLE_TELOSB = True
+DEV_ENABLE_FREAKDUINO = False
+DEV_ENABLE_SL_NODETEST = False
+DEV_ENABLE_SL_BEEHIVE = False
+DEV_ENABLE_ZIGDUINO = False
+DEV_ENABLE_TELOSB = False
 DEV_ENABLE_APIMOTE2 = True
-DEV_ENABLE_APIMOTE1 = True
+DEV_ENABLE_APIMOTE1 = False

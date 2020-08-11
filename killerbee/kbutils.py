@@ -92,6 +92,7 @@ class KBCapabilities:
     def getlist(self):
         return self._capabilities
 
+    #TODO enforce value is bool
     def setcapab(self, capab, value):
         self._capabilities[capab] = value
 
@@ -99,7 +100,7 @@ class KBCapabilities:
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
 
-    def frequency(self, channel=None, page=None):
+    def frequency(self, channel=None, page=0):
         '''
         Return actual frequency of channel/page in KHz
         '''
