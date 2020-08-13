@@ -140,6 +140,8 @@ class TestKbutils(unittest.TestCase):
         #Check FREQ_2400
         kbc.setcapab(KBCapabilities.FREQ_2400, True)
         self.assertEqual(0, kbc.frequency(11, 1))
+        self.assertEqual(0, kbc.frequency(10))
+        self.assertEqual(0, kbc.frequency(27))
         self.assertEqual(2405000, kbc.frequency(11))
         self.assertEqual(2480000, kbc.frequency(26))
         kbc.setcapab(KBCapabilities.FREQ_2400, False)
@@ -176,25 +178,104 @@ class TestKbutils(unittest.TestCase):
         self.assertEqual(920550, kbc.frequency(26, 31))
         kbc.setcapab(KBCapabilities.FREQ_915, False)
 
-    #TODO USB Discovery
     def test_findFromList_init(self):
-        self.assertTrue(True)
-    def test_findFromList_call(self):
-        self.assertTrue(True)
+        ffl = findFromList(['vendor0', 'vendor1'], ['product0', 'product1'])
+
+        self.assertEqual('vendor0', ffl._vendors[0])
+        self.assertEqual('vendor1', ffl._vendors[1])
+        self.assertEqual('product0', ffl._products[0])
+        self.assertEqual('product1', ffl._products[1])
+
+    #TODO device is pyusb object 
+    def _test_findFromList_call(self):
+        ffl = findFromList(['vendor0', 'vendor1'], ['product0', 'product1'])
+
+        device = {
+            'idVendor': 'vendor0',
+            'idProduct': 'product1' 
+        }
+
+        self.assertTrue(ffl(device))
+
+        device = {
+            'idVendor': 'vendor3',
+            'idProduct': 'product3' 
+        }
+
+        self.assertFalse(ffl(device))
+
     def test_findFromListAndBusDevId_init(self):
+        busnum = 1
+        devnum = 1
+        vendors = ['vendor0', 'vendor1']
+        products = ['product0', 'product1']
+        fflabdi = findFromListAndBusDevId(busnum, devnum, vendors, products)
+
+        self.assertEqual(1, fflabdi._busNum)
+        self.assertEqual(1, fflabdi._devNum)
+
+    #TODO device is pyusb object 
+    def _test_findFromListAndBusDevId_call(self):
+        busnum = 1
+        devnum = 1
+        vendors = ['vendor0', 'vendor1']
+        products = ['product0', 'product1']
+        fflabdi = findFromListAndBusDevId(busnum, devnum, vendors, products)
+
+        device = {
+            'idVendor': 'vendor0',
+            'idProduct': 'product1',
+            'bus': 1,
+            'address': 1
+        }
+
+        self.assertTrue(fflabdi(device))
+
+        device = {
+            'idVendor': 'vendor0',
+            'idProduct': 'product1',
+            'bus': 2,
+            'address': 2
+        }
+
+        self.assertFalse(fflabdi(device))
+
+    #TODO && deprecate usb v0x
+    def _test_devlist_usb_v1x(self):
         self.assertTrue(True)
-    def test_findFromListAndBusDevId_call(self):
-        self.assertTrue(True)
-    def test_devlist_usb_v1x(self):
-        self.assertTrue(True)
-    def test_devlist_usb_v0x(self):
+    def _test_devlist_usb_v0x(self):
         self.assertTrue(True)    
+
     def test_devlist(self):
+        devlist()
+
         self.assertTrue(True)
+
+    #TODO Remove this empty function
+    def _test_get_serial_devs(self):
+        self.assertTrue(True)
+
+    #TODO lots of false positives
     def test_getSerialDeviceString(self):
-        self.assertTrue(True)
+        path = "/ttyUSB0"
+        self.assertTrue(isSerialDeviceString(path))
+        path = "/dev/ttyUSB0"
+        self.assertTrue(isSerialDeviceString(path))
+        path = "/////dev//////ttyUSB0"
+        self.assertTrue(isSerialDeviceString(path))
+        path = "/ttpUSB0"
+        self.assertTrue(isSerialDeviceString(path))
+        path = "/"
+        self.assertTrue(isSerialDeviceString(path))
+        path = "tty"
+        self.assertTrue(isSerialDeviceString(path))
+        path = "kitty"
+        self.assertTrue(isSerialDeviceString(path))
+        path = "test"
+        self.assertFalse(isSerialDeviceString(path))
+
     def test_get_serial_ports(self):
-        self.assertTrue(True)
+        self.assertTrue(os.environ['APIMOTE_DEVSTRING'] in get_serial_ports())
 
     def test_isIpAddr(self):
         self.assertFalse(isIpAddr("256.256.256.256"))
@@ -209,20 +290,40 @@ class TestKbutils(unittest.TestCase):
         self.assertTrue(isIpAddr("2607:f0d0:1002:0051:0000:0000:0000:0004"))
         self.assertFalse(isIpAddr("gggg:gggg:gggg:gggg:gggg:gggg:gggg:gggg:gggg"))
 
-    #TODO Device ID
-    def test_iszigduino(self):
-        self.assertTrue(True)
-    def test_issl_nodetest(self):
-        self.assertTrue(True)
-    def test_issl_beehive(self):
-        self.assertTrue(True)
-    def test_isfreakduino(self):
-        self.assertTrue(True)
+    #TAKE A LONG TIME TO RUN DURING DEVELOPMENT
+    def _test_isgoodfetccspi(self):
+        self.assertTrue(isgoodfetccspi(os.environ['APIMOTE_DEVSTRING']))
 
-    #TODO More USB
+    def _test_iszigduino(self):
+        self.assertFalse(iszigduino(os.environ['APIMOTE_DEVSTRING']))
+
+    def _test_issl_nodetest(self):
+        self.assertFalse(issl_nodetest(os.environ['APIMOTE_DEVSTRING']))
+
+    def _test_issl_beehive(self):
+        self.assertFalse(issl_beehive(os.environ['APIMOTE_DEVSTRING']))
+
+    def _test_isfreakduino(self):
+        self.assertFalse(isfreakduino(os.environ['APIMOTE_DEVSTRING']))
+
     def test_search_usb(self):
-        self.assertTrue(True)
-    def test_search_usb_bus_v0x(self):
+        device = "123"
+        self.assertRaises(KBInterfaceError, search_usb, device)
+
+        device = "1:2:3"
+        self.assertRaises(ValueError, search_usb, device)
+
+        device = "a:b"
+        self.assertRaises(ValueError, search_usb, device)
+
+        device = ":"
+        self.assertRaises(ValueError, search_usb, device)
+
+        device = "1:2"
+        search_usb(device)
+
+    #TODO Deprecate usb v0x
+    def _test_search_usb_bus_v0x(self):
         self.assertTrue(True)
     
     #TODO migrate this function to scapy hexdump? This doesn't work in Python3

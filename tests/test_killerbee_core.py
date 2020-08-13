@@ -7,7 +7,16 @@ from killerbee import *
 from killerbee.dev_apimote import APIMOTE
 
 class TestKillerbeeCore(unittest.TestCase):
-    def test_init(self):
+    def test_getkillerbee(self):
+        kb = getKillerBee(15)
+        self.assertIsNotNone(kb)
+        self.assertEqual(15, kb.channel)
+        
+    def test_show_dev(self):
+        show_dev()
+        self.assertTrue(True)
+
+    def test_killerbee_init(self):
         devstring=os.environ['APIMOTE_DEVSTRING']
 
         #TODO datastore, gps, dblog
@@ -25,13 +34,13 @@ class TestKillerbeeCore(unittest.TestCase):
 
         kb.close()
 
-    def test_close(self):
+    def test_killerbee_close(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
         self.assertIsNotNone(kb.driver.handle)
         kb.close()
         self.assertIsNone(kb.driver.handle)
 
-    def test_get_dev_info(self):
+    def test_killerbee_get_dev_info(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         info = kb.get_dev_info()
@@ -42,7 +51,7 @@ class TestKillerbeeCore(unittest.TestCase):
      
         kb.close()
      
-    def test_check_capability(self):
+    def test_killerbee_check_capability(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertTrue(kb.check_capability(KBCapabilities.FREQ_2400))
@@ -63,7 +72,7 @@ class TestKillerbeeCore(unittest.TestCase):
 
         kb.close()
 
-    def test_is_valid_channel(self):
+    def test_killerbee_is_valid_channel(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertFalse(kb.is_valid_channel(27, 28))
@@ -85,21 +94,23 @@ class TestKillerbeeCore(unittest.TestCase):
 
         kb.close()
 
-    #TODO frequency function doesn't handle out of bounds cases
-    def test_frequency(self):
+    def test_killerbee_frequency(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
-        #self.assertEqual(0, kb.frequency(11, 1))
-        #self.assertEqual(0, kb.frequency(1))
-        #self.assertEqual(0, kb.frequency(27))
-        #self.assertEqual(2405000, kb.frequency(11))
-        #self.assertEqual(2480000, kb.frequency(26))
+        self.assertEqual(0, kb.frequency(11, 1))
+        self.assertEqual(0, kb.frequency(1))
+        self.assertEqual(0, kb.frequency(27))
+        self.assertEqual(2405000, kb.frequency(11))
+        self.assertEqual(2405000, kb.frequency(11, 0))
+        self.assertEqual(2480000, kb.frequency(26))
+        self.assertEqual(2480000, kb.frequency(26, 0))
 
-        self.assertTrue(True)
+        #TODO frequency handles none-case
+        #self.assertEqual(0, kb.frequency())
 
         kb.close()
 
-    def test_get_capabilities(self):
+    def test_killerbee_get_capabilities(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
         capabilities = kb.get_capabilities()
     
@@ -119,42 +130,42 @@ class TestKillerbeeCore(unittest.TestCase):
         self.assertFalse(capabilities[KBCapabilities.FREQ_915])
         self.assertFalse(capabilities[KBCapabilities.BOOT])
 
-    def test_enter_bootloader(self):
+    def test_killerbee_enter_bootloader(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertRaises(AttributeError, kb.enter_bootloader)
   
         kb.close()
 
-    def test_get_bootloader_version(self):
+    def test_killerbee_get_bootloader_version(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertRaises(AttributeError, kb.get_bootloader_version)
   
         kb.close()
 
-    def test_get_bootloader_signature(self):
+    def test_killerbee_get_bootloader_signature(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertRaises(AttributeError, kb.get_bootloader_signature)
   
         kb.close()
 
-    def test_bootloader_sign_on(self): 
+    def test_killerbee_bootloader_sign_on(self): 
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertRaises(AttributeError, kb.bootloader_sign_on)
   
         kb.close()
 
-    def test_bootloader_start_application(self): 
+    def test_killerbee_bootloader_start_application(self): 
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertRaises(AttributeError, kb.bootloader_start_application)
   
         kb.close()
 
-    def test_sniffer_on_off(self):
+    def test_killerbee_sniffer_on_off(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
         kb.sniffer_on()
 
@@ -164,7 +175,7 @@ class TestKillerbeeCore(unittest.TestCase):
 
         self.assertTrue(True)
 
-    def test_channel(self):
+    def test_killerbee_channel(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertEqual(None, kb.channel)
@@ -175,7 +186,7 @@ class TestKillerbeeCore(unittest.TestCase):
 
         kb.close()
         
-    def test_page(self):
+    def test_killerbee_page(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertEqual(0, kb.page)
@@ -186,7 +197,7 @@ class TestKillerbeeCore(unittest.TestCase):
         
         kb.close() 
 
-    def test_set_channel(self):
+    def test_killerbee_set_channel(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertEqual(None, kb.channel)
@@ -199,7 +210,7 @@ class TestKillerbeeCore(unittest.TestCase):
 
         kb.close()
 
-    def test_inject(self):
+    def test_killerbee_inject(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertRaises(Exception, kb.inject, b'')
@@ -212,7 +223,7 @@ class TestKillerbeeCore(unittest.TestCase):
 
         kb.close()
 
-    def test_pnext(self):
+    def test_killerbee_pnext(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         kb.pnext()
@@ -221,7 +232,7 @@ class TestKillerbeeCore(unittest.TestCase):
   
         kb.close()
 
-    def test_jammer_on_off(self):
+    def test_killerbee_jammer_on_off(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
         kb.jammer_on()

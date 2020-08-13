@@ -52,7 +52,7 @@ def __kb_send(kb, x, channel = None, page = 0, inter = 0, loop = 0, count = None
                 kb.inject(p.do_build()[:-2], channel = None, count = 1, delay = 0, page = 0)  # [:-2] because the firmware adds the FCS
                 n += 1
                 if verbose:
-                    os.write(1,".")
+                    os.write(1,b".")
                 time.sleep(inter)
             if loop < 0:
                 loop += 1
@@ -136,7 +136,7 @@ def kbsendp(pkt, channel = None, inter = 0, loop = 0, iface = None, count = None
 
     pkts_out = __kb_send(kb, pkt, inter = inter, loop = loop, count = count, verbose = verbose, realtime = realtime)
     if verbose:
-        print("\nSent %i packets." % pkts_out)
+        print("\nSent {} packets.".format(pkts_out))
     kb.close()
 
 @conf.commands.register
@@ -221,7 +221,7 @@ def kbsniff(channel = None, page = 0, count = 0, iface = None, store = 1, prn = 
         kb.set_channel(channel, page)
     else:
         kb = iface
-    return plist.PacketList(__kb_recv(kb, count = count, store = store, prn = prn, lfilter = lfilter, stop_filter = stop_filter, verbose = verbose, timeout = timeout), 'Sniffed')
+    return scapy.plist.PacketList(__kb_recv(kb, count = count, store = store, prn = prn, lfilter = lfilter, stop_filter = stop_filter, verbose = verbose, timeout = timeout), 'Sniffed')
 
 @conf.commands.register
 def kbrdpcap(filename, count = -1, skip = 0, nofcs=False):
@@ -252,7 +252,7 @@ def kbrdpcap(filename, count = -1, skip = 0, nofcs=False):
         lst.append(packet)
         if count > 0 and packetcount >= count:
             break
-    return plist.PacketList(lst, os.path.basename(filename))
+    return scapy.plist.PacketList(lst, os.path.basename(filename))
 
 @conf.commands.register
 def kbwrpcap(save_file, pkts):
@@ -553,12 +553,12 @@ def kbencrypt(source_pkt, data, key = None, verbose = None):
 
     if verbose > 2:
         print("Encrypt Details:")
-        print("\tKey:            " + key.encode('hex'))
-        print("\tNonce:          " + nonce.encode('hex'))
-        print("\tZigbeeData:     " + zigbeeData.encode('hex'))
-        print("\tDecrypted Data: " + decrypted.encode('hex'))
-        print("\tEncrypted Data: " + payload.encode('hex'))
-        print("\tMic:            " + mic.encode('hex'))
+        print("\tKey:            " + key.encode('latin-1'))
+        print("\tNonce:          " + nonce.encode('latin-1'))
+        print("\tZigbeeData:     " + zigbeeData.encode('latin-1'))
+        print("\tDecrypted Data: " + decrypted.encode('latin-1'))
+        print("\tEncrypted Data: " + payload.encode('latin-1'))
+        print("\tMic:            " + mic.encode('latin-1'))
 
     # According to comments in e.g. https://github.com/wireshark/wireshark/blob/master/epan/dissectors/packet-zbee-security.c nwk_seclevel is not used any more but
     # we should reconstruct and return what was asked for anyway.

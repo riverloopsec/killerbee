@@ -232,7 +232,7 @@ class KillerBee:
         '''
         return self.driver.capabilities.is_valid_channel(channel, page)
 
-    def frequency(self, channel= None, page= None):
+    def frequency(self, channel= None, page=0):
         '''
         Use the driver's capabilities class to convert channel and page to actual frequency in KHz
         @rtype: Integer
