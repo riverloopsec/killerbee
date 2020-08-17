@@ -259,9 +259,9 @@ def kbwrpcap(save_file, pkts):
     """
     Write a pcap using the KillerBee library.
     """
-    pd = PcapDumper(DLT_IEEE802_15_4, save_file, ppi=False)
+    pd = PcapWriter(save_file)
     for packet in pkts:
-        pd.pcap_dump(bytes(packet))
+        pd.write(bytes(packet))
     pd.close()
 
 @conf.commands.register
