@@ -3,6 +3,44 @@ KillerBee
 
 KillerBee is a Framework and Tools for Testing & Auditing ZigBee and IEEE 802.15.4 Networks
 
+KillerBee 3.0.0-beta Update
+================
+
+Hi everyone, thank you for your continued support and interest in KillerBee.
+
+As we are putting new effort into cleaning up the code, migrating to Python3, adding features, functionality, and consistency, we're using this overhaul as an opportunity to revisit the goals and uses for the project and the best way to accomplish those.
+
+This effort will result in a major version update as we deprecate old functions and dependencies restructure the code to help organize features and enable funcitonality to be extended.
+
+This is also an attempt to define the pieces that make up Killerbee and determine the best way for all the pieces to work together. Our goals center around drawing more distinct lines around features in Killerbee, treating it as library, and separating out tools written using Killerbee as a dependency.
+
+
+| Category | Sub-category | Description | Examples | Notes | 
+| -------- | ------------ | ----------- | -------- | ----- | 
+| core | | The library that is used to interact with the radio peripheral | pnext(), inject(), set_channel(), sniffer_on()/off() | |
+| | drivers | Device specific implementation of "core" functionality | dev_apimote.py | |
+| utilities | | Convenience functions for working with ZigBee | | |
+| | pcap | | | may want to migrate to 3rd party pcap libraries (e.g. scapy) |
+| | device | | devlist(), is_\[device\]() | perhaps move this into core |
+| | zigbee | | makeFCS(), randmac(), extractkey() | |
+| | crypto | | encrypt_ccm(), decrypt_ccm(), hash_mmo() | |
+| | rf4ce | | derivekey() | |
+| | home-automation | | disarm(), sensor_trigger(), tamper() | |
+| scapy-extension | | A wrapper around "core" and "utility" for convenience when working alongside scapy or as-if working with scapy | kbsend(), kbsniff() | |
+| | home-automation layer | | | |
+| tools | | Simple script wrappers around "core" or "utility" functionality |zbcat, zbdump, zbwireshark, zbid, zbcrypto | |
+| | | Other, more complex tools will be promoted to their own repository | zbwardrive, openear | |
+
+### Additional Goals 
+
+* Migrate tools and utilities to use Dot15d4 Scapy for packet construction
+* Move device configuration to runtime options rather than compile time
+* Add unittesting coverage (see `tests/` for coverage so far)
+* Add pytypes
+* Move documentation to modern framework such as Sphinx
+* Publish documentation to [readthedocs.io](https://readthedocs.io)
+* Publish killerbee to pypi to simplify installation
+
 MAINTAINERS/LICENSE
 ================
 

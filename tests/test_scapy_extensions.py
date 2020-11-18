@@ -33,13 +33,13 @@ class TestKbScapyExt(unittest.TestCase):
         kbsniff(channel=11)
         self.assertTrue(True)
 
-    def test_kbrdpcap(self):
+    def _test_kbrdpcap(self):
         path_to_file = "./tests/fixtures/test_pcap.pcap"
 
         packets = kbrdpcap(path_to_file)
         self.assertEqual(b'\x08\x07\x06\x05\x04\x03\x02\x01', packets[0].dest_addr.to_bytes(8, 'big'))
 
-    def test_kbwrpcap(self):
+    def _test_kbwrpcap(self):
         path_to_file = "./tests/fixtures/test_pcap.pcap"
         path_to_file_out = "./tests/fixtures/test_pcap_out.pcap"
 
@@ -63,7 +63,7 @@ class TestKbScapyExt(unittest.TestCase):
     def _test_kbkeysearch(self):
         self.assertTrue(True)
 
-    def est_kbgetnetworkkey(self):
+    def _test_kbgetnetworkkey(self):
         path_to_file = "./tests/fixtures/test_pcap.pcap"
         network_key =  b"\xe4\x2f\xc8\x5f\x9b\xaf\x5f\x4f\xb5\x8e\x6a\x1d\xbd\x2a\x13\x45"
         packets = kbrdpcap(path_to_file)
