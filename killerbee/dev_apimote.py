@@ -27,6 +27,9 @@ DEFAULT_REVISION = 2
 CC2420_REG_SYNC = 0x14
 
 class APIMOTE:
+
+    packet_queue = None
+
     def __init__(self, dev, revision=DEFAULT_REVISION):
         '''
         Instantiates the KillerBee class for the ApiMote platform running GoodFET firmware.
@@ -187,17 +190,30 @@ class APIMOTE:
         if self.__stream_open == False:
             self.sniffer_on()
 
-        packet = None
-        start = datetime.utcnow()
+        if self.packet_queue is not None:
+             packet = self.packet_queue
+             self.packet_queue = None
+             frame = packet
+             rssi = self.packet_queue_rssi
 
-        while (packet is None and (start + timedelta(microseconds=timeout) > datetime.utcnow())):
-            packet = self.handle.RF_rxpacket()
-            rssi = self.handle.RF_getrssi() #TODO calibrate
+        else:
+             packet = None
 
-        if packet is None:
-            return None
+             start = datetime.utcnow()
 
-        frame = packet[1:]
+             while (packet is None and (start + timedelta(microseconds=timeout) > datetime.utcnow())):
+                 packet = self.handle.RF_rxpacket()
+                 rssi = self.handle.RF_getrssi() #TODO calibrate
+
+             if packet is None:
+                 return None
+
+	     if ord(packet[0])+1 < len(packet):
+                 self.packet_queue = packet[ord(packet[0])+1+1:]
+                 self.packet_queue_rssi = rssi
+
+             frame = packet[1:ord(packet[0])+1]
+
         validcrc = False
         if frame[-2:] == makeFCS(frame[:-2]):
             validcrc = True
