@@ -98,6 +98,10 @@ The devices typically come preloaded and do not need to be reflashed for basic u
 The hardware is open-source at https://github.com/riverloopsec/apimote.
 It is available assembled by contacting team at riverloopsecurity dot com.
 
+In case of problems identifying the hardware try to run the following command (present in [GoodFET](https://github.com/travisgoodspeed/goodfet/blob/master/firmware/apps/radios/ccspi.c)) before any killerbee command
+
+`~/goodfet/client$ sudo ./goodfet.monitor listapps full`
+
 _This is currently supported for beta, and supports sniffing, injection, and jamming._
 
 Texas Instruments CC2530/1 EMK:
