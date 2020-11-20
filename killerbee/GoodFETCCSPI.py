@@ -19,6 +19,7 @@ class GoodFETCCSPI(GoodFET):
         
         #Set up the radio for ZigBee
         self.strobe(0x01);       #SXOSCON
+        self.strobe(0x01);       #SXOSCON ## YL: idk why but needed to enable ram poking
         self.strobe(0x02);       #SCAL
         self.poke(0x11, 0x0AC2 & (~0x0800)); #MDMCTRL0, promiscuous
         self.poke(0x12, 0x0500); #MDMCTRL1
@@ -76,12 +77,10 @@ class GoodFETCCSPI(GoodFET):
         bytes=2;
         
         self.writecmd(self.CCSPIAPP,0x02,len(data),data);
-        try:
-            toret=( ord(self.data[2]) + (ord(self.data[1])<<8) );
-        except Exception as e:
-            print "issue in peeking for a register"
-            print e
-            toret=( (ord(self.data[1])<<8) );
+        toret=(
+            ord(self.data[2])+
+            (ord(self.data[1])<<8)
+            );
         return toret;
     def poke(self,reg,val,bytes=2):
         """Write a CCSPI Register."""
@@ -198,6 +197,20 @@ class GoodFETCCSPI(GoodFET):
         return;
     
     lastpacket=range(0,0xff);
+
+    def RF_txrxpacket(self,packet,timeout=1):
+        data="\0";
+        self.data=data;
+        packet = [timeout&0xff, timeout>>8] + packet
+
+        self.writecmd(self.CCSPIAPP,0x86,len(packet),packet);
+        buffer=self.data;
+        self.lastpacket=buffer;
+        if(len(buffer)==0):
+            return None;
+        
+        return buffer;
+
     def RF_rxpacket(self):
         """Get a packet from the radio.  Returns None if none is
         waiting."""
