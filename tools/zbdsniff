@@ -68,7 +68,7 @@ def sniffNetworkKey(pkts, key, verbose):
 
 if __name__ == '__main__':
     # Define the command line options.
-    parser = OptionParser(description="zbdsniff: Decode plaintext Zigbee Nwtwork key from a " +
+    parser = OptionParser(description="zbdsniff: Decode plaintext Zigbee Network key from a " +
         "capture file. Will process libpcap capture files. Original concept: " +
         "jwright@willhackforsushi.com, re-implemented using Scapy by Steve Martin.")
     parser.add_option("-f", "--file", dest="filename", help="PCap file to process", metavar="FILE")
