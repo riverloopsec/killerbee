@@ -1,8 +1,14 @@
-Firmware
-================
+# Supported Devices & Firmware
 
-ApiMote
-==================
+
+## ApiMote v4beta
+
+The devices typically come preloaded and do not need to be reflashed for basic use.
+
+The hardware is open-source at https://github.com/riverloopsec/apimote.
+It is available assembled online from resellers, or at cost for bulk orders by contacting team at riverloopsecurity dot com.
+
+_This is currently supported for beta, and supports sniffing, injection, and jamming._
 
 The firmware for this is mainained and built using the GoodFET repository.
 
@@ -11,13 +17,29 @@ Compiled firmware versions are stored here for ease of use. However, you should 
 To flash it, plug in the ApiMote v3 or v4beta and then run the `flash\_apimote.sh` script.
 Note that it may sometimes take two attempts to flash correctly if the first time doesn't synchronize and times out.
 
-Silicon Labs Node Test 2.4GHz & SubGHz:
-==================
-See https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf
+
+## Texas Instruments CC2530/1 EMK
+
+This USB dongle is produced by Texas Instruments and is sold as an evaluation
+kit for their CC2530 or CC2531 integrated circuit.
+
+It can be purchased from electronics distributors, or directly from them
+[here](http://www.ti.com/tool/cc2531emk).
+
+_This is currently supported for beta, and supports sniffing only._
+
+
+## Silicon Labs Node Test 2.4GHz & SubGHz
 
 This is a firmware image for a huge variety of hardware platforms, supporting EM250, EM375, EFR32, etc., and provides for (with appropriate radio part) the following frequencies:
 + 2.4 GHz (ch 11-26)
 + 863-917 MHz (pages 28-31, ch 0-26)
+
+You must enable these to be searched for in `killerbee/config.py` and then reinstall KillerBee.
+
+_NOTE: This is a SNIFFER only implementation which will only read packets with a good FCS, and although the firmware has injection capability, it adds a 2 byte counter to the end of every packet, rendering it useless for all practical purposes. If you are interested in an INJECTION and BAD FCS capable device, contact the author, Adam Laurie - adam at algroup.co.uk_
+
+See https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf
 
 It can be installed in Simplicity Studio by right clicking on the device in the 'Debug Adapters' window and selecting the appropriate Nodetest image for your hardware from the 'Upload application' menu (note that some of them are misspelled as 'Notetest').
 
@@ -26,10 +48,46 @@ The device should come up as a CDC Serial port and can be addressed with the '-i
 zbwireshark -c 0 -s 28 -i /dev/ttyACM0
 ```
 
-_NOTE: This is a SNIFFER only implementation which will only read packets with a good FCS, and although the firmware has injection capability, it adds a 2 byte counter to the end of every packet, rendering it useless for all practical purposes. If you are interested in an INJECTION and BAD FCS capable device, contact the author, Adam Laurie - adam at algroup.co.uk_
 
-RZUSBSTICK
-==================
+## MoteIV Tmote Sky or TelosB mote
+
+This device can be loaded with firmware via USB. Attach the device, and then
+within killerbee/firmware, run:
+```
+$ ./flash_telosb.sh
+```
+
+These boards can be obtained via multiple distributors, however
+[this vendor](https://www.advanticsys.com/shop/mtmcm5000msp-p-14.html) has
+stated that their "clone" of the original hardware is compatible.
+We have not tested nor do we endorse any specific "clone".
+
+
+## Atmel RZ Raven USBSTICK (RZUSBSTICK)
+
+> NOTE: Atmel has stopped selling this hardware.
+
+See http://www.atmel.com/tools/RZUSBSTICK.aspx.
+This hardware 
+is convenient as the base firmware is open source with a freely-available IDE.
+The KillerBee firmware for the RZ RAVEN included in the `firmware/` directory is
+a modified version of the stock firmware distributed by Atmel to include
+attack functionality.
+
+The RZ RAVEN USB Stick is available from common electronics resellers for
+approximately $40/USD:
+
++ Mouser: http://bit.ly/vZ2pt
++ Digi-Key: http://bit.ly/3T8MaK
+
+The stock firmware shipped with this hardware allows you to leverage the passive
+functionality included in the KillerBee tools and framework (such as receiving
+frames), but does not allow you to do packet injection, or to impersonate
+devices on the network.
+
+In order to get the full functionality included in KillerBee, the RZ RAVEN USB
+Stick must be flashed with the custom firmware included in this `firmware/ `
+directory.
 
 This needs to be flashed using external tools. Compiled firmware is:
 - `kb-rzusbstick-001.hex`: Initial version
