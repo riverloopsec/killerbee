@@ -154,6 +154,9 @@ class KillerBee:
                 elif (DEV_ENABLE_FREAKDUINO and kbutils.isfreakduino(self.dev)):
                     from .dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
+                elif (DEV_ENABLE_BUMBLEBEE and kbutils.isbumblebee(self.dev)):
+                    from .dev_bumblebee import Bumblebee
+                    self.driver = Bumblebee(self.dev)
                 else:
                     gfccspi,subtype = isgoodfetccspi(self.dev)
                     if gfccspi and subtype == 0:

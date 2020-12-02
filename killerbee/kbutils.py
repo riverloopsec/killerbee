@@ -299,6 +299,8 @@ def devlist(vendor=None, product=None, gps=None, include=None):
         elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
             #TODO maybe move support for freakduino into goodfetccspi subtype==?
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
+        elif (DEV_ENABLE_BUMBLEBEE and isbumblebee(serialdev)):
+            devlist.append([serialdev, "Bumblebee", ""])
         else:
             gfccspi,subtype = isgoodfetccspi(serialdev)
             if gfccspi and subtype == 0:
@@ -505,6 +507,28 @@ def isfreakduino(serialdev):
     else: version = None
     s.close()
     return (version is not None)
+
+def isbumblebee(serialdev):
+    """
+    Determine if a given serial device is a CC2531 attached with the Bumblebee firmware loaded.
+    @type serialdev: String
+    @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
+    @rtype: Boolean
+    """
+    s = serial.Serial(port=serialdev, baudrate=115200, timeout=1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+    time.sleep(1.5)
+    # Flush serial interface (if sniffer has been left enabled, we may have received some packets that will interfere).
+    if s.in_waiting > 0:
+      trash = s.read(s.in_waiting)
+
+    # Send radio init command.
+    s.write(b'\x03\x00\xFC')
+    time.sleep(1.5)
+    answer = s.read(3)
+    s.close()
+
+    # Check answer.
+    return (answer == b'\x03\x01\xFD')
 
 def search_usb(device):
     """
