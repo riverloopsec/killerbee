@@ -1,5 +1,12 @@
 """
-CC2531 injection support is contributed by virtualabs.
+CC2530/CC2531 injection support is contributed by virtualabs.
+
+This driver communicates with a CC2531 compatible USB dongle
+flashed with 'Bumblebee' firmware. It is then able to communicate
+with this dongle through a USB CDC serial port (/dev/ttyACM*).
+
+Bumblebee firmware provides 2.4GHz sniffing and injection capabilities,
+with RSSI/LQI. Bad FCS sniffing and jamming are not currently supported.
 """
 
 from __future__ import print_function
@@ -14,7 +21,8 @@ from .kbutils import KBCapabilities, makeFCS, bytearray_to_bytes
 
 class SerialProtocolPacket(object):
     """
-    Serial protocol packet
+    Serial protocol packet, used to communicate with
+    our CC2531 dongle.
     """
 
     def __init__(self, command, data):
@@ -34,7 +42,11 @@ class SerialProtocolPacket(object):
         return self.__data
 
 class Bumblebee(object):
+    """
+    Bumblebee driver class.
+    """
 
+    # Serial protocol commands
     CMD_INIT = 0x00
     CMD_INIT_ACK = 0x01
     CMD_SET_CHANNEL = 0x02
@@ -49,6 +61,9 @@ class Bumblebee(object):
 
 
     def __init__(self, serialpath):
+        """
+        Initialize serial device and capabilities.
+        """
         self.serialpath = serialpath
         self.dev = Serial(serialpath, 115200)
         self.rx_buffer = bytes()
@@ -64,10 +79,11 @@ class Bumblebee(object):
         """
         # Did we receive some data ?
         if len(self.rx_buffer) > 0:
+
             pkt_len = self.rx_buffer[0]
 
-            # Did we receive a complete packet ?
-            if len(self.rx_buffer) >= pkt_len:
+            # Loop on received packets and yield SerialProtocolPacket objects
+            while (len(self.rx_buffer) >= pkt_len) and (pkt_len > 0):
                 # Extract payload
                 payload = self.rx_buffer[1:pkt_len-1]
                 
@@ -85,10 +101,16 @@ class Bumblebee(object):
                     # Chomp packet
                     self.rx_buffer = self.rx_buffer[pkt_len:]
 
+                # Process next packet if any
+                if len(self.rx_buffer) > 0:
+                  pkt_len = self.rx_buffer[0]
+                else:
+                  pkt_len = 0
+
 
     def crc(self, x):
         """
-        Compute CRC for a given byte array.
+        Compute CRC (sort of ;) for a given byte array.
         """
         c=0xff
         for i in x:
@@ -97,7 +119,7 @@ class Bumblebee(object):
 
     def process_rx(self):
         """
-        Read rx buffer
+        Read incoming data and fill serial RX buffer.
         """
         if self.dev.in_waiting > 0:
             self.rx_buffer += self.dev.read(self.dev.in_waiting)
@@ -105,18 +127,17 @@ class Bumblebee(object):
     def send_message(self, command, data):
         """
         Send a message to our dongle.
-
-        [length (1 byte)][command (1 byte)][ payload .... ][crc (1 byte)]
         """
         length = len(data) + 3
         buf = struct.pack('<BB', length, command) + data
         buf += bytes([ self.crc(buf) ])
         return self.dev.write(buf)
 
-
     def send_packet(self, packet):
         """
         Send a 802.11.4 packet, FCS will be automatically added.
+        FCS must not be provided, only packet data. Also, no need to add two
+        bytes at the end of the packet to insert FCS.
         """
         self.send_message(
           Bumblebee.CMD_SEND_PKT,
@@ -181,6 +202,9 @@ class Bumblebee(object):
 
 
     def close(self):
+        """
+        Close serial device.
+        """
         self.dev.close()
         self.dev = None
 
@@ -310,7 +334,10 @@ class Bumblebee(object):
         if self.__stream_open == False:
             self.sniffer_on() #start sniffing
 
+        # Fetch incoming data
         self.process_rx()
+
+        # Loop on all received serial packets
         for packet in self.process_packet():
             payload = packet.get_data()
 
