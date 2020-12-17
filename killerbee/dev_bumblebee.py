@@ -13,10 +13,21 @@ from __future__ import print_function
 import sys
 import struct
 import time
+from array import array
 from datetime import datetime
 from serial import Serial
 from .kbutils import KBCapabilities, makeFCS, bytearray_to_bytes
 
+# Import USB support depending on version of pyUSB
+try:
+    import usb.core
+    import usb.util
+    import sys
+    print("Warning: You are using pyUSB 1.x, support is in beta.", file=sys.stderr)
+except ImportError:
+    import usb
+    print("Error: You are using pyUSB 0.x, not supported for CC253x.", file=sys.stderr)
+    sys.exit(-1)
 
 
 class SerialProtocolPacket(object):
@@ -46,6 +57,10 @@ class Bumblebee(object):
     Bumblebee driver class.
     """
 
+    # USB Endpoints
+    EP_OUT = 0x03
+    EP_IN = 0x82
+
     # Serial protocol commands
     CMD_INIT = 0x00
     CMD_INIT_ACK = 0x01
@@ -60,18 +75,23 @@ class Bumblebee(object):
     CMD_GOT_PKT = 0x0A
 
 
-    def __init__(self, serialpath):
+    def __init__(self, dev, bus):
         """
         Initialize serial device and capabilities.
         """
-        self.serialpath = serialpath
-        self.dev = Serial(serialpath, 115200)
+        self.dev = dev
         self.rx_buffer = bytes()
+        self.usb_rx_buffer = array('B', b'\x00'*256)
         self._channel = None
         self.__stream_open = False
         self.timeout = 2.0
         self.capabilities = KBCapabilities()
         self.__set_capabilities()
+
+        # Set configuration
+        self.dev.set_configuration()
+
+        self.name = usb.util.get_string(self.dev, self.dev.iProduct)
 
     def process_packet(self):
         """
@@ -121,8 +141,12 @@ class Bumblebee(object):
         """
         Read incoming data and fill serial RX buffer.
         """
-        if self.dev.in_waiting > 0:
-            self.rx_buffer += self.dev.read(self.dev.in_waiting)
+        try:
+          nbytes = self.dev.read(Bumblebee.EP_IN, self.usb_rx_buffer, 100)
+          if nbytes > 0:
+            self.rx_buffer += self.usb_rx_buffer.tobytes()[:nbytes]
+        except usb.core.USBTimeoutError as usb_timeout:
+          pass
 
     def send_message(self, command, data):
         """
@@ -131,7 +155,16 @@ class Bumblebee(object):
         length = len(data) + 3
         buf = struct.pack('<BB', length, command) + data
         buf += bytes([ self.crc(buf) ])
-        return self.dev.write(buf)
+
+        # Cut buffer in blocks of 64 bytes
+        nbulks = int(len(buf)/64)
+        if nbulks*64 < len(buf):
+          nbulks += 1
+
+        sent=0
+        for i in range(nbulks):
+          sent += self.dev.write(Bumblebee.EP_OUT, buf[i*64:(i+1)*64])
+        return sent
 
     def send_packet(self, packet):
         """
@@ -203,10 +236,11 @@ class Bumblebee(object):
 
     def close(self):
         """
-        Close serial device.
+        Close device.
         """
-        self.dev.close()
-        self.dev = None
+        if self.__stream_open == True:
+            self.sniffer_off()
+            pass
 
     def check_capability(self, capab):
         return self.capabilities.check(capab)
@@ -233,7 +267,7 @@ class Bumblebee(object):
         @return: List of 3 strings identifying device.
         """
         # TODO Determine if there is a way to get a unique ID from the device
-        return [self.serialpath, "BUMBLEBEE", ""]
+        return [self.name, "BUMBLEBEE", ""]
 
     # KillerBee expects the driver to implement this function
     def sniffer_on(self, channel=None, page=0):
@@ -319,7 +353,7 @@ class Bumblebee(object):
             self.set_channel(channel, page)
 
         for pnum in range(0, count):
-            self.send_packet(packet)
+            print(self.send_packet(packet))
             time.sleep(delay)
 
     # KillerBee expects the driver to implement this function
