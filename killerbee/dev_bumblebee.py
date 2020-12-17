@@ -3,7 +3,7 @@ CC2530/CC2531 injection support is contributed by virtualabs.
 
 This driver communicates with a CC2531 compatible USB dongle
 flashed with 'Bumblebee' firmware. It is then able to communicate
-with this dongle through a USB CDC serial port (/dev/ttyACM*).
+with this dongle through USB (bulk data transfer).
 
 Bumblebee firmware provides 2.4GHz sniffing and injection capabilities,
 with RSSI/LQI. Bad FCS sniffing and jamming are not currently supported.
@@ -15,7 +15,6 @@ import struct
 import time
 from array import array
 from datetime import datetime
-from serial import Serial
 from .kbutils import KBCapabilities, makeFCS, bytearray_to_bytes
 
 # Import USB support depending on version of pyUSB
@@ -30,9 +29,9 @@ except ImportError:
     sys.exit(-1)
 
 
-class SerialProtocolPacket(object):
+class CommProtocolPacket(object):
     """
-    Serial protocol packet, used to communicate with
+    USB communication protocol packet, used to communicate with
     our CC2531 dongle.
     """
 
@@ -61,7 +60,7 @@ class Bumblebee(object):
     EP_OUT = 0x03
     EP_IN = 0x82
 
-    # Serial protocol commands
+    # Communication protocol commands
     CMD_INIT = 0x00
     CMD_INIT_ACK = 0x01
     CMD_SET_CHANNEL = 0x02
@@ -77,7 +76,7 @@ class Bumblebee(object):
 
     def __init__(self, dev, bus):
         """
-        Initialize serial device and capabilities.
+        Initialize device and capabilities.
         """
         self.dev = dev
         self.rx_buffer = bytes()
@@ -95,14 +94,14 @@ class Bumblebee(object):
 
     def process_packet(self):
         """
-        Process incoming packets from serial device (dongle)
+        Process incoming packets from device (dongle)
         """
         # Did we receive some data ?
         if len(self.rx_buffer) > 0:
 
             pkt_len = self.rx_buffer[0]
 
-            # Loop on received packets and yield SerialProtocolPacket objects
+            # Loop on received packets and yield CommProtocolPacket objects
             while (len(self.rx_buffer) >= pkt_len) and (pkt_len > 0):
                 # Extract payload
                 payload = self.rx_buffer[1:pkt_len-1]
@@ -116,7 +115,7 @@ class Bumblebee(object):
                     self.rx_buffer = self.rx_buffer[pkt_len:]
 
                     # Yield packet
-                    yield SerialProtocolPacket(payload[0], payload[1:]) 
+                    yield CommProtocolPacket(payload[0], payload[1:]) 
                 else:
                     # Chomp packet
                     self.rx_buffer = self.rx_buffer[pkt_len:]
@@ -139,7 +138,7 @@ class Bumblebee(object):
 
     def process_rx(self):
         """
-        Read incoming data and fill serial RX buffer.
+        Read incoming data and fill RX buffer.
         """
         try:
           nbytes = self.dev.read(Bumblebee.EP_IN, self.usb_rx_buffer, 100)
@@ -161,9 +160,12 @@ class Bumblebee(object):
         if nbulks*64 < len(buf):
           nbulks += 1
 
+        # Send each bulk separately
         sent=0
         for i in range(nbulks):
           sent += self.dev.write(Bumblebee.EP_OUT, buf[i*64:(i+1)*64])
+
+        # Return total number of bytes sent
         return sent
 
     def send_packet(self, packet):
@@ -218,7 +220,7 @@ class Bumblebee(object):
         """
         entry_time = time.time()
         while True:
-            # Poll our serial device
+            # Poll our USB device
             self.process_rx()
 
             # Check packets
@@ -371,7 +373,7 @@ class Bumblebee(object):
         # Fetch incoming data
         self.process_rx()
 
-        # Loop on all received serial packets
+        # Loop on all received packets
         for packet in self.process_packet():
             payload = packet.get_data()
 
