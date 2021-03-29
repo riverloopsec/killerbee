@@ -41,7 +41,7 @@ class DainTreeDumper:
                 str(self._pcount), " ", 
                 "%6f"%time.time(), " ", 
                 str(len(packet)), " ",
-                binascii.hexlify(packet), " ",
+                str(binascii.hexlify(packet)), " ",
                 "255 ",                             # LQI
                 "1 ",                               # Unknown
                 str(rssi), " ",                     # RSSI

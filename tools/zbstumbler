@@ -29,7 +29,7 @@ def display_details(routerdata):
     stackprofile = stackprofilever & 0x0f
     stackver = (stackprofilever & 0xf0) >>4
 
-    print("New Network: PANID 0x%02X%02X  Source 0x%02X%02X"%(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1])))
+    print("New Network: PANID 0x{0:02X}{1:02X} Source 0x{2:02X}{3:02X}".format(ord(spanid[0]), ord(spanid[1]), ord(source[0]), ord(source[1])))
 
     try:
         extpanidstr=""
@@ -41,10 +41,10 @@ def display_details(routerdata):
         sys.stdout.write("\tExt PANID: Unknown")
 
     try:
-        print("\tStack Profile: %s"%stackprofile_map[stackprofile])
+        print("\tStack Profile: {0}".format(stackprofile_map[stackprofile]))
         stackprofilestr = stackprofile_map[stackprofile]
     except KeyError:
-        print("\tStack Profile: Unknown (%d)"%stackprofile)
+        print("\tStack Profile: Unknown ({0})".format(stackprofile))
         stackprofilestr = "Unknown (%d)"%stackprofile
 
     try:
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     try:
         kb = KillerBee(device=args.devstring)
     except KBInterfaceError as e:
-        print(("Interface Error: {0}".format(e)))
+        sys.stderr.write("Interface Error: {0}".format(e))
         sys.exit(-1)
 
     signal.signal(signal.SIGINT, interrupt)
@@ -173,7 +173,7 @@ if __name__ == '__main__':
             try:
                 kb.set_channel(channel)
             except Exception as e:
-                print("ERROR: Failed to set channel to {0}. ({1})".format(channel, e))
+                sys.stderr.write("ERROR: Failed to set channel to {0}. ({1})".format(channel, e))
                 sys.exit(-1)
 
         if args.verbose:
@@ -189,7 +189,7 @@ if __name__ == '__main__':
             txcount+=1
             kb.inject(beaconinj)
         except Exception as e:
-            print("ERROR: Unable to inject packet: {0}".format(e))
+            sys.stderr.write("ERROR: Unable to inject packet: {0}".format(e))
             sys.exit(-1)
 
         while (start+args.delay > time.time()):

@@ -11,14 +11,7 @@ from time import sleep
 import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR) # suppress annoying Scapy IPv6 warning
 from killerbee import *
-
-try:
-	from scapy.all import *
-except ImportError:
-	print('This tool requires Scapy to be installed (specifically scapy-com edition).')
-	from sys import exit
-	exit(-1)
-
+from scapy.all import *
 
 def create_coord_realign(panid, coordinator, device, newchannel, newpanid, seqnum):
     '''802.15.4 Coordinator Realignment Notification Packet'''
