@@ -99,7 +99,7 @@ def response_handler(stumbled, packet, channel):
         return value
 
     if args.verbose:
-        print(("Received frame is not a beacon (FCF={0}).".format(pktdecode[0].encode('hex'))))
+        print(("Received frame is not a beacon (FCF={0}).".format(pktdecode[0].encode('utf-8').hex())))
 
     return None
 
