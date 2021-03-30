@@ -66,9 +66,10 @@ class DainTreeReader:
         @param savefile: Daintree SNA packet capture filename to read from.
         @rtype: None.  An exception is raised if the capture file is not in Daintree SNA format.
         '''
-        DSNA_HEADER1 = '#Format=4\r\n'
-        self._fh = open(savefile, "r")
+        DSNA_HEADER1 = b'#Format=4\r\n'
+        self._fh = open(savefile, "rb")
         header = self._fh.readline()
+        print(header)
 
         if header != DSNA_HEADER1:
             raise Exception('Invalid or unsupported Daintree SNA file specified')

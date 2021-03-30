@@ -29,7 +29,6 @@ The main toolkit was/is authored by:
 + 2010-2011, Ricky Melgares <ricky@riverloopsecurity.com>
 
 We appreciate the many contributers to the framework, including the following who have contributed capabilities:
-+ Taylor Centers <taylor@riverloopsecurity.com> (Python 3 port)
 + Anonymous Contributors
 + Spencer McIntyre (scapy extension)
 + Bryan Halfpap <Bryanhalf@gmail.com> (additional tools)
@@ -44,6 +43,10 @@ We appreciate the many contributers to the framework, including the following wh
 + Scytmo (bug fixes and CC2530/1 EMK board support)
 + Adam Laurie/rfidiot (APS crypto implementation, firmware, DFU & BOOTLOADER, SubGHZ, SiLabs NodeTest)
 + Steve Martin
++ Taylor Centers <taylor@riverloopsecurity.com> (Python 3 port)
++ SecureAB (Python 3)
++ Jan Rude (Python 3, Sewio)
++ Damien Cauquil (CC2531 BumbleBee)
 
 REQUIREMENTS
 ================
