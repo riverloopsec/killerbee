@@ -11,7 +11,7 @@ triggers = []
 #  initiate a pcap and online database capture.
 def startCapture(dev, capChan):
     timeLabel = datetime.utcnow().strftime('%Y%m%d-%H%M')
-    print 'Cap%s: Launching a capture on channel %s.' % (dev, capChan)
+    print('Cap%s: Launching a capture on channel %s.' % (dev, capChan))
     fname = 'zb_c%s_%s.pcap' % (capChan, timeLabel) #fname is -w equiv
     signal.signal(signal.SIGINT, interrupt)
     trigger = threading.Event()
@@ -39,7 +39,7 @@ class CaptureThread(threading.Thread):
         self.kb = KillerBee(device=self.devstring, datasource="Wardrive Live")
         self.kb.set_channel(self.channel)
         self.kb.sniffer_on()
-        print "Capturing on \'%s\' at channel %d." % (self.kb.get_dev_info()[0], self.channel)
+        print("Capturing on \'%s\' at channel %d." % (self.kb.get_dev_info()[0], self.channel))
         # loop capturing packets to dblog and file
         while not self.trigger.is_set():
             packet = self.kb.pnext()
@@ -52,5 +52,5 @@ class CaptureThread(threading.Thread):
         self.kb.sniffer_off()
         self.kb.close()
         self.pd.close()
-        print "%d packets captured" % self.packetcount
+        print("%d packets captured" % self.packetcount)
 

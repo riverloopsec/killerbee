@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2015
 
@@ -11,14 +11,7 @@ from time import sleep
 import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR) # suppress annoying Scapy IPv6 warning
 from killerbee import *
-
-try:
-	from scapy.all import *
-except ImportError:
-	print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
-	from sys import exit
-	exit(-1)
-
+from scapy.all import *
 
 def create_coord_realign(panid, coordinator, device, newchannel, newpanid, seqnum):
     '''802.15.4 Coordinator Realignment Notification Packet'''
@@ -63,7 +56,7 @@ if __name__ == '__main__':
     parser.add_argument('--numloops', action='store', default=1, type=int)
     args = parser.parse_args()
 
-    print("Expecting {2:#016x} to be the coordinator on network (PAN ID) {0:#04x}, located on channel {1}.".format(args.panid, args.channel, args.coordinator))
+    print(("Expecting {2:#016x} to be the coordinator on network (PAN ID) {0:#04x}, located on channel {1}.".format(args.panid, args.channel, args.coordinator)))
     #TODO: seqnums for each direction
 
     kb = KillerBee(device=args.devstring)

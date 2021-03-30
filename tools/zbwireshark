@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''
 Sends sniffed IEEE 802.15.4 packets to Wireshark via a named pipe.
@@ -62,7 +62,7 @@ def main():
         try:
             kb.set_channel(args.channel, args.subghz_page)
         except ValueError as e:
-            print 'ERROR:', e
+            print('ERROR:', e)
             sys.exit(1)
 
         kb.sniffer_on()
@@ -76,7 +76,7 @@ def main():
             #rf_freq_mhz = (args.channel - 10) * 5 + 2400
             #print("zbwireshark: listening on \'{0}\'".format(kb.get_dev_info()[0]))
             rf_freq_mhz = kb.frequency(args.channel, args.subghz_page) / 1000.0
-            print("zbwireshark: listening on \'{0}\', channel {1}, page {2} ({3} MHz), link-type DLT_IEEE802_15_4, capture size 127 bytes".format(kb.get_dev_info()[0], args.channel, args.subghz_page, rf_freq_mhz))
+            print(("zbwireshark: listening on \'{0}\', channel {1}, page {2} ({3} MHz), link-type DLT_IEEE802_15_4, capture size 127 bytes".format(kb.get_dev_info()[0], args.channel, args.subghz_page, rf_freq_mhz)))
             try:
                 packetcount = 0
                 while args.count != packetcount:
@@ -85,7 +85,7 @@ def main():
 
                     rc = wireshark_proc.poll()
                     if rc is not None:
-                        print("Wireshark exited ({0})".format(rc))
+                        print(("Wireshark exited ({0})".format(rc)))
                         break
 
                     if packet != None:
@@ -102,7 +102,7 @@ def main():
                     raise
 
             kb.sniffer_off()
-            print("{0} packets captured".format(packetcount))
+            print(("{0} packets captured".format(packetcount)))
 
 if __name__ == '__main__':
     main()

@@ -14,8 +14,8 @@ import time
 import struct
 import time
 from datetime import datetime, date, timedelta
-from kbutils import KBCapabilities, makeFCS
-from GoodFETatmel128 import GoodFETatmel128rfa1
+from .kbutils import KBCapabilities, makeFCS
+from .GoodFETatmel128 import GoodFETatmel128rfa1
 
 ATMEL_REG_SYNC = 0x0B
 
@@ -88,8 +88,6 @@ class ZIGDUINO:
 
 	    if channel != None or page:
 	        self.set_channel(channel, page)
-
-	    #print "Sniffer started (listening as %010x on %i MHz)" % (self.handle.RF_getsmac(), self.handle.RF_getfreq()/10**6);
 
 	    self.__stream_open = True
 

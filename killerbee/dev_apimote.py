@@ -17,8 +17,8 @@ import time
 import struct
 import time
 from datetime import datetime, timedelta
-from kbutils import KBCapabilities, makeFCS
-from GoodFETCCSPI import GoodFETCCSPI
+from .kbutils import KBCapabilities, makeFCS
+from .GoodFETCCSPI import GoodFETCCSPI
 
 # Default revision of the ApiMote. This is liable to change at any time
 # as new ApiMote versions are released. Automatic recognition would be nice.
@@ -46,8 +46,8 @@ class APIMOTE:
 
         self.__revision_num = revision
         # Set enviroment variables for GoodFET code to use
-        os.environ["platform"] = "apimote%d".format(self.__revision_num)
-        os.environ["board"] = "apimote%d".format(self.__revision_num)
+        os.environ["platform"] = "apimote{}".format(self.__revision_num)
+        os.environ["board"] = "apimote{}".format(self.__revision_num)
         self.handle = GoodFETCCSPI()
         self.handle.serInit(port=self.dev)
         self.handle.setup()
@@ -86,7 +86,7 @@ class APIMOTE:
         @rtype: List
         @return: List of 3 strings identifying device.
         '''
-        return [self.dev, "GoodFET Apimote v%d".format(self.__revision_num), ""]
+        return [self.dev, "GoodFET Apimote v{}".format(self.__revision_num), ""]
 
     # KillerBee expects the driver to implement this function
     def sniffer_on(self, channel=None, page=0):
@@ -109,7 +109,6 @@ class APIMOTE:
             self.set_channel(channel, page)
         
         self.handle.CC_RFST_RX()
-        #print "Sniffer started (listening as %010x on %i MHz)" % (self.handle.RF_getsmac(), self.handle.RF_getfreq()/10**6);
 
         self.__stream_open = True
 
@@ -134,7 +133,7 @@ class APIMOTE:
         '''
         self.capabilities.require(KBCapabilities.SETCHAN)
 
-        if channel >= 11 or channel <= 26:
+        if channel >= 11 and channel <= 26:
             self._channel = channel
             self.handle.RF_setchan(channel)
         else:
@@ -170,7 +169,7 @@ class APIMOTE:
 
         self.handle.RF_autocrc(1)               #let radio add the CRC
         for pnum in range(0, count):
-            gfready = [ord(x) for x in packet]  #convert packet string to GoodFET expected integer format
+            gfready = list(bytearray(packet))  #convert packet string to GoodFET expected integer format
             gfready.insert(0, len(gfready)+2)   #add a length that leaves room for CRC
             self.handle.RF_txpacket(gfready)
             time.sleep(1)
@@ -235,6 +234,7 @@ class APIMOTE:
         self.handle.RF_carrier() #constant carrier wave jamming
         #self.handle.RF_reflexjam() #reflexive jamming (advanced)
 
+    #TODO maybe move sync to byte string rather than int
     def set_sync(self, sync=0xA70F):
         '''Set the register controlling the 802.15.4 PHY sync byte.'''
         self.capabilities.require(KBCapabilities.SET_SYNC)

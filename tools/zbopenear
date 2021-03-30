@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 ZBOpenEar is a ZigBee/802.15.4 many channel listener.
@@ -36,11 +36,11 @@ if __name__ == '__main__':
         kbdev_info = kbutils.devlist(include=args.include, gps=args.ignore)
         channel = 11
         for i in range(0, len(kbdev_info)):
-            print 'Found device at %s: \'%s\'' % (kbdev_info[i][0], kbdev_info[i][1])
+            print('Found device at %s: \'%s\'' % (kbdev_info[i][0], kbdev_info[i][1]))
             if channel <= 26:
-                print '\tAssigning to channel %d.' % channel
+                print('\tAssigning to channel %d.' % channel)
                 startCapture(kbdev_info[i][0], channel)
                 channel += 1
     except KeyboardInterrupt:
-        print 'Shutting down'
+        print('Shutting down')
 

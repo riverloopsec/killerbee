@@ -7,7 +7,7 @@ We welcome and greatly appreciate improvements and contributions!
 Python Versions
 ================
 
-Please write all code to be compatible with Python 2.7+ and 3.5+.
+Please write all code to be compatible with Python 3.5+.
 
 Branching
 ================

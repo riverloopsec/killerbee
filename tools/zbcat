@@ -1,7 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Contributed by Bryan Halfpap <Bryanhalf@gmail.com>, Copyright 2016
 
 import argparse
+import binascii
 from time import sleep
 
 from killerbee import *
@@ -77,9 +78,9 @@ def create_packet(panid, source, dest, data, extsource=False, ack=False, shortad
         struct.pack('<H', dest),    # " "
         struct.pack('<H', source),  # " "
         #hex(extsource),
-        data.decode('hex')          # hex
+        binascii.unhexlify(data)    # hex
     ]
-    return ''.join(mypacket)
+    return b''.join(mypacket)
 
 
 if __name__ == '__main__':
@@ -106,7 +107,7 @@ if __name__ == '__main__':
     # TODO: not sure if this accounts for long address addressing schemes in 802.15.4
     def response_handler(packet):
         if len(packet) > 7:
-            if packet[9] == '\x04': # we check if it is a data request, if so, then:
+            if packet[9] == b'\x04': # we check if it is a data request, if so, then:
                 sp = create_packet(args.panid, args.source, args.dest, args.data, args.extsource, args.ack, args.shortaddress, args.seqnum)
                 kb.sniffer_off()
                 kb.inject(sp)

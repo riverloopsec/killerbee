@@ -2,17 +2,14 @@ import struct
 import glob
 from warnings import warn
 
-from pcapdump import *
-from daintree import *
-from pcapdlt import *
+from .pcapdump import *
+from .daintree import *
+from .pcapdlt import *
 
-from kbutils import *      #provides serial, usb, USBVER
-from zigbeedecode import * #would like to import only within killerbee class
-from dot154decode import * #would like to import only within killerbee class
-# for backwards compatibility
-from config import (DEV_ENABLE_SL_NODETEST, DEV_ENABLE_SL_BEEHIVE, DEV_ENABLE_FREAKDUINO, DEV_ENABLE_ZIGDUINO, DB_HOST,
-                    DB_NAME, DB_PASS, DB_PORT, DB_USER)
-import config  # to get DEV_ENABLE_* variables
+from .kbutils import *      #provides serial, usb, USBVER
+from .zigbeedecode import * #would like to import only within killerbee class
+from .dot154decode import * #would like to import only within killerbee class
+from .config import *       #to get DEV_ENABLE_* variables
 
 # Utility Functions
 def getKillerBee(channel, page= 0):
@@ -45,9 +42,10 @@ def show_dev(vendor=None, product=None, gps=None, include=None):
         these to be enumerated. Aka, include only these items.
     '''
     fmt = "{: >14} {: <20} {: >10}"
-    print(fmt.format("Dev", "Product String", "Serial Number"))
+    print((fmt.format("Dev", "Product String", "Serial Number")))
     for dev in kbutils.devlist(vendor=vendor, product=product, gps=gps, include=include):
-        print(fmt.format(dev[0], dev[1], dev[2]))
+        # Using None as a format value is an TypeError in python3
+        print((fmt.format(dev[0], dev[1], str(dev[2]))))
 
 # KillerBee Class
 class KillerBee:
@@ -81,9 +79,9 @@ class KillerBee:
         # discovery, just connecting to defined addresses, so we'll check
         # first to see if we have an IP address given as our device parameter.
         if (device is not None) and kbutils.isIpAddr(device):
-            from dev_sewio import isSewio
+            from .dev_sewio import isSewio
             if isSewio(device):
-                from dev_sewio import SEWIO
+                from .dev_sewio import SEWIO
                 self.driver = SEWIO(dev=device)  # give it the ip address
             else: del isSewio
 
@@ -111,16 +109,19 @@ class KillerBee:
 
             if self.dev is not None:
                 if self.__device_is(RZ_USB_VEND_ID, RZ_USB_PROD_ID):
-                    from dev_rzusbstick import RZUSBSTICK
+                    from .dev_rzusbstick import RZUSBSTICK
                     self.driver = RZUSBSTICK(self.dev, self.__bus)
                 elif self.__device_is(ZN_USB_VEND_ID, ZN_USB_PROD_ID):
                     raise KBInterfaceError("Zena firmware not yet implemented.")
                 elif self.__device_is(CC2530_USB_VEND_ID, CC2530_USB_PROD_ID):
-                    from dev_cc253x import CC253x
+                    from .dev_cc253x import CC253x
                     self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2530)
                 elif self.__device_is(CC2531_USB_VEND_ID, CC2531_USB_PROD_ID):
-                    from dev_cc253x import CC253x
+                    from .dev_cc253x import CC253x
                     self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2531)
+                elif self.__device_is(BB_USB_VEND_ID, BB_USB_PROD_ID):
+                    from .dev_bumblebee import Bumblebee
+                    self.driver = Bumblebee(self.dev, self.__bus)
                 else:
                     raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x." % (self.dev.idVendor, self.dev.idProduct))
 
@@ -144,28 +145,28 @@ class KillerBee:
                 self.dev = device
                 if (self.dev == gps_devstring):
                     pass
-                elif ((config.DEV_ENABLE_SL_NODETEST or DEV_ENABLE_SL_NODETEST) and kbutils.issl_nodetest(self.dev)):
-                    from dev_sl_nodetest import SL_NODETEST
+                elif (DEV_ENABLE_SL_NODETEST and kbutils.issl_nodetest(self.dev)):
+                    from .dev_sl_nodetest import SL_NODETEST
                     self.driver = SL_NODETEST(self.dev)
-                elif ((config.DEV_ENABLE_SL_BEEHIVE or DEV_ENABLE_SL_BEEHIVE) and kbutils.issl_beehive(self.dev)):
-                    from dev_sl_beehive import SL_BEEHIVE
+                elif (DEV_ENABLE_SL_BEEHIVE and kbutils.issl_beehive(self.dev)):
+                    from .dev_sl_beehive import SL_BEEHIVE
                     self.driver = SL_BEEHIVE(self.dev)
-                elif ((config.DEV_ENABLE_ZIGDUINO or DEV_ENABLE_ZIGDUINO) and kbutils.iszigduino(self.dev)):
-                    from dev_zigduino import ZIGDUINO
+                elif (DEV_ENABLE_ZIGDUINO and kbutils.iszigduino(self.dev)):
+                    from .dev_zigduino import ZIGDUINO
                     self.driver = ZIGDUINO(self.dev)
-                elif ((config.DEV_ENABLE_FREAKDUINO or DEV_ENABLE_FREAKDUINO) and kbutils.isfreakduino(self.dev)):
-                    from dev_freakduino import FREAKDUINO
+                elif (DEV_ENABLE_FREAKDUINO and kbutils.isfreakduino(self.dev)):
+                    from .dev_freakduino import FREAKDUINO
                     self.driver = FREAKDUINO(self.dev)
                 else:
                     gfccspi,subtype = isgoodfetccspi(self.dev)
                     if gfccspi and subtype == 0:
-                        from dev_telosb import TELOSB
+                        from .dev_telosb import TELOSB
                         self.driver = TELOSB(self.dev)
                     elif gfccspi and subtype == 1:
-                        from dev_apimote import APIMOTE
+                        from .dev_apimote import APIMOTE
                         self.driver = APIMOTE(self.dev, revision=1)
                     elif gfccspi and subtype == 2:
-                        from dev_apimote import APIMOTE
+                        from .dev_apimote import APIMOTE
                         self.driver = APIMOTE(self.dev, revision=2)
                     else:
                         raise KBInterfaceError("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
@@ -176,7 +177,7 @@ class KillerBee:
         # Start a connection to the remote packet logging server, if able:
         if datasource is not None:
             try:
-                import dblog
+                from . import dblog
                 self.dblog = dblog.DBLogger(datasource)
             except Exception as e:
                 warn("Error initializing DBLogger (%s)." % e)
@@ -234,7 +235,7 @@ class KillerBee:
         '''
         return self.driver.capabilities.is_valid_channel(channel, page)
 
-    def frequency(self, channel= None, page= None):
+    def frequency(self, channel= None, page=0):
         '''
         Use the driver's capabilities class to convert channel and page to actual frequency in KHz
         @rtype: Integer
