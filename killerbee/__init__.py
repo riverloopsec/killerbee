@@ -119,6 +119,9 @@ class KillerBee:
                 elif self.__device_is(CC2531_USB_VEND_ID, CC2531_USB_PROD_ID):
                     from .dev_cc253x import CC253x
                     self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2531)
+                elif self.__device_is(BB_USB_VEND_ID, BB_USB_PROD_ID):
+                    from .dev_bumblebee import Bumblebee
+                    self.driver = Bumblebee(self.dev, self.__bus)
                 else:
                     raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x." % (self.dev.idVendor, self.dev.idProduct))
 
