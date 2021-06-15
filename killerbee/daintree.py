@@ -41,7 +41,7 @@ class DainTreeDumper:
                 str(self._pcount), " ", 
                 "%6f"%time.time(), " ", 
                 str(len(packet)), " ",
-                str(binascii.hexlify(packet)), " ",
+                binascii.hexlify(packet).decode('latin-1'), " ",
                 "255 ",                             # LQI
                 "1 ",                               # Unknown
                 str(rssi), " ",                     # RSSI
@@ -69,7 +69,6 @@ class DainTreeReader:
         DSNA_HEADER1 = b'#Format=4\r\n'
         self._fh = open(savefile, "rb")
         header = self._fh.readline()
-        print(header)
 
         if header != DSNA_HEADER1:
             raise Exception('Invalid or unsupported Daintree SNA file specified')
@@ -91,8 +90,11 @@ class DainTreeReader:
         '''
         try:
             while(1):
-                record = self._fh.readline().split(' ')
-                if record[0][0] == "#":
+                record = self._fh.readline().split(b' ')
+                print("Record")
+                print(record)
+                if record[0] == b'#':
+                    print("was a ccomment or header or something")
                     continue
                 else:
                     break
@@ -100,7 +102,8 @@ class DainTreeReader:
             if record == None:
                 return None
             # Return a list with the first element a list containing timestamp
-            # for compatibility with ithe pcapdump PcapReader.pnext() method.
+            # for compatibility with the pcapdump PcapReader.pnext() method.
+            print(record[3])
             return [[float(record[1]),len(record[3]),len(record[3])], binascii.unhexlify(record[3])]
         except IndexError:
             return [None, None]
