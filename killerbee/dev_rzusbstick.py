@@ -562,10 +562,12 @@ class RZUSBSTICK:
                 try:
                     pdata = self.dev.read(RZ_USB_PACKET_EP, self.dev.bMaxPacketSize0, timeout=timeout)
                 except usb.core.USBError as e:
-                    if e.errno != 110: #Operation timed out
-                        print(("Error args: {}".format(e.args)))
-                        raise e
-                        #TODO error handling enhancements for USB 1.0
+                    if e.errno != 110: #Operation timed out ???
+                        if len(e.args) >= 1 and e.args[0] == 60:
+                            pass
+                        else:
+                            print(("Error args: {}".format(e.args)))
+                            raise e
                     else:
                         return None
 
