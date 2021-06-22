@@ -1,5 +1,5 @@
-from .config import *
-import MySQLdb
+from .config import * # type: ignore
+import MySQLdb # type: ignore
 
 class DBReader:
     def __init__(self):
@@ -83,9 +83,9 @@ class DBLogger:
         # Dissect the packet's bytes, using the Scapy'd version in parameter scapy if provided
         if scapy == None:
             # Import Scapy extensions
-            import logging
+            import logging # type: ignore
             logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
-            from scapy.all import Dot15d4
+            from scapy.all import Dot15d4 # type: ignore
             scapy = Dot15d4(bytes)
         #from kbutils import hexdump
         #scapy.show2()

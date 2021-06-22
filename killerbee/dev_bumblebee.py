@@ -9,22 +9,22 @@ Bumblebee firmware provides 2.4GHz sniffing and injection capabilities,
 with RSSI/LQI. Bad FCS sniffing and jamming are not currently supported.
 """
 
-from __future__ import print_function
-import sys
-import struct
-import time
-from array import array
-from datetime import datetime
-from .kbutils import KBCapabilities, makeFCS, bytearray_to_bytes
+from __future__ import print_function # type: ignore
+import sys # type: ignore
+import struct # type: ignore
+import time # type: ignore
+from array import array # type: ignore
+from datetime import datetime # type: ignore
+from .kbutils import KBCapabilities, makeFCS, bytearray_to_bytes # type: ignore
 
 # Import USB support depending on version of pyUSB
 try:
-    import usb.core
-    import usb.util
-    import sys
+    import usb.core # type: ignore
+    import usb.util # type: ignore
+    import sys # type: ignore
     print("Warning: You are using pyUSB 1.x, support is in beta.", file=sys.stderr)
 except ImportError:
-    import usb
+    import usb # type: ignore
     print("Error: You are using pyUSB 0.x, not supported for CC253x.", file=sys.stderr)
     sys.exit(-1)
 

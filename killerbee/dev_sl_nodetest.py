@@ -4,13 +4,13 @@ Author: Adam Laurie <adam@algroup.co.uk> aka RFIDiot
 
 '''
 
-import usb
-import serial
-import time
-import struct
-from datetime import datetime, date
-from datetime import time as dttime
-from .kbutils import KBCapabilities, makeFCS
+import usb # type: ignore
+import serial # type: ignore
+import time # type: ignore
+import struct # type: ignore
+from datetime import datetime, date # type: ignore
+from datetime import time as dttime # type: ignore
+from .kbutils import KBCapabilities, makeFCS # type: ignore
 
 MODE_NONE    = 0x01
 MODE_SNIFF   = 0x02

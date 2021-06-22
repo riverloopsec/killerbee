@@ -9,13 +9,13 @@ Items still TODO:
     - add jamming support
 '''
 
-import os
-import time
-import struct
-import time
-from datetime import datetime, date, timedelta
-from .kbutils import KBCapabilities, makeFCS
-from .GoodFETatmel128 import GoodFETatmel128rfa1
+import os # type: ignore
+import time # type: ignore
+import struct # type: ignore
+import time # type: ignore
+from datetime import datetime, date, timedelta # type: ignore
+from .kbutils import KBCapabilities, makeFCS # type: ignore
+from .GoodFETatmel128 import GoodFETatmel128rfa1 # type: ignore
 
 ATMEL_REG_SYNC = 0x0B
 

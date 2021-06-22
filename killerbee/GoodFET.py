@@ -5,13 +5,13 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, io, struct, glob, os;
-import sqlite3;
+import sys, time, string, io, struct, glob, os; # type: ignore # type: ignore
+import sqlite3; # type: ignore
 
 fmt = ("B", "<H", None, "<L")
 
 def getClient(name="GoodFET"):
-    import GoodFET, GoodFETCC, GoodFETAVR, GoodFETSPI, GoodFETMSP430, GoodFETNRF, GoodFETCCSPI;
+    import GoodFET, GoodFETCC, GoodFETAVR, GoodFETSPI, GoodFETMSP430, GoodFETNRF, GoodFETCCSPI; # type: ignore
     if(name=="GoodFET" or name=="monitor"): return GoodFET.GoodFET();
     elif name=="cc" or name=="cc51": return GoodFETCC.GoodFETCC();
     elif name=="cc2420" or name=="ccspi": return GoodFETCCSPI.GoodFETCCSPI();
@@ -47,7 +47,7 @@ class SymbolTable:
 class GoodFETbtser:
     """py-bluez class for emulating py-serial."""
     def __init__(self,btaddr):
-        import bluetooth;
+        import bluetooth; # type: ignore
         if btaddr==None or btaddr=="none" or btaddr=="bluetooth":
             print("performing inquiry...")
             nearby_devices = bluetooth.discover_devices(lookup_names = True)
@@ -84,7 +84,7 @@ class GoodFETbtser:
         
     def write(self,msg):
         """Send traffic."""
-        import time;
+        import time; # type: ignore
         self.sock.send(msg);
         #time.sleep(0.1);
         return;
@@ -112,7 +112,7 @@ class GoodFET:
     def __init__(self, *args, **kargs):
         self.data=[0];
     def getConsole(self):
-        from GoodFETConsole import GoodFETConsole;
+        from GoodFETConsole import GoodFETConsole; # type: ignore
         return GoodFETConsole(self);
     def name2adr(self,name):
         return self.symbols.get(name);
@@ -120,7 +120,7 @@ class GoodFET:
         print("timeout\n");
     def serInit(self, port=None, timeout=2, attemptlimit=None):
         """Open a serial port of some kind."""
-        import re;
+        import re; # type: ignore
         
         if port==None:
             port=os.environ.get("GOODFET");
@@ -136,7 +136,7 @@ class GoodFET:
     def pyserInit(self, port, timeout, attemptlimit):
         """Open the serial port"""
         # Make timeout None to wait forever, 0 for non-blocking mode.
-        import serial;
+        import serial; # type: ignore
         fixserial=False;
         
         if os.name=='nt' and sys.version.find('64 bit')!=-1:
@@ -161,7 +161,7 @@ class GoodFET:
             if len(glob_list) > 0:
                 port = glob_list[0];
         if port is None and os.name=='nt':
-            from scanwin32 import winScan;
+            from scanwin32 import winScan; # type: ignore
             scan=winScan();
             for order,comport,desc,hwid in sorted(scan.comports()):
                 try:

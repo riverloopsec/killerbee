@@ -4,13 +4,13 @@ Support for the TelosB / Tmote Sky platforms, and close clones.
 Utilizes the GoodFET firmware with CCSPI application, and the GoodFET client code.
 '''
 
-import os
-import time
-import struct
-import time
-from datetime import datetime, timedelta
-from .kbutils import KBCapabilities, makeFCS
-from .GoodFETCCSPI import GoodFETCCSPI
+import os # type: ignore
+import time # type: ignore
+import struct # type: ignore
+import time # type: ignore
+from datetime import datetime, timedelta # type: ignore
+from .kbutils import KBCapabilities, makeFCS # type: ignore
+from .GoodFETCCSPI import GoodFETCCSPI # type: ignore
 
 CC2420_REG_SYNC = 0x14
 
