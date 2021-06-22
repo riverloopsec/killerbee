@@ -31,24 +31,24 @@ class gpscommon:
                 host, port = host[:i], host[i+1:]
             try: port = int(port)
             except ValueError:
-                raise socket.error, "nonnumeric port"
+                raise socket.error("nonnumeric port")
         #if self.verbose > 0:
-        #    print 'connect:', (host, port)
+        #    print('connect:', (host, port))
         msg = "getaddrinfo returns an empty list"
         self.sock = None
         for res in socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM):
             af, socktype, proto, canonname, sa = res
             try:
                 self.sock = socket.socket(af, socktype, proto)
-                #if self.debuglevel > 0: print 'connect:', (host, port)
+                #if self.debuglevel > 0: print('connect:', (host, port))
                 self.sock.connect(sa)
-            except socket.error, msg:
+            except socket.error as msg:
                 #if self.debuglevel > 0: print 'connect fail:', (host, port)
                 self.close()
                 continue
             break
         if not self.sock:
-            raise socket.error, msg
+            raise socket.error(msg)
 
     def close(self):
         if self.sock:
@@ -128,14 +128,14 @@ class gpsjson(gpscommon):
         def asciify(d):
             "De-Unicodify everything so we can copy dicts into Python objects."
             t = {}
-            for (k, v) in d.items():
+            for (k, v) in list(d.items()):
                 ka = k.encode("ascii")
-                if type(v) == type(u"x"):
+                if type(v) == type("x"):
                     va = v.encode("ascii")
                 elif type(v) == type({}):
                     va = asciify(v)
                 elif type(v) == type([]):
-                    va = map(asciify, v)
+                    va = list(map(asciify, v))
                 else:
                     va = v
                 t[ka] = va
@@ -143,7 +143,7 @@ class gpsjson(gpscommon):
         self.data = dictwrapper(**asciify(json.loads(buf.strip(), encoding="ascii")))
         # Should be done for any other array-valued subobjects, too.
         if self.data["class"] == "SKY" and hasattr(self.data, "satellites"):
-            self.data.satellites = map(lambda x: dictwrapper(**x), self.data.satellites)
+            self.data.satellites = [dictwrapper(**x) for x in self.data.satellites]
 
     def stream(self, flags=0, outfile=None):
         "Control streaming reports from the daemon,"
@@ -182,7 +182,7 @@ class dictwrapper:
     def get(self, k, d=None):
         return self.__dict__.get(k, d)
     def keys(self):
-        return self.__dict__.keys()
+        return list(self.__dict__.keys())
     def __getitem__(self, key):
         "Emulate dictionary, for new-style interface."
         return self.__dict__[key]

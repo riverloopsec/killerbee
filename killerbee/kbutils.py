@@ -1,4 +1,5 @@
 from __future__ import print_function
+
 import sys
 
 # Import USB support depending on version of pyUSB
@@ -10,18 +11,18 @@ try:
     USBVER=1
 except ImportError:
     import usb
-    #print("Warning: You are using pyUSB 0.x, future deprecation planned.")
     USBVER=0
 
 import serial
 import os
+import struct
 import glob
 import time
 import random
 import inspect
 from struct import pack
 
-import config
+from .config import *       #to get DEV_ENABLE_* variables
 
 # Known devices by USB ID:
 RZ_USB_VEND_ID      = 0x03EB
@@ -32,13 +33,15 @@ CC2530_USB_VEND_ID  = 0x11A0
 CC2530_USB_PROD_ID  = 0xEB20
 CC2531_USB_VEND_ID  = 0x0451
 CC2531_USB_PROD_ID  = 0x16AE
+BB_USB_VEND_ID      = 0x0451
+BB_USB_PROD_ID      = 0x16A8
 #FTDI_USB_VEND_ID      = 0x0403
 #FTDI_USB_PROD_ID      = 0x6001 #this is also used by FDTI cables used to attach gps
 FTDI_X_USB_VEND_ID  = 0x0403
 FTDI_X_USB_PROD_ID  = 0x6015    #api-mote FTDI chip
 
-usbVendorList  = [RZ_USB_VEND_ID, ZN_USB_VEND_ID, CC2530_USB_VEND_ID, CC2531_USB_VEND_ID]
-usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID, CC2530_USB_PROD_ID, CC2531_USB_PROD_ID]
+usbVendorList  = [RZ_USB_VEND_ID, ZN_USB_VEND_ID, CC2530_USB_VEND_ID, CC2531_USB_VEND_ID, BB_USB_VEND_ID]
+usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID, CC2530_USB_PROD_ID, CC2531_USB_PROD_ID, BB_USB_PROD_ID]
 
 # Global variables
 gps_devstring = None
@@ -91,6 +94,7 @@ class KBCapabilities:
     def getlist(self):
         return self._capabilities
 
+    #TODO enforce value is bool
     def setcapab(self, capab, value):
         self._capabilities[capab] = value
 
@@ -98,7 +102,7 @@ class KBCapabilities:
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
 
-    def frequency(self, channel=None, page=None):
+    def frequency(self, channel=None, page=0):
         '''
         Return actual frequency of channel/page in KHz
         '''
@@ -288,13 +292,13 @@ def devlist(vendor=None, product=None, gps=None, include=None):
         if serialdev == gps_devstring:
             print("kbutils.devlist is skipping ignored/GPS device string {0}".format(serialdev)) #TODO remove debugging print
             continue
-        elif (config.DEV_ENABLE_SL_NODETEST and issl_nodetest(serialdev)):
+        elif (DEV_ENABLE_SL_NODETEST and issl_nodetest(serialdev)):
             devlist.append([serialdev, "Silabs NodeTest", ""])
-        elif (config.DEV_ENABLE_SL_BEEHIVE and issl_beehive(serialdev)):
+        elif (DEV_ENABLE_SL_BEEHIVE and issl_beehive(serialdev)):
             devlist.append([serialdev, "BeeHive SG", ""])
-        elif (config.DEV_ENABLE_ZIGDUINO and iszigduino(serialdev)):
+        elif (DEV_ENABLE_ZIGDUINO and iszigduino(serialdev)):
             devlist.append([serialdev, "Zigduino", ""])
-        elif (config.DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
+        elif (DEV_ENABLE_FREAKDUINO and isfreakduino(serialdev)):
             #TODO maybe move support for freakduino into goodfetccspi subtype==?
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
         else:
@@ -310,7 +314,7 @@ def devlist(vendor=None, product=None, gps=None, include=None):
 
     if include is not None:
         # Ugly nested load, so we don't load this class when unneeded!
-        import dev_sewio #use isSewio, getFirmwareVersion
+        from . import dev_sewio #use isSewio, getFirmwareVersion
         for ipaddr in filter(isIpAddr, include):
             if dev_sewio.isSewio(ipaddr):
                 devlist.append([ipaddr, "Sewio Open-Sniffer v{0}".format(dev_sewio.getFirmwareVersion(ipaddr)), dev_sewio.getMacAddr(ipaddr)])
@@ -357,10 +361,10 @@ def isgoodfetccspi(serialdev):
                 is the subtype, and is 0 for telosb devices and 1 for apimote devices.
     '''
     #TODO reduce code, perhaps into loop iterating over board configs
-    from GoodFETCCSPI import GoodFETCCSPI
+    from .GoodFETCCSPI import GoodFETCCSPI
     os.environ["platform"] = ""
     # First try tmote detection
-    if config.DEV_ENABLE_TELOSB:
+    if DEV_ENABLE_TELOSB:
         os.environ["board"] = "telosb" #set enviroment variable for GoodFET code to use
         gf = GoodFETCCSPI()
         try:
@@ -368,14 +372,13 @@ def isgoodfetccspi(serialdev):
         except serial.serialutil.SerialException as e:
             raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
         if gf.connected == 1:
-            #print "TelosB/Tmote attempts: found %s on %s" % (gf.identstr(), serialdev)
             # now check if ccspi app is installed
             out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
             gf.serClose()
             if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
                 return True, 0
     # Try apimote v2 detection
-    if config.DEV_ENABLE_APIMOTE2:
+    if DEV_ENABLE_APIMOTE2:
         os.environ["board"] = "apimote2" #set enviroment variable for GoodFET code to use
         gf = GoodFETCCSPI()
         try:
@@ -384,14 +387,13 @@ def isgoodfetccspi(serialdev):
         except serial.serialutil.SerialException as e:
             raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
         if gf.connected == 1:
-            #print "ApiMotev2+ attempts: found %s on %s" % (gf.identstr(), serialdev)
             # now check if ccspi app is installed
             out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
             gf.serClose()
             if (gf.app == gf.CCSPIAPP) and (gf.verb == 0):
                 return True, 2
     # Then try apimote v1 detection
-    if config.DEV_ENABLE_APIMOTE1:
+    if DEV_ENABLE_APIMOTE1:
         os.environ["board"] = "apimote1" #set enviroment variable for GoodFET code to use
         gf = GoodFETCCSPI()
         try:
@@ -401,11 +403,9 @@ def isgoodfetccspi(serialdev):
             #       export board=apimote1; ./goodfet.ccspi info; ./goodfet.ccspi spectrum
             gf.serInit(port=serialdev, attemptlimit=4)
             #gf.setup()
-            #print "Found %s on %s" % (gf.identstr(), serialdev)
         except serial.serialutil.SerialException as e:
             raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)
         if gf.connected == 1:
-            #print "ApiMotev1 attempts: found %s on %s" % (gf.identstr(), serialdev)
             # now check if ccspi app is installed
             out = gf.writecmd(gf.CCSPIAPP, 0, 0, None)
             gf.serClose()
@@ -424,7 +424,7 @@ def iszigduino(serialdev):
     @returns: Boolean with the fist element==True if it is a goodfet atmel128 device.
     '''
     # TODO why does this only work every-other time zbid is invoked?
-    from GoodFETatmel128 import GoodFETatmel128rfa1
+    from .GoodFETatmel128 import GoodFETatmel128rfa1
     os.environ["platform"] = "zigduino"
     gf = GoodFETatmel128rfa1()
     try:
@@ -448,15 +448,15 @@ def issl_nodetest(serialdev):
     s = serial.Serial(port=serialdev, baudrate=115200, timeout=.1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
     #time.sleep(.5)
     # send RX stop in case it was left running
-    s.write('\re\r')
+    s.write(b'\re\r')
     # get anything in the buffers
     for x in range(5):
         s.readline()
-    s.write('version\r')
+    s.write(b'version\r')
     version = None
     for i in range(5):
-        d= s.readline()
-        if 'Node Test Application' in d:
+        d = s.readline()
+        if b'Node Test Application' in d:
             version = d
             break
     s.close()
@@ -472,15 +472,15 @@ def issl_beehive(serialdev):
     s = serial.Serial(port=serialdev, baudrate=115200, timeout=.5, bytesize=8, parity='N', stopbits=1, xonxoff=0)
     #time.sleep(.5)
     # send RX stop in case it was left running
-    s.write('\rrx 0\r')
+    s.write(b'\rrx 0\r')
     # get anything in the buffers
     while s.in_waiting:
         d = s.readline()
-    s.write('\r')
+    s.write(b'\r')
     version = None
     for i in range(5):
-        d= s.readline()
-        if 'BeeHive SG' in d:
+        d = s.readline()
+        if b'BeeHive SG' in d:
             version = d
             break
     s.close()
@@ -495,15 +495,15 @@ def isfreakduino(serialdev):
     '''
     s = serial.Serial(port=serialdev, baudrate=57600, timeout=1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
     time.sleep(1.5)
-    s.write('SC!V\r')
+    s.write(b'SC!V\r')
     time.sleep(1.5)
     #readline should take an eol argument, per:
     # http://pyserial.sourceforge.net/pyserial_api.html#serial.FileLike.readline
     # However, many got an "TypeError: readline() takes no keyword arguments" due to a pySerial error
     # So we have replaced it with a bruteforce method. Old: s.readline(eol='&')
     for i in range(100):
-        if (s.read() == '&'): break
-    if s.read(3) == 'C!V': version = s.read()
+        if (s.read() == b'&'): break
+    if s.read(3) == b'C!V': version = s.read()
     else: version = None
     s.close()
     return (version is not None)
@@ -522,7 +522,7 @@ def search_usb(device):
     else:
         if ':' not in device:
             raise KBInterfaceError("USB device format expects <BusNumber>:<DeviceNumber>, but got {0} instead.".format(device))
-        busNum, devNum = map(int, device.split(':', 1))
+        busNum, devNum = list(map(int, device.split(':', 1)))
     if USBVER == 0:
         busses = usb.busses()
         for bus in busses:
@@ -545,7 +545,6 @@ def search_usb_bus_v0x(bus, busNum, devNum):
             if devNum == None:
                 return dev
             elif busNum == int(bus.dirname) and devNum == int(dev.filename):
-                #print "Choose device", bus.dirname, dev.filename, "to initialize KillerBee instance on."
                 return dev
     return None
 
@@ -559,9 +558,9 @@ def hexdump(src, length=16):
     @param length: Optional length of data for a single row of output, def=16
     @rtype: String
     '''
-    FILTER = ''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
+    FILTER = b''.join([(len(repr(chr(x))) == 3) and chr(x) or '.' for x in range(256)])
     result = []
-    for i in xrange(0, len(src), length):
+    for i in range(0, len(src), length):
        chars = src[i:i+length]
        hex = ' '.join(["%02x" % ord(x) for x in chars])
        printable = ''.join(["%s" % ((ord(x) <= 127 and FILTER[ord(x)]) or '.') for x in chars])
@@ -576,7 +575,7 @@ def randbytes(size):
     @param size: Length of random data to return.
     @rtype: String
     '''
-    return ''.join(chr(random.randrange(0,256)) for i in xrange(size))
+    return ''.join(chr(random.randrange(0,256)) for i in range(size))
 
 
 def randmac(length=8):
@@ -619,8 +618,7 @@ def makeFCS(data):
         little-endian order.
     '''
     crc = 0
-    for i in xrange(len(data)):
-        c = ord(data[i])
+    for c in bytearray(data):
         #if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
         q = (crc ^ c) & 15				#Do low-order 4 bits
         crc = (crc // 16) ^ (q * 4225)
@@ -657,6 +655,10 @@ def pyusb_1x_patch():
             return usb.util.zzz__get_string(dev, 255, index, langid)
         usb.util.zzz__get_string = usb.util.get_string
         usb.util.get_string = get_string
+
+
+def bytearray_to_bytes(b):
+    return b"".join(struct.pack('B', value) for value in b)
 
 
 if USBVER == 1:

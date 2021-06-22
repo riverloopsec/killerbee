@@ -1,18 +1,20 @@
 #!/usr/bin/python
+from __future__ import print_function
+
 import sys
 import random
 import signal
 from killerbee import *
 
 def usage():
-    print >>sys.stderr, """
+    print("""
 zbgoodfind - search a binary file to identify the encryption key for a given
 SNA or libpcap IEEE 802.15.4 encrypted packet - jwright@willhackforsushi.com
 
 Usage: zbgoodfind [-frRFd] [-f binary file] [-r pcapfile] [-R daintreefile] 
          [-F Don't skip 2-byte FCS at end of each frame]
          [-d genenerate binary file (test mode)]
-    """
+    """, file=sys.stderr)
 
 def testmode():
     '''
@@ -47,15 +49,15 @@ def keysearch(packet, searchdata):
     searchdatalen = len(searchdata)
     while (offset < (searchdatalen - 16)):
         if arg_verbose:
-	        print "Calling decrypt with key:",
-	        for i in xrange(0,16):
-	            print "%02x" % ord(searchdata[offset+i]),
+	        print("Calling decrypt with key:", end=' ')
+	        for i in range(0,16):
+	            print("%02x" % ord(searchdata[offset+i]), end=' ')
         guesses += 1
         if d.decrypt(packet, searchdata[offset:offset+16]) != '':
-            print "Key found after %d guesses: " % guesses,
-            for i in xrange(0,15):
+            print("Key found after %d guesses: " % guesses, end=' ')
+            for i in range(0,15):
                 sys.stdout.write("%02x:" % ord(searchdata[offset+i]))
-            print "%02x" % ord(searchdata[offset+15])
+            print("%02x" % ord(searchdata[offset+15]))
             return True
         else:
             offset+=1
@@ -92,12 +94,12 @@ while len(sys.argv) > 1:
         sys.exit(0)
  
 if arg_searchfile == None:
-    print >>sys.stderr, "ERROR: Must specify a search file with -f"
+    print("ERROR: Must specify a search file with -f", file=sys.stderr)
     usage()
     sys.exit(1)
 
 if arg_pcapfile == None and arg_dsnafile == None:
-    print >>sys.stderr, "ERROR: Must specify a file with frames to decrypt with -r (pcap) or -R (Daintree SNA)"
+    print("ERROR: Must specify a file with frames to decrypt with -r (pcap) or -R (Daintree SNA)", file=sys.stderr)
     usage()
     sys.exit(1)
 
@@ -116,7 +118,7 @@ elif (arg_dsnafile != None):
 signal.signal(signal.SIGINT, interrupt)
 
 
-print "zbgoodfind: searching the contents of %s for encryption keys with the first encrypted packet in %s." % (arg_searchfile, savefile)
+print("zbgoodfind: searching the contents of %s for encryption keys with the first encrypted packet in %s." % (arg_searchfile, savefile))
 
 packetfound=0
 packetcount=0
@@ -131,24 +133,24 @@ while 1:
         if (fcf & DOT154_FCF_SEC_EN) == 0:
             # Packet is not encrypted
             if arg_verbose:
-                print "Skipping unencrypted packet %d." % packetcount
+                print("Skipping unencrypted packet %d." % packetcount)
             continue
 
         packetfound=1
         if arg_skipfcs:
             packet = packet[:-2]
         if arg_verbose:
-            print "Starting key search with packet %d." % packetcount
+            print("Starting key search with packet %d." % packetcount)
         if keysearch(packet, searchdata) == True:
             break
         else:
-            print "Failed to locate the encryption key for frame %d." % packetcount
+            print("Failed to locate the encryption key for frame %d." % packetcount)
 
     except TypeError:       # raised when pnext returns Null (end of capture)
         break
 
 if packetfound == 0:
-    print "No encrypted packets found in the capture file %s." % savefile
+    print("No encrypted packets found in the capture file %s." % savefile)
 
 cap.close()
 

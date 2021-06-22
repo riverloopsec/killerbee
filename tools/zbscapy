@@ -1,15 +1,10 @@
-#! /usr/bin/env python
+#!/usr/bin/env python3
 
 __version__ = '0.6'
 import logging
 log_killerbee = logging.getLogger('scapy.killerbee')
 
-try:
-	from scapy.all import *
-except ImportError:
-	print 'This tool requires Scapy to be installed (specifically scapy-com edition).'
-	from sys import exit
-	exit(-1)
+from scapy.all import *
 
 # Per cutaway at https://code.google.com/p/killerbee/issues/detail?id=28, this has been
 # moved to scapy_extensions.py for now. That should allow KillerBee's PCAP reader.

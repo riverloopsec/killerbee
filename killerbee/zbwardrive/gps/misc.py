@@ -50,8 +50,10 @@ def CalcRad(lat):
     r = r * 1000.0      # Convert to meters
     return r
 
-def EarthDistance((lat1, lon1), (lat2, lon2)):
+def EarthDistance(xxx_todo_changeme, xxx_todo_changeme1):
     "Distance in meters between two points specified in degrees."
+    (lat1, lon1) = xxx_todo_changeme
+    (lat2, lon2) = xxx_todo_changeme1
     x1 = CalcRad(lat1) * math.cos(Deg2Rad(lon1)) * math.sin(Deg2Rad(90-lat1))
     x2 = CalcRad(lat2) * math.cos(Deg2Rad(lon2)) * math.sin(Deg2Rad(90-lat2))
     y1 = CalcRad(lat1) * math.sin(Deg2Rad(lon1)) * math.sin(Deg2Rad(90-lat1))
@@ -67,8 +69,10 @@ def EarthDistance((lat1, lon1), (lat2, lon2)):
     elif a < -1: a = -1
     return CalcRad((lat1+lat2) / 2) * math.acos(a)
 
-def MeterOffset((lat1, lon1), (lat2, lon2)):
+def MeterOffset(xxx_todo_changeme2, xxx_todo_changeme3):
     "Return offset in meters of second arg from first."
+    (lat1, lon1) = xxx_todo_changeme2
+    (lat2, lon2) = xxx_todo_changeme3
     dx = EarthDistance((lat1, lon1), (lat1, lon2))
     dy = EarthDistance((lat1, lon1), (lat2, lon1))
     if lat1 < lat2: dy *= -1
@@ -83,7 +87,7 @@ def isotime(s):
         date = int(s)
         msec = s - date
         date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
-        return date + "." + `msec`[2:]
+        return date + "." + repr(msec)[2:]
     elif type(s) == type(""):
         if s[-1] == "Z":
             s = s[:-1]

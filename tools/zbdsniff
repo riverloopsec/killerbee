@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import print_function
+
 from optparse import OptionParser
 
 from killerbee.scapy_extensions import *
@@ -68,7 +68,7 @@ def sniffNetworkKey(pkts, key, verbose):
 
 if __name__ == '__main__':
     # Define the command line options.
-    parser = OptionParser(description="zbdsniff: Decode plaintext Zigbee Nwtwork key from a " +
+    parser = OptionParser(description="zbdsniff: Decode plaintext Zigbee Network key from a " +
         "capture file. Will process libpcap capture files. Original concept: " +
         "jwright@willhackforsushi.com, re-implemented using Scapy by Steve Martin.")
     parser.add_option("-f", "--file", dest="filename", help="PCap file to process", metavar="FILE")
@@ -105,6 +105,7 @@ if __name__ == '__main__':
         try:
             pkts = kbrdpcap(fname)
         except Exception as e:
+            print("Exception: ", e)
             print("ERROR: Input file \"{}\" is not able to be loaded. Is it a PCAP file? Daintree support was removed in KillerBee 2.7.1".format(fname), file=sys.stderr)
             continue
         sniffNetworkKey(pkts, options.transportKey, options.verbose)

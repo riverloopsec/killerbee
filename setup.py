@@ -47,8 +47,8 @@ except ImportError:
 try:
     from scapy.all import Dot15d4
 except ImportError:
-    warn.append("Scapy 802.15.4 (see README.md)")
-    pip_pkgs.append("git+https://github.com/secdev/scapy.git#egg=scapy")
+    warn.append("Scapy (with dot15d4 layer)")
+    pip_pkgs.append("scapy")
 
 if len(err) > 0:
     print("""
@@ -67,7 +67,7 @@ if len(apt_get_pkgs) > 0 or len(pip_pkgs) > 0:
     if len(apt_get_pkgs) > 0:
         print("\tsudo apt-get install -y {}".format(' '.join(apt_get_pkgs)), file=sys.stderr)
     if len(pip_pkgs) > 0:
-        print("\tpip install {}".format(' '.join(pip_pkgs)), file=sys.stderr)
+        print("\tpip3 install {}".format(' '.join(pip_pkgs)), file=sys.stderr)
 
 if len(err) > 0:
     sys.exit(1)
@@ -80,7 +80,7 @@ zigbee_crypt = Extension('zigbee_crypt',
                          )
 
 setup(name        = 'killerbee',
-      version     = '2.7.1',
+      version     = '3.0.0-beta.0',
       description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
       author = 'Joshua Wright, Ryan Speers',
       author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
@@ -92,8 +92,7 @@ setup(name        = 'killerbee',
                  'tools/zbwardrive', 'tools/zbopenear', 'tools/zbfakebeacon',
                  'tools/zborphannotify', 'tools/zbpanidconflictflood', 'tools/zbrealign', 'tools/zbcat',
                  'tools/zbjammer', 'tools/kbbootloader'],
-      install_requires=['pyserial>=2.0', 'pyusb', 'pycrypto', 'rangeparser'],
-                        #'git+https://github.com/secdev/scapy.git#egg=scapy'],
+      install_requires=['pyserial>=2.0', 'pyusb', 'pycrypto', 'rangeparser', 'scapy'],
       # NOTE: pygtk doesn't install via distutils on non-Windows hosts
       ext_modules = [zigbee_crypt],
       )

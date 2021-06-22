@@ -46,7 +46,7 @@ Install the requirement, such as `sudo apt-get install -y libgcrypt-dev`.
 
 #### Flashing
 
-See `firmware/README.md` for details.
+See [firmware/README.md](firmware/README.md) for details.
 
 #### ValueError device has no langid
 

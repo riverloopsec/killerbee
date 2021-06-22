@@ -10,7 +10,7 @@ import time
 import struct
 from datetime import datetime, date
 from datetime import time as dttime
-from kbutils import KBCapabilities, makeFCS
+from .kbutils import KBCapabilities, makeFCS
 
 MODE_NONE    = 0x01
 MODE_SNIFF   = 0x02
@@ -84,12 +84,10 @@ class SL_NODETEST:
         self.handle.write(cmdstr)
         if send_return:
             self.handle.write('\r')
-        #print "Sent %s" % (cmdstr)
         if confirm:
             ret= False
             for x in range(10):
                 d= self.handle.readline().strip()
-                #print 'got', d
                 if d == '>':
                     ret= True
                     break
@@ -112,7 +110,7 @@ class SL_NODETEST:
         data = packet[1:].replace('{',' ').replace('}',' ').split()
         # should be 12 fields + payload length + payload
         if not data or not len(data[13:]) == int(data[12], 16):
-            print "Error parsing stream received from device (payload size error):", packet
+            print("Error parsing stream received from device (payload size error):", packet)
             return None
         # payload is in the form e.g. "0x03 0x08 0xA3 0xFF 0xFF 0xFF 0xFF 0x07" so we need to convert to a string
         frame = ''
@@ -120,7 +118,7 @@ class SL_NODETEST:
             try:
                 frame += chr(int(x, 16))
             except:
-                print "Error parsing stream received from device (invalid payload):", packet
+                print("Error parsing stream received from device (invalid payload):", packet)
                 return None
 
         # Parse other useful fields
@@ -130,7 +128,7 @@ class SL_NODETEST:
             validcrc = True
             frame += makeFCS(frame)
         except:
-            print "Error parsing stream received from device (invalid rssi or FCS build error):", packet
+            print("Error parsing stream received from device (invalid rssi or FCS build error):", packet)
             return None
         return [frame, validcrc, rssi]
 
@@ -156,7 +154,6 @@ class SL_NODETEST:
             self.__send_cmd("rx", confirm= False)
             for x in range(10):
                 d = self.handle.readline()
-                #print 'got', d
                 if '{payload}' in d:
                     self.mode = MODE_SNIFF
                     self.__stream_open = True
@@ -176,7 +173,6 @@ class SL_NODETEST:
         self.__send_cmd("e", send_return= False, confirm= False)
         for x in range(5):
             d= self.handle.readline().strip()
-            #print 'got', d
             if "test end" in d:
                 self.mode = MODE_NONE
                 self.__stream_open = False
