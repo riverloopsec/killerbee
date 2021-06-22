@@ -47,7 +47,7 @@ class DainTreeDumper:
                 str(self._pcount), " ", 
                 "%6f"%time.time(), " ", 
                 str(len(packet)), " ",
-                str(binascii.hexlify(packet)), " ",
+                binascii.hexlify(packet).decode('latin-1'), " ",
                 "255 ",                             # LQI
                 "1 ",                               # Unknown
                 str(rssi), " ",                     # RSSI
@@ -115,7 +115,8 @@ class DainTreeReader:
             if record == None:
                 return None
             # Return a list with the first element a list containing timestamp
-            # for compatibility with ithe pcapdump PcapReader.pnext() method.
+            # for compatibility with the pcapdump PcapReader.pnext() method.
+            print(record[3])
             return [[float(record[1]),len(record[3]),len(record[3])], binascii.unhexlify(record[3])]
         except IndexError:
             return [None, None]
