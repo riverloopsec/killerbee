@@ -300,6 +300,12 @@ class GoodFET:
         By now only BSL mode is accessed.
         @type  invokeBSL: Integer
         @param invokeBSL: 1 for a complete sequence, or 0 to only access RST/NMI pin
+        Applies BSL entry sequence on RST/NMI and TEST/VPP pins
+        Parameters:
+            invokeBSL = 1: complete sequence
+            invokeBSL = 0: only RST/NMI pin accessed
+            
+        By now only BSL mode is accessed
         '''
         #if DEBUG > 1: sys.stderr.write("* bslReset(invokeBSL=%s)\n" % invokeBSL)
         if invokeBSL:
@@ -367,7 +373,6 @@ class GoodFET:
         return self.serialport.getCTS()
 
     def telosBReset(self, invokeBSL=0):
-        '''Helper function for support of the TelosB platform.'''
         # "BSL entry sequence at dedicated JTAG pins"
         # rst !s0: 0 0 0 0 1 1
         # tck !s1: 1 0 1 0 0 1
@@ -610,7 +615,7 @@ class GoodFET:
         self.serialport.write(bytearray([0x00, 0x80, 1, baud]))
 
         print("Changed host baud.")
-        self.serialport.baudrate = rates[baud];
+        self.serialport.setBaudrate(rates[baud]);
         time.sleep(1);
         self.serialport.flushInput()
         self.serialport.flushOutput()
@@ -622,7 +627,7 @@ class GoodFET:
     def findbaud(self):
         for r in self.baudrates:
             print("\nTrying %i" % r);
-            self.serialport.baudrate = r;
+            self.serialport.setBaudrate(r);
             #time.sleep(1);
             self.serialport.flushInput()
             self.serialport.flushOutput()

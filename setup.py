@@ -14,19 +14,6 @@ warn = []
 apt_get_pkgs = []
 pip_pkgs = []
 
-# We have made gtk, cairo, scapy-com into optional libraries
-try:
-    import gtk
-except ImportError:
-    warn.append("gtk")
-    apt_get_pkgs.append("python-gtk2")
-
-try:
-    import cairo
-except ImportError:
-    warn.append("cairo")
-    apt_get_pkgs.append("python-cairo")
-
 # Ensure we have either pyUSB 0.x or pyUSB 1.x, but we now
 #  prefer pyUSB 1.x moving forward. Support for 0.x may be deprecated.
 try:
@@ -80,7 +67,7 @@ zigbee_crypt = Extension('zigbee_crypt',
                          )
 
 setup(name        = 'killerbee',
-      version     = '3.0.0-beta.0',
+      version     = '3.0.0-beta.1',
       description = 'ZigBee and IEEE 802.15.4 Attack Framework and Tools',
       author = 'Joshua Wright, Ryan Speers',
       author_email = 'jwright@willhackforsushi.com, ryan@riverloopsecurity.com',
