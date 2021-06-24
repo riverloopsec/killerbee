@@ -12,10 +12,7 @@ TODO list (help is welcomed):
   - Platform recognition (ApiMote versons)
 '''
 
-from typing import Optional
-from typing import Dict
-from typing import Union
-from typing import Any
+from typing import Optional, Dict, Union, Any
 
 import os
 import time
@@ -119,9 +116,7 @@ class APIMOTE:
         self.handle.RF_promiscuity(1)
         self.handle.RF_autocrc(0)
 
-        if channel is None:
-            pass
-        else:
+        if channel is not None:
             self.set_channel(channel, page)
         
         self.handle.CC_RFST_RX()
@@ -186,9 +181,7 @@ class APIMOTE:
         if len(packet) > 125:                   # 127 - 2 to accommodate FCS
             raise Exception('Packet too long')
 
-        if channel is None:
-            pass
-        else:
+        if channel is not None:
             self.set_channel(channel, page)
 
         self.handle.RF_autocrc(1)               #let radio add the CRC
@@ -258,10 +251,10 @@ class APIMOTE:
 
         self.handle.RF_promiscuity(1)
         self.handle.RF_autocrc(0)
-        if channel is None:
-            pass
-        else:
+
+        if channel is not None:
             self.set_channel(channel, page)
+
         self.handle.CC_RFST_RX()
         self.handle.RF_carrier() #constant carrier wave jamming
         #self.handle.RF_reflexjam() #reflexive jamming (advanced)
