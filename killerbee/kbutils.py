@@ -1,19 +1,12 @@
-from __future__ import print_function
+from typing import Optional, Dict, Union, List, Tuple, Any 
 
 import sys
 
 # Import USB support depending on version of pyUSB
-try:
-    import usb.core
-    import usb.util
-    #import usb.backend.libusb01
-    #backend = usb.backend.libusb01.get_backend()
-    USBVER=1
-except ImportError:
-    import usb
-    USBVER=0
+import usb.core # type: ignore
+import usb.util # type: ignore
 
-import serial
+import serial # type: ignore
 import os
 import struct
 import glob
@@ -22,53 +15,53 @@ import random
 import inspect
 from struct import pack
 
-from .config import *       #to get DEV_ENABLE_* variables
+from .config import *       #to get DEV_ENABLE_* variables 
 
 # Known devices by USB ID:
-RZ_USB_VEND_ID      = 0x03EB
-RZ_USB_PROD_ID      = 0x210A
-ZN_USB_VEND_ID      = 0x04D8
-ZN_USB_PROD_ID      = 0x000E
-CC2530_USB_VEND_ID  = 0x11A0
-CC2530_USB_PROD_ID  = 0xEB20
-CC2531_USB_VEND_ID  = 0x0451
-CC2531_USB_PROD_ID  = 0x16AE
-BB_USB_VEND_ID      = 0x0451
-BB_USB_PROD_ID      = 0x16A8
+RZ_USB_VEND_ID: int       = 0x03EB
+RZ_USB_PROD_ID: int       = 0x210A
+ZN_USB_VEND_ID: int       = 0x04D8
+ZN_USB_PROD_ID: int       = 0x000E
+CC2530_USB_VEND_ID: int   = 0x11A0
+CC2530_USB_PROD_ID: int   = 0xEB20
+CC2531_USB_VEND_ID: int   = 0x0451
+CC2531_USB_PROD_ID: int   = 0x16AE
+BB_USB_VEND_ID: int       = 0x0451
+BB_USB_PROD_ID: int       = 0x16A8
 #FTDI_USB_VEND_ID      = 0x0403
 #FTDI_USB_PROD_ID      = 0x6001 #this is also used by FDTI cables used to attach gps
-FTDI_X_USB_VEND_ID  = 0x0403
-FTDI_X_USB_PROD_ID  = 0x6015    #api-mote FTDI chip
+FTDI_X_USB_VEND_ID: int   = 0x0403
+FTDI_X_USB_PROD_ID: int   = 0x6015    #api-mote FTDI chip
 
-usbVendorList  = [RZ_USB_VEND_ID, ZN_USB_VEND_ID, CC2530_USB_VEND_ID, CC2531_USB_VEND_ID, BB_USB_VEND_ID]
-usbProductList = [RZ_USB_PROD_ID, ZN_USB_PROD_ID, CC2530_USB_PROD_ID, CC2531_USB_PROD_ID, BB_USB_PROD_ID]
+usbVendorList: List[int] = [RZ_USB_VEND_ID, ZN_USB_VEND_ID, CC2530_USB_VEND_ID, CC2531_USB_VEND_ID, BB_USB_VEND_ID]
+usbProductList: List[int] = [RZ_USB_PROD_ID, ZN_USB_PROD_ID, CC2530_USB_PROD_ID, CC2531_USB_PROD_ID, BB_USB_PROD_ID]
 
 # Global variables
-gps_devstring = None
+gps_devstring: Optional[str] = None
 
 
 class KBCapabilities:
     """
     Class to store and report on the capabilities of a specific KillerBee device.
     """
-    NONE               = 0x00 #: Capabilities Flag: No Capabilities
-    SNIFF              = 0x01 #: Capabilities Flag: Can Sniff
-    SETCHAN            = 0x02 #: Capabilities Flag: Can Set the Channel
-    INJECT             = 0x03 #: Capabilities Flag: Can Inject Frames
-    PHYJAM             = 0x04 #: Capabilities Flag: Can Jam PHY Layer
-    SELFACK            = 0x05 #: Capabilities Flag: Can ACK Frames Automatically
-    PHYJAM_REFLEX      = 0x06 #: Capabilities Flag: Can Jam PHY Layer Reflexively
-    SET_SYNC           = 0x07 #: Capabilities Flag: Can set the register controlling 802.15.4 sync byte
-    FREQ_2400          = 0x08 #: Capabilities Flag: Can perform 2.4 GHz sniffing (ch 11-26)
-    FREQ_900           = 0x09 #: Capabilities Flag: Can perform 900 MHz sniffing (ch 1-10)
-    BOOT               = 0x0a #: Capabilities Flag: Has BootLoader
-    FREQ_863           = 0x0b #: Capabilities Flag: Can perform 863-868 MHz sniffing (ch 0-26 )
-    FREQ_868           = 0x0c #: Capabilities Flag: Can perform 868-876 MHz sniffing (ch 0-8)
-    FREQ_870           = 0x0d #: Capabilities Flag: Can perform 870-876 MHz sniffing (ch 0-26)
-    FREQ_915           = 0x0e #: Capabilities Flag: Can perform 915-917 MHz sniffing (ch 0-26)
+    NONE: int          = 0x00 #: Capabilities Flag: No Capabilities
+    SNIFF: int         = 0x01 #: Capabilities Flag: Can Sniff
+    SETCHAN: int       = 0x02 #: Capabilities Flag: Can Set the Channel
+    INJECT: int        = 0x03 #: Capabilities Flag: Can Inject Frames
+    PHYJAM: int        = 0x04 #: Capabilities Flag: Can Jam PHY Layer
+    SELFACK: int       = 0x05 #: Capabilities Flag: Can ACK Frames Automatically
+    PHYJAM_REFLEX: int = 0x06 #: Capabilities Flag: Can Jam PHY Layer Reflexively
+    SET_SYNC: int      = 0x07 #: Capabilities Flag: Can set the register controlling 802.15.4 sync byte
+    FREQ_2400: int     = 0x08 #: Capabilities Flag: Can perform 2.4 GHz sniffing (ch 11-26)
+    FREQ_900: int      = 0x09 #: Capabilities Flag: Can perform 900 MHz sniffing (ch 1-10)
+    BOOT: int          = 0x0a #: Capabilities Flag: Has BootLoader
+    FREQ_863: int      = 0x0b #: Capabilities Flag: Can perform 863-868 MHz sniffing (ch 0-26 )
+    FREQ_868: int      = 0x0c #: Capabilities Flag: Can perform 868-876 MHz sniffing (ch 0-8)
+    FREQ_870: int      = 0x0d #: Capabilities Flag: Can perform 870-876 MHz sniffing (ch 0-26)
+    FREQ_915: int      = 0x0e #: Capabilities Flag: Can perform 915-917 MHz sniffing (ch 0-26)
 
-    def __init__(self):
-        self._capabilities = {
+    def __init__(self) -> None:
+        self._capabilities: Dict[int, bool] = {
                 self.NONE : False,
                 self.SNIFF : False,
                 self.SETCHAN : False,
@@ -85,27 +78,29 @@ class KBCapabilities:
                 self.FREQ_915: False,
                 self.BOOT: False }
 
-    def check(self, capab):
+    def check(self, capab: int) -> bool:
         if capab in self._capabilities:
             return self._capabilities[capab]
         else:
             return False
 
-    def getlist(self):
+    def getlist(self) -> Dict[int, bool]:
         return self._capabilities
 
-    #TODO enforce value is bool
-    def setcapab(self, capab, value):
+    def setcapab(self, capab: int, value: bool) -> None:
         self._capabilities[capab] = value
 
-    def require(self, capab):
+    def require(self, capab: int) -> None:
         if self.check(capab) != True:
             raise Exception('Selected hardware does not support required capability (%d).' % capab)
 
-    def frequency(self, channel=None, page=0):
+    def frequency(self, channel: Optional[int]=None, page: int=0) -> int:
         '''
         Return actual frequency of channel/page in KHz
         '''
+        if channel is None:
+            return 0
+
         #TODO: FREQ_900
         if not self.is_valid_channel(channel, page):
             return 0
@@ -136,11 +131,14 @@ class KBCapabilities:
             first = 0
         return (channel - first) * step + base
 
-    def is_valid_channel(self, channel, page= 0):
+    def is_valid_channel(self, channel: Optional[int], page: int=0) -> bool:
         '''
         Based on sniffer capabilities, return if this is an OK channel number.
         @rtype: Boolean
         '''
+        if channel is None:
+            return False
+
         # if sub-ghz, check that page and channel and capability match
         if page:
             if page == 28 and (channel > 26 or not self.check(self.FREQ_863)):
@@ -166,11 +164,12 @@ class findFromList(object):
     Custom matching function for pyUSB 1.x.
     Used by usb.core.find's custom_match parameter.
     '''
-    def __init__(self, vendors_, products_):
+    def __init__(self, vendors_, products_) -> None:
         '''Takes a list of vendor IDs and product IDs.'''
-        self._vendors  = vendors_
-        self._products = products_
-    def __call__(self, device):
+        self._vendors: List[int]  = vendors_
+        self._products: List[int] = products_
+
+    def __call__(self, device: Any) -> bool:
         '''
         Returns True if the device being searched
         is in these lists.
@@ -178,6 +177,7 @@ class findFromList(object):
         if (device.idVendor in self._vendors) and \
            (device.idProduct in self._products):
             return True
+
         return False
 
 class findFromListAndBusDevId(findFromList):
@@ -185,12 +185,13 @@ class findFromListAndBusDevId(findFromList):
     Custom matching function for pyUSB 1.x.
     Used by usb.core.find's custom_match parameter.
     '''
-    def __init__(self, busNum_, devNum_, vendors_, products_):
+    def __init__(self, busNum_: Optional[int], devNum_: Optional[int], vendors_: List[int], products_: List[int]) -> None:
         '''Takes a list of vendor IDs and product IDs.'''
         findFromList.__init__(self, vendors_, products_)
-        self._busNum = busNum_
-        self._devNum = devNum_
-    def __call__(self, device):
+        self._busNum: Optional[int] = busNum_
+        self._devNum: Optional[int] = devNum_
+
+    def __call__(self, device: Any) -> bool:
         '''
         Returns True if the device being searched
         is in these lists.
@@ -199,18 +200,19 @@ class findFromListAndBusDevId(findFromList):
            (self._busNum == None or device.bus == self._busNum)     and \
            (self._devNum == None or device.address == self._devNum)     :
             return True
+
         return False
 
-def devlist_usb_v1x(vendor=None, product=None):
+def devlist_usb_v1x(vendor: Optional[Any]=None, product: Optional[Any]=None) -> list[Any]:
     '''
     Private function. Do not call from tools/scripts/etc.
     '''
-    devlist = []
-    if vendor == None:  vendor = usbVendorList
+    devlist: List[Any] = []
+    if vendor is None:  vendor = usbVendorList
     else:               vendor = [vendor]
-    if product == None: product = usbProductList
+    if product is None: product = usbProductList
     else:               product = [product]
-    devs = usb.core.find(find_all=True, custom_match=findFromList(vendor, product)) #backend=backend, 
+    devs: Any = usb.core.find(find_all=True, custom_match=findFromList(vendor, product)) #backend=backend, 
     try:
         for dev in devs:
             # Note, can use "{0:03d}:{1:03d}" to get the old format,
@@ -227,26 +229,10 @@ def devlist_usb_v1x(vendor=None, product=None):
 
     return devlist
 
-def devlist_usb_v0x(vendor=None, product=None):
-    '''
-    Private function. Do not call from tools/scripts/etc.
-    '''
-    devlist = []
-    busses = usb.busses()
-    for bus in busses:
-        devices = bus.devices
-        for dev in devices:
-            if ((vendor==None and dev.idVendor in usbVendorList) or dev.idVendor==vendor) \
-               and ((product==None and dev.idProduct in usbProductList) or dev.idProduct==product):
-                devlist.append([''.join([bus.dirname + ":" + dev.filename]), \
-                                  dev.open().getString(dev.iProduct, 50),    \
-                                  dev.open().getString(dev.iSerialNumber, 12)])
-    return devlist
-
-def isIpAddr(ip):
+def isIpAddr(ip: str) -> bool:
     '''Return True if the given string is a valid IPv4 or IPv6 address.'''
     import socket
-    def is_valid_ipv4_address(address):
+    def is_valid_ipv4_address(address: str) -> bool:
         try:                    socket.inet_pton(socket.AF_INET, address)
         except AttributeError:  # no inet_pton here, sorry
             try:                    socket.inet_aton(address)
@@ -254,13 +240,13 @@ def isIpAddr(ip):
             return (address.count('.') == 3)
         except socket.error:    return False
         return True
-    def is_valid_ipv6_address(address):
+    def is_valid_ipv6_address(address: str) -> bool:
         try:                    socket.inet_pton(socket.AF_INET6, address)
         except socket.error:    return False
         return True
     return ( is_valid_ipv6_address(ip) or is_valid_ipv4_address(ip) )
 
-def devlist(vendor=None, product=None, gps=None, include=None):
+def devlist(vendor: Optional[Any]=None, product: Optional[Any]=None, gps: Optional[str]=None, include: Optional[str]=None) -> list[Any]:
     '''
     Return device information for all present devices, 
     filtering if requested by vendor and/or product IDs on USB devices, and
@@ -281,16 +267,11 @@ def devlist(vendor=None, product=None, gps=None, include=None):
     global usbVendorList, usbProductList, gps_devstring
     if gps is not None and gps_devstring is None:
         gps_devstring = gps
-    devlist = []
 
-    if USBVER == 0:
-        devlist = devlist_usb_v0x(vendor, product)
-    elif USBVER == 1:
-        devlist = devlist_usb_v1x(vendor, product)
+    devlist: List[Any] = devlist_usb_v1x(vendor, product)
 
     for serialdev in get_serial_ports(include=include):
         if serialdev == gps_devstring:
-            print("kbutils.devlist is skipping ignored/GPS device string {0}".format(serialdev)) #TODO remove debugging print
             continue
         elif (DEV_ENABLE_SL_NODETEST and issl_nodetest(serialdev)):
             devlist.append([serialdev, "Silabs NodeTest", ""])
@@ -324,14 +305,14 @@ def devlist(vendor=None, product=None, gps=None, include=None):
     
     return devlist
 
-def get_serial_devs(seriallist):
+def get_serial_devs(seriallist: List[str]) -> None:
     global DEV_ENABLE_FREAKDUINO, DEV_ENABLE_ZIGDUINO
     #TODO Continue moving code from line 163:181 here, yielding results
 
-def isSerialDeviceString(s):
+def isSerialDeviceString(s: str) -> bool:
     return ( ( s.count('/') + s.count('tty') ) > 0 )
 
-def get_serial_ports(include=None):
+def get_serial_ports(include: Optional[Any]=None) -> Any:
     '''
     Private function. Do not call from tools/scripts/etc.
     This should return a list of device paths for serial devices that we are
@@ -350,7 +331,7 @@ def get_serial_ports(include=None):
         seriallist = list( set(seriallist).union(set(filter(isSerialDeviceString, include))) )
     return seriallist
 
-def isgoodfetccspi(serialdev):
+def isgoodfetccspi(serialdev: str) -> Tuple[bool, Optional[int]]:
     '''
     Determine if a given serial device is running the GoodFET firmware with the CCSPI application.
     This should either be a TelosB/Tmote Sky GOODFET or an Api-Mote design.
@@ -414,7 +395,7 @@ def isgoodfetccspi(serialdev):
     # Nothing found
     return False, None
 
-def iszigduino(serialdev):
+def iszigduino(serialdev: str) -> bool:
     '''
     Determine if a given serial device is running the GoodFET firmware with the atmel_radio application.
     This should be a Zigduino (only tested on hardware r1 currently).
@@ -438,18 +419,16 @@ def iszigduino(serialdev):
             return True
     return False
     
-def issl_nodetest(serialdev):
+def issl_nodetest(serialdev: str) -> bool:
     '''
     Determine if a given serial device is a Silabs dev board NodeTest loaded (https://www.silabs.com/documents/public/application-notes/AN1019-NodeTest.pdf)
     @type serialdev: String
     @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
     @rtype: Boolean
     '''
-    s = serial.Serial(port=serialdev, baudrate=115200, timeout=.1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
-    #time.sleep(.5)
-    # send RX stop in case it was left running
+    s: serial.Serial = serial.Serial(port=serialdev, baudrate=115200, timeout=.1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+
     s.write(b'\re\r')
-    # get anything in the buffers
     for x in range(5):
         s.readline()
     s.write(b'version\r')
@@ -462,18 +441,16 @@ def issl_nodetest(serialdev):
     s.close()
     return (version is not None)
 
-def issl_beehive(serialdev):
+def issl_beehive(serialdev: str) -> bool:
     '''
     Determine if a given serial device is a BeeHive SG - contact Adam Laurie <adam@algroup.co.uk> for more info
     @type serialdev: String
     @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
     @rtype: Boolean
     '''
-    s = serial.Serial(port=serialdev, baudrate=115200, timeout=.5, bytesize=8, parity='N', stopbits=1, xonxoff=0)
-    #time.sleep(.5)
-    # send RX stop in case it was left running
+    s: serial.Serial = serial.Serial(port=serialdev, baudrate=115200, timeout=.5, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+
     s.write(b'\rrx 0\r')
-    # get anything in the buffers
     while s.in_waiting:
         d = s.readline()
     s.write(b'\r')
@@ -486,14 +463,14 @@ def issl_beehive(serialdev):
     s.close()
     return (version is not None)
 
-def isfreakduino(serialdev):
+def isfreakduino(serialdev: str) -> bool:
     '''
     Determine if a given serial device is a Freakduino attached with the right sketch loaded.
     @type serialdev: String
     @param serialdev: Path to a serial device, ex /dev/ttyUSB0.
     @rtype: Boolean
     '''
-    s = serial.Serial(port=serialdev, baudrate=57600, timeout=1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
+    s: serial.Serial = serial.Serial(port=serialdev, baudrate=57600, timeout=1, bytesize=8, parity='N', stopbits=1, xonxoff=0)
     time.sleep(1.5)
     s.write(b'SC!V\r')
     time.sleep(1.5)
@@ -508,7 +485,7 @@ def isfreakduino(serialdev):
     s.close()
     return (version is not None)
 
-def search_usb(device):
+def search_usb(device: Any) -> Any:
     """
     Takes either None, specifying that any USB device in the
     global vendor and product lists are acceptable, or takes
@@ -517,37 +494,13 @@ def search_usb(device):
     for bus and device that correspond to the identifier string.
     """
     if device == None:
-        busNum = None
-        devNum = None
+        busNum: Optional[int] = None
+        devNum: Optional[int] = None
     else:
         if ':' not in device:
             raise KBInterfaceError("USB device format expects <BusNumber>:<DeviceNumber>, but got {0} instead.".format(device))
         busNum, devNum = list(map(int, device.split(':', 1)))
-    if USBVER == 0:
-        busses = usb.busses()
-        for bus in busses:
-            dev = search_usb_bus_v0x(bus, busNum, devNum)
-            if dev != None:
-                return (bus, dev)
-        return None  # NOTE: can't expect a tuple returned
-    elif USBVER == 1:
-        return usb.core.find(custom_match=findFromListAndBusDevId(busNum, devNum, usbVendorList, usbProductList)) #backend=backend, 
-    else:
-        raise Exception("USB version expected to be 0.x or 1.x.")
-
-
-def search_usb_bus_v0x(bus, busNum, devNum):
-    '''Helper function for USB enumeration in pyUSB 0.x enviroments.'''
-    devices = bus.devices
-    for dev in devices:
-        if (dev.idVendor in usbVendorList) and (dev.idProduct in usbProductList):
-            #Populate the capability information for this device later, when driver is initialized
-            if devNum == None:
-                return dev
-            elif busNum == int(bus.dirname) and devNum == int(dev.filename):
-                return dev
-    return None
-
+    return usb.core.find(custom_match=findFromListAndBusDevId(busNum, devNum, usbVendorList, usbProductList)) #backend=backend, 
 
 def hexdump(src, length=16):
     '''
@@ -568,7 +521,7 @@ def hexdump(src, length=16):
     return ''.join(result)
 
 
-def randbytes(size):
+def randbytes(size: int) -> str:
     '''
     Returns a random string of size bytes.  Not cryptographically safe.
     @type size: Int
@@ -578,7 +531,7 @@ def randbytes(size):
     return ''.join(chr(random.randrange(0,256)) for i in range(size))
 
 
-def randmac(length=8):
+def randmac(length: int=8) -> str:
     '''
     Returns a random MAC address using a list valid OUI's from ZigBee device 
     manufacturers.  Data is returned in air-format byte order (LSB first).
@@ -589,7 +542,8 @@ def randmac(length=8):
     @returns: A randomized MAC address in a little-endian byte string.
     '''
     # Valid OUI prefixes for MAC addresses
-    prefixes = [ "\x00\x0d\x6f",    # Ember
+    prefixes: List[str] = [ 
+                "\x00\x0d\x6f",     # Ember
                 "\x00\x12\x4b",     # TI
                 "\x00\x04\xa3",     # Microchip
                 "\x00\x04\x25",     # Atmel
@@ -602,13 +556,13 @@ def randmac(length=8):
                 "\x00\xa0\x50"      # Cypress
                 ]
 
-    prefix = random.choice(prefixes)
-    suffix = randbytes(length-3)
+    prefix: str = random.choice(prefixes)
+    suffix: str = randbytes(length-3)
     # Reverse the address for use in a packet
     return ''.join([prefix, suffix])[::-1]
 
 
-def makeFCS(data):
+def makeFCS(data: bytes) -> bytes:
     '''
     Do a CRC-CCITT Kermit 16bit on the data given
     Implemented using pseudocode from: June 1986, Kermit Protocol Manual
@@ -617,7 +571,7 @@ def makeFCS(data):
     @return: a CRC that is the FCS for the frame, as two hex bytes in
         little-endian order.
     '''
-    crc = 0
+    crc: int = 0
     for c in bytearray(data):
         #if (A PARITY BIT EXISTS): c = c & 127	#Mask off any parity bit
         q = (crc ^ c) & 15				#Do low-order 4 bits
@@ -625,7 +579,6 @@ def makeFCS(data):
         q = (crc ^ (c // 16)) & 15		#And high 4 bits
         crc = (crc // 16) ^ (q * 4225)
     return pack('<H', crc) #return as bytes in little endian order
-
 
 class KBException(Exception):
     '''Base class for all KillerBee specific exceptions.'''
@@ -639,27 +592,5 @@ class KBInterfaceError(KBException):
     '''
     pass
 
-
-def pyusb_1x_patch():
-    '''Monkey-patch pyusb 1.x for API compatibility
-    '''
-
-    '''
-    In pyusb v1.0.0b2 (git dac78933), they removed the "length" parameter
-    to usb.util.get_string(). We'll monkey-patch older versions so we don't
-    have to ever pass this argument.
-    '''
-    if 'length' in inspect.getargspec(usb.util.get_string).args:
-        print('Monkey-patching usb.util.get_string()', file=sys.stderr)
-        def get_string(dev, index, langid = None):
-            return usb.util.zzz__get_string(dev, 255, index, langid)
-        usb.util.zzz__get_string = usb.util.get_string
-        usb.util.get_string = get_string
-
-
-def bytearray_to_bytes(b):
+def bytearray_to_bytes(b: List[bytes]) -> bytes:
     return b"".join(struct.pack('B', value) for value in b)
-
-
-if USBVER == 1:
-    pyusb_1x_patch()

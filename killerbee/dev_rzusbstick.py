@@ -1,18 +1,18 @@
 # Import USB support depending on version of pyUSB
 try:
-    import usb.core
-    import usb.util
+    import usb.core # type: ignore
+    import usb.util # type: ignore
     USBVER=1
-    import sys
+    import sys # type: ignore
     print("Warning: You are using pyUSB 1.x, support is in beta.", file=sys.stderr)
 except ImportError:
-    import usb
+    import usb # type: ignore
     USBVER=0
 
-import time
-import struct
-from datetime import datetime
-from .kbutils import KBCapabilities
+import time # type: ignore
+import struct # type: ignore
+from datetime import datetime # type: ignore
+from .kbutils import KBCapabilities # type: ignore
 
 # Functions for RZUSBSTICK, not all are implemented in firmware
 # Functions not used are commented out but retained for prosperity
@@ -562,10 +562,12 @@ class RZUSBSTICK:
                 try:
                     pdata = self.dev.read(RZ_USB_PACKET_EP, self.dev.bMaxPacketSize0, timeout=timeout)
                 except usb.core.USBError as e:
-                    if e.errno != 110: #Operation timed out
-                        print(("Error args: {}".format(e.args)))
-                        raise e
-                        #TODO error handling enhancements for USB 1.0
+                    if e.errno != 110: #Operation timed out ???
+                        if len(e.args) >= 1 and e.args[0] == 60:
+                            pass
+                        else:
+                            print(("Error args: {}".format(e.args)))
+                            raise e
                     else:
                         return None
 

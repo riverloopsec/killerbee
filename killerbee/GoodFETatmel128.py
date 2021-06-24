@@ -1,7 +1,7 @@
 # GoodFETclient to interface zigduino/atmel128 radio
 # forked by bx from code by neighbor Travis Goodspeed
-from .GoodFETAVR import GoodFETAVR
-import sys, binascii, os, array, time, glob, struct
+from .GoodFETAVR import GoodFETAVR # type: ignore # type: ignore
+import sys, binascii, os, array, time, glob, struct # type: ignore
 
 fmt = ("B", "<H", None, "<L")
 
@@ -24,7 +24,7 @@ class GoodFETatmel128rfa1(GoodFETAVR):
                 attemptlimit == 2
 
             # Make timeout None to wait forever, 0 for non-blocking mode.
-            import serial;
+            import serial; # type: ignore
 
             if os.name=='nt' and sys.version.find('64 bit')!=-1:
                 print("WARNING: PySerial requires a 32-bit Python build in Windows.");
@@ -48,7 +48,7 @@ class GoodFETatmel128rfa1(GoodFETAVR):
                 if len(glob_list) > 0:
                     port = glob_list[0];
             if port is None and os.name=='nt':
-                from scanwin32 import winScan;
+                from scanwin32 import winScan; # type: ignore
                 scan=winScan();
                 for order,comport,desc,hwid in sorted(scan.comports()):
                     try:
@@ -244,7 +244,7 @@ class GoodFETatmel128rfa1(GoodFETAVR):
 
     def RF_txpacket(self, payload):
         if type(payload) == list: #convert to string
-            import array
+            import array # type: ignore
             payload = array.array('B', payload).tostring()
         self.writecmd(self.ATMELRADIOAPP, 0x81, len(payload), payload)
 

@@ -9,20 +9,20 @@
 #   http://www.sniffer.wislab.cz/sniffer-configuration/
 #
 
-import os
-import time
-import struct
-import time
+import os # type: ignore
+import time # type: ignore
+import struct # type: ignore
+import time # type: ignore
 try:
-    import urllib.request as urllib2
+    import urllib.request as urllib2 # type: ignore
 except ImportError:
-    import urllib2
-import re
-from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR, timeout as error_timeout
-from struct import unpack
+    import urllib2 # type: ignore
+import re # type: ignore
+from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR, timeout as error_timeout # type: ignore
+from struct import unpack # type: ignore
 
-from datetime import datetime, timedelta
-from .kbutils import KBCapabilities, makeFCS, isIpAddr, KBInterfaceError
+from datetime import datetime, timedelta # type: ignore
+from .kbutils import KBCapabilities, makeFCS, isIpAddr, KBInterfaceError # type: ignore
 
 DEFAULT_IP = "10.10.10.2"   #IP address of the sniffer
 DEFAULT_GW = "10.10.10.1"   #IP address of the default gateway

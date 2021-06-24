@@ -12,22 +12,24 @@ TODO list (help is welcomed):
   - Platform recognition (ApiMote versons)
 '''
 
+from typing import Optional, Dict, Union, Any
+
 import os
 import time
 import struct
-import time
-from datetime import datetime, timedelta
-from .kbutils import KBCapabilities, makeFCS
+import time 
+from datetime import datetime, timedelta 
+from .kbutils import KBCapabilities, makeFCS 
 from .GoodFETCCSPI import GoodFETCCSPI
 
 # Default revision of the ApiMote. This is liable to change at any time
 # as new ApiMote versions are released. Automatic recognition would be nice.
-DEFAULT_REVISION = 2
+DEFAULT_REVISION: int = 2
 
-CC2420_REG_SYNC = 0x14
+CC2420_REG_SYNC: int = 0x14
 
 class APIMOTE:
-    def __init__(self, dev, revision=DEFAULT_REVISION):
+    def __init__(self, dev: str, revision: int=DEFAULT_REVISION) -> None:
         '''
         Instantiates the KillerBee class for the ApiMote platform running GoodFET firmware.
         @type dev:   String
@@ -39,12 +41,12 @@ class APIMOTE:
         @return: None
         @rtype: None
         '''
-        self._channel = None
-        self._page = 0
-        self.handle = None
-        self.dev = dev
+        self._channel: Optional[int] = None
+        self._page: int = 0
+        self.handle: Optional[Any] = None
+        self.dev: str = dev
 
-        self.__revision_num = revision
+        self.__revision_num: int = revision
         # Set enviroment variables for GoodFET code to use
         os.environ["platform"] = "apimote{}".format(self.__revision_num)
         os.environ["board"] = "apimote{}".format(self.__revision_num)
@@ -53,19 +55,25 @@ class APIMOTE:
         self.handle.setup()
         # TODO can we verify here the revision number that was sent is correct?
 
-        self.__stream_open = False
-        self.capabilities = KBCapabilities()
+        self.__stream_open: bool = False
+        self.capabilities: KBCapabilities = KBCapabilities()
         self.__set_capabilities()
 
-    def close(self):
+    def close(self) -> None:
+        
+        if self.handle is None:
+            raise Exception("Handle does not exist");
+
         self.handle.serClose()
         self.handle = None
 
-    def check_capability(self, capab):
+    def check_capability(self, capab: int) -> bool:
         return self.capabilities.check(capab)
-    def get_capabilities(self):
+
+    def get_capabilities(self) -> Dict[int, bool]:
         return self.capabilities.getlist()
-    def __set_capabilities(self):
+
+    def __set_capabilities(self) -> None:
         '''
         Sets the capability information appropriate for GoodFETCCSPI client and firmware.
         @rtype: None
@@ -80,7 +88,7 @@ class APIMOTE:
         return
 
     # KillerBee expects the driver to implement this function
-    def get_dev_info(self):
+    def get_dev_info(self) -> list[Union[str, Any]]:
         '''
         Returns device information in a list identifying the device.
         @rtype: List
@@ -89,7 +97,7 @@ class APIMOTE:
         return [self.dev, "GoodFET Apimote v{}".format(self.__revision_num), ""]
 
     # KillerBee expects the driver to implement this function
-    def sniffer_on(self, channel=None, page=0):
+    def sniffer_on(self, channel: Optional[int]=None, page: int=0) -> None:
         '''
         Turns the sniffer on such that pnext() will start returning observed
         data.  Will set the command mode to Air Capture if it is not already
@@ -101,11 +109,14 @@ class APIMOTE:
         @rtype: None
         '''
         self.capabilities.require(KBCapabilities.SNIFF)
+        
+        if self.handle is None:
+            raise Exception("Handle does not exist")
 
         self.handle.RF_promiscuity(1)
         self.handle.RF_autocrc(0)
 
-        if channel != None:
+        if channel is not None:
             self.set_channel(channel, page)
         
         self.handle.CC_RFST_RX()
@@ -113,7 +124,7 @@ class APIMOTE:
         self.__stream_open = True
 
     # KillerBee expects the driver to implement this function
-    def sniffer_off(self):
+    def sniffer_off(self) -> None:
         '''
         Turns the sniffer off, freeing the hardware for other functions.  It is
         not necessary to call this function before closing the interface with
@@ -124,13 +135,16 @@ class APIMOTE:
         self.__stream_open = False
 
     # KillerBee expects the driver to implement this function
-    def set_channel(self, channel, page=0):
+    def set_channel(self, channel: int, page: int=0) -> None:
         '''
         Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
         @type channel: Integer
         @param channel: Sets the channel, optional
         @rtype: None
         '''
+        if self.handle is None:
+            raise Exception("Handle does not exist")
+
         self.capabilities.require(KBCapabilities.SETCHAN)
 
         if channel >= 11 and channel <= 26:
@@ -142,7 +156,7 @@ class APIMOTE:
             raise Exception('SubGHz not supported')
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0, page=0):
+    def inject(self, packet: bytes, channel: Optional[int]=None, count: int=1, delay: int=0, page: int=0) -> None:
         '''
         Injects the specified packet contents.
         @type packet: String
@@ -157,6 +171,9 @@ class APIMOTE:
         @param delay: Delay between each frame, def=1
         @rtype: None
         '''
+        if self.handle is None:
+            raise Exception("Handle does not exist")
+
         self.capabilities.require(KBCapabilities.INJECT)
 
         if len(packet) < 1:
@@ -164,7 +181,7 @@ class APIMOTE:
         if len(packet) > 125:                   # 127 - 2 to accommodate FCS
             raise Exception('Packet too long')
 
-        if channel != None:
+        if channel is not None:
             self.set_channel(channel, page)
 
         self.handle.RF_autocrc(1)               #let radio add the CRC
@@ -175,7 +192,7 @@ class APIMOTE:
             time.sleep(1)
 
     # KillerBee expects the driver to implement this function
-    def pnext(self, timeout=100):
+    def pnext(self, timeout: int=100) -> Any:
         '''
         Returns a dictionary containing packet data, else None.
         @type timeout: Integer
@@ -183,31 +200,34 @@ class APIMOTE:
         @rtype: List
         @return: Returns None is timeout expires and no packet received.  When a packet is received, a dictionary is returned with the keys bytes (string of packet bytes), validcrc (boolean if a vaid CRC), rssi (unscaled RSSI), and location (may be set to None). For backwards compatibility, keys for 0,1,2 are provided such that it can be treated as if a list is returned, in the form [ String: packet contents | Bool: Valid CRC | Int: Unscaled RSSI ]
         '''
+        if self.handle is None:
+            raise Exception("Handle does not exist")
+
         if self.__stream_open == False:
             self.sniffer_on()
 
-        packet = None
-        start = datetime.utcnow()
+        packet: Optional[bytes] = None
+        start: datetime = datetime.utcnow()
 
         while (packet is None and (start + timedelta(microseconds=timeout) > datetime.utcnow())):
             packet = self.handle.RF_rxpacket()
-            rssi = self.handle.RF_getrssi() #TODO calibrate
+            rssi: int = self.handle.RF_getrssi() #TODO calibrate
 
         if packet is None:
             return None
 
-        frame = packet[1:]
-        validcrc = False
+        frame: bytes = packet[1:]
+        validcrc: bool = False
         if frame[-2:] == makeFCS(frame[:-2]):
             validcrc = True
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
-        result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'location':None}
+        result: Dict[Union[int, str], Any] = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'location':None}
         result['dbm'] = rssi - 45 #TODO tune specifically to the Apimote platform (does ext antenna need to different?)
         result['datetime'] = datetime.utcnow()
         return result
  
-    def ping(self, da, panid, sa, channel=None, page=0):
+    def ping(self, da: Any, panid: Any, sa: Any, channel: Optional[int]=None, page: int=0) -> None:
         '''
         Not yet implemented.
         @return: None
@@ -215,7 +235,7 @@ class APIMOTE:
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel=None, page=0):
+    def jammer_on(self, channel: Optional[int]=None, page: int=0) -> None:
         '''
         Not yet implemented.
         @type channel: Integer
@@ -224,25 +244,33 @@ class APIMOTE:
         @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
+        if self.handle is None:
+            raise Exception("Handle does not exist")
+
         self.capabilities.require(KBCapabilities.PHYJAM_REFLEX)
 
         self.handle.RF_promiscuity(1)
         self.handle.RF_autocrc(0)
-        if channel != None:
+
+        if channel is not None:
             self.set_channel(channel, page)
+
         self.handle.CC_RFST_RX()
         self.handle.RF_carrier() #constant carrier wave jamming
         #self.handle.RF_reflexjam() #reflexive jamming (advanced)
 
     #TODO maybe move sync to byte string rather than int
-    def set_sync(self, sync=0xA70F):
+    def set_sync(self, sync: int=0xA70F) -> Any:
         '''Set the register controlling the 802.15.4 PHY sync byte.'''
+        if self.handle is None:
+            raise Exception("Handle does not exist")
+
         self.capabilities.require(KBCapabilities.SET_SYNC)
         if (sync >> 16) > 0:
             raise Exception("Sync word (%x) must be 2-bytes or less." % sync)
         return self.handle.poke(CC2420_REG_SYNC, sync)
 
-    def jammer_off(self, channel=None, page=0):
+    def jammer_off(self, channel: Optional[int]=None, page: int=0) -> None:
         '''
         Not yet implemented.
         @return: None

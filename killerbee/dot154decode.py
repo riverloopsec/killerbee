@@ -1,5 +1,5 @@
-import struct
-from Crypto.Cipher import AES
+import struct # type: ignore
+from Crypto.Cipher import AES # type: ignore
 
 
 ## Constants for packet decoding fields

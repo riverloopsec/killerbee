@@ -5,10 +5,10 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, io, struct, glob, os;
+import sys, time, string, io, struct, glob, os; # type: ignore
 
-from .GoodFET import GoodFET;
-from .kbutils import bytearray_to_bytes
+from .GoodFET import GoodFET; # type: ignore
+from .kbutils import bytearray_to_bytes # type: ignore
 
 class GoodFETCCSPI(GoodFET):
     CCSPIAPP=0x51;
@@ -366,7 +366,7 @@ class GoodFETCCSPI(GoodFET):
         
     def printdissect(self,packet):
         try:
-            from scapy.all import Dot15d4
+            from scapy.all import Dot15d4 # type: ignore
         except ImportError:
             print("To use packet disection, Scapy must be installed and have the Dot15d4 extension present.")
             print("try: hg clone http://hg.secdev.org/scapy-com");
