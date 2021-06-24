@@ -412,7 +412,7 @@ class KillerBee:
 
         return self.driver.inject(packet, channel, count, delay, page)
 
-    def pnext(self, timeout: int=100) -> Optional[Dict[str, Union[int, bool, str]]]:
+    def pnext(self, timeout: int=100) -> Optional[Dict[Union[int, str], Any]]:
         '''
         Returns packet data as a string, else None.
         @type timeout: Integer

@@ -32,7 +32,6 @@ DEFAULT_REVISION: int = 2
 CC2420_REG_SYNC: int = 0x14
 
 class APIMOTE:
-    packet_queue: Optional[list[Any]]: None
 
     def __init__(self, dev: str, revision: int=DEFAULT_REVISION) -> None:
         '''
@@ -46,6 +45,9 @@ class APIMOTE:
         @return: None
         @rtype: None
         '''
+        self.packet_queue: Optional[bytes] = None
+        self.packet_queue_rssi: Optional[int] = None
+
         self._channel: Optional[int] = None
         self._page: int = 0
         self.handle: Optional[Any] = None
@@ -214,19 +216,13 @@ class APIMOTE:
 
         if self.__stream_open == False:
             self.sniffer_on()
-
-        if self.packet_queue is not None:
-             packet = self.packet_queue
-             self.packet_queue = None
-             frame = packet
-             rssi = self.packet_queue_rssi
-
-        else:
-            packet = None
-
+        
+        if self.packet_queue is None:
+            packet: Optional[Any] = None
             start = datetime.utcnow()
 
-            while (packet is None and (start + timedelta(microseconds=timeout) > datetime.utcnow())):
+            while (packet is None and 
+                  (start + timedelta(microseconds=timeout) > datetime.utcnow())):
                 packet = self.handle.RF_rxpacket()
                 rssi = self.handle.RF_getrssi() #TODO calibrate
 
@@ -235,18 +231,39 @@ class APIMOTE:
 
             if ord(packet[0])+1 < len(packet):
                 self.packet_queue = packet[ord(packet[0])+1+1:]
-                self.packet_queue.rssi = rssi
+                self.packet_queue_rssi = rssi
              
             frame = packet[1:ord(packet[0])+1]
+        else: 
+            packet = self.packet_queue
+            self.packet_queue = None
+            frame = packet
+
+            if self.packet_queue_rssi is None:
+                rssi = None
+            else:
+                rssi = self.packet_queue_rssi
 
         validcrc: bool = False
         if frame[-2:] == makeFCS(frame[:-2]):
             validcrc = True
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
-        result: Dict[Union[int, str], Any] = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi, 'location':None}
-        result['dbm'] = rssi - 45 #TODO tune specifically to the Apimote platform (does ext antenna need to different?)
+        result: Dict[Union[int, str], Any] = {
+            0: frame, 
+            1: validcrc, 
+            2: rssi, 
+            'bytes': frame, 
+            'validcrc': validcrc, 
+            'rssi': rssi, 
+            'location': None
+        }
+
         result['datetime'] = datetime.utcnow()
+        if rssi is None:
+            result['dbm'] = None
+        else:          
+            result['dbm'] = rssi - 45 #TODO tune specifically to the Apimote platform (does ext antenna need to different?)
         return result
  
     def ping(self, da: Any, panid: Any, sa: Any, channel: Optional[int]=None, page: int=0) -> None:
