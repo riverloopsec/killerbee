@@ -81,14 +81,14 @@ class SL_NODETEST:
 
         if arg != None:
             cmdstr += ' ' + arg
-        self.handle.write(cmdstr)
+        self.handle.write(cmdstr.encode())
         if send_return:
-            self.handle.write('\r')
+            self.handle.write('\r'.encode())
         if confirm:
             ret= False
             for x in range(10):
                 d= self.handle.readline().strip()
-                if d == '>':
+                if d == b'>':
                     ret= True
                     break
         else:
@@ -107,16 +107,16 @@ class SL_NODETEST:
         @return: Returns None if packet is not in correct format.  When a packet is correct,
                  a list is returned, in the form [ String: Frame | Bool: Valid CRC | Int: Unscaled RSSI ]
         '''
-        data = packet[1:].replace('{',' ').replace('}',' ').split()
+        data = packet[1:].decode().replace('{',' ').replace('}',' ').split()
         # should be 12 fields + payload length + payload
         if not data or not len(data[13:]) == int(data[12], 16):
             print("Error parsing stream received from device (payload size error):", packet)
             return None
         # payload is in the form e.g. "0x03 0x08 0xA3 0xFF 0xFF 0xFF 0xFF 0x07" so we need to convert to a string
-        frame = ''
+        frame = b''
         for x in data[13:]:
             try:
-                frame += chr(int(x, 16))
+                frame += chr(int(x, 16)).encode('latin-1')
             except:
                 print("Error parsing stream received from device (invalid payload):", packet)
                 return None
@@ -154,7 +154,7 @@ class SL_NODETEST:
             self.__send_cmd("rx", confirm= False)
             for x in range(10):
                 d = self.handle.readline()
-                if '{payload}' in d:
+                if b'{payload}' in d:
                     self.mode = MODE_SNIFF
                     self.__stream_open = True
                     break
@@ -173,7 +173,7 @@ class SL_NODETEST:
         self.__send_cmd("e", send_return= False, confirm= False)
         for x in range(5):
             d= self.handle.readline().strip()
-            if "test end" in d:
+            if b"test end" in d:
                 self.mode = MODE_NONE
                 self.__stream_open = False
                 break
