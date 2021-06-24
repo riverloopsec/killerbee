@@ -1,10 +1,4 @@
-from typing import Optional
-from typing import Dict
-from typing import Union
-from typing import Any
-from typing import List 
-from typing import Tuple
-from typing import ByteString
+from typing import Optional, Dict, Union, List, Tuple, Any 
 
 import sys
 
@@ -39,8 +33,8 @@ BB_USB_PROD_ID: int       = 0x16A8
 FTDI_X_USB_VEND_ID: int   = 0x0403
 FTDI_X_USB_PROD_ID: int   = 0x6015    #api-mote FTDI chip
 
-usbVendorList: list[int] = [RZ_USB_VEND_ID, ZN_USB_VEND_ID, CC2530_USB_VEND_ID, CC2531_USB_VEND_ID, BB_USB_VEND_ID]
-usbProductList: list[int] = [RZ_USB_PROD_ID, ZN_USB_PROD_ID, CC2530_USB_PROD_ID, CC2531_USB_PROD_ID, BB_USB_PROD_ID]
+usbVendorList: List[int] = [RZ_USB_VEND_ID, ZN_USB_VEND_ID, CC2530_USB_VEND_ID, CC2531_USB_VEND_ID, BB_USB_VEND_ID]
+usbProductList: List[int] = [RZ_USB_PROD_ID, ZN_USB_PROD_ID, CC2530_USB_PROD_ID, CC2531_USB_PROD_ID, BB_USB_PROD_ID]
 
 # Global variables
 gps_devstring: Optional[str] = None
@@ -172,8 +166,8 @@ class findFromList(object):
     '''
     def __init__(self, vendors_, products_) -> None:
         '''Takes a list of vendor IDs and product IDs.'''
-        self._vendors: list[int]  = vendors_
-        self._products: list[int] = products_
+        self._vendors: List[int]  = vendors_
+        self._products: List[int] = products_
 
     def __call__(self, device: Any) -> bool:
         '''
@@ -191,7 +185,7 @@ class findFromListAndBusDevId(findFromList):
     Custom matching function for pyUSB 1.x.
     Used by usb.core.find's custom_match parameter.
     '''
-    def __init__(self, busNum_: Optional[int], devNum_: Optional[int], vendors_: list[int], products_: list[int]) -> None:
+    def __init__(self, busNum_: Optional[int], devNum_: Optional[int], vendors_: List[int], products_: List[int]) -> None:
         '''Takes a list of vendor IDs and product IDs.'''
         findFromList.__init__(self, vendors_, products_)
         self._busNum: Optional[int] = busNum_
@@ -213,7 +207,7 @@ def devlist_usb_v1x(vendor: Optional[Any]=None, product: Optional[Any]=None) -> 
     '''
     Private function. Do not call from tools/scripts/etc.
     '''
-    devlist: list[Any] = []
+    devlist: List[Any] = []
     if vendor is None:  vendor = usbVendorList
     else:               vendor = [vendor]
     if product is None: product = usbProductList
@@ -274,7 +268,7 @@ def devlist(vendor: Optional[Any]=None, product: Optional[Any]=None, gps: Option
     if gps is not None and gps_devstring is None:
         gps_devstring = gps
 
-    devlist: list[Any] = devlist_usb_v1x(vendor, product)
+    devlist: List[Any] = devlist_usb_v1x(vendor, product)
 
     for serialdev in get_serial_ports(include=include):
         if serialdev == gps_devstring:
@@ -311,7 +305,7 @@ def devlist(vendor: Optional[Any]=None, product: Optional[Any]=None, gps: Option
     
     return devlist
 
-def get_serial_devs(seriallist: list[str]) -> None:
+def get_serial_devs(seriallist: List[str]) -> None:
     global DEV_ENABLE_FREAKDUINO, DEV_ENABLE_ZIGDUINO
     #TODO Continue moving code from line 163:181 here, yielding results
 
@@ -548,7 +542,7 @@ def randmac(length: int=8) -> str:
     @returns: A randomized MAC address in a little-endian byte string.
     '''
     # Valid OUI prefixes for MAC addresses
-    prefixes: list[str] = [ 
+    prefixes: List[str] = [ 
                 "\x00\x0d\x6f",     # Ember
                 "\x00\x12\x4b",     # TI
                 "\x00\x04\xa3",     # Microchip
@@ -598,5 +592,5 @@ class KBInterfaceError(KBException):
     '''
     pass
 
-def bytearray_to_bytes(b: list[bytes]) -> bytes:
+def bytearray_to_bytes(b: List[bytes]) -> bytes:
     return b"".join(struct.pack('B', value) for value in b)

@@ -1,5 +1,4 @@
-from typing import Optional
-from typing import Any
+from typing import Optional, Any, List
 
 import binascii
 import time
@@ -106,7 +105,7 @@ class DainTreeReader:
 
         try:
             while(1):
-                record: list[bytes] = self._fh.readline().split(' ')
+                record: List[bytes] = self._fh.readline().split(' ')
                 if record[0][0] == "#":
                     continue
                 else:
