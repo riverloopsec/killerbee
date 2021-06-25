@@ -80,8 +80,7 @@ class GoodFETCCSPI(GoodFET):
         self.writecmd(self.CCSPIAPP,0x02,len(data),data);
   
         toret=(
-            ord(self.data[2])+
-            (ord(self.data[1])<<8)
+            self.data[2]+(self.data[1]<<8)
         ); 
 
         return toret;
