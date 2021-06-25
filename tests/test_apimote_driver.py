@@ -84,7 +84,7 @@ class TestApimoteDriver(unittest.TestCase):
         driver.close()
         self.assertTrue(True)
 
-    def test_set_channe(self):
+    def test_set_channel(self):
         driver=APIMOTE(os.environ['APIMOTE_DEVSTRING'])
 
         self.assertRaises(Exception, driver.set_channel, 1)

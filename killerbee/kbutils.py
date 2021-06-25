@@ -363,7 +363,7 @@ def isgoodfetccspi(serialdev: str) -> Tuple[bool, Optional[int]]:
         os.environ["board"] = "apimote2" #set enviroment variable for GoodFET code to use
         gf = GoodFETCCSPI()
         try:
-            gf.serInit(port=serialdev, attemptlimit=2)
+            gf.serInit(port=serialdev, attemptlimit=30)
             #gf.setup()
         except serial.serialutil.SerialException as e:
             raise KBInterfaceError("Serial issue in kbutils.isgoodfetccspi: %s." % e)

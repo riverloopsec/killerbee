@@ -61,8 +61,13 @@ The install will detect and prompt you for what is needed.
 On Ubuntu systems, you can install the needed dependencies with the following
 commands:
 ```
-# apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
-# python3 setup.py install
+# apt-get install python-usb python-crypto python-serial python-dev libgcrypt-dev
+```
+
+On Mac OS, you can install the dependencies with the following commands
+```
+# brew install libusb libgcrypt
+# pip3 install pyusb scapy
 ```
 
 The python-dev and libgcrypt are required for the Scapy Extension Patch.
@@ -82,7 +87,7 @@ KillerBee uses the standard Python 'setup.py' installation file, once dependenci
 
 Install KillerBee with the following command:
 ```
-# python setup.py install
+# python3 setup.py install
 ```
 
 DIRECTORIES

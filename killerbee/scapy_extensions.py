@@ -9,18 +9,17 @@ setattr(conf, 'killerbee_channel', DEFAULT_KB_CHANNEL)
 setattr(conf, 'killerbee_page', DEFAULT_KB_PAGE)
 setattr(conf, 'killerbee_device', DEFAULT_KB_DEVICE)
 setattr(conf, 'killerbee_nkey', None)
+from scapy import plist
 from scapy.base_classes import SetGen # type: ignore
 from scapy.packet import Gen, Raw # type: ignore
 from scapy.all import Dot15d4 # type: ignore
 from scapy.all import Dot15d4FCS # type: ignore
-from scapy.all import plist # type: ignore
 from scapy.all import PcapWriter # type: ignore
 from scapy.all import ZigbeeSecurityHeader # type: ignore
 from scapy.all import ZigbeeNWK # type: ignore
 from scapy.all import ZigbeeAppDataPayload # type: ignore
 from scapy.all import ZigbeeNWKCommandPayload # type: ignore
 from scapy.all import Packet # type: ignore
-from scapy.all import Layer # type: ignore
 
 # This line will allow KillerBee's pcap reader to overwrite scapy's reader that is imported on the
 # above line, per suggestion from cutaway at https://code.google.com/p/killerbee/issues/detail?id=28:
@@ -593,7 +592,7 @@ def kbgetmiclen(seclevel: int) -> int:
     return lengths[seclevel]
 
 @conf.commands.register
-def kbgetpanid(packet: Gen) -> Tuple[Optional[bytes], Optional[Layer]]:
+def kbgetpanid(packet: Gen) -> Tuple[Optional[bytes], Optional[Any]]:
     """Returns the pan id and which layer it was found in or None, None"""
     for layer in packet.layers():
         for field in packet[layer].fields:

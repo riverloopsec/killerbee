@@ -102,3 +102,10 @@ a serial sync with some hosts.
 - Appears as: `zbid` lists the device as 'v2'
 - Cause: expected behavior, as from the software side only v1 is different than v2-v4, and thus it doesn't see a difference
 - Fix: N/A
+
+#### Cannot identify hardware
+- In case of problems identifying the hardware try to run the following command (present in [GoodFET](https://github.com/travisgoodspeed/goodfet/blob/master/firmware/apps/radios/ccspi.c)) before any killerbee command
+
+- `~/goodfet/client$ sudo ./goodfet.monitor listapps full`
+
+

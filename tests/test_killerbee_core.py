@@ -7,11 +7,6 @@ from killerbee import *
 from killerbee.dev_apimote import APIMOTE
 
 class TestKillerbeeCore(unittest.TestCase):
-    def test_getkillerbee(self):
-        kb = getKillerBee(15)
-        self.assertIsNotNone(kb)
-        self.assertEqual(15, kb.channel)
-        
     def test_show_dev(self):
         show_dev()
         self.assertTrue(True)
