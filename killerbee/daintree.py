@@ -1,5 +1,4 @@
-from typing import Optional
-from typing import Any
+from typing import Optional, Any, List
 
 import binascii
 import time
@@ -78,7 +77,6 @@ class DainTreeReader:
         DSNA_HEADER1 = b'#Format=4\r\n'
         self._fh: Optional[Any] = open(savefile, "rb")
         header: bytes = self._fh.readline()
-        print(header)
 
         if header != DSNA_HEADER1:
             raise Exception('Invalid or unsupported Daintree SNA file specified')

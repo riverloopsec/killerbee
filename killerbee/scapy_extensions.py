@@ -1,7 +1,4 @@
-from typing import Optional
-from typing import Union
-from typing import Tuple 
-from typing import Any
+from typing import Optional, Union, Tuple, Any, List
 
 DEFAULT_KB_CHANNEL: int = 11
 DEFAULT_KB_PAGE: Optional[int] = None
@@ -82,7 +79,7 @@ def __kb_recv(kb: KillerBee, count: int=0, store: int=1, prn: Optional[Any]=None
     if verbose is None:
         verbose = conf.verb
 
-    lst: list[Any] = []
+    lst: List[Any] = []
     packetcount: int = 0
     remain: Optional[float] = None
     while 1:
@@ -197,7 +194,7 @@ def kbsrp(pkt: bytes, channel: Optional[int]=None, page: int=0, inter: int=0, co
     if verbose:
         print("\nSent %i packets." % pkts_out)
 
-    pkts_in: list[bytes] = __kb_recv(kb, count = count, store = store, prn = prn, lfilter = lfilter, verbose = verbose, timeout = timeout)
+    pkts_in: List[bytes] = __kb_recv(kb, count = count, store = store, prn = prn, lfilter = lfilter, verbose = verbose, timeout = timeout)
     if verbose:
         print("\nReceived %i packets." % len(pkts_in))
 
@@ -252,7 +249,7 @@ def kbrdpcap(filename: str, count: int=-1, skip: int=0, nofcs: bool=False) -> pl
     @return: Scapy packetlist of Dot15d4 packets parsed from the given PCAP file.
     """
     cap: PcapReader = PcapReader(filename)
-    lst: list[bytes] = []
+    lst: List[bytes] = []
     packetcount: int = 0
     if count > 0:
         count += skip
@@ -273,7 +270,7 @@ def kbrdpcap(filename: str, count: int=-1, skip: int=0, nofcs: bool=False) -> pl
     return plist.PacketList(lst, os.path.basename(filename))
 
 @conf.commands.register
-def kbwrpcap(save_file: str, pkts: list[bytes]) -> None:
+def kbwrpcap(save_file: str, pkts: List[bytes]) -> None:
     """
     Write a pcap using the KillerBee library.
     """
@@ -289,7 +286,7 @@ def kbrddain(filename: str, count: int=-1, skip: int=0) -> plist.PacketList:
     Wraps the DainTreeReader to return scapy packet object from daintree files.
     """
     cap: DainTreeReader = DainTreeReader(filename)
-    lst: list[Any] = []
+    lst: List[Any] = []
     packetcount: int = 0
 
     while 1:
@@ -308,7 +305,7 @@ def kbrddain(filename: str, count: int=-1, skip: int=0) -> plist.PacketList:
     return plist.PacketList(lst, os.path.basename(filename))
 
 @conf.commands.register
-def kbwrdain(save_file: str, pkts: list[Any]) -> None:
+def kbwrdain(save_file: str, pkts: List[Any]) -> None:
     """
     Write a daintree file using the KillerBee library.
     """
@@ -330,7 +327,7 @@ def kbkeysearch(packet: Any, searchdata: str, ispath: bool=True, skipfcs: bool=T
     if skipfcs:
         packet = packet[:-2]
     offset: int = 0
-    keybytes: list[bytes] = []
+    keybytes: List[bytes] = []
     d: Dot154PacketParser = Dot154PacketParser()
     searchdatalen: int = len(searchdata)
     while (offset < (searchdatalen - 16)):

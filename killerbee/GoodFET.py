@@ -5,8 +5,14 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
-import sys, time, string, io, struct, glob, os; # type: ignore # type: ignore
-import sqlite3; # type: ignore
+import sys 
+import time
+import string
+import io
+import struct
+import glob
+import os; 
+import sqlite3; 
 
 fmt = ("B", "<H", None, "<L")
 
@@ -84,7 +90,6 @@ class GoodFETbtser:
         
     def write(self,msg):
         """Send traffic."""
-        import time; # type: ignore
         self.sock.send(msg);
         #time.sleep(0.1);
         return;
@@ -120,7 +125,7 @@ class GoodFET:
         print("timeout\n");
     def serInit(self, port=None, timeout=2, attemptlimit=None):
         """Open a serial port of some kind."""
-        import re; # type: ignore
+        import re; 
         
         if port==None:
             port=os.environ.get("GOODFET");

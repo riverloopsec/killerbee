@@ -247,7 +247,10 @@ class CC253x:
                 # in last two bytes of framedata. Note that we remove these before return of the frame.
 
                 # RSSI is signed value, offset by 73 (see CC2530 data sheet for offset)
-                rssi = struct.unpack("b", framedata[-2:-1])[0] - 73
+                rssi = struct.unpack("b", framedata[-2])[0] - 73
+                # Dirty hack to compensate for possible RSSI overflow
+                if rssi > 255:
+                    rssi = 255 # assumed to be max, could also report error/0
 
                 fcsx = framedata[-1]
                 # validcrc is the bit 7 in fcsx
@@ -293,4 +296,3 @@ class CC253x:
         @rtype: None
         """
         raise Exception('Not yet implemented')
-
