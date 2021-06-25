@@ -104,8 +104,8 @@ class DainTreeReader:
 
         try:
             while(1):
-                record: List[bytes] = self._fh.readline().split(' ')
-                if record[0][0] == "#":
+                record: List[bytes] = self._fh.readline().split(b' ')
+                if record[0] == b"#":
                     continue
                 else:
                     break

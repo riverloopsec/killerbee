@@ -1,7 +1,4 @@
-from typing import Optional
-from typing import Any 
-from typing import Dict 
-from typing import Union
+from typing import Optional, Any, Dict, Union
 
 import struct
 import glob
@@ -24,23 +21,6 @@ from .zigbeedecode import * #would like to import only within killerbee class
 from .dot154decode import * #would like to import only within killerbee class
 from .config import *       #to get DEV_ENABLE_* variables
 
-# Utility Functions
-def getKillerBee(channel: int, page: int=0) -> KillerBee:
-    '''
-    Returns an instance of a KillerBee device, setup on the given channel/page.
-    Error handling for KillerBee creation and setting of the channel is wrapped
-    and will raise an Exception().
-    @return: A KillerBee instance initialized to the given channel/page.
-    '''
-    kb: KillerBee = KillerBee()
-    if kb is None:
-        raise Exception("Failed to create a KillerBee instance.")
-    try:
-        kb.set_channel(channel, page)
-    except Exception as e:
-        raise Exception('Error: Failed to set channel to %d/%d' % (channel, page), e)
-    return kb
-
 def show_dev(vendor: str=None, product: str=None, gps: str=None, include: str=None) -> None:
     '''
     A basic function to output the device listing.
@@ -58,7 +38,7 @@ def show_dev(vendor: str=None, product: str=None, gps: str=None, include: str=No
 
 # KillerBee Class
 class KillerBee:
-    def __init__(self, device: str=None, datasource: str=None, gps: str=None) -> None:
+    def __init__(self, device: Optional[str]=None, hardware: Optional[str]=None, datasource: Optional[str]=None, gps: Optional[str]=None) -> None:
         '''
         Instantiates the KillerBee class.
 
@@ -93,6 +73,40 @@ class KillerBee:
                 from .dev_sewio import SEWIO
                 self.driver = SEWIO(dev=device)  # give it the ip address
             else: del isSewio
+
+        if hardware is None:
+            print("Auto-detection is being deprecated - Please specify hardware")
+        else:
+            if hardware == "apimote":
+                from .dev_apimote import APIMOTE
+                self.driver = RZUSBSTICK(self.dev, self.__bus)
+            elif hardware == "rzusbstick":
+                from .dev_rzusbstick import RZUSBSTICK
+                self.driver = RZUSBSTICK(self.dev, self.__bus)
+            elif hardware == "cc2530":
+                from .dev_cc253x import CC253x
+                self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2530)
+            elif hardware == "cc2531":
+                from .dev_cc253x import CC253x
+                self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2531)
+            elif hardware == "bumblebee":
+                from .dev_bumblebee import Bumblebee
+                self.driver = Bumblebee(self.dev, self.__bus)
+            elif hardware == "sl_nodetest":
+                from .dev_sl_nodetest import SL_NODETEST
+                self.driver = SL_NODETEST(self.dev)
+            elif hardware == "sl_beehive":
+                from .dev_sl_beehive import SL_BEEHIVE
+                self.driver = SL_BEEHIVE(self.dev)
+            elif hardware == "zigduino":
+                from .dev_zigduino import ZIGDUINO
+                self.driver = ZIGDUINO(self.dev)
+            elif hardware == "freakdruino":
+                from .dev_freakduino import FREAKDUINO
+                self.driver = FREAKDUINO(self.dev)
+            elif hardware == "telosb":
+                from .dev_telosb import TELOSB
+                self.driver = TELOSB(self.dev)
 
         # Figure out a device is one is not set, trying USB devices next
         if self.driver is None:
@@ -156,12 +170,9 @@ class KillerBee:
                     if gfccspi and subtype == 0:
                         from .dev_telosb import TELOSB
                         self.driver = TELOSB(self.dev)
-                    elif gfccspi and subtype == 1:
-                        from .dev_apimote import APIMOTE
-                        self.driver = APIMOTE(self.dev, revision=1)
                     elif gfccspi and subtype == 2:
                         from .dev_apimote import APIMOTE
-                        self.driver = APIMOTE(self.dev, revision=2)
+                        self.driver = APIMOTE(self.dev)
                     else:
                         raise KBInterfaceError("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
             # Otherwise unrecognized device string type was provided:
