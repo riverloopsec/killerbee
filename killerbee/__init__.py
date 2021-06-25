@@ -25,22 +25,6 @@ from .dot154decode import * #would like to import only within killerbee class
 from .config import *       #to get DEV_ENABLE_* variables
 
 # Utility Functions
-def getKillerBee(channel: int, page: int=0) -> KillerBee:
-    '''
-    Returns an instance of a KillerBee device, setup on the given channel/page.
-    Error handling for KillerBee creation and setting of the channel is wrapped
-    and will raise an Exception().
-    @return: A KillerBee instance initialized to the given channel/page.
-    '''
-    kb: KillerBee = KillerBee()
-    if kb is None:
-        raise Exception("Failed to create a KillerBee instance.")
-    try:
-        kb.set_channel(channel, page)
-    except Exception as e:
-        raise Exception('Error: Failed to set channel to %d/%d' % (channel, page), e)
-    return kb
-
 def show_dev(vendor: str=None, product: str=None, gps: str=None, include: str=None) -> None:
     '''
     A basic function to output the device listing.
@@ -158,10 +142,10 @@ class KillerBee:
                         self.driver = TELOSB(self.dev)
                     elif gfccspi and subtype == 1:
                         from .dev_apimote import APIMOTE
-                        self.driver = APIMOTE(self.dev, revision=1)
+                        self.driver = APIMOTE(self.dev)
                     elif gfccspi and subtype == 2:
                         from .dev_apimote import APIMOTE
-                        self.driver = APIMOTE(self.dev, revision=2)
+                        self.driver = APIMOTE(self.dev)
                     else:
                         raise KBInterfaceError("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
             # Otherwise unrecognized device string type was provided:

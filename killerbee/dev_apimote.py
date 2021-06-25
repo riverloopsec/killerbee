@@ -25,23 +25,15 @@ from datetime import datetime, timedelta
 from .kbutils import KBCapabilities, makeFCS 
 from .GoodFETCCSPI import GoodFETCCSPI
 
-# Default revision of the ApiMote. This is liable to change at any time
-# as new ApiMote versions are released. Automatic recognition would be nice.
-DEFAULT_REVISION: int = 2
-
 CC2420_REG_SYNC: int = 0x14
 
 class APIMOTE:
 
-    def __init__(self, dev: str, revision: int=DEFAULT_REVISION) -> None:
+    def __init__(self, dev: str) -> None:
         '''
         Instantiates the KillerBee class for the ApiMote platform running GoodFET firmware.
         @type dev:   String
         @param dev:  Serial device identifier (ex /dev/ttyUSB0)
-        @type revision: Integer
-        @param revision: The revision number for the ApiMote, which is used by 
-            the called GoodFET libraries to properly communicate with
-            and configure the hardware.
         @return: None
         @rtype: None
         '''
@@ -53,10 +45,9 @@ class APIMOTE:
         self.handle: Optional[Any] = None
         self.dev: str = dev
 
-        self.__revision_num: int = revision
         # Set enviroment variables for GoodFET code to use
-        os.environ["platform"] = "apimote{}".format(self.__revision_num)
-        os.environ["board"] = "apimote{}".format(self.__revision_num)
+        os.environ["platform"] = "apimote2"
+        os.environ["board"] = "apimote2"
         self.handle = GoodFETCCSPI()
         self.handle.serInit(port=self.dev)
         self.handle.setup()
@@ -101,7 +92,7 @@ class APIMOTE:
         @rtype: List
         @return: List of 3 strings identifying device.
         '''
-        return [self.dev, "GoodFET Apimote v{}".format(self.__revision_num), ""]
+        return [self.dev, "GoodFET Apimote v2", ""]
 
     # KillerBee expects the driver to implement this function
     def sniffer_on(self, channel: Optional[int]=None, page: int=0) -> None:
