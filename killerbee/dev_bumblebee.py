@@ -144,8 +144,13 @@ class Bumblebee(object):
           nbytes = self.dev.read(Bumblebee.EP_IN, self.usb_rx_buffer, 100)
           if nbytes > 0:
             self.rx_buffer += self.usb_rx_buffer.tobytes()[:nbytes]
-        except usb.core.USBTimeoutError as usb_timeout:
-          pass
+        except usb.core.USBError as e:
+            if e.errno != 110: #Operation timed out
+                print("Error args: {}".format(e.args))
+                raise e
+                #TODO error handling enhancements for USB 1.0
+            else:
+                return None
 
     def send_message(self, command, data):
         """
