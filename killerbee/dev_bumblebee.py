@@ -360,7 +360,7 @@ class Bumblebee(object):
             self.set_channel(channel, page)
 
         for pnum in range(0, count):
-            print(self.send_packet(packet))
+            self.send_packet(packet)
             time.sleep(delay)
 
     # KillerBee expects the driver to implement this function
