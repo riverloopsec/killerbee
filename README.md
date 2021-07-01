@@ -3,6 +3,12 @@ KillerBee
 
 KillerBee is a Framework and Tools for Testing & Auditing ZigBee and IEEE 802.15.4 Networks
 
+> **Notice**
+> * usb0.x support is being deprecated/removed
+> * Apimote v1 support is being deprected/removed
+>
+> If you require these features please create an issue to explain your usecase and requirements.
+
 > **KillerBee 3.0.0-beta Update**
 > 
 > Hi everyone, thank you for your continued support and interest in KillerBee.
@@ -15,7 +21,6 @@ KillerBee is a Framework and Tools for Testing & Auditing ZigBee and IEEE 802.15
 > This is also an attempt to define the pieces that make up KillerBee, aiming to draw more distinct lines
 > around features in KillerBee and treating it as library.
 > See [ARCHITECTURE.md](ARCHITECTURE.md) for details about this and future goals.
-
 
 MAINTAINERS/LICENSE
 ================
