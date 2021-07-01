@@ -45,7 +45,7 @@ class TestDaintree(unittest.TestCase):
     def test_daintreereader_pnext(self):
         path_to_file = "./tests/fixtures/test_dt_read.dcf"
         dt = DainTreeReader(path_to_file)
-        dt.pnext()
+        out = dt.pnext()
         self.assertTrue(True)
         dt.close()
         self.assertTrue(True)

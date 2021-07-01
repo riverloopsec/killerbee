@@ -6,75 +6,86 @@ zbdump - a tcpdump-like tool for ZigBee/IEEE 802.15.4 networks
 Compatible with Wireshark 1.1.2 and later (jwright@willhackforsushi.com)
 The -p flag adds CACE PPI headers to the PCAP (ryan@rmspeers.com)
 '''
-
 from typing import Optional, Any, List, Dict, Union
 
 import sys
 import signal
 import argparse
 import os
+from scapy.all import Dot15d4FCS # type: ignore
+from killerbee import KillerBee, PcapDumper, DainTreeDumper, DLT_IEEE802_15_4
+from killerbee.scapy_extensions import kbgetpanid
 
-from scapy.all import *
-from killerbee import *
-from killerbee.scapy_extensions import *
+packetcount: int = 0
+kb: Optional[KillerBee] = None
+pcap_dumper: Optional[PcapDumper] = None
+daintree_dumper: Optional[DainTreeDumper] = None
+unbuffered: Optional[Any] = None
 
-def interrupt(signum, frame):
-    global packetcount
+def interrupt(signum, frame) -> None:
     global kb
-    global pd, dt
+    global pcap_dumper
+    global daintree_dumper 
+
     kb.sniffer_off()
     kb.close()
-    if pd:
-        pd.close()
-    if dt:
-        dt.close()
-    print(("\n{0} packets captured".format(packetcount)))
-    sys.exit(0)
 
-# PcapDumper, only used if -w is specified
-pcapDumper: Optional[PcapDumper]  = None
-daintreeDumper: Optional[DainTreeDumper]  = None
+    if pcap_dumper is not None:
+        pcap_dumper.close()
+    if daintree_dumper is not None:
+        daintree_dumper.close()
 
-# Global
-packetcount: int = 0
+def dump_packets(args):
+    global packetcount;
+    global kb
+    global pcap_dumper
+    global daintree_dumper 
+    global unbuffered
 
-def sniff(kb: KillerBee, args) -> None:
+    if args.pan_id_hex:
+        panid: Optional[int] = int(args.pan_id_hex, 16)
+    else:
+        panid = None
+
     rf_freq_mhz = kb.frequency(args.channel, args.subghz_page) / 1000.0
-
+    
     print(("zbdump: listening on \'{0}\', channel {1}, page {2} ({3} MHz), link-type DLT_IEEE802_15_4, capture size 127 bytes".format(
-        kb.get_dev_info()[0], 
+        args.devstring,
         args.channel, 
         args.subghz_page, 
         rf_freq_mhz
     )))
 
-    if args.pan_id_hex:
-        panid: int = int(args.pan_id_hex, 16)
-    else:
-        panid = 0
-
     while args.count != packetcount:
-        packet = kb.pnext()
+
+        packet: Optional[Dict[Union[int, str], Any]] = kb.pnext()
 
         if packet is None:
-            continue;
-        else:
-            print(packet)
+            continue
 
-        if panid:
+        if panid is not None:
             pan, layer = kbgetpanid(Dot15d4FCS(packet['bytes']))
 
-        if (not panid or panid == pan): # and packet[1]:
+        if panid is None or panid == pan: 
             packetcount+=1
             if args.verbose:
-                unbuffered.write('.')
-            if pd:
-                pd.pcap_dump(packet['bytes'], ant_dbm=packet['dbm'], freq_mhz=rf_freq_mhz)
-            if dt:
-                dt.pwrite(packet['bytes'])
+                if unbuffered is None:
+                    print('ERROR: Could not open stdout for verbose mode.', file=sys.stderr)
+                    sys.exit(0)
+                else:
+                    unbuffered.write('.')
 
+            if pcap_dumper is not None:
+                pcap_dumper.pcap_dump(packet['bytes'], ant_dbm=packet['dbm'], freq_mhz=rf_freq_mhz)
+            if daintree_dumper is not None:
+                daintree_dumper.pwrite(packet['bytes'])
 
-def main() -> None:
+def main():
+    global kb
+    global pcap_dumper
+    global daintree_dumper 
+    global unbuffered
+
     # Command-line arguments
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring',
@@ -101,7 +112,7 @@ def main() -> None:
 
     #Handle required args
     if args.verbose:
-        unbuffered: Any = os.fdopen(sys.stdout.fileno(), 'w', 0)
+        unbuffered = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
     if args.channel == None:
         print("ERROR: Must specify a channel.", file=sys.stderr)
@@ -121,7 +132,7 @@ def main() -> None:
     if args.device is None:
         print("Autodetection features will be deprecated - please include device string (e.g. -d apimote)")
 
-    kb: KillerBee = KillerBee(device=args.devstring, hardware=args.device)
+    kb = KillerBee(device=args.devstring, hardware=args.device)
 
     signal.signal(signal.SIGINT, interrupt)
 
@@ -133,18 +144,16 @@ def main() -> None:
     kb.set_channel(args.channel, args.subghz_page)
     kb.sniffer_on()
 
-    sniff(kb, args)
+    dump_packets(args)
 
     kb.sniffer_off()
     kb.close()
-
-    if pcapDumper:
-        pcapDumper.close()
-    if daintreeDumper:
-        daintreeDumper.close()
+    if pcap_dumper is not None:
+        pcap_dumper.close()
+    if daintree_dumper is not None:
+        daintree_dumper.close()
 
     print(("{0} packets captured".format(packetcount)))
-
 
 if __name__ == "__main__":
   main()

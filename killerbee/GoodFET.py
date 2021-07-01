@@ -5,6 +5,8 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
+from typing import Dict, Union, Optional, Any, List, Tuple
+
 import sys 
 import time
 import string
@@ -14,9 +16,9 @@ import glob
 import os; 
 import sqlite3; 
 
-fmt = ("B", "<H", None, "<L")
+fmt: Tuple[str, str, None, str] = ("B", "<H", None, "<L")
 
-def getClient(name="GoodFET"):
+def getClient(name="GoodFET") -> Any:
     import GoodFET, GoodFETCC, GoodFETAVR, GoodFETSPI, GoodFETMSP430, GoodFETNRF, GoodFETCCSPI; # type: ignore
     if(name=="GoodFET" or name=="monitor"): return GoodFET.GoodFET();
     elif name=="cc" or name=="cc51": return GoodFETCC.GoodFETCC();
@@ -26,128 +28,81 @@ def getClient(name="GoodFET"):
     elif name=="msp430": return GoodFETMSP430.GoodFETMSP430();
     elif name=="nrf": return GoodFETNRF.GoodFETNRF();
     
-    print("Unsupported target: %s" % name)
+    print("Unsupported target: {}".format(name))
     sys.exit(0);
 
 class SymbolTable:
     """GoodFET Symbol Table"""
-    db=sqlite3.connect(":memory:");
+    db: Any =sqlite3.connect(":memory:");
     
-    def __init__(self, *args, **kargs):
+    def __init__(self, *args: Any, **kargs: Any) -> None:
         self.db.execute("create table if not exists symbols(adr,name,memory,size,comment);");
-    def get(self,name):
+
+    def get(self, name: str) -> Any:
         self.db.commit();
-        c=self.db.cursor();
+
+        c: Any =self.db.cursor();
+
         try:
             c.execute("select adr,memory from symbols where name=?",(name,));
             for row in c:
                 sys.stdout.flush();
                 return row[0];
         except:# sqlite3.OperationalError:
-            return eval(name);
+            pass
+
         return eval(name);
-    def define(self,adr,name,comment="",memory="vn",size=16):
+
+    def define(self, adr: Any, name: str, comment: str="", memory: str="vn", size: int=16) -> None:
         self.db.execute("insert into symbols(adr,name,memory,size,comment)"
                         "values(?,?,?,?,?);", (
                 adr,name,memory,size,comment));
-class GoodFETbtser:
-    """py-bluez class for emulating py-serial."""
-    def __init__(self,btaddr):
-        import bluetooth; # type: ignore
-        if btaddr==None or btaddr=="none" or btaddr=="bluetooth":
-            print("performing inquiry...")
-            nearby_devices = bluetooth.discover_devices(lookup_names = True)
-            print("found %d devices" % len(nearby_devices))
-            for addr, name in nearby_devices:
-                print("  %s - '%s'" % (addr, name))
-                #TODO switch to wildcards.
-                if name=='FireFly-A6BD':
-                    btaddr=addr;
-                if name=='RN42-A94A':
-                    btaddr=addr;
-                
-            print("Please set $GOODFET to the address of your device.");
-            sys.exit();
-        print("Identified GoodFET at %s" % btaddr);
-
-        # Manually use the portnumber.
-        port=1;
-        
-        print("Connecting to %s on port %i." % (btaddr, port));
-        sock=bluetooth.BluetoothSocket(bluetooth.RFCOMM);
-        self.sock=sock;
-        sock.connect((btaddr,port));
-        sock.settimeout(10);  #IMPORTANT Must be patient.
-        
-        ##This is what we'd do for a normal reset.
-        #str="";
-        #while not str.endswith("goodfet.sf.net/"):
-        #    str=self.read(64);
-        #    print(str)
-        
-        # Instead, just return and hope for the best.
-        return;
-        
-    def write(self,msg):
-        """Send traffic."""
-        self.sock.send(msg);
-        #time.sleep(0.1);
-        return;
-    def read(self,length):
-        """Read traffic."""
-        data="";
-        while len(data)<length:
-            data=data+self.sock.recv(length-len(data));
-        return data;
 
 class GoodFET:
     """GoodFET Client Library"""
 
-    besilent=0;
-    app=0;
-    verb=0;
-    count=0;
-    data=b"";
-    verbose=False
+    besilent: int = 0;
+    app: int = 0;
+    verb: int = 0;
+    count: int = 0;
+    data: bytes = b"";
+    verbose: bool = False
     
-    GLITCHAPP=0x71;
-    MONITORAPP=0x00;
-    symbols=SymbolTable();
+    GLITCHAPP: int = 0x71;
+    MONITORAPP: int = 0x00;
+    symbols: SymbolTable = SymbolTable();
     
-    def __init__(self, *args, **kargs):
-        self.data=[0];
-    def getConsole(self):
+    def __init__(self, *args: Any, **kargs: Any) -> None:
+        self.data: bytes = b'';
+
+    def getConsole(self) -> Any:
         from GoodFETConsole import GoodFETConsole; # type: ignore
         return GoodFETConsole(self);
-    def name2adr(self,name):
+
+    def name2adr(self, name: str) -> str:
         return self.symbols.get(name);
-    def timeout(self):
+
+    def timeout(self) -> None:
         print("timeout\n");
-    def serInit(self, port=None, timeout=2, attemptlimit=None):
+
+    def serInit(self, port: Optional[str]=None, timeout: int=2, attemptlimit: Optional[int]=None) -> None:
         """Open a serial port of some kind."""
         import re; 
         
-        if port==None:
-            port=os.environ.get("GOODFET");
-        if port=="bluetooth" or (port is not None and re.match("..:..:..:..:..:..",port)):
-            self.btInit(port,2,attemptlimit);
-        else:
-            self.pyserInit(port,timeout,attemptlimit);
-    def btInit(self, port, timeout, attemptlimit):
-        """Open a bluetooth port.""";
-        #self.verbose=True;  #For debugging BT.
-        self.serialport=GoodFETbtser(port);
-        
+        if port is None:
+            port = os.environ.get("GOODFET");
+
+        self.pyserInit(port, timeout, attemptlimit);
+
     def pyserInit(self, port, timeout, attemptlimit):
         """Open the serial port"""
-        # Make timeout None to wait forever, 0 for non-blocking mode.
         import serial; # type: ignore
-        fixserial=False;
+        fixserial: bool = False;
         
-        if os.name=='nt' and sys.version.find('64 bit')!=-1:
+        if os.name == 'nt' and sys.version.find('64 bit') != -1:
             print("WARNING: PySerial requires a 32-bit Python build in Windows.");
         
-        if port is None and os.environ.get("GOODFET")!=None:
+        if port is None and os.environ.get("GOODFET") != None:
             glob_list = glob.glob(os.environ.get("GOODFET"));
             if len(glob_list) > 0:
                 port = glob_list[0];
@@ -173,106 +128,107 @@ class GoodFET:
                     if hwid.index('FTDI')==0:
                         port=comport;
                 except:
-                    #Do nothing.
-                    a=1;
+                    pass
         
-        baud=115200;
+        baud: int = 115200;
+
         if(os.environ.get("platform")=='arduino' or os.environ.get("board")=='arduino'):
             baud=19200 #Slower, for now.
+
         self.serialport = serial.Serial(
             port,
-            #9600,
             baud,
             parity = serial.PARITY_NONE,
             timeout=timeout
-            )
+        )
         
-        self.verb=0;
-        attempts=0;
-        connected=0;
-        while connected==0:
-            while self.verb!=0x7F or self.data!=b"http://goodfet.sf.net/":
+        self.verb = 0;
+        attempts: int = 0;
+        connected = False;
+        while connected is False:
+            while self.verb != 0x7F or self.data != b"http://goodfet.sf.net/":
+
                 if attemptlimit is not None and attempts >= attemptlimit:
                     return
-                elif attempts==2 and os.environ.get("board")!='telosb':
+
+                elif attempts == 2 and os.environ.get("board") != 'telosb':
                     print("See the GoodFET FAQ about missing info flash.");
                     self.serialport.timeout = 0.2;
+
                 elif attempts == 100:
                     print("Tried 100 times to connect and failed.")
-                    sys.stdout.write("Continuing to try forever.")  # No newline
-                    sys.stdout.flush()
-                    self.verbose=True   # Something isn't going right, give the user more info
+                    print("Continuing to try forever.", end='')
+                    self.verbose = True   # Something isn't going right, give the user more info
+
                 elif attempts > 100 and attempts % 10 == 0:
-                    sys.stdout.write('.')
-                    sys.stdout.flush()
-                #self.serialport.flushInput()
-                #self.serialport.flushOutput()
-                
+                    print('.', end='')
+
                 #TelosB reset, prefer software to I2C SPST Switch.
-                if (os.environ.get("board")=='telosb'):
+                if (os.environ.get("board") == 'telosb'):
                     self.telosBReset();
-                elif (os.environ.get("board")=='z1'):
+
+                elif (os.environ.get("board") == 'z1'):
                     self.bslResetZ1(invokeBSL=0);
+
                 elif (os.environ.get("board")=='apimote1') or (os.environ.get("board")=='apimote'):
-                    #Not needed for the apimote2
-                    #Explicitly set RTS and DTR to halt board.
                     self.serialport.setRTS(1);
                     self.serialport.setDTR(1);
-                    #RTS pin, not DTR is used for reset.
                     self.serialport.setRTS(0);
                 else:
-                    #Explicitly set RTS and DTR to halt board.
                     self.serialport.setRTS(1);
                     self.serialport.setDTR(1);
-                    #Drop DTR, which is !RST, low to begin the app.
                     self.serialport.setDTR(0);
                 
-                #self.serialport.write(bytearray([0x80, 0x80, 0x80, 0x80]));
-                #self.serialport.flushInput()
-                #self.serialport.flushOutput()
-                #time.sleep(60);
-
-                attempts=attempts+1;
+                attempts = attempts + 1;
                 self.readcmd(); #Read the first command.
+
                 if self.verb!=0x7f:
-                    #Retry again. This usually times out, but helps connect.
                     self.readcmd();
-            #Here we have a connection, but maybe not a good one.
-            connected=1;
+
+            connected=True;
+
         if attempts >= 100:
             print("")   # Add a newline
-            olds=self.infostring();
-            clocking=self.monitorclocking();
+            olds: str = self.infostring();
+            clocking: Any = self.monitorclocking();
+
             for foo in range(1,30):
                 if not self.monitorecho():
                     if self.verbose:
-                        print("Comm error on %i try, resyncing out of %s." % (foo,
-                                                                              clocking));
-                    connected=0;
+                        print("Comm error on {0} try, resyncing out of {1}.".format(foo ,clocking));
+                    connected=False;
                     break;
-        if self.verbose: print("Connected after %02i attempts." % attempts);
+
+        if self.verbose: 
+            print("Connected after {} attempts.".format(attempts));
+
         self.mon_connected();
         self.serialport.timeout = 12;
-    def serClose(self):
+
+    def serClose(self) -> None:
         self.serialport.close();
 
-    def telosSetSCL(self, level):
+    def telosSetSCL(self, level: int) -> None:
         '''Helper function for support of the TelosB platform.'''
         self.serialport.setRTS(not level)
-    def telosSetSDA(self, level):
+
+    def telosSetSDA(self, level: int) -> None:
         '''Helper function for support of the TelosB platform.'''
         self.serialport.setDTR(not level)
-    def telosI2CStart(self):
+
+    def telosI2CStart(self) -> None:
         '''Helper function for support of the TelosB platform.'''
         self.telosSetSDA(1)
         self.telosSetSCL(1)
         self.telosSetSDA(0)
-    def telosI2CStop(self):
+
+    def telosI2CStop(self) -> None:
         '''Helper function for support of the TelosB platform.'''
         self.telosSetSDA(0)
         self.telosSetSCL(1)
         self.telosSetSDA(1)
-    def telosI2CWriteBit(self, bit):
+
+    def telosI2CWriteBit(self, bit: int) -> None:
         '''Helper function for support of the TelosB platform.'''
         self.telosSetSCL(0)
         self.telosSetSDA(bit)
@@ -280,7 +236,8 @@ class GoodFET:
         self.telosSetSCL(1)
         time.sleep(1e-6)
         self.telosSetSCL(0)
-    def telosI2CWriteByte(self, byte):
+
+    def telosI2CWriteByte(self, byte: int) -> None:
         '''Helper function for support of the TelosB platform.'''
         self.telosI2CWriteBit( byte & 0x80 );
         self.telosI2CWriteBit( byte & 0x40 );
@@ -291,14 +248,15 @@ class GoodFET:
         self.telosI2CWriteBit( byte & 0x02 );
         self.telosI2CWriteBit( byte & 0x01 );
         self.telosI2CWriteBit( 0 );  # "acknowledge"
-    def telosI2CWriteCmd(self, addr, cmdbyte):
+
+    def telosI2CWriteCmd(self, addr: int, cmdbyte: int) -> None:
         '''Helper function for support of the TelosB platform.'''
         self.telosI2CStart()
         self.telosI2CWriteByte( 0x90 | (addr << 1) )
         self.telosI2CWriteByte( cmdbyte )
         self.telosI2CStop()
 
-    def bslResetZ1(self, invokeBSL=0):
+    def bslResetZ1(self, invokeBSL: int=0) -> None:
         '''
         Helper function for support of the Z1 mote platform.
         Applies BSL entry sequence on RST/NMI and TEST/VPP pins.
@@ -312,72 +270,69 @@ class GoodFET:
             
         By now only BSL mode is accessed
         '''
-        #if DEBUG > 1: sys.stderr.write("* bslReset(invokeBSL=%s)\n" % invokeBSL)
+
         if invokeBSL:
-            #sys.stderr.write("in Z1 bsl reset...\n")
             time.sleep(0.1)
             self.writepicROM(0xFF, 0xFF)
             time.sleep(0.1)
-            #sys.stderr.write("z1 bsl reset done...\n")
         else:
-            #sys.stderr.write("in Z1 reset...\n")
             time.sleep(0.1)
             self.writepicROM(0xFF, 0xFE)
             time.sleep(0.1)
-            #sys.stderr.write("z1 reset done...\n")
 
-    def writepicROM(self, address, data):
+    def writepicROM(self, address: int, data: int) -> int:
         ''' Writes data to @address'''
+
         for i in range(7,-1,-1):
             self.picROMclock((address >> i) & 0x01)
+
         self.picROMclock(0)
-        recbuf = 0
+
+        recbuf: int = 0
+
         for i in range(7,-1,-1):
-            s = ((data >> i) & 0x01)
+            s: int = ((data >> i) & 0x01)
             if i < 1:
-                r = not self.picROMclock(s, True)
+                r: bool = not self.picROMclock(s, True)
             else:
                 r = not self.picROMclock(s)
             recbuf = (recbuf << 1) + r
 
         self.picROMclock(0, True)
-        #k = 1
-        #while not self.serial.getCTS():
-        #    pass 
-        #time.sleep(0.1)
         return recbuf
-    def readpicROM(self, address):
+
+    def readpicROM(self, address: int) -> int:
         ''' reads a byte from @address'''
         for i in range(7,-1,-1):
             self.picROMclock((address >> i) & 0x01)
+
         self.picROMclock(1)
-        recbuf = 0
-        r = 0
+
+        recbuf: int = 0
+        r: int = 0
+
         for i in range(7,-1,-1):
             r = self.picROMclock(0)
             recbuf = (recbuf << 1) + r
+
         self.picROMclock(r)
-        #time.sleep(0.1)
         return recbuf
         
     #This seems more reliable when slowed.
-    def picROMclock(self, masterout, slow = True):
+    def picROMclock(self, masterout: int, slow: bool=True) -> int:
         self.serialport.setRTS(masterout)
         self.serialport.setDTR(1)
-        #time.sleep(0.02)
         self.serialport.setDTR(0)
+
         if slow:
             time.sleep(0.02)
+
         return self.serialport.getCTS()
 
-    def picROMfastclock(self, masterout):
-        self.serialport.setRTS(masterout)
-        self.serialport.setDTR(1)
-        self.serialport.setDTR(0)
-        time.sleep(0.02)
-        return self.serialport.getCTS()
+    def picROMfastclock(self, masterout: int) -> int:
+        return self.picROMclock(masterout, False)
 
-    def telosBReset(self, invokeBSL=0):
+    def telosBReset(self, invokeBSL: int=0) -> None:
         # "BSL entry sequence at dedicated JTAG pins"
         # rst !s0: 0 0 0 0 1 1
         # tck !s1: 1 0 1 0 0 1
@@ -405,68 +360,61 @@ class GoodFET:
         time.sleep(0.250)       #give MSP430's oscillator time to stabilize
         self.serialport.flushInput()  #clear buffers
 
-    def getbuffer(self,size=0x1c00):
-        writecmd(0,0xC2,[size&0xFF,(size>>16)&0xFF]);
-        print("Got %02x%02x buffer size." % (self.data[1],self.data[0]));
-
-    def writecmd(self, app, verb, count=0, data=[]):
+    def writecmd(self, app: int, verb: int, count: int=0, data: Optional[bytes]=None)-> bytearray:
         """Write a command and some data to the GoodFET."""
         self.serialport.write(bytearray([app, verb]))
 
-        #if data!=None:
-        #    count=len(data); #Initial count ignored.
-        
-        #little endian 16-bit length
         self.serialport.write(bytearray([count & 0xFF, count >> 8]))
 
         if self.verbose:
-            print("Tx: ( 0x%02x, 0x%02x, 0x%04x )" % ( app, verb, count ))
+            print("Tx: ( {0}, {1}, {2} )".format( app, verb, count ))
         
-        if count!=0:
-            if isinstance(data, (list, bytearray)):
-                out = bytearray(data[:count])
-            else:
-                out = b''.join(data)
+        if count != 0:
+            if data is not None:
+                out: bytearray = bytearray(data[:count])
+
             self.serialport.write(out)
+
         if not self.besilent:
             return self.readcmd()
         else:
-            return []
+            return b''
 
-    def readcmd(self):
+    def readcmd(self) -> bytearray:
         """Read a reply from the GoodFET."""
-        while 1:#self.serialport.inWaiting(): # Loop while input data is available
+        while 1:
             try:
-                self.app=ord(self.serialport.read(1));
-                self.verb=ord(self.serialport.read(1));
+                self.app = ord(self.serialport.read(1));
+                self.verb = ord(self.serialport.read(1));
                 
                 #Fixes an obscure bug in the TelosB.
-                if self.app==0x00:
-                    while self.verb==0x00:
-                        self.verb=ord(self.serialport.read(1));
-                
+                if self.app == 0x00:
+                    while self.verb == 0x00:
+                        self.verb = ord(self.serialport.read(1));
+               
                 self.count=(
-                    ord(self.serialport.read(1))
-                    +(ord(self.serialport.read(1))<<8)
-                    );
+                    ord(self.serialport.read(1)) + (ord(self.serialport.read(1))<<8)
+                );
 
                 if self.verbose:
-                    print("Rx: ( 0x%02x, 0x%02x, 0x%04x )" % ( self.app, self.verb, self.count ))
+                    print("Rx: ( {0}, {1}, {2} )".format( self.app, self.verb, self.count ))
             
                 #Debugging string; print, but wait.
-                if self.app==0xFF:
-                    if self.verb==0xFF:
+                if self.app == 0xFF:
+                    if self.verb == 0xFF:
                         print("# DEBUG %s" % self.serialport.read(self.count))
+
                	    elif self.verb==0xFE:
                         print("# DEBUG 0x%x" % struct.unpack(fmt[self.count-1], self.serialport.read(self.count))[0])
                     elif self.verb==0xFD:
-                        #Do nothing, just wait so there's no timeout.
                         print("# NOP.")
                         
                     sys.stdout.flush();
+
                 else:
-                    self.data=bytearray(self.serialport.read(self.count))
+                    self.data = bytearray(self.serialport.read(self.count))
                     return self.data;
+
             except TypeError:
                 if self.connected:
                     print("Warning: waiting for serial read timed out (most likely).")

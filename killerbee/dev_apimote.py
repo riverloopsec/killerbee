@@ -25,7 +25,6 @@ from .GoodFETCCSPI import GoodFETCCSPI
 CC2420_REG_SYNC: int = 0x14
 
 class APIMOTE:
-
     def __init__(self, dev: str) -> None:
         '''
         Instantiates the KillerBee class for the ApiMote platform running GoodFET firmware.
@@ -45,10 +44,10 @@ class APIMOTE:
         # Set enviroment variables for GoodFET code to use
         os.environ["platform"] = "apimote2"
         os.environ["board"] = "apimote2"
+
         self.handle = GoodFETCCSPI()
         self.handle.serInit(port=self.dev)
         self.handle.setup()
-        # TODO can we verify here the revision number that was sent is correct?
 
         self.__stream_open: bool = False
         self.capabilities: KBCapabilities = KBCapabilities()
@@ -195,6 +194,7 @@ class APIMOTE:
         @rtype: List
         @return: Returns None is timeout expires and no packet received.  When a packet is received, a dictionary is returned with the keys bytes (string of packet bytes), validcrc (boolean if a vaid CRC), rssi (unscaled RSSI), and location (may be set to None). For backwards compatibility, keys for 0,1,2 are provided such that it can be treated as if a list is returned, in the form [ String: packet contents | Bool: Valid CRC | Int: Unscaled RSSI ]
         '''
+
         if self.handle is None:
             raise Exception("Handle does not exist")
 
@@ -202,24 +202,22 @@ class APIMOTE:
             self.sniffer_on()
         
         if self.packet_queue is None:
-            packet: Optional[Any] = None
+            packet: Optional[bytes] = None
             start = datetime.utcnow()
 
-            while (packet is None and 
-                  (start + timedelta(microseconds=timeout) > datetime.utcnow())):
+            while packet is None:
                 packet = self.handle.RF_rxpacket()
                 rssi = self.handle.RF_getrssi() #TODO calibrate
 
             if packet is None:
                 return None
 
-            print(packet)
-
             if packet[0]+1 < len(packet):
                 self.packet_queue = packet[packet[0]+1+1:]
                 self.packet_queue_rssi = rssi
              
             frame = packet[1:packet[0]+1]
+
         else: 
             packet = self.packet_queue
             self.packet_queue = None
@@ -229,6 +227,7 @@ class APIMOTE:
                 rssi = None
             else:
                 rssi = self.packet_queue_rssi
+
 
         validcrc: bool = False
         if frame[-2:] == makeFCS(frame[:-2]):
