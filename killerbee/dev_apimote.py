@@ -213,11 +213,13 @@ class APIMOTE:
             if packet is None:
                 return None
 
-            if ord(packet[0])+1 < len(packet):
-                self.packet_queue = packet[ord(packet[0])+1+1:]
+            print(packet)
+
+            if packet[0]+1 < len(packet):
+                self.packet_queue = packet[packet[0]+1+1:]
                 self.packet_queue_rssi = rssi
              
-            frame = packet[1:ord(packet[0])+1]
+            frame = packet[1:packet[0]+1]
         else: 
             packet = self.packet_queue
             self.packet_queue = None
