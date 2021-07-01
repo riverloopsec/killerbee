@@ -75,9 +75,13 @@ class KillerBee:
                 self.driver = SEWIO(dev=device)  # give it the ip address
             else: del isSewio
 
+
+        if device is not None:
+            self.dev = device
+
         if hardware is None:
             print("Auto-detection is being deprecated - Please specify hardware")
-        else:
+        elif self.dev is not None:
             if hardware == "apimote":
                 from .dev_apimote import APIMOTE
                 self.driver = APIMOTE(self.dev)

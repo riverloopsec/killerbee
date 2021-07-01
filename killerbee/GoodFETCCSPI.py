@@ -208,7 +208,7 @@ class GoodFETCCSPI(GoodFET):
         self.writecmd(self.CCSPIAPP,0x85,len(data),data);
         return;
     
-    lastpacket=list(range(0,0xff));
+    lastpacket: bytearray = bytearray(list(range(0,0xff)));
 
     def RF_txrxpacket(self,packet,timeout=1):
         data="\0";
@@ -228,16 +228,16 @@ class GoodFETCCSPI(GoodFET):
         """Get a packet from the radio.  Returns None if none is
         waiting."""
         
-        data=bytearray([0]);
-        self.data=data;
-        buffer = self.writecmd(self.CCSPIAPP,0x80,len(data),data);
+        data: bytearray = bytearray([0]);
+        self.data = data;
+        buffer: bytearray = self.writecmd(self.CCSPIAPP,0x80,len(data),data);
         
-        self.lastpacket=buffer;
+        self.lastpacket: bytearray = buffer;
 
         if(len(buffer)==0):
             return None;
 
-        return bytearray_to_bytes(buffer);
+        return bytes(buffer);
 
     def RF_rxpacketrepeat(self):
         """Gets packets from the radio, ignoring all future requests so as

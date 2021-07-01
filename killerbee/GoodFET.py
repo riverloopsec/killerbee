@@ -16,7 +16,7 @@ import glob
 import os; 
 import sqlite3; 
 
-fmt: Tuple[str, str, None, str] = ("B", "<H", None, "<L")
+fmt: Tuple[str, str, str, str] = ("B", "<H", "<3S", "<L")
 
 def getClient(name="GoodFET") -> Any:
     import GoodFET, GoodFETCC, GoodFETAVR, GoodFETSPI, GoodFETMSP430, GoodFETNRF, GoodFETCCSPI; # type: ignore
@@ -65,7 +65,7 @@ class GoodFET:
     app: int = 0;
     verb: int = 0;
     count: int = 0;
-    data: bytes = b"";
+    data: bytearray = bytearray([]);
     verbose: bool = False
     
     GLITCHAPP: int = 0x71;
@@ -73,7 +73,7 @@ class GoodFET:
     symbols: SymbolTable = SymbolTable();
     
     def __init__(self, *args: Any, **kargs: Any) -> None:
-        self.data: bytes = b'';
+        self.data: bytearray = bytearray([]); 
 
     def getConsole(self) -> Any:
         from GoodFETConsole import GoodFETConsole; # type: ignore
@@ -378,7 +378,7 @@ class GoodFET:
         if not self.besilent:
             return self.readcmd()
         else:
-            return b''
+            return bytearray([0])
 
     def readcmd(self) -> bytearray:
         """Read a reply from the GoodFET."""
@@ -405,7 +405,7 @@ class GoodFET:
                         print("# DEBUG %s" % self.serialport.read(self.count))
 
                	    elif self.verb==0xFE:
-                        print("# DEBUG 0x%x" % struct.unpack(fmt[self.count-1], self.serialport.read(self.count))[0])
+                        print("# DEBUG 0x{:x}".format(struct.unpack(fmt[self.count-1], self.serialport.read(self.count))[0]))
                     elif self.verb==0xFD:
                         print("# NOP.")
                         
