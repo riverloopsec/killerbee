@@ -9,7 +9,7 @@ setattr(conf, 'killerbee_channel', DEFAULT_KB_CHANNEL)
 setattr(conf, 'killerbee_page', DEFAULT_KB_PAGE)
 setattr(conf, 'killerbee_device', DEFAULT_KB_DEVICE)
 setattr(conf, 'killerbee_nkey', None)
-from scapy import plist
+from scapy import plist # type: ignore
 from scapy.base_classes import SetGen # type: ignore
 from scapy.packet import Gen, Raw # type: ignore
 from scapy.all import Dot15d4 # type: ignore

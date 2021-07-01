@@ -5,6 +5,8 @@
 #
 # This code is being rewritten and refactored.  You've been warned!
 
+from typing import Optional, Any
+
 import sys, time, string, io, struct, glob, os; # type: ignore
 
 from .GoodFET import GoodFET; # type: ignore
@@ -76,14 +78,22 @@ class GoodFETCCSPI(GoodFET):
         
         #Automatically calibrate the len.
         bytes=2;
-        
-        self.writecmd(self.CCSPIAPP,0x02,len(data),data);
-  
-        toret=(
-            self.data[2]+(self.data[1]<<8)
-        ); 
+       
+        resp: Optional[bytearray] = self.writecmd(self.CCSPIAPP,0x02,len(data),data);
 
+        if len(resp) > 1: 
+            try: 
+                toret = resp[2] + (resp[1]<<8); 
+            except IndexError:
+                try:
+                    toret = resp[1] << 8
+                except IndexError:
+                    toret = 0
+        else:
+            toret = 0
+            
         return toret;
+
     def poke(self,reg,val,bytes=2):
         """Write a CCSPI Register."""
         data=[reg,(val>>8)&0xFF,val&0xFF];
@@ -198,7 +208,7 @@ class GoodFETCCSPI(GoodFET):
         self.writecmd(self.CCSPIAPP,0x85,len(data),data);
         return;
     
-    lastpacket=list(range(0,0xff));
+    lastpacket: bytearray = bytearray(list(range(0,0xff)));
 
     def RF_txrxpacket(self,packet,timeout=1):
         data="\0";
@@ -208,25 +218,27 @@ class GoodFETCCSPI(GoodFET):
         self.writecmd(self.CCSPIAPP,0x86,len(packet),packet);
         buffer=self.data;
         self.lastpacket=buffer;
+
         if(len(buffer)==0):
             return None;
 
         return buffer;
 
-    def RF_rxpacket(self):
+    def RF_rxpacket(self) -> Optional[bytes]:
         """Get a packet from the radio.  Returns None if none is
         waiting."""
         
-        data=bytearray([0]);
-        self.data=data;
-        self.writecmd(self.CCSPIAPP,0x80,len(data),data);
-        buffer=self.data;
+        data: bytearray = bytearray([0]);
+        self.data = data;
+        buffer: bytearray = self.writecmd(self.CCSPIAPP,0x80,len(data),data);
         
-        self.lastpacket=buffer;
+        self.lastpacket: bytearray = buffer;
+
         if(len(buffer)==0):
             return None;
-        
-        return bytearray_to_bytes(buffer);
+
+        return bytes(buffer);
+
     def RF_rxpacketrepeat(self):
         """Gets packets from the radio, ignoring all future requests so as
         not to waste time.  Call RF_rxpacket() after this."""
