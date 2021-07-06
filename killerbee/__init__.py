@@ -31,7 +31,7 @@ def show_dev(vendor: str=None, product: str=None, gps: str=None, include: str=No
     @param include: Provide device names in this argument if you would like only
         these to be enumerated. Aka, include only these items.
     '''
-    fmt: str = "{: >14} {: <20} {: >10}"
+    fmt: str = "{: >14} {: <30} {: >10}"
     print((fmt.format("Dev", "Product String", "Serial Number")))
     for dev in devlist(vendor=vendor, product=product, gps=gps, include=include): 
         # Using None as a format value is an TypeError in python3
@@ -76,42 +76,39 @@ class KillerBee:
             else: del isSewio
 
 
-        if device is not None:
-            self.dev = device
-
         if hardware is None:
             print("Auto-detection is being deprecated - Please specify hardware")
-        elif self.dev is not None:
+        elif device is not None:
             if hardware == "apimote":
                 from .dev_apimote import APIMOTE
-                self.driver = APIMOTE(self.dev)
+                self.driver = APIMOTE(device)
             elif hardware == "rzusbstick":
                 from .dev_rzusbstick import RZUSBSTICK
-                self.driver = RZUSBSTICK(self.dev, self.__bus)
+                self.driver = RZUSBSTICK(device, self.__bus)
             elif hardware == "cc2530":
                 from .dev_cc253x import CC253x
-                self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2530)
+                self.driver = CC253x(device, self.__bus, CC253x.VARIANT_CC2530)
             elif hardware == "cc2531":
                 from .dev_cc253x import CC253x
-                self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2531)
+                self.driver = CC253x(device, self.__bus, CC253x.VARIANT_CC2531)
             elif hardware == "bumblebee":
                 from .dev_bumblebee import Bumblebee
-                self.driver = Bumblebee(self.dev, self.__bus)
+                self.driver = Bumblebee(device, self.__bus)
             elif hardware == "sl_nodetest":
                 from .dev_sl_nodetest import SL_NODETEST
-                self.driver = SL_NODETEST(self.dev)
+                self.driver = SL_NODETEST(device)
             elif hardware == "sl_beehive":
                 from .dev_sl_beehive import SL_BEEHIVE
-                self.driver = SL_BEEHIVE(self.dev)
+                self.driver = SL_BEEHIVE(device)
             elif hardware == "zigduino":
                 from .dev_zigduino import ZIGDUINO
-                self.driver = ZIGDUINO(self.dev)
+                self.driver = ZIGDUINO(device)
             elif hardware == "freakdruino":
                 from .dev_freakduino import FREAKDUINO
-                self.driver = FREAKDUINO(self.dev)
+                self.driver = FREAKDUINO(device)
             elif hardware == "telosb":
                 from .dev_telosb import TELOSB
-                self.driver = TELOSB(self.dev)
+                self.driver = TELOSB(device)
 
         # Figure out a device is one is not set, trying USB devices next
         if self.driver is None:
@@ -208,8 +205,10 @@ class KillerBee:
         @rtype: Boolean
         @return: True if KillerBee class has device matching the vendor and product IDs provided.
         '''
-        if self.dev.idVendor == vendorId and self.dev.idProduct == productId: return True
-        else: return False
+        if self.dev.idVendor == vendorId and self.dev.idProduct == productId: 
+            return True
+        else: 
+            return False
 
     def get_dev_info(self) -> list[str]:
         '''
@@ -442,7 +441,7 @@ class KillerBee:
 
         return self.driver.pnext(timeout)
 
-    def jammer_on(self, channel: Optional[int]=None):
+    def jammer_on(self, channel: Optional[int]=None, method: Optional[str]=None):
         '''
         Attempts reflexive jamming on all 802.15.4 frames.
         Targeted frames must be >12 bytes for reliable jamming in current firmware.
@@ -454,9 +453,10 @@ class KillerBee:
         if self.driver is None:
             raise KBInterfaceError("Driver not configured")
 
-        return self.driver.jammer_on(channel=channel)
+        return self.driver.jammer_on(channel=channel, method=method)
 
-    def jammer_off(self, channel: Optional[int]=None):
+
+    def jammer_off(self):
         '''
         End reflexive jamming on all 802.15.4 frames.
         Targeted frames must be >12 bytes for reliable jamming in current firmware.
@@ -468,5 +468,5 @@ class KillerBee:
         if self.driver is None:
             raise KBInterfaceError("Driver not configured")
 
-        return self.driver.jammer_off(channel=channel)
+        return self.driver.jammer_off()
 

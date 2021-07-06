@@ -259,18 +259,22 @@ class APIMOTE:
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel: Optional[int]=None, page: int=0) -> None:
+    def jammer_on(self, channel: Optional[int]=None, page: int=0, method: Optional[str]=None) -> None:
         '''
-        Not yet implemented.
+        Implements reflexive jamming or constant carrier wave jamming.
         @type channel: Integer
         @param channel: Sets the channel, optional
         @type page: Integer
         @param page: Sets the subghz page, not supported on this device
         @rtype: None
         '''
+
         if self.handle is None:
             raise Exception("Handle does not exist")
 
+        if method is None or method not in ['reflexive', 'constant']:
+            raise Exception("Device does not support the provided jamming method")
+            
         self.capabilities.require(KBCapabilities.PHYJAM_REFLEX)
 
         self.handle.RF_promiscuity(1)
@@ -280,8 +284,11 @@ class APIMOTE:
             self.set_channel(channel, page)
 
         self.handle.CC_RFST_RX()
-        self.handle.RF_carrier() #constant carrier wave jamming
-        #self.handle.RF_reflexjam() #reflexive jamming (advanced)
+
+        if method == "reflexive":
+            self.handle.RF_reflexjam() 
+        elif method == 'constant':
+            self.handle.RF_carrier()  
 
     #TODO maybe move sync to byte string rather than int
     def set_sync(self, sync: int=0xA70F) -> Any:
@@ -294,7 +301,7 @@ class APIMOTE:
             raise Exception("Sync word (%x) must be 2-bytes or less." % sync)
         return self.handle.poke(CC2420_REG_SYNC, sync)
 
-    def jammer_off(self, channel: Optional[int]=None, page: int=0) -> None:
+    def jammer_off(self) -> None:
         '''
         Not yet implemented.
         @return: None

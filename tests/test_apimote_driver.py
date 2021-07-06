@@ -116,7 +116,8 @@ class TestApimoteDriver(unittest.TestCase):
 
     def test_pnext(self):
         driver=APIMOTE(os.environ['APIMOTE_DEVSTRING'])
-      
+     
+        driver.set_channel(25) 
         driver.pnext()
 
         self.assertTrue(True) 
@@ -129,8 +130,12 @@ class TestApimoteDriver(unittest.TestCase):
     def test_jammer_on_off(self):
         driver=APIMOTE(os.environ['APIMOTE_DEVSTRING'])
      
-        driver.jammer_on() 
-
+        #driver.jammer_on(None, 0, 'reflexive')
+        #driver.jammer_on(None, 0, 'constant')
+        #driver.jammer_on(11, 0, 'constant')
+        self.assertRaises(Exception, driver.jammer_on)
+        self.assertRaises(Exception, driver.jammer_on, None, 0, 'none')
+        self.assertRaises(Exception, driver.jammer_on, None, 0, None)
         self.assertRaises(Exception, driver.jammer_off)
 
         driver.close()

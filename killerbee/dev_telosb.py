@@ -199,21 +199,28 @@ class TELOSB:
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel=None, page=0):
+    def jammer_on(self, channel=None, page=0, method=None):
         '''
-        Not yet implemented.
+        Implements reflexive jamming.
+        Targeted frames must be >12 bytes for reliable jamming in current firmware.
         @type channel: Integer
         @param channel: Sets the channel, optional
         @type page: Integer
         @param page: Sets the subghz page, not support on this device
         @rtype: None
         '''
+
+        if channel is not None:
+            self.set_channel(channel, page)
+
+        if method is None or method not in ["reflexive"]:
+            raise ValueError("Jamming method is unsupported by this driver.")
+
         self.capabilities.require(KBCapabilities.PHYJAM_REFLEX)
 
         self.handle.RF_promiscuity(1)
         self.handle.RF_autocrc(0)
-        if channel != None:
-            self.set_channel(channel, page)
+
         self.handle.CC_RFST_RX()
         self.handle.RF_reflexjam()
 
@@ -224,7 +231,7 @@ class TELOSB:
             raise Exception("Sync word (%x) must be 2-bytes or less." % sync)
         return self.handle.poke(CC2420_REG_SYNC, sync)
 
-    def jammer_off(self, channel=None, page=0):
+    def jammer_off(self):
         '''
         Not yet implemented.
         @return: None

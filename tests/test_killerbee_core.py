@@ -221,6 +221,7 @@ class TestKillerbeeCore(unittest.TestCase):
     def test_killerbee_pnext(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
+        kb.set_channel(25)
         kb.pnext()
 
         self.assertTrue(True)
@@ -230,8 +231,12 @@ class TestKillerbeeCore(unittest.TestCase):
     def test_killerbee_jammer_on_off(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
-        kb.jammer_on()
-
+        #kb.jammer_on(None, 'reflexive')
+        #kb.jammer_on(None, 'constant')
+        #kb.jammer_on(11, 'constant')
+        self.assertRaises(Exception, kb.jammer_on, None, 'none')
+        self.assertRaises(Exception, kb.jammer_on, None, None)
+        self.assertRaises(Exception, kb.jammer_on)
         self.assertRaises(Exception, kb.jammer_off)
 
         kb.close()
