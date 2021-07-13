@@ -1,7 +1,4 @@
-from typing import Optional
-from typing import Dict
-from typing import Union
-from typing import Any
+from typing import Optional, Dict, Union, Any, List
 
 import os
 import time
@@ -60,7 +57,7 @@ class APIMOTE:
     def get_capabilities(self) -> Dict[int, bool]:
         return self.capabilities.getlist()
 
-    def get_dev_info(self) -> list[Union[str, Any]]:
+    def get_dev_info(self) -> List[Union[str, Any]]:
         return [self.dev, "GoodFET Apimote", ""]
 
     def sniffer_on(self, channel: Optional[int]=None, page: int=0) -> None:
