@@ -91,7 +91,7 @@ class DainTreeReader:
 
         del(self._fh)
 
-    def pnext(self) -> Optional[list[Any]]:
+    def pnext(self) -> Optional[List[Any]]:
         '''
         Retrieves the next packet from the capture file.  Returns a list of
         [Hdr, packet] where Hdr is a list of [timestamp, snaplen, plen] and

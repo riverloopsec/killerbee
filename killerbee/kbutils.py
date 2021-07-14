@@ -203,7 +203,7 @@ class findFromListAndBusDevId(findFromList):
 
         return False
 
-def devlist_usb_v1x(vendor: Optional[Any]=None, product: Optional[Any]=None) -> list[Any]:
+def devlist_usb_v1x(vendor: Optional[Any]=None, product: Optional[Any]=None) -> List[Any]:
     '''
     Private function. Do not call from tools/scripts/etc.
     '''
@@ -246,7 +246,7 @@ def isIpAddr(ip: str) -> bool:
         return True
     return ( is_valid_ipv6_address(ip) or is_valid_ipv4_address(ip) )
 
-def devlist(vendor: Optional[Any]=None, product: Optional[Any]=None, gps: Optional[str]=None, include: Optional[str]=None) -> list[Any]:
+def devlist(vendor: Optional[Any]=None, product: Optional[Any]=None, gps: Optional[str]=None, include: Optional[str]=None) -> List[Any]:
     '''
     Return device information for all present devices, 
     filtering if requested by vendor and/or product IDs on USB devices, and
