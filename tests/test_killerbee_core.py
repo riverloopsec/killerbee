@@ -234,6 +234,7 @@ class TestKillerbeeCore(unittest.TestCase):
         #kb.jammer_on(None, 'reflexive')
         #kb.jammer_on(None, 'constant')
         #kb.jammer_on(11, 'constant')
+        self.assertRaises(Exception, kb.jammer_on, None, 0, 'none')
         self.assertRaises(Exception, kb.jammer_off)
 
         kb.close()

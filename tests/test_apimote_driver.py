@@ -133,6 +133,7 @@ class TestApimoteDriver(unittest.TestCase):
         #driver.jammer_on(None, 0, 'reflexive')
         #driver.jammer_on(None, 0, 'constant')
         #driver.jammer_on(11, 0, 'constant')
+        self.assertRaises(Exception, driver.jammer_on, None, 0, 'none')
         self.assertRaises(Exception, driver.jammer_off)
 
         driver.close()
