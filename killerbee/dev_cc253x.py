@@ -272,7 +272,7 @@ class CC253x:
                 return ret
 
 
-    def jammer_on(self, channel=None, page=0):
+    def jammer_on(self, channel=None, page=0, method=None):
         """
         Not yet implemented.
         @type channel: Integer
@@ -289,7 +289,7 @@ class CC253x:
         """
         raise Exception('Not yet implemented')
 
-    def jammer_off(self, channel=None, page=0):
+    def jammer_off(self):
         """
         Not yet implemented.
         @return: None

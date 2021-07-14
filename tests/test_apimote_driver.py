@@ -34,7 +34,7 @@ class TestApimoteDriver(unittest.TestCase):
         self.assertTrue(capabilities[KBCapabilities.SET_SYNC])
         self.assertFalse(capabilities[KBCapabilities.NONE])
         self.assertFalse(capabilities[KBCapabilities.SELFACK])
-        self.assertFalse(capabilities[KBCapabilities.PHYJAM])
+        self.assertTrue(capabilities[KBCapabilities.PHYJAM])
         self.assertFalse(capabilities[KBCapabilities.FREQ_900])
         self.assertFalse(capabilities[KBCapabilities.FREQ_863])
         self.assertFalse(capabilities[KBCapabilities.FREQ_868])
@@ -65,7 +65,7 @@ class TestApimoteDriver(unittest.TestCase):
         self.assertTrue(driver.check_capability(KBCapabilities.SET_SYNC))
         self.assertFalse(driver.check_capability(KBCapabilities.NONE))
         self.assertFalse(driver.check_capability(KBCapabilities.SELFACK))
-        self.assertFalse(driver.check_capability(KBCapabilities.PHYJAM))
+        self.assertTrue(driver.check_capability(KBCapabilities.PHYJAM))
         self.assertFalse(driver.check_capability(KBCapabilities.FREQ_900))
         self.assertFalse(driver.check_capability(KBCapabilities.FREQ_863))
         self.assertFalse(driver.check_capability(KBCapabilities.FREQ_868))
@@ -116,7 +116,8 @@ class TestApimoteDriver(unittest.TestCase):
 
     def test_pnext(self):
         driver=APIMOTE(os.environ['APIMOTE_DEVSTRING'])
-      
+     
+        driver.set_channel(25) 
         driver.pnext()
 
         self.assertTrue(True) 
@@ -129,8 +130,10 @@ class TestApimoteDriver(unittest.TestCase):
     def test_jammer_on_off(self):
         driver=APIMOTE(os.environ['APIMOTE_DEVSTRING'])
      
-        driver.jammer_on() 
-
+        #driver.jammer_on(None, 0, 'reflexive')
+        #driver.jammer_on(None, 0, 'constant')
+        #driver.jammer_on(11, 0, 'constant')
+        self.assertRaises(Exception, driver.jammer_on, None, 0, 'none')
         self.assertRaises(Exception, driver.jammer_off)
 
         driver.close()

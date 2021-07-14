@@ -55,9 +55,9 @@ class TestKillerbeeCore(unittest.TestCase):
         self.assertTrue(kb.check_capability(KBCapabilities.INJECT))
         self.assertTrue(kb.check_capability(KBCapabilities.PHYJAM_REFLEX))
         self.assertTrue(kb.check_capability(KBCapabilities.SET_SYNC))
+        self.assertTrue(kb.check_capability(KBCapabilities.PHYJAM))
         self.assertFalse(kb.check_capability(KBCapabilities.NONE))
         self.assertFalse(kb.check_capability(KBCapabilities.SELFACK))
-        self.assertFalse(kb.check_capability(KBCapabilities.PHYJAM))
         self.assertFalse(kb.check_capability(KBCapabilities.FREQ_900))
         self.assertFalse(kb.check_capability(KBCapabilities.FREQ_863))
         self.assertFalse(kb.check_capability(KBCapabilities.FREQ_868))
@@ -115,8 +115,8 @@ class TestKillerbeeCore(unittest.TestCase):
         self.assertTrue(capabilities[KBCapabilities.PHYJAM_REFLEX])
         self.assertTrue(capabilities[KBCapabilities.SET_SYNC])
         self.assertTrue(capabilities[KBCapabilities.FREQ_2400])
+        self.assertTrue(capabilities[KBCapabilities.PHYJAM])
         self.assertFalse(capabilities[KBCapabilities.NONE])
-        self.assertFalse(capabilities[KBCapabilities.PHYJAM])
         self.assertFalse(capabilities[KBCapabilities.SELFACK])
         self.assertFalse(capabilities[KBCapabilities.FREQ_900])
         self.assertFalse(capabilities[KBCapabilities.FREQ_863])
@@ -221,6 +221,7 @@ class TestKillerbeeCore(unittest.TestCase):
     def test_killerbee_pnext(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
+        kb.set_channel(25)
         kb.pnext()
 
         self.assertTrue(True)
@@ -230,8 +231,10 @@ class TestKillerbeeCore(unittest.TestCase):
     def test_killerbee_jammer_on_off(self):
         kb = KillerBee(os.environ['APIMOTE_DEVSTRING'])
 
-        kb.jammer_on()
-
+        #kb.jammer_on(None, 'reflexive')
+        #kb.jammer_on(None, 'constant')
+        #kb.jammer_on(11, 'constant')
+        self.assertRaises(Exception, kb.jammer_on, None, 0, 'none')
         self.assertRaises(Exception, kb.jammer_off)
 
         kb.close()

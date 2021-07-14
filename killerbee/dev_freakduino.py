@@ -313,7 +313,7 @@ class FREAKDUINO:
         '''
         raise Exception('Not yet implemented')
 
-    def jammer_on(self, channel=None, page=0):
+    def jammer_on(self, channel=None, page=0, method=None):
         '''
         Not yet implemented.
         @type channel: Integer
@@ -333,7 +333,7 @@ class FREAKDUINO:
         #TODO implement
         raise Exception('Not yet implemented')
 
-    def jammer_off(self, channel=None, page=0):
+    def jammer_off(self):
         '''
         Not yet implemented.
         @return: None

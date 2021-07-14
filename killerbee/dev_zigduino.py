@@ -21,34 +21,33 @@ ATMEL_REG_SYNC = 0x0B
 
 class ZIGDUINO:
     def __init__(self, dev):
-	    '''
-	    Instantiates the KillerBee class for Zigduino running GoodFET firmware.
-	    @type dev:   String
-	    @param dev:  Serial device identifier (ex /dev/ttyUSB0)
-	    @return: None
-	    @rtype: None
-	    '''
-	    self._channel = None
-	    self._page = 0
-	    self.handle = None
-	    self.dev = dev
-	    self.handle = GoodFETatmel128rfa1()
-	    self.handle.serInit(port=self.dev)
-	    self.handle.setup()
+        '''
+        Instantiates the KillerBee class for Zigduino running GoodFET firmware.
+        @type dev:   String
+        @param dev:  Serial device identifier (ex /dev/ttyUSB0)
+        @return: None
+        @rtype: None
+        '''
+        self._channel = None
+        self.handle = None
+        self.dev = dev
+        self.handle = GoodFETatmel128rfa1()
+        self.handle.serInit(port=self.dev)
+        self.handle.setup()
 
-	    self.__stream_open = False
-	    self.capabilities = KBCapabilities()
-	    self.__set_capabilities()
+        self.__stream_open = False
+        self.capabilities = KBCapabilities()
+        self.__set_capabilities()
 
     def close(self):
-	    self.handle.serClose()
-	    self.handle = None
+	      self.handle.serClose()
+	      self.handle = None
 
     def check_capability(self, capab):
-    	return self.capabilities.check(capab)
+        return self.capabilities.check(capab)
 
     def get_capabilities(self):
-	    return self.capabilities.getlist()
+        return self.capabilities.getlist()
 
     def __set_capabilities(self):
         '''
@@ -65,60 +64,60 @@ class ZIGDUINO:
 
     # KillerBee expects the driver to implement this function
     def get_dev_info(self):
-	    '''
-	    Returns device information in a list identifying the device.
-	    @rtype: List
-	    @return: List of 3 strings identifying device.
-	    '''
-	    return [self.dev, "Zigduino", ""]
+        '''
+        Returns device information in a list identifying the device.
+        @rtype: List
+        @return: List of 3 strings identifying device.
+        '''
+        return [self.dev, "Zigduino", ""]
 
     # KillerBee expects the driver to implement this function
     def sniffer_on(self, channel=None, page=0):
-	    '''
-	    Turns the sniffer on such that pnext() will start returning observed
-	    data.  Will set the command mode to Air Capture if it is not already
-	    set.
-	    @type channel: Integer
-	    @param channel: Sets the channel, optional
-	    @type page: Integer
-	    @param page: Sets the subghz page, optional
-	    @rtype: None
-	    '''
-	    self.capabilities.require(KBCapabilities.SNIFF)
+        '''
+        Turns the sniffer on such that pnext() will start returning observed
+        data.  Will set the command mode to Air Capture if it is not already
+        set.
+        @type channel: Integer
+        @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, optional
+        @rtype: None
+        '''
+        self.capabilities.require(KBCapabilities.SNIFF)
 
-	    if channel != None or page:
-	        self.set_channel(channel, page)
+        if channel != None or page:
+            self.set_channel(channel, page)
 
-	    self.__stream_open = True
+        self.__stream_open = True
 
     # KillerBee expects the driver to implement this function
     def sniffer_off(self):
-	    '''
-	    Turns the sniffer off, freeing the hardware for other functions.  It is
-	    not necessary to call this function before closing the interface with
-	    close().
-	    @rtype: None
-	    '''
-	    #TODO actually have firmware stop sending us packets!
-	    self.__stream_open = False
+        '''
+        Turns the sniffer off, freeing the hardware for other functions.  It is
+        not necessary to call this function before closing the interface with
+        close().
+        @rtype: None
+        '''
+        #TODO actually have firmware stop sending us packets!
+        self.__stream_open = False
 
     # KillerBee expects the driver to implement this function
     def set_channel(self, channel, page=0):
-	    '''
-	    Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
-	    @type channel: Integer
-	    @param channel: Sets the channel
-	    @type page: Integer
-	    @param page: Sets the subghz page, not supported on this device
-	    @rtype: None
-	    '''
-	    self.capabilities.require(KBCapabilities.SETCHAN)
+        '''
+        Sets the radio interface to the specifid channel (limited to 2.4 GHz channels 11-26)
+        @type channel: Integer
+        @param channel: Sets the channel
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
+        @rtype: None
+        '''
+        self.capabilities.require(KBCapabilities.SETCHAN)
 
-	    if channel >= 11 or channel <= 26:
-	        self._channel = channel
-	        self.handle.RF_setchannel(channel)
-	    else:
-	        raise Exception('Invalid channel')
+        if channel >= 11 or channel <= 26:
+            self._channel = channel
+            self.handle.RF_setchannel(channel)
+        else:
+            raise Exception('Invalid channel')
 
     # KillerBee expects the driver to implement this function
     def inject(self, packet, channel=None, count=1, delay=0, page=0):
@@ -184,15 +183,15 @@ class ZIGDUINO:
         return result
 
     def jammer_on(self, channel=None, page=0):
-	    '''
-	    Not yet implemented.
-	    @type channel: Integer
-	    @param channel: Sets the channel, optional
-	    @type page: Integer
-	    @param page: Sets the subghz page, not supported on this device
-	    @rtype: None
-	    '''
-	    raise Exception('Not yet implemented')
+        '''
+        Not yet implemented.
+        @type channel: Integer
+        @param channel: Sets the channel, optional
+        @type page: Integer
+        @param page: Sets the subghz page, not supported on this device
+        @rtype: None
+        '''
+        raise Exception('Not yet implemented')
 
     def set_sync(self, sync=0xA7):
         '''Set the register controlling the 802.15.4 PHY sync byte.'''
@@ -204,11 +203,11 @@ class ZIGDUINO:
         return self.handle.poke(ATMEL_REG_SYNC, sync)
 
     def jammer_off(self, channel=None, page=0):
-	    '''
-	    Not yet implemented.
-	    @return: None
-	    @rtype: None
-	    '''
-	    #TODO implement
-	    raise Exception('Not yet implemented')
+        '''
+        Not yet implemented.
+        @return: None
+        @rtype: None
+        '''
+        #TODO implement
+        raise Exception('Not yet implemented')
 
