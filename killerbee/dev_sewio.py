@@ -341,9 +341,9 @@ class SEWIO:
         self.capabilities.require(KBCapabilities.INJECT)
 
         if len(packet) < 1:
-            raise Exception('Empty packet')
+            raise ValueError('Empty packet')
         if len(packet) > 125:                # 127 -2 to accommodate FCS
-            raise Exception('Packet too long')
+            raise ValueError('Packet too long')
 
         if channel != None:
             self.set_channel(channel)

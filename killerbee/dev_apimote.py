@@ -79,6 +79,7 @@ class APIMOTE:
         self.capabilities.setcapab(KBCapabilities.INJECT, True)
         self.capabilities.setcapab(KBCapabilities.PHYJAM_REFLEX, True)
         self.capabilities.setcapab(KBCapabilities.SET_SYNC, True)
+        self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
         return
 
     # KillerBee expects the driver to implement this function
@@ -272,10 +273,15 @@ class APIMOTE:
         if self.handle is None:
             raise Exception("Handle does not exist")
 
-        if method is None or method not in ['reflexive', 'constant']:
-            raise Exception("Device does not support the provided jamming method")
-            
-        self.capabilities.require(KBCapabilities.PHYJAM_REFLEX)
+        if method is None: 
+            method = "constant"
+
+        if method == "reflexive":
+            self.capabilities.require(KBCapabilities.PHYJAM_REFLEX)
+        elif method == "constant":
+            self.capabilities.require(KBCapabilities.PHYJAM)
+        else:
+            raise ValueError('Parameter "method" must be either \'reflexive\' or \'constant\'.')
 
         self.handle.RF_promiscuity(1)
         self.handle.RF_autocrc(0)
