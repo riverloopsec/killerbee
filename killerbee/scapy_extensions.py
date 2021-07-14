@@ -72,7 +72,7 @@ def __kb_send(kb: KillerBee, x: Union[str, Gen], channel: Optional[int]=None, pa
         pass
     return n
 
-def __kb_recv(kb: KillerBee, count: int=0, store: int=1, prn: Optional[Any]=None, lfilter: Optional[Any]=None, stop_filter: Optional[Any]=None, verbose: Optional[int]=None, timeout: Optional[int]=None) -> list[bytes]:
+def __kb_recv(kb: KillerBee, count: int=0, store: int=1, prn: Optional[Any]=None, lfilter: Optional[Any]=None, stop_filter: Optional[Any]=None, verbose: Optional[int]=None, timeout: Optional[int]=None) -> List[bytes]:
     kb.sniffer_on()
     if timeout is not None:
         stoptime = time.time()+timeout
@@ -290,7 +290,7 @@ def kbrddain(filename: str, count: int=-1, skip: int=0) -> plist.PacketList:
     packetcount: int = 0
 
     while 1:
-        packet: Optional[list[Any]] = cap.pnext()
+        packet: Optional[List[Any]] = cap.pnext()
         if packet is None:
           break;
         packetcount += 1

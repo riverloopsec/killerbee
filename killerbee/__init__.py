@@ -1,4 +1,4 @@
-from typing import Optional, Any, Dict, Union
+from typing import Optional, Any, Dict, Union, List
 
 import struct
 import glob
@@ -210,7 +210,7 @@ class KillerBee:
         else: 
             return False
 
-    def get_dev_info(self) -> list[str]:
+    def get_dev_info(self) -> List[str]:
         '''
         Returns device information in a list identifying the device. Implemented by the loaded driver.
         @rtype: List
@@ -271,7 +271,7 @@ class KillerBee:
 
         return self.driver.capabilities.frequency(channel, page)
 
-    def get_capabilities(self) -> list[Any]:
+    def get_capabilities(self) -> List[Any]:
         '''
         Returns a list of capability information for the device.
         @rtype:  List
@@ -294,7 +294,7 @@ class KillerBee:
 
         return self.driver.enter_bootloader()
 
-    def get_bootloader_version(self) -> list[int]:
+    def get_bootloader_version(self) -> List[int]:
         '''
         Gets the bootloader major and minor version.
         @rtype:  List
@@ -306,7 +306,7 @@ class KillerBee:
 
         return self.driver.get_bootloader_version()
 
-    def get_bootloader_signature(self) -> list[int]:
+    def get_bootloader_signature(self) -> List[int]:
         '''
         Gets the bootloader chip signature.
         @rtype:  List

@@ -12,7 +12,7 @@ TODO list (help is welcomed):
   - Platform recognition (ApiMote versons)
 '''
 
-from typing import Optional, Dict, Union, Any
+from typing import Optional, Dict, Union, Any, List
 
 import os
 import time
@@ -82,7 +82,7 @@ class APIMOTE:
         return
 
     # KillerBee expects the driver to implement this function
-    def get_dev_info(self) -> list[Union[str, Any]]:
+    def get_dev_info(self) -> List[Union[str, Any]]:
         '''
         Returns device information in a list identifying the device.
         @rtype: List
