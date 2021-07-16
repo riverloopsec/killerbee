@@ -118,7 +118,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-i', '--iface', '--dev', action='store', dest='devstring')
     parser.add_argument('-g', '--gps', '--ignore', action='append', dest='ignore')
-    parser.add_argument('-s', '--delay', action='store', type=float, dest='delay', default=2.0)
+    parser.add_argument('-s', '--delay', action='store', type=int, dest='delay', default=2)
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-c', '--channel', action='store', type=int, default=None)
     parser.add_argument('-w', '--file', action='store', dest='csvfile', default=None)
@@ -181,10 +181,7 @@ if __name__ == '__main__':
 
         beaconinj = b''.join([beaconp1, b"%c" % seqnum, beaconp2])
 
-        # Process packets for arg_delay seconds looking for the beacon
         # response frame.
-        start = time.time()
-
         try:
             txcount+=1
             kb.inject(beaconinj)
@@ -192,15 +189,13 @@ if __name__ == '__main__':
             sys.stderr.write("ERROR: Unable to inject packet: {0}".format(e))
             sys.exit(-1)
 
-        while (start+args.delay > time.time()):
-            # Does not block
-            recvpkt = kb.pnext()
-            # Check for empty packet (timeout) and valid FCS
-            if recvpkt != None and recvpkt[1]:
-                rxcount += 1
-                if args.verbose:
-                    print("Received frame.")#, time.time()-start
-                networkdata = response_handler(stumbled, recvpkt[0], channel)
+        recvpkt = kb.pnext(args.delay)
+        # Check for empty packet (timeout) and valid FCS
+        if recvpkt is not None and recvpkt[1]:
+            rxcount += 1
+            if args.verbose:
+                print("Received frame.")
+            networkdata = response_handler(stumbled, recvpkt[0], channel)
 
         kb.sniffer_off()
         seqnum += 1
