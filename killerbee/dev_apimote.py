@@ -204,9 +204,9 @@ class APIMOTE:
         
         if self.packet_queue is None:
             packet: Optional[bytes] = None
-            start = datetime.utcnow()
+            start = datetime.now()
 
-            while packet is None:
+            while (packet is None) and ((start + timedelta(seconds=timeout)) > datetime.now()):
                 packet = self.handle.RF_rxpacket()
                 rssi = self.handle.RF_getrssi() #TODO calibrate
 
