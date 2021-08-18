@@ -104,7 +104,7 @@ if arg_pcapfile == None and arg_dsnafile == None:
     sys.exit(1)
 
 # Open and read the search file
-fh = open(arg_searchfile, 'r')
+fh = open(arg_searchfile, 'rb')
 searchdata = fh.read()
 fh.close()
 
