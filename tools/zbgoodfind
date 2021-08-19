@@ -1,156 +1,228 @@
 #!/usr/bin/python
 from __future__ import print_function
 
-import sys
+import argparse
+import os
 import random
 import signal
+import sys
+
 from killerbee import *
 
-def usage():
-    print("""
-zbgoodfind - search a binary file to identify the encryption key for a given
-SNA or libpcap IEEE 802.15.4 encrypted packet - jwright@willhackforsushi.com
+parser = argparse.ArgumentParser(
+    prog="zbgoodfind",
+    description="search a binary file to identify the encryption key for a given SNA or libpcap IEEE 802.15.4 encrypted packet",
+    epilog="Enjoy! - jwright@willhackforsushi.com",
+)
 
-Usage: zbgoodfind [-frRFd] [-f binary file] [-r pcapfile] [-R daintreefile] 
-         [-F Don't skip 2-byte FCS at end of each frame]
-         [-d genenerate binary file (test mode)]
-    """, file=sys.stderr)
+parser.add_argument(
+    "-F",
+    "--skip-fcs",
+    action="store_false",
+    default=True,
+    help="Don't skip 2-byte FCS at end of each frame",
+)
+
+file_group = parser.add_mutually_exclusive_group(required=True)
+
+file_group.add_argument("-R", "--daintree", help="Daintree SNA file path", type=str)
+file_group.add_argument("-r", "--pcap", help="PCAP file path", type=str)
+file_group.add_argument(
+    "-d",
+    "--test",
+    action="store_true",
+    default=False,
+    help="genenerate binary file (test mode)",
+)
+
+parser.add_argument(
+    "-f",
+    "--binary-file",
+    help="Binary file path (used as key inputs)",
+    type=str,
+)
+
+parser.add_argument(
+    '-v',
+    '--verbose',
+    action='store_true',
+    help='enable verbose output'
+)
+
+args = parser.parse_args()
 
 def testmode():
-    '''
+    """
     Generate a search file of 4K in size of random data, then "hide" a static
     key in the file to locate using this tool.  For demonstration purposes and
     testing.
-    '''
-    key = "\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf"
+    """
+    key = b"\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf"
+    key_len = len(key)
     searchfilelen = 8192
 
-    fin = open("/dev/urandom", 'r')
-    fout = open("searchfile.dat", 'w')
+    fin = open("/dev/urandom", "rb")
+    fout = open("searchfile.dat", "wb")
     searchdata = fin.read(searchfilelen)
-    randoffset = int("%d" % random.uniform(0, searchfilelen-16))
+    randoffset = int(random.uniform(0, searchfilelen - key_len))
 
-    fout.write(searchdata[0:randoffset] + key + searchdata[randoffset+16:])
+    fout.write(searchdata[0:randoffset] + key + searchdata[randoffset + key_len :])
     fout.close()
     fin.close()
+    sys.exit(0)
+
 
 def interrupt(signum, frame):
     global cap
+
     if cap:
         cap.close()
+
     sys.exit(0)
 
+
 def keysearch(packet, searchdata):
-    global arg_verbose
+    global args
+
     offset = 0
     guesses = 0
     d = Dot154PacketParser()
 
     searchdatalen = len(searchdata)
-    while (offset < (searchdatalen - 16)):
-        if arg_verbose:
-	        print("Calling decrypt with key:", end=' ')
-	        for i in range(0,16):
-	            print("%02x" % ord(searchdata[offset+i]), end=' ')
+
+    while offset < (searchdatalen - 16):
+
+        if args.verbose:
+
+            key = ""
+
+            for i in range(0, 16):
+                key += "%02x:" % searchdata[offset + i]
+
+            print(f"Calling decrypt with key: {key[:-1]}", end="\n")
+
         guesses += 1
-        if d.decrypt(packet, searchdata[offset:offset+16]) != '':
-            print("Key found after %d guesses: " % guesses, end=' ')
-            for i in range(0,15):
-                sys.stdout.write("%02x:" % ord(searchdata[offset+i]))
-            print("%02x" % ord(searchdata[offset+15]))
-            return True
-        else:
-            offset+=1
+
+        try:
+
+            if d.decrypt(packet, searchdata[offset : offset + 16]) != "":
+                print("Key found after %d guesses: " % guesses, end=" ")
+
+                for i in range(0, 15):
+                    sys.stdout.write("%02x:" % searchdata[offset + i])
+
+                print("%02x" % searchdata[offset + 15])
+
+                return True
+
+        except (UnsupportedPacket, BadKeyLength, BadPayloadLength):
+            pass
+        except Exception as e:
+            import traceback
+
+            traceback.print_exc()
+
+        finally:
+            offset += 1
 
     return False
+
+if args.test:
+    testmode()
 
 # Pcap or Daintree reader object
 cap = None
 
-# Command-line arguments
-arg_searchfile = None
-arg_pcapfile = None
-arg_dsnafile = None
-arg_skipfcs = True
-arg_verbose = 0
-
-while len(sys.argv) > 1:
-    op = sys.argv.pop(1)
-    if op == '-f':
-        arg_searchfile = sys.argv.pop(1)
-    if op == '-r':
-        arg_pcapfile = sys.argv.pop(1)
-    if op == '-R':
-        arg_dsnafile = sys.argv.pop(1)
-    if op == '-d':
-        testmode()
-        sys.exit(0)
-    if op == '-v':
-        arg_verbose=1
-    if op == '-F':
-        arg_skipfcs = False
-    if op == '-h':
-        usage()
-        sys.exit(0)
- 
-if arg_searchfile == None:
+if args.binary_file == None:
     print("ERROR: Must specify a search file with -f", file=sys.stderr)
-    usage()
+    parser.print_usage()
     sys.exit(1)
 
-if arg_pcapfile == None and arg_dsnafile == None:
-    print("ERROR: Must specify a file with frames to decrypt with -r (pcap) or -R (Daintree SNA)", file=sys.stderr)
-    usage()
+if not os.path.exists(args.binary_file):
+    print(f"ERROR: Search file not found: {args.binary_file}", file=sys.stderr)
     sys.exit(1)
+
+if (args.pcap == None and args.daintree == None):
+    print(
+        "ERROR: Must specify a file with frames to decrypt with -r (pcap) or -R (Daintree SNA)",
+        file=sys.stderr,
+    )
+    parser.print_usage()
+    sys.exit(1)
+
+fnfm = False
+
+if args.pcap and not os.path.exists(args.pcap):
+    fnfm = f"ERROR: Capture file {args.pcap} was not found"
+
+if args.daintree and not os.path.exists(args.daintree):
+    fnfm = f"ERROR: Capture file {args.pcap} was not found"
+
+if fnfm != False:
+    print(
+        fnfm,
+        file=sys.stderr,
+    )
+    sys.exit(1)
+
 
 # Open and read the search file
-fh = open(arg_searchfile, 'rb')
+fh = open(args.binary_file, "rb")
 searchdata = fh.read()
 fh.close()
 
-if (arg_pcapfile != None):
-    savefile = arg_pcapfile
-    cap = PcapReader(arg_pcapfile)
-elif (arg_dsnafile != None):
-    savefile = arg_dsnafile
-    cap = DainTreeReader(arg_dsnafile)
+if len(searchdata) <= 0:
+    print(f"ERROR: no data found in {args.binary_file} populate it with possible key material")
+    sys.exit(1)
+
+if args.pcap != None:
+    savefile = args.pcap
+    cap = PcapReader(args.pcap)
+elif args.daintree != None:
+    savefile = args.daintree
+    cap = DainTreeReader(args.daintree)
 
 signal.signal(signal.SIGINT, interrupt)
 
+print(
+    f"zbgoodfind: searching the contents of {args.binary_file} for encryption keys with the first encrypted packet in {savefile}"
+)
 
-print("zbgoodfind: searching the contents of %s for encryption keys with the first encrypted packet in %s." % (arg_searchfile, savefile))
+packetfound = 0
+packetcount = 0
 
-packetfound=0
-packetcount=0
 while 1:
+
     try:
         packet = cap.pnext()[1]
-        packetcount+=1
+        packetcount += 1
 
         # Byte swap
-        fcf = struct.unpack("<H",packet[0:2])[0]
+        fcf = struct.unpack("<H", packet[0:2])[0]
 
         if (fcf & DOT154_FCF_SEC_EN) == 0:
             # Packet is not encrypted
-            if arg_verbose:
+            if args.verbose:
                 print("Skipping unencrypted packet %d." % packetcount)
             continue
 
-        packetfound=1
-        if arg_skipfcs:
+        packetfound = 1
+
+        if args.skip_fcs:
             packet = packet[:-2]
-        if arg_verbose:
+
+        if args.verbose:
             print("Starting key search with packet %d." % packetcount)
+
         if keysearch(packet, searchdata) == True:
             break
         else:
             print("Failed to locate the encryption key for frame %d." % packetcount)
 
-    except TypeError:       # raised when pnext returns Null (end of capture)
+    except TypeError:  # raised when pnext returns Null (end of capture)
         break
 
 if packetfound == 0:
     print("No encrypted packets found in the capture file %s." % savefile)
 
 cap.close()
-
