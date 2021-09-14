@@ -18,7 +18,7 @@ from .kbutils import iszigduino
 from .kbutils import isfreakduino
 from .kbutils import *
 from .zigbeedecode import * #would like to import only within killerbee class
-from .dot154decode import * #would like to import only within killerbee class
+#from .dot154decode import * #would like to import only within killerbee class
 from .config import *       #to get DEV_ENABLE_* variables
 
 # Utility Functions
