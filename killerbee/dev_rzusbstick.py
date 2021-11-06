@@ -605,7 +605,7 @@ class RZUSBSTICK:
                 # The last byte of frame data is the link quality indicator
                 ret['lqi'] = framedata[-1]
                 # Convert the framedata to a string for the return value
-                ret[0] = ''.join(framedata[:-1])
+                ret[0] = b''.join(framedata[:-1])
                 ret['bytes'] = ret[0]
                 return ret
             else:
