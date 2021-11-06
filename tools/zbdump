@@ -123,9 +123,9 @@ def main():
         sys.exit(1)
 
     elif args.pcapfile is not None:
-        pcapDumper = PcapDumper(DLT_IEEE802_15_4, args.pcapfile, ppi=args.ppi)
+        pcap_dumper = PcapDumper(DLT_IEEE802_15_4, args.pcapfile, ppi=args.ppi)
     elif args.dsnafile is not None:
-        daintreeDumper = DainTreeDumper(args.dsnafile)
+        daintree_dumper = DainTreeDumper(args.dsnafile)
 
     if args.devstring is None:
         print("Autodetection features will be deprecated - please include interface string (e.g. -i /dev/ttyUSB0)")
