@@ -6,3 +6,4 @@ pdf/
 .DS_Store
 *.egg-info/
 .idea/
+.python-version

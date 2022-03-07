@@ -11,16 +11,9 @@ from datetime import datetime # type: ignore
 from .kbutils import KBCapabilities, makeFCS, bytearray_to_bytes # type: ignore
 
 # Import USB support depending on version of pyUSB
-try:
-    import usb.core # type: ignore
-    import usb.util # type: ignore
-    import sys # type: ignore
-    print("Warning: You are using pyUSB 1.x, support is in beta.", file=sys.stderr)
-except ImportError:
-    import usb # type: ignore
-    print("Error: You are using pyUSB 0.x, not supported for CC253x.", file=sys.stderr)
-    sys.exit(-1)
-
+import usb.core # type: ignore
+import usb.util # type: ignore
+import sys # type: ignore
 
 class CC253x:
     USB_DIR_OUT        = 0x40
@@ -45,6 +38,7 @@ class CC253x:
         @return: None
         @rtype: None
         """
+        print("INIT CC253X")
         if variant == CC253x.VARIANT_CC2530:
             self._data_ep = CC253x.USB_CC2530_DATA_EP
         else:
@@ -214,7 +208,7 @@ class CC253x:
             try:
                 pdata = self.dev.read(self._data_ep, self._maxPacketSize, timeout=timeout)
             except usb.core.USBError as e:
-                if e.errno != 110: #Operation timed out
+                if e.errno is not 110 and e.errno is not 60: #Operation timed out
                     print("Error args: {}".format(e.args))
                     raise e
                     #TODO error handling enhancements for USB 1.0
@@ -247,7 +241,7 @@ class CC253x:
                 # in last two bytes of framedata. Note that we remove these before return of the frame.
 
                 # RSSI is signed value, offset by 73 (see CC2530 data sheet for offset)
-                rssi = struct.unpack("b", framedata[-2])[0] - 73
+                rssi = framedata[-2] - 73
                 # Dirty hack to compensate for possible RSSI overflow
                 if rssi > 255:
                     rssi = 255 # assumed to be max, could also report error/0

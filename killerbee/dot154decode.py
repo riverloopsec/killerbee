@@ -2,7 +2,7 @@ import struct  # type: ignore
 
 from Crypto.Cipher import AES  # type: ignore
 
-from .exception import *
+#from .exception import *
 
 
 ## Constants for packet decoding fields

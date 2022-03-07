@@ -62,6 +62,7 @@ def main():
         try:
             kb.set_channel(args.channel, args.subghz_page)
         except ValueError as e:
+            print("failed setting channel")
             print('ERROR:', e)
             sys.exit(1)
 
