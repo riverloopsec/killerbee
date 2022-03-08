@@ -232,13 +232,13 @@ class RZUSBSTICK:
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
-            self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
+            self.capabilities.setcapab(KBCapabilities.PHYJAM, False)
         elif prod == "KILLERB006":
             self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
-            self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
+            self.capabilities.setcapab(KBCapabilities.PHYJAM, False)
             self.capabilities.setcapab(KBCapabilities.BOOT, True)
         elif prod == "KILLERB00T":
             self.capabilities.setcapab(KBCapabilities.BOOT, True)
