@@ -150,7 +150,7 @@ if __name__ == '__main__':
         else:
             assocreqp[6] = "\x01\x8c\x67"  # Reduced Function Device (RFD)
 
-        assocreqinj = ''.join(assocreqp)
+        assocreqinj = b''.join(assocreqp)
 
         seqnum += 1
         datareqp[1] = "%c" % seqnum
