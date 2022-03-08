@@ -70,7 +70,7 @@ class Bumblebee(object):
         """
         Initialize device and capabilities.
         """
-        print("BUMBLEBEE")
+
         self.dev = dev
         self.rx_buffer = bytes()
         self.usb_rx_buffer = array('B', b'\x00'*256)

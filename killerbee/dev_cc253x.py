@@ -38,7 +38,7 @@ class CC253x:
         @return: None
         @rtype: None
         """
-        print("INIT CC253X")
+
         if variant == CC253x.VARIANT_CC2530:
             self._data_ep = CC253x.USB_CC2530_DATA_EP
         else:
