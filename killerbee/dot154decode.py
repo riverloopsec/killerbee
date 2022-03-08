@@ -2,9 +2,6 @@ import struct  # type: ignore
 
 from Crypto.Cipher import AES  # type: ignore
 
-#from .exception import *
-
-
 ## Constants for packet decoding fields
 # Frame Control Field
 DOT154_FCF_TYPE_MASK            = 0x0007  #: Frame type mask
@@ -375,3 +372,12 @@ class Dot154PacketParser:
         noncep2 = encpayload[1:5][::-1]
 
         return noncep1 + noncep2 + noncep3
+
+class UnsupportedPacket(Exception):
+  pass
+
+class BadKeyLength(Exception):
+  pass
+
+class BadPayloadLength(Exception):
+  pass
