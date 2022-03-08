@@ -151,6 +151,8 @@ class KillerBee:
                           self.dev = result
                         else:
                           raise KBInterfaceError("KillerBee doesn't understand device given by '%s'." % device)
+                elif isSerialDeviceString(device):
+                    self.dev = device
 
                 # If Serial, identify hardware
                 if self.dev is not None:
