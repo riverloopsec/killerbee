@@ -154,7 +154,7 @@ class APIMOTE:
     def inject(self, packet: bytes, channel: Optional[int]=None, count: int=1, delay: int=0, page: int=0) -> None:
         '''
         Injects the specified packet contents.
-        @type packet: String
+        @type packet: Bytes 
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional

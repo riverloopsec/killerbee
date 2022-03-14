@@ -491,10 +491,10 @@ class RZUSBSTICK:
             raise Exception('SubGHz not supported')
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0, page=0):
+    def inject(self, packet: bytes, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
-        @type packet: String
+        @type packet: Bytes 
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
@@ -520,7 +520,7 @@ class RZUSBSTICK:
             self.set_channel(channel, page)
 
         # Append two bytes to be replaced with FCS by firmware.
-        packet += "\x00\x00"
+        packet += b"\x00\x00"
 
         for pnum in range(count):
             # Format for packet is opcode RZ_CMD_INJECT_FRAME, one-byte length, 
