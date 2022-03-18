@@ -19,7 +19,6 @@ from .kbutils import KBCapabilities, makeFCS, bytearray_to_bytes # type: ignore
 
 import usb.core # type: ignore
 import usb.util # type: ignore
-import sys # type: ignore
 
 class CommProtocolPacket(object):
     """
@@ -374,7 +373,6 @@ class Bumblebee(object):
         for packet in self.process_packet():
             if packet is not None:
                 payload = packet.get_data()
-                print(payload)
             else:
                 return None
 
