@@ -14,8 +14,8 @@ warn = []
 apt_get_pkgs = []
 pip_pkgs = []
 
-# Ensure we have either pyUSB 0.x or pyUSB 1.x, but we now
-#  prefer pyUSB 1.x moving forward. Support for 0.x may be deprecated.
+#Check pyUSB 1.x dependency present.
+#Support for 0.x is deprecated and being removed.
 try:
     import usb
 except ImportError:
@@ -24,9 +24,8 @@ except ImportError:
 
 try:
     import usb.core
-    #print("Warning: You are using pyUSB 1.x, support is in beta.")
 except ImportError:
-    warn.append("You are using pyUSB 0.x. Consider upgrading to pyUSB 1.x.")
+    err.append("You are using pyUSB 0.x. Upgrade to pyUSB 1.x.")
 
 # TODO: Ideally we would detect missing python-dev and libgcrypt-dev to give better errors.
 
