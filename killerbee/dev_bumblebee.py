@@ -17,17 +17,8 @@ from array import array # type: ignore
 from datetime import datetime # type: ignore
 from .kbutils import KBCapabilities, makeFCS, bytearray_to_bytes # type: ignore
 
-# Import USB support depending on version of pyUSB
-try:
-    import usb.core # type: ignore
-    import usb.util # type: ignore
-    import sys # type: ignore
-    print("Warning: You are using pyUSB 1.x, support is in beta.", file=sys.stderr)
-except ImportError:
-    import usb # type: ignore
-    print("Error: You are using pyUSB 0.x, not supported for CC253x.", file=sys.stderr)
-    sys.exit(-1)
-
+import usb.core # type: ignore
+import usb.util # type: ignore
 
 class CommProtocolPacket(object):
     """
@@ -78,6 +69,7 @@ class Bumblebee(object):
         """
         Initialize device and capabilities.
         """
+
         self.dev = dev
         self.rx_buffer = bytes()
         self.usb_rx_buffer = array('B', b'\x00'*256)
@@ -126,7 +118,6 @@ class Bumblebee(object):
                 else:
                   pkt_len = 0
 
-
     def crc(self, x):
         """
         Compute CRC (sort of ;) for a given byte array.
@@ -145,7 +136,7 @@ class Bumblebee(object):
           if nbytes > 0:
             self.rx_buffer += self.usb_rx_buffer.tobytes()[:nbytes]
         except usb.core.USBError as e:
-            if e.errno != 110: #Operation timed out
+            if e.errno is not 110 and e.errno is not 60: #Operation timed out
                 print("Error args: {}".format(e.args))
                 raise e
                 #TODO error handling enhancements for USB 1.0
@@ -380,7 +371,10 @@ class Bumblebee(object):
 
         # Loop on all received packets
         for packet in self.process_packet():
-            payload = packet.get_data()
+            if packet is not None:
+                payload = packet.get_data()
+            else:
+                return None
 
             # CC2531 only allow (for the moment) to capture packets with valid CRC
             validcrc = True
@@ -390,8 +384,8 @@ class Bumblebee(object):
             correlation = struct.unpack('<b', bytes([payload[1]]))[0]
 
             ret = {1:validcrc, 2:rssi,
-                      'validcrc':validcrc, 'rssi':rssi, 'lqi':correlation,
-                      'dbm':rssi,'datetime':datetime.utcnow()}
+                        'validcrc':validcrc, 'rssi':rssi, 'lqi':correlation,
+                        'dbm':rssi,'datetime':datetime.utcnow()}
 
             # Convert the framedata to a string for the return value, and replace the TI FCS with a real FCS
             # if the radio told us that the FCS had passed validation.

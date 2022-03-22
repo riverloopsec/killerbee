@@ -56,29 +56,16 @@ class KillerBee:
         @return: None
         @rtype: None
         '''
-
-        global gps_devstring
-        if gps_devstring is None and gps is not None:
-            gps_devstring = gps
-
         self.dev: Optional[Any] = None
         self.__bus: Optional[Any] = None
         self.driver: Optional[Any] = None
 
-        # IP devices may be the most straightforward, and we aren't doing
-        # discovery, just connecting to defined addresses, so we'll check
-        # first to see if we have an IP address given as our device parameter.
-        if (device is not None) and isIpAddr(device):
-            from .dev_sewio import isSewio
-            if isSewio(device):
-                from .dev_sewio import SEWIO
-                self.driver = SEWIO(dev=device)  # give it the ip address
-            else: del isSewio
+        #TODO deprecate
+        global gps_devstring
+        if gps_devstring is None and gps is not None:
+            gps_devstring = gps
 
-
-        if hardware is None:
-            print("Auto-detection is being deprecated - Please specify hardware")
-        elif device is not None:
+        if hardware is not None and device is not None:
             if hardware == "apimote":
                 from .dev_apimote import APIMOTE
                 self.driver = APIMOTE(device)
@@ -109,77 +96,93 @@ class KillerBee:
             elif hardware == "telosb":
                 from .dev_telosb import TELOSB
                 self.driver = TELOSB(device)
+            elif hardware == "sewio":
+                from .dev_sewio import SEWIO
+                self.driver = SEWIO(dev=device)
 
-        # Figure out a device is one is not set, trying USB devices next
-        if self.driver is None:
-            if device is None:
-                result = search_usb(None)
-                if result != None:
-                    self.dev = result
-            # Recognize if device is provided in the USB format (like a 012:456 string):
-            elif ":" in device:
-                result = search_usb(device)
-                if result == None:
-                    raise KBInterfaceError("Did not find a USB device matching %s." % device)
-                else:
-                    self.dev = result
+        else:
+            if self.driver is None:
+                # Check if IP device
+                if device is not None and isIpAddr(device):
+                    from .dev_sewio import isSewio
+                    if isSewio(device):
+                        from .dev_sewio import SEWIO
+                        self.driver = SEWIO(dev=device)  # give it the ip address
+                    else: del isSewio
 
-            if self.dev is not None:
-                if self.__device_is(RZ_USB_VEND_ID, RZ_USB_PROD_ID):
-                    from .dev_rzusbstick import RZUSBSTICK
-                    self.driver = RZUSBSTICK(self.dev, self.__bus)
-                elif self.__device_is(ZN_USB_VEND_ID, ZN_USB_PROD_ID):
-                    raise KBInterfaceError("Zena firmware not yet implemented.")
-                elif self.__device_is(CC2530_USB_VEND_ID, CC2530_USB_PROD_ID):
-                    from .dev_cc253x import CC253x
-                    self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2530)
-                elif self.__device_is(CC2531_USB_VEND_ID, CC2531_USB_PROD_ID):
-                    from .dev_cc253x import CC253x
-                    self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2531)
-                elif self.__device_is(BB_USB_VEND_ID, BB_USB_PROD_ID):
-                    from .dev_bumblebee import Bumblebee
-                    self.driver = Bumblebee(self.dev, self.__bus)
-                else:
-                    raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x." % (self.dev.idVendor, self.dev.idProduct))
-
-        # If a USB device driver was not loaded, now we try serial devices
-        if self.driver is None:
-            # If no device was specified
-            if device is None:
-                glob_list = get_serial_ports()
-                if len(glob_list) > 0:
-                    #TODO be able to check other devices if this one is not correct
-                    device = glob_list[0]
-            # Recognize if device specified by serial string:
-            if (device is not None) and isSerialDeviceString(device):
-                self.dev = device
-                if (self.dev == gps_devstring):
-                    pass
-                elif (DEV_ENABLE_SL_NODETEST and issl_nodetest(self.dev)):
-                    from .dev_sl_nodetest import SL_NODETEST
-                    self.driver = SL_NODETEST(self.dev)
-                elif (DEV_ENABLE_SL_BEEHIVE and issl_beehive(self.dev)):
-                    from .dev_sl_beehive import SL_BEEHIVE
-                    self.driver = SL_BEEHIVE(self.dev)
-                elif (DEV_ENABLE_ZIGDUINO and iszigduino(self.dev)):
-                    from .dev_zigduino import ZIGDUINO
-                    self.driver = ZIGDUINO(self.dev)
-                elif (DEV_ENABLE_FREAKDUINO and isfreakduino(self.dev)):
-                    from .dev_freakduino import FREAKDUINO
-                    self.driver = FREAKDUINO(self.dev)
-                else:
-                    gfccspi,subtype = isgoodfetccspi(self.dev)
-                    if gfccspi and subtype == 0:
-                        from .dev_telosb import TELOSB
-                        self.driver = TELOSB(self.dev)
-                    elif gfccspi and subtype == 2:
-                        from .dev_apimote import APIMOTE
-                        self.driver = APIMOTE(self.dev)
+                # Check if USB device
+                if device is None :
+                    result = search_usb(None)
+                    if result is not None:
+                        self.dev = result
+                elif ":" in device:
+                    result = search_usb(None)
+                    if result is not None:
+                        self.dev = result
                     else:
-                        raise KBInterfaceError("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
-            # Otherwise unrecognized device string type was provided:
-            else:
-                raise KBInterfaceError("KillerBee doesn't understand device given by '%s'." % device)
+                        raise KBInterfaceError("Did not find a USB device matching %s." % device)
+
+                # If USB, identify hardware
+                if self.dev is not None:
+                    if self.__device_is(RZ_USB_VEND_ID, RZ_USB_PROD_ID):
+                        from .dev_rzusbstick import RZUSBSTICK
+                        self.driver = RZUSBSTICK(self.dev, self.__bus)
+                    elif self.__device_is(ZN_USB_VEND_ID, ZN_USB_PROD_ID):
+                        raise KBInterfaceError("Zena firmware not yet implemented.")
+                    elif self.__device_is(CC2530_USB_VEND_ID, CC2530_USB_PROD_ID):
+                        from .dev_cc253x import CC253x
+                        self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2530)
+                    elif self.__device_is(CC2531_USB_VEND_ID, CC2531_USB_PROD_ID):
+                        from .dev_cc253x import CC253x
+                        self.driver = CC253x(self.dev, self.__bus, CC253x.VARIANT_CC2531)
+                    elif self.__device_is(BB_USB_VEND_ID, BB_USB_PROD_ID):
+                        from .dev_bumblebee import Bumblebee
+                        self.driver = Bumblebee(self.dev, self.__bus)
+                    else:
+                        raise KBInterfaceError("KillerBee doesn't know how to interact with USB device vendor=%04x, product=%04x." % (self.dev.idVendor, self.dev.idProduct))
+
+            if self.driver is None:
+                # Check if Serial device
+                if device is None:
+                    glob_list = get_serial_ports()
+                    if len(glob_list) > 0:
+                        result = glob_list[0]
+                        if isSerialDeviceString(result):
+                          self.dev = result
+                        else:
+                          raise KBInterfaceError("KillerBee doesn't understand device given by '%s'." % device)
+                elif isSerialDeviceString(device):
+                    self.dev = device
+
+                # If Serial, identify hardware
+                if self.dev is not None:
+                    if (self.dev == gps_devstring):
+                        pass
+                    elif (DEV_ENABLE_SL_NODETEST and issl_nodetest(self.dev)):
+                        from .dev_sl_nodetest import SL_NODETEST
+                        self.driver = SL_NODETEST(self.dev)
+                    elif (DEV_ENABLE_SL_BEEHIVE and issl_beehive(self.dev)):
+                        from .dev_sl_beehive import SL_BEEHIVE
+                        self.driver = SL_BEEHIVE(self.dev)
+                    elif (DEV_ENABLE_ZIGDUINO and iszigduino(self.dev)):
+                        from .dev_zigduino import ZIGDUINO
+                        self.driver = ZIGDUINO(self.dev)
+                    elif (DEV_ENABLE_FREAKDUINO and isfreakduino(self.dev)):
+                        from .dev_freakduino import FREAKDUINO
+                        self.driver = FREAKDUINO(self.dev)
+                    else:
+                        gfccspi,subtype = isgoodfetccspi(self.dev)
+                        if gfccspi and subtype == 0:
+                            from .dev_telosb import TELOSB
+                            self.driver = TELOSB(self.dev)
+                        elif gfccspi and subtype == 2:
+                            from .dev_apimote import APIMOTE
+                            self.driver = APIMOTE(self.dev)
+                        else:
+                            raise KBInterfaceError("KillerBee doesn't know how to interact with serial device at '%s'." % self.dev)
+
+        if self.driver is None:
+            raise KBInterfaceError("KillerBee cannot find device.")
 
         # Start a connection to the remote packet logging server, if able:
         if datasource is not None:
@@ -406,10 +409,10 @@ class KillerBee:
 
         self.driver.set_channel(channel, page)
 
-    def inject(self, packet: str, channel: Optional[int]=None, count: int=1, delay: int=0, page: int=0) -> Any:
+    def inject(self, packet: bytes, channel: Optional[int]=None, count: int=1, delay: int=0, page: int=0) -> Any:
         '''
         Injects the specified packet contents.
-        @type packet: String
+        @type packet: Bytes 
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional

@@ -232,13 +232,13 @@ class RZUSBSTICK:
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
-            self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
+            self.capabilities.setcapab(KBCapabilities.PHYJAM, False)
         elif prod == "KILLERB006":
             self.capabilities.setcapab(KBCapabilities.FREQ_2400, True)
             self.capabilities.setcapab(KBCapabilities.SNIFF, True)
             self.capabilities.setcapab(KBCapabilities.SETCHAN, True)
             self.capabilities.setcapab(KBCapabilities.INJECT, True)
-            self.capabilities.setcapab(KBCapabilities.PHYJAM, True)
+            self.capabilities.setcapab(KBCapabilities.PHYJAM, False)
             self.capabilities.setcapab(KBCapabilities.BOOT, True)
         elif prod == "KILLERB00T":
             self.capabilities.setcapab(KBCapabilities.BOOT, True)
@@ -491,10 +491,10 @@ class RZUSBSTICK:
             raise Exception('SubGHz not supported')
 
     # KillerBee expects the driver to implement this function
-    def inject(self, packet, channel=None, count=1, delay=0, page=0):
+    def inject(self, packet: bytes, channel=None, count=1, delay=0, page=0):
         '''
         Injects the specified packet contents.
-        @type packet: String
+        @type packet: Bytes 
         @param packet: Packet contents to transmit, without FCS.
         @type channel: Integer
         @param channel: Sets the channel, optional
@@ -520,7 +520,7 @@ class RZUSBSTICK:
             self.set_channel(channel, page)
 
         # Append two bytes to be replaced with FCS by firmware.
-        packet += "\x00\x00"
+        packet += b"\x00\x00"
 
         for pnum in range(count):
             # Format for packet is opcode RZ_CMD_INJECT_FRAME, one-byte length, 
@@ -572,8 +572,7 @@ class RZUSBSTICK:
                         return None
 
             # PyUSB returns an empty tuple occasionally, handle as "no data"
-            # TODO added len(pdata) check as some arrays were failing
-            if pdata == None or pdata == () or len(pdata) == 0 or len(pdata) <= 10:
+            if pdata == None or pdata == () or len(pdata) == 0: 
                 return None
 
             if pdata[0] == RZ_EVENT_STREAM_AC_DATA and ret is None:
