@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 from optparse import OptionParser
 
 from killerbee.scapy_extensions import *
@@ -29,7 +28,55 @@ KEY_TYPE = [
 ]
 
 
-def sniffNetworkKey(pkts, key, verbose):
+def bytestohex(b, sep=':'):
+    """
+    Convert bytes b to hex string using sep value as a delimiter.
+    This is what Python 3.8 `hex(bytes_per_sep)` does
+    """
+    assert(type(b) == bytes)
+    bstr = b.hex()
+    return sep.join([bstr[i:i+2] for i in range(0, len(bstr), 2)])
+
+
+def sniffApsTransportKey(pkts, verbose=False):
+    """
+    Search a Scapy PacketList of packets for APS_CMD_TRANSPORT_KEY type 5 (NWK key)
+    """
+    pcount = 0
+
+    if (verbose):
+        print("Searching packets for APS_CMD_TRANSPORT_KEY")
+
+    for p in pkts:
+        pcount += 1
+
+        if not (p.haslayer("ZigbeeAppCommandPayload")):
+            if (verbose):
+                print(f"Skipping packet {pcount}; no APS CMD payload")
+            continue
+
+        if (verbose):
+            print(f"Searching packet {pcount} for APS CMD identifier Transport Key (0x05)")
+
+        appcmd = p.getlayer("ZigbeeAppCommandPayload")
+
+        if (appcmd.cmd_identifier == 5 and appcmd.key_type == 1):
+
+            keystr = bytestohex(appcmd.key)
+            wiresharkkeystr = bytestohex(appcmd.key[::-1])
+            destaddrstr = bytestohex(appcmd.dest_addr.to_bytes(8, 'big'))
+            srcaddrstr = bytestohex(appcmd.src_addr.to_bytes(8, 'big'))
+
+            print(f"[+] Network Key: {keystr}")
+            print(f"      Wireshark: {wiresharkkeystr}")
+            print(f"      Dest Addr: {destaddrstr}")
+            print(f"       Src Addr: {srcaddrstr}")
+        else:
+            if (verbose):
+                print(f"Packet {pcount} lacks transport key identifier")
+
+
+def sniffAppDataKey(pkts, key, verbose):
     addrMap = dict()
     keyHash = sec_key_hash(key, '\0')
 
@@ -84,10 +131,6 @@ if __name__ == '__main__':
         print("A packet capture file or directory must be specified")
         sys.exit(1)
 
-    if (not options.transportKey):
-        print("A transport key value must be specified")
-        sys.exit(1)
-
     files = []
     if options.filename:
         files.append(options.filename)
@@ -108,7 +151,10 @@ if __name__ == '__main__':
             print("Exception: ", e)
             print("ERROR: Input file \"{}\" is not able to be loaded. Is it a PCAP file? Daintree support was removed in KillerBee 2.7.1".format(fname), file=sys.stderr)
             continue
-        sniffNetworkKey(pkts, options.transportKey, options.verbose)
+
+        if (options.transportKey):
+            sniffAppDataKey(pkts, options.transportKey, options.verbose)
+
+        sniffApsTransportKey(pkts, options.verbose)
 
     print("[+] Processed {} capture files.".format(filecount))
-
