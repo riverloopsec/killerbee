@@ -201,7 +201,7 @@ Those tools are:
 
 Additional tools, that are for special cases or are not stable, are stored in
     the Api-Do project repository: http://code.google.com/p/zigbee-security/
-    and at .
+    and at https://github.com/riverloopsec/beekeeperwids.
 
 
 FRAMEWORK
