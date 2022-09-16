@@ -66,7 +66,7 @@ The install will detect and prompt you for what is needed.
 On Ubuntu systems, you can install the needed dependencies with the following
 commands:
 ```
-# apt-get install python-usb python-crypto python-serial python-dev libgcrypt-dev
+# apt install python3-setuptools python3-scapy  python3-pycryptodome python3-usb python3-cryptography python3-serial python3-dev libgcrypt-dev 
 ```
 
 On Mac OS, you can install the dependencies with the following commands
@@ -156,9 +156,6 @@ summarized below.
                 a target device.  May be able to reset the device's PAN ID or Channel
 + zbfakebeacon  -  Spoofs beacon frames, either spamming them or on response to seeing
                 a beacon request come through.
-+ zbopenear    -  Assists in data capture where devices are operating on multiple 
-                channels or fast-frequency-hopping. It assigns multiple 
-                interfaces sequentially across all channels.
 + zbassocflood -  Repeatedly associate to the target PANID in an effort to cause
                 the device to crash from too many connected stations.
 + zbconvert    -  Convert a packet capture from Libpcap to Daintree SNA format,
@@ -184,14 +181,23 @@ summarized below.
                 must be in binary format (obj hexfile's are not supported). To
                 convert from the hexfile format to a binary file, use the
                 objcopy tool: objcopy -I ihex -O binary mem.hex mem.bin
++ zbscapy      -  Provides an interactive Scapy shell for interacting via a
+                KillerBee interface. Scapy must be installed to run this.
++ kbbootloader -  Switches device into DFU/BOOTLOADER mode (if device is capable)
+
+This repository is a framework-only repository and so some of the implementation tools
+have been removed and placed in a dedicated repo: https://github.com/rmspeers/zigbee-security
+Those tools are:
+
++ zbopenear    -  Assists in data capture where devices are operating on multiple 
+                channels or fast-frequency-hopping. It assigns multiple 
+                interfaces sequentially across all channels.
 + zbwardrive   -	Discovers available interfaces and uses one to inject beacon 
                 requests and listen for respones across channels. Once a network
                 is found on a channel, it assigns another device to continuously
                 capture traffic on that channel to a PCAP file. Scapy must be 
                 installed to run this.
-+ zbscapy      -  Provides an interactive Scapy shell for interacting via a
-                KillerBee interface. Scapy must be installed to run this.
-+ kbbootloader -  Switches device into DFU/BOOTLOADER mode (if device is capable)
+
 
 Additional tools, that are for special cases or are not stable, are stored in
     the Api-Do project repository: http://code.google.com/p/zigbee-security/
