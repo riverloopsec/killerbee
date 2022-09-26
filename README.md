@@ -112,6 +112,7 @@ The KillerBee framework is being expanded to support multiple devices.
 Currently there is support for the River Loop ApiMote, Atmel RZ RAVEN USB Stick,
 MoteIV Tmote Sky, TelosB mote, Sewino Sniffer, and various hardware running Silicon Labs Node Test firmware.
 
+The ApiMote, Atmel RZ RAVEN USB STICK and many of the other named devices are currently not available to buy on the internet. But with the CC2531 and [custom firmware](https://github.com/virtualabs/cc2531-killerbee-fw) a device for sniffing and injecting packets is still available.
 **See [firmware/README.md](firmware/README.md) for details on hardware support and firmware programming.**
 
 Support for Freaklab's Freakduino with added hardware & the Dartmouth arduino sketch

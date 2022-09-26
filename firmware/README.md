@@ -28,6 +28,9 @@ It can be purchased from electronics distributors, or directly from them
 
 _This is currently supported for beta, and supports sniffing only._
 
+### Virtualabs custom firmware (Allows injecting)
+
+When flashing the CC2531 with the [custom firmware ](https://github.com/virtualabs/cc2531-killerbee-fw) developed by @virtualabs it also supports injecting packages.
 
 ## Silicon Labs Node Test 2.4GHz & SubGHz
 
