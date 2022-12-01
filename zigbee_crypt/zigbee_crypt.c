@@ -10,6 +10,7 @@
 
 // Explaination of Python Build Values http://docs.python.org/c-api/arg.html#Py_BuildValue
 
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <stdio.h>
 #include <gcrypt.h>
@@ -43,14 +44,15 @@
 static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	// This was modeled after zigbee_crypt_decrypt_ccm in reverse
 	const char			*pZkey;
-	int					sizeZkey;
+	Py_ssize_t				sizeZkey;
 	const char			*pNonce;
-	int					sizeNonce;
-	int					sizeMIC;
+	Py_ssize_t				sizeNonce;
+  const char      *MICThrow;
+	Py_ssize_t				sizeMIC;
 	const char			*pUnencryptedData;
-	int					sizeUnencryptedData;
+	Py_ssize_t				sizeUnencryptedData;
 	const char			*zigbeeData;
-	int					sizeZigbeeData;
+	Py_ssize_t				sizeZigbeeData;
 	int i, j;
 	PyObject			*res;
 
@@ -63,13 +65,13 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	gcry_cipher_hd_t	cipher_hd;
 
 #if PY_MAJOR_VERSION >= 3
-	if (!PyArg_ParseTuple(args, "y#y#iy#y#",
+	if (!PyArg_ParseTuple(args, "y#y#y#y#y#",
 #else
-	if (!PyArg_ParseTuple(args, "s#s#is#s#",
+	if (!PyArg_ParseTuple(args, "s#s#s#s#s#",
 #endif
 								&pZkey, &sizeZkey,
 								&pNonce, &sizeNonce,
-								&sizeMIC,
+								&MICThrow, &sizeMIC,
 								&pUnencryptedData, &sizeUnencryptedData,
 								&zigbeeData, &sizeZigbeeData)) {
 								return NULL;
@@ -247,15 +249,15 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 
 static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	const char			*pZkey;
-	int					sizeZkey;
+	Py_ssize_t				sizeZkey;
 	const char			*pNonce;
-	int					sizeNonce;
+	Py_ssize_t				sizeNonce;
 	const char			*pOldMIC;
-	int					sizeMIC;
+	Py_ssize_t				sizeMIC;
 	const char			*pEncryptedData;
-	int					sizeEncryptedData;
+	Py_ssize_t				sizeEncryptedData;
 	const char			*zigbeeData;
-	int					sizeZigbeeData;
+	Py_ssize_t				sizeZigbeeData;
 	PyObject			*res;
 
 	char				pMIC[ZBEE_SEC_CONST_MICSIZE];
@@ -454,7 +456,6 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	}
 
 	gcry_cipher_close(cipher_hd);
-
 	// now use j to indicate whether the MICs match
 	j = 0;
 	if (memcmp(cipher_out, pUnencMIC, sizeMIC) == 0) {
@@ -502,7 +503,6 @@ zbee_sec_hash(char *input, int input_len, char *output)
     int               i, j;
     /* Cipher Instance. */
     gcry_cipher_hd_t    cipher_hd;
-
     /* Clear the first hash block (Hash0). */
     memset(output, 0, ZBEE_SEC_CONST_BLOCKSIZE);
     /* Create the cipher instance in ECB mode. */
@@ -594,7 +594,7 @@ zbee_sec_hash(char *input, int input_len, char *output)
  */
 static PyObject *zigbee_sec_key_hash(PyObject *self, PyObject *args) {
 	const char			*key;
-	int					sizeKey;
+	//int             sizeKey;
 	const char           input;
 
     char          hash_in[2*ZBEE_SEC_CONST_BLOCKSIZE];
@@ -603,7 +603,7 @@ static PyObject *zigbee_sec_key_hash(PyObject *self, PyObject *args) {
     static const char ipad = 0x36;
     static const char opad = 0x5c;
 
-	if (!PyArg_ParseTuple(args, "s#c", &key, &sizeKey, &input)) {
+	if (!PyArg_ParseTuple(args, "sc", &key, &input)) {
 		return NULL;
 	}
 
