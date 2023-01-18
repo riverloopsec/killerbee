@@ -1,6 +1,8 @@
 #ifndef PACKET_ZBEE_SECURITY_H
 #define PACKET_ZBEE_SECURITY_H
 
+#define PY_SSIZE_T_CLEAN
+
 /* Bit masks for the Security Control Field. */
 #define ZBEE_SEC_CONTROL_LEVEL  0x07
 #define ZBEE_SEC_CONTROL_KEY    0x18
