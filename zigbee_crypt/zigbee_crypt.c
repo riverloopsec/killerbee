@@ -9,6 +9,7 @@
  */
 
 // Explaination of Python Build Values http://docs.python.org/c-api/arg.html#Py_BuildValue
+#define PY_SSIZE_T_CLEAN
 
 #include <Python.h>
 #include <stdio.h>
@@ -624,15 +625,37 @@ static PyObject *zigbee_sec_key_hash(PyObject *self, PyObject *args) {
 } /* zbee_sec_key_hash */
 
 
+/*FUNCTION:------------------------------------------------------
+ *  NAME
+ *      zbee_mmo_hash
+ *  DESCRIPTION
+ *      ZigBee Matyas-Meyer-Oseas Hash Function. 
+ *      Used to derive the link key from the install code for ZigBee 3.0 device pairing.
+ *
+ *---------------------------------------------------------------
+ */
+static PyObject *zigbee_mmo_hash(PyObject *self, PyObject *args) {
+	char			*input;
+  int       sizeInput;
+  char            hash_out[ZBEE_SEC_CONST_BLOCKSIZE+1];
+
+	if (!PyArg_ParseTuple(args, "y#", &input, &sizeInput)) {
+		return NULL;
+	}
+
+  hash_out[ZBEE_SEC_CONST_BLOCKSIZE] = 0; 
+  zbee_sec_hash(input, sizeInput, hash_out);
+
+  return Py_BuildValue("y", hash_out);
+} /* zbee_mmo_hash */
 
 static PyMethodDef zigbee_crypt_Methods[] = {
 	{ "decrypt_ccm", zigbee_crypt_decrypt_ccm, METH_VARARGS, "decrypt_ccm(key, nonce, mic, encrypted_payload, zigbee_data)\nDecrypt data with a 0, 32, 64, or 128-bit MIC\n\n@type key: String\n@param key: 16-byte decryption key\n@type nonce: String\n@param nonce: 13-byte nonce\n@type mic: String\n@param mic: 4-16 byte message integrity check (MIC)\n@type encrypted_payload: String\n@param encrypted_payload: The encrypted data to decrypt\n@type zigbee_data: String\n@param zigbee_data: The zigbee data within the frame, without the encrypted payload, MIC, or FCS" },
 	{ "encrypt_ccm", zigbee_crypt_encrypt_ccm, METH_VARARGS, "encrypt_ccm(key, nonce, mic_size, decrypted_payload, zigbee_data)\nEncrypt data with a 0, 32, 64, or 128-bit MIC\n\n@type key: String\n@param key: 16-byte decryption key\n@type nonce: String\n@param nonce: 13-byte nonce\n@type mic_size: Integer\n@param mic_size: the size in bytes of the desired MIC\n@type decrypted_payload: String\n@param decrypted_payload: The decrypted data to encrypt\n@type zigbee_data: String\n@param zigbee_data: The zigbee data within the frame, without the decrypted payload, MIC or FCS" },
 	{ "sec_key_hash", zigbee_sec_key_hash, METH_VARARGS, "sec_key_hash(key, input)\nHash the supplied key as per ZigBee Cryptographic Hash (B.1.3 and B.6).\n\n@type key: String\n@param key: 16-byte key to hash\n@type input: Char\n@param input: Character terminator for key" },
+	{ "mmo_hash", zigbee_mmo_hash, METH_VARARGS, "mmo_hash(input)\nHash the supplied value using the Matyas-Meyer-Oseas hashing algorithm\n\n@type input: Bytes\n@param input: 16-byte value to hash"},
 	{ NULL, NULL, 0, NULL },
 };
-
-
 
 ZIGBEE_CRYPT_INIT
 {
@@ -640,7 +663,6 @@ ZIGBEE_CRYPT_INIT
     ZIGBEE_MOD_DEF
     return module;
 }
-
 
 int main(int argc, char *argv[]) {
 #if PY_MAJOR_VERSION >= 3
