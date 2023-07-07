@@ -125,7 +125,6 @@ class KillerBee:
                 elif ":" in device:
                     result = search_usb(None)
                     if result is not None:
-                        print(f"Found device: {result}")
                         self.dev = result
                     else:
                         raise KBInterfaceError("Did not find a USB device matching %s." % device)
