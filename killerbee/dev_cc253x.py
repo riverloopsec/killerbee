@@ -247,11 +247,6 @@ class CC253x:
                     print(f"Rssi = {rssi}, out of range, setting to invalid valuei (-128)")
                     rssi = -128 # invalid value according to PPI spec 
          
-                rssi = framedata[-2] - 73
-                # Dirty hack to compensate for possible RSSI overflow
-                if rssi > 255:
-                    rssi = 255 # assumed to be max, could also report error/0
-
                 fcsx = framedata[-1]
                 # validcrc is the bit 7 in fcsx
                 validcrc  = (fcsx & 0x80) == 0x80
