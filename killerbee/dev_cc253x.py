@@ -241,11 +241,12 @@ class CC253x:
                 # in last two bytes of framedata. Note that we remove these before return of the frame.
 
                 # RSSI is signed value, offset by 73 (see CC2530 data sheet for offset)
-                rssi = framedata[-2] - 73
+                rssi = struct.unpack('b', framedata[-2:-1])[0] - 73
                 # Dirty hack to compensate for possible RSSI overflow
-                if rssi > 255:
-                    rssi = 255 # assumed to be max, could also report error/0
-
+                if rssi > 127 or rssi < -127:
+                    print(f"Rssi = {rssi}, out of range, setting to invalid valuei (-128)")
+                    rssi = -128 # invalid value according to PPI spec 
+         
                 fcsx = framedata[-1]
                 # validcrc is the bit 7 in fcsx
                 validcrc  = (fcsx & 0x80) == 0x80

@@ -66,6 +66,13 @@ class KillerBee:
             gps_devstring = gps
 
         if hardware is not None and device is not None:
+            if ":" in device:
+                result = search_usb(None)
+                if result is not None:
+                    device = result
+                else:
+                    raise KBInterfaceError("Did not find a USB device matching %s." % device)
+
             if hardware == "apimote":
                 from .dev_apimote import APIMOTE
                 self.driver = APIMOTE(device)
