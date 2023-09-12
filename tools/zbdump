@@ -73,7 +73,7 @@ def dump_packets(args):
                     print('ERROR: Could not open stdout for verbose mode.', file=sys.stderr)
                     sys.exit(0)
                 else:
-                    unbuffered.write('.')
+                    unbuffered.write(b'.')
 
             if pcap_dumper is not None:
                 pcap_dumper.pcap_dump(packet['bytes'], ant_dbm=packet['dbm'], freq_mhz=rf_freq_mhz)
@@ -112,7 +112,7 @@ def main():
 
     #Handle required args
     if args.verbose:
-        unbuffered = os.fdopen(sys.stdout.fileno(), 'w', 0)
+        unbuffered = os.fdopen(sys.stdout.fileno(), 'wb', 0)
 
     if args.channel == None:
         print("ERROR: Must specify a channel.", file=sys.stderr)
