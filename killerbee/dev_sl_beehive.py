@@ -83,23 +83,25 @@ class SL_BEEHIVE:
             self.handle.readline()
 
         # some commands require us to be in idle, so do it always
-        self.handle.write("rx 0\r")
+        self.handle.write(b"rx 0\r")
         time.sleep(0.02)
         for x in range(3):
             self.handle.readline()
 
         if arg != None:
             cmdstr += ' ' + arg
+        if not isinstance(cmdstr, bytes):
+            cmdstr= cmdstr.encode()
         self.handle.write(cmdstr)
         if send_return:
-            self.handle.write('\r')
+            self.handle.write(b'\r')
         #time.sleep(0.1)
         time.sleep(extra_delay)
         if confirm:
             ret= False
             for x in range(100):
                 d= self.handle.readline().strip()
-                if d[-1:] == '>':
+                if d[-1:] == b'>':
                     ret= True
                     break
         else:
@@ -114,7 +116,7 @@ class SL_BEEHIVE:
         packet will be in the format: "{{(rxPacket)}{len:11}{timeUs:994524212}{crc:Pass}{rssi:-44}{lqi:210}{phy:0}{isAck:False}{syncWordId:0}{antenna:0}{payload: 0x0a 0x03 0x08 0xba 0xff 0xff }"
         '''
         try:
-            data = packet.replace('}','').split(':')[10].split()
+            data = packet.replace(b'}',b'').split(b':')[10].split()
         except:
             return None, None, None
         if not data:
@@ -130,8 +132,8 @@ class SL_BEEHIVE:
             except:
                 return None, None, None
         try:
-            crc = packet.replace('}','').split(':')[4].split('{')[0] == 'Pass'
-            rssi = packet.replace('}','').split(':')[4].split('{')[0]
+            crc = packet.replace(b'}',b'').split(b':')[4].split(b'{')[0] == 'Pass'
+            rssi = packet.replace(b'}',b'').split(b':')[4].split(b'{')[0]
         except:
             return None, None, None
         return rssi, out, crc
@@ -158,7 +160,7 @@ class SL_BEEHIVE:
             self.__send_cmd("rx", "1", confirm= False)
             for x in range(5):
                 d = self.handle.readline()
-                if 'Rx:Enabled' in d:
+                if b'Rx:Enabled' in d:
                     self.mode = MODE_SNIFF
                     self.__stream_open = True
 
@@ -178,7 +180,7 @@ class SL_BEEHIVE:
         self.__send_cmd("rx", "0", confirm= False, initial_read= 0)
         for x in range(3):
             d= self.handle.readline().strip()
-            if "Rx:Disabled" in d:
+            if b'Rx:Disabled' in d:
                 self.mode = MODE_NONE
                 self.__stream_open = False
                 self.handle.readline()
@@ -252,9 +254,9 @@ class SL_BEEHIVE:
             tosend = maxp
         else:
             tosend = len(packet) 
-        self.__send_cmd("setTxPayload", "00 %02x%s" % ((len(packet)), packet[:tosend].encode('hex')))
+        self.__send_cmd("setTxPayload", "00 %02x%s" % ((len(packet)), packet[:tosend].hex()))
         if len(packet) > maxp:
-            self.__send_cmd("setTxPayload", "%d %s" % (tosend + 1, packet[tosend:].encode('hex')))
+            self.__send_cmd("setTxPayload", "%d %s" % (tosend + 1, packet[tosend:].hex()))
         for pnum in range(0, count):
             self.__send_cmd("tx", "1", confirm= False)
             time.sleep(delay)
@@ -290,7 +292,7 @@ class SL_BEEHIVE:
             return None
         #Return in a nicer dictionary format, so we don't have to reference by number indicies.
         #Note that 0,1,2 indicies inserted twice for backwards compatibility.
-        result = {0:frame, 1:validcrc, 2:rssi, 'bytes':frame, 'validcrc':validcrc, 'rssi':rssi}
+        result = {0:frame.encode(), 1:validcrc, 2:rssi, 'bytes':frame.encode(), 'validcrc':validcrc, 'rssi':rssi}
         result['dbm'] = None #TODO calculate dBm antenna signal based on RSSI formula
         result['datetime'] = datetime.utcnow() # TODO - see what time field in sniff is actually telling us
         result['location'] = (self.lon, self.lat, self.alt)
