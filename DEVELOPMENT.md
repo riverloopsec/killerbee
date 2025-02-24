@@ -29,7 +29,7 @@ More tailored helper scripts or other things you wish to keep but aren't ready f
 All tools must accept standard command line flags and be parsed by `argparse`. See an existing tool like `zbdump` for
  examples of expected flags.
 
-Tools should be prefixed by `zb` in the name if they operate on IEEE 802.15.4 or ZigBee RF/PCAP/etc.
+Tools should be prefixed by `zb` in the name if they operate on IEEE 802.15.4 or Zigbee RF/PCAP/etc.
 They may be prefixed instead by `kb` if they are tools to setup/configure KillerBee itself.
 
 Contributions

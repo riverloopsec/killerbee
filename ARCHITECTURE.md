@@ -5,11 +5,11 @@
 The below table is intended to help orient users to the different parts of the KillerBee codebase,
 and share overall thoughts for planned future changes to allow for comments, feedback, and planning.
 
-| Category | Sub-category | Description | Examples | Notes | 
-| -------- | ------------ | ----------- | -------- | ----- | 
+| Category | Sub-category | Description | Examples | Notes |
+| -------- | ------------ | ----------- | -------- | ----- |
 | core | | The library that is used to interact with the radio peripheral | `pnext()`, `inject()`, `set_channel()`, `sniffer_on()/off()` | |
 | | drivers | Device specific implementation of "core" functionality | `dev_*.py` | Will be moved to a sub-directory. |
-| utilities | | Convenience functions for working with ZigBee | | |
+| utilities | | Convenience functions for working with Zigbee | | |
 | | pcap | | | Plan to migrate to using scapy fully for this |
 | | device | | `devlist()`, `is_\[device\]()` | Possibly move this into core |
 | | zigbee | | `makeFCS()`, `randmac()`, `extractkey()` | |
@@ -21,7 +21,7 @@ and share overall thoughts for planned future changes to allow for comments, fee
 | tools | simple | Simple script wrappers around "core" or "utility" functionality | e.g., `zbcat`, `zbdump`, `zbwireshark`, `zbid`, `zbcrypto` | |
 | | fully-featured | Other, more complex tools | `zbwardrive`, `openear` | These will be promoted to their own repository |
 
-## Additional Goals 
+## Additional Goals
 
 * Migrate remaining tools and utilities to use Dot15d4 Scapy for packet construction
 * Move device configuration to runtime options rather than "compile" time

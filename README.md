@@ -1,23 +1,23 @@
 KillerBee
 ================
 
-KillerBee is a Framework and Tools for Testing & Auditing ZigBee and IEEE 802.15.4 Networks
+KillerBee is a Framework and Tools for Testing & Auditing Zigbee and IEEE 802.15.4 Networks
 
 > **Notice**
 > * usb0.x support is being deprecated/removed
-> * Apimote v1 support is being deprected/removed
+> * Apimote v1 support is being deprecated/removed
 >
 > If you require these features please create an issue to explain your usecase and requirements.
 
 > **KillerBee 3.0.0-beta Update**
-> 
+>
 > Hi everyone, thank you for your continued support and interest in KillerBee.
-> 
+>
 > As we are putting new effort into cleaning up the code, migrating to Python 3, adding features, functionality, and consistency, we're using this overhaul as an opportunity to revisit the goals and uses for the project and the best way to accomplish those.
-> 
-> This effort will result in a major version update as we deprecate old functions and dependencies 
-> and restructure the code to help organize features and enable funcitonality to be extended.
-> 
+>
+> This effort will result in a major version update as we deprecate old functions and dependencies
+> and restructure the code to help organize features and enable functionality to be extended.
+>
 > This is also an attempt to define the pieces that make up KillerBee, aiming to draw more distinct lines
 > around features in KillerBee and treating it as library.
 > See [ARCHITECTURE.md](ARCHITECTURE.md) for details about this and future goals.
@@ -33,7 +33,7 @@ The main toolkit was/is authored by:
 + 2010-2019, Ryan Speers <ryan@riverloopsecurity.com>
 + 2010-2011, Ricky Melgares <ricky@riverloopsecurity.com>
 
-We appreciate the many contributers to the framework, including the following who have contributed capabilities:
+We appreciate the many contributors to the framework, including the following who have contributed capabilities:
 + Anonymous Contributors
 + Spencer McIntyre (scapy extension)
 + Bryan Halfpap <Bryanhalf@gmail.com> (additional tools)
@@ -79,12 +79,11 @@ The python-dev and libgcrypt are required for the Scapy Extension Patch.
 
 Also note that this is a fairly advanced and un-friendly attack platform.  This
 is not Cain & Abel.  It is intended for developers and advanced analysts who are
-attacking ZigBee and IEEE 802.15.4 networks.  I recommend you gain some
-understanding of the ZigBee protocol (the book [ZigBee Wireless Networks and
+attacking Zigbee and IEEE 802.15.4 networks.  I recommend you gain some
+understanding of the Zigbee protocol (the book [ZigBee Wireless Networks and
 Transceivers by Shahin Farahani](http://bit.ly/2I5ppI) is reasonable, though
 still not great) and familiarity with the Python language before digging into
 this framework.
-
 
 INSTALLATION
 ================
@@ -104,7 +103,7 @@ The directory structure for the KillerBee code is described as follows:
 + killerbee - Python library source.
 + sample    - Sample packet captures, referenced below.
 + scripts   - Shell scripts used in development.
-+ tools     - ZigBee and IEEE 802.15.4 attack tools developed using this framework.
++ tools     - Zigbee and IEEE 802.15.4 attack tools developed using this framework.
 
 REQUIRED HARDWARE
 ================
@@ -120,14 +119,14 @@ You must enable these to be searched for in `killerbee/config.py` and then reins
 
 TOOLS
 ================
-KillerBee includes several tools designed to attack ZigBee and IEEE 802.15.4
+KillerBee includes several tools designed to attack Zigbee and IEEE 802.15.4
 networks, built using the KillerBee framework.  Each tool has its own usage
 instructions documented by running the tool with the "-h" argument, and
 summarized below.
 
 + zbid         -  Identifies available interfaces that can be used by KillerBee
                 and associated tools.
-+ zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time 
++ zbwireshark  -  Similar to zbdump but exposes a named pipe for real-time
                 capture and viewing in Wireshark.
 + zbdump       -  A tcpdump-like took to capture IEEE 802.15.4 frames to a libpcap
                 or Daintree SNA packet capture file.  Does not display real-time
@@ -135,7 +134,7 @@ summarized below.
 + zbreplay     -  Implements a replay attack, reading from a specified Daintree
                 DCF or libpcap packet capture file, retransmitting the frames.
                 ACK frames are not retransmitted.
-+ zbstumbler   -  Active ZigBee and IEEE 802.15.4 network discovery tool.
++ zbstumbler   -  Active Zigbee and IEEE 802.15.4 network discovery tool.
                 Zbstumbler sends beacon request frames out while channel
                 hopping, recording and displaying summarized information about
                 discovered devices.  Can also log results to a CSV file.
@@ -145,7 +144,7 @@ summarized below.
                 beacon packets with the same PAN ID cause the PAN coordinator to
                 believe that there is a PAN ID conflict, and the coordinator begins
                 the process of realigning the network on a new PAN ID.  The process
-                repeats ad nauseum.  Typically, network devices can't keep up with
+                repeats ad nauseam.  Typically, network devices can't keep up with
                 the rapid change and after several seconds the network falls apart.
                 _NO TARGETING BUILT IN: This may *destroy* all zigbee networks
                 within range on the channel you are performing the attack on. Use
@@ -156,14 +155,14 @@ summarized below.
                 a target device.  May be able to reset the device's PAN ID or Channel
 + zbfakebeacon  -  Spoofs beacon frames, either spamming them or on response to seeing
                 a beacon request come through.
-+ zbopenear    -  Assists in data capture where devices are operating on multiple 
-                channels or fast-frequency-hopping. It assigns multiple 
++ zbopenear    -  Assists in data capture where devices are operating on multiple
+                channels or fast-frequency-hopping. It assigns multiple
                 interfaces sequentially across all channels.
 + zbassocflood -  Repeatedly associate to the target PANID in an effort to cause
                 the device to crash from too many connected stations.
 + zbconvert    -  Convert a packet capture from Libpcap to Daintree SNA format,
                 or vice-versa.
-+ zbdsniff     -  Captures ZigBee traffic, looking for NWK frames and over-the-air
++ zbdsniff     -  Captures Zigbee traffic, looking for NWK frames and over-the-air
                 key provisioning.  When a key is found, zbdsniff prints the
                 key to stdout.  The sample packet capture
                 `sample/zigbee-network-key-ota.dcf` can be used to demonstrate
@@ -172,11 +171,11 @@ summarized below.
                 802.15.4 transmitter by measuring RSSI. zbfind can be passive
                 in discovery (only listen for packets) or it can be active by
                 sending Beacon Request frames and recording the responses from
-                ZigBee routers and coordinators.
+                Zigbee routers and coordinators.
                 If you get a bunch of errors after starting this tool, make
                 sure your `DISPLAY` variable is set properly.
 + zbgoodfind   -  Implements a key search function using an encrypted packet
-                capture and memory dump from a legitimate ZigBee or IEEE
+                capture and memory dump from a legitimate Zigbee or IEEE
                 802.15.4 device.  This tool accompanies Travis Goodspeed's
                 GoodFET hardware attack tool, or other binary data that could
                 contain encryption key information such as bus sniffing with
@@ -184,10 +183,10 @@ summarized below.
                 must be in binary format (obj hexfile's are not supported). To
                 convert from the hexfile format to a binary file, use the
                 objcopy tool: objcopy -I ihex -O binary mem.hex mem.bin
-+ zbwardrive   -	Discovers available interfaces and uses one to inject beacon 
-                requests and listen for respones across channels. Once a network
++ zbwardrive   -  Discovers available interfaces and uses one to inject beacon
+                requests and listen for responses across channels. Once a network
                 is found on a channel, it assigns another device to continuously
-                capture traffic on that channel to a PCAP file. Scapy must be 
+                capture traffic on that channel to a PCAP file. Scapy must be
                 installed to run this.
 + zbscapy      -  Provides an interactive Scapy shell for interacting via a
                 KillerBee interface. Scapy must be installed to run this.
@@ -197,15 +196,14 @@ Additional tools, that are for special cases or are not stable, are stored in
     the Api-Do project repository: http://code.google.com/p/zigbee-security/
     and at https://github.com/riverloopsec/beekeeperwids.
 
-
 FRAMEWORK
 ==============
 KillerBee is designed to simplify the process of sniffing packets from the air
 interface or a supported packet capture file (libpcap), and for
-injecting arbitrary packets.  Helper functions including IEEE 802.15.4, ZigBee
-NWK and ZigBee APS packet decoders are available as well.
+injecting arbitrary packets.  Helper functions including IEEE 802.15.4, Zigbee
+NWK and Zigbee APS packet decoders are available as well.
 
-The KillerBee API is documented in epydoc format, with HTML documentation in 
+The KillerBee API is documented in epydoc format, with HTML documentation in
 the `doc/` directory of this distribution.  If you have epydoc installed, you can
 also generate a convenient PDF for printing, if desired, as shown:
 
@@ -224,9 +222,8 @@ To get started using the KillerBee framework, take a look at the included tools
 Since KillerBee is a Python library, it integrates well with other Python
 software as well.  For example, the Sulley library is a fuzzing framework
 written in Python by Pedram Amini.  Using the Sulley mutation features and
-KillerBee's packet injection features, it is staightforward to build a
-mechanism for generating and transmitting malformed ZigBee data to a target.
-
+KillerBee's packet injection features, it is straightforward to build a
+mechanism for generating and transmitting malformed Zigbee data to a target.
 
 QUESTIONS/COMMENTS/CONCERNS
 ==============

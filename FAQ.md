@@ -107,5 +107,3 @@ a serial sync with some hosts.
 - In case of problems identifying the hardware try to run the following command (present in [GoodFET](https://github.com/travisgoodspeed/goodfet/blob/master/firmware/apps/radios/ccspi.c)) before any killerbee command
 
 - `~/goodfet/client$ sudo ./goodfet.monitor listapps full`
-
-
