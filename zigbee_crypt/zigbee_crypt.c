@@ -10,6 +10,7 @@
 
 // Explaination of Python Build Values http://docs.python.org/c-api/arg.html#Py_BuildValue
 
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <stdio.h>
 #include <gcrypt.h>
@@ -43,14 +44,14 @@
 static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	// This was modeled after zigbee_crypt_decrypt_ccm in reverse
 	const char			*pZkey;
-	int					sizeZkey;
+	Py_ssize_t			sizeZkey;
 	const char			*pNonce;
-	int					sizeNonce;
+	Py_ssize_t			sizeNonce;
 	int					sizeMIC;
 	const char			*pUnencryptedData;
-	int					sizeUnencryptedData;
+	Py_ssize_t			sizeUnencryptedData;
 	const char			*zigbeeData;
-	int					sizeZigbeeData;
+	Py_ssize_t			sizeZigbeeData;
 	int i, j;
 	PyObject			*res;
 
@@ -88,11 +89,15 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 		PyErr_SetString(PyExc_ValueError, "incorrect mic size (must be 0, 4, 8, or 16 bytes)");
 		return NULL;
 	}
+	if (sizeUnencryptedData > 127 || sizeZigbeeData > 127) {
+		PyErr_SetString(PyExc_ValueError, "802.15.4 data exceeds 127 bytes");
+		return NULL;
+	}
 
 	memset(pMIC, 0, ZBEE_SEC_CONST_MICSIZE);	// set both mics to 0
 	memset(pEncMIC, 0, ZBEE_SEC_CONST_MICSIZE);
 
-	pEncrypted = malloc(sizeUnencryptedData);
+	pEncrypted = malloc(sizeUnencryptedData ? sizeUnencryptedData : 1);
 	if (pEncrypted == NULL) {
 		PyErr_SetString(PyExc_MemoryError, "could not allocate memory");
 		return NULL;
@@ -237,7 +242,7 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 	gcry_cipher_close(cipher_hd);
 
 #if PY_MAJOR_VERSION >= 3
-	res = Py_BuildValue("(y#y#)", pEncrypted, sizeUnencryptedData, pEncMIC, sizeMIC);
+	res = Py_BuildValue("(y#y#)", pEncrypted, sizeUnencryptedData, pEncMIC, (Py_ssize_t)sizeMIC);
 #else
 	res = Py_BuildValue("(s#s#)", pEncrypted, sizeUnencryptedData, pEncMIC, sizeMIC);
 #endif
@@ -247,15 +252,15 @@ static PyObject *zigbee_crypt_encrypt_ccm(PyObject *self, PyObject *args) {
 
 static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 	const char			*pZkey;
-	int					sizeZkey;
+	Py_ssize_t			sizeZkey;
 	const char			*pNonce;
-	int					sizeNonce;
+	Py_ssize_t			sizeNonce;
 	const char			*pOldMIC;
-	int					sizeMIC;
+	Py_ssize_t			sizeMIC;
 	const char			*pEncryptedData;
-	int					sizeEncryptedData;
+	Py_ssize_t			sizeEncryptedData;
 	const char			*zigbeeData;
-	int					sizeZigbeeData;
+	Py_ssize_t			sizeZigbeeData;
 	PyObject			*res;
 
 	char				pMIC[ZBEE_SEC_CONST_MICSIZE];
@@ -285,8 +290,12 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 		return NULL;
 	}
 
-	if (sizeMIC > 16) {
-		PyErr_SetString(PyExc_ValueError, "incorrect mic size (must be between 0 and 16)");
+	if (sizeMIC != 0 && sizeMIC != 4 && sizeMIC != 8 && sizeMIC != 16) {
+		PyErr_SetString(PyExc_ValueError, "incorrect mic size (must be 0, 4, 8, or 16 bytes)");
+		return NULL;
+	}
+	if (sizeEncryptedData > 127 || sizeZigbeeData > 127) {
+		PyErr_SetString(PyExc_ValueError, "802.15.4 data exceeds 127 bytes");
 		return NULL;
 	}
 
@@ -295,7 +304,7 @@ static PyObject *zigbee_crypt_decrypt_ccm(PyObject *self, PyObject *args) {
 
 	memset(pUnencMIC, 0, ZBEE_SEC_CONST_MICSIZE);
 
-	pUnencrypted = malloc(sizeEncryptedData);
+	pUnencrypted = malloc(sizeEncryptedData ? sizeEncryptedData : 1);
 	if (pUnencrypted == NULL) {
 		PyErr_SetString(PyExc_MemoryError, "could not allocate memory");
 		return NULL;
@@ -594,8 +603,8 @@ zbee_sec_hash(char *input, int input_len, char *output)
  */
 static PyObject *zigbee_sec_key_hash(PyObject *self, PyObject *args) {
 	const char			*key;
-	int					sizeKey;
-	const char           input;
+	Py_ssize_t			sizeKey;
+	char                input;
 
     char          hash_in[2*ZBEE_SEC_CONST_BLOCKSIZE];
     char          hash_out[ZBEE_SEC_CONST_BLOCKSIZE+1];
@@ -603,7 +612,11 @@ static PyObject *zigbee_sec_key_hash(PyObject *self, PyObject *args) {
     static const char ipad = 0x36;
     static const char opad = 0x5c;
 
-	if (!PyArg_ParseTuple(args, "s#c", &key, &sizeKey, &input)) {
+	if (!PyArg_ParseTuple(args, "y#c", &key, &sizeKey, &input)) {
+		return NULL;
+	}
+	if (sizeKey != ZBEE_SEC_CONST_KEYSIZE) {
+		PyErr_SetString(PyExc_ValueError, "incorrect key size (must be 16)");
 		return NULL;
 	}
 
@@ -620,7 +633,7 @@ static PyObject *zigbee_sec_key_hash(PyObject *self, PyObject *args) {
     /* Hash the contents of hash_in to get the final result. */
     zbee_sec_hash(hash_in, 2*ZBEE_SEC_CONST_BLOCKSIZE, hash_out);
 
-	return Py_BuildValue("y", hash_out);
+	return Py_BuildValue("y#", hash_out, (Py_ssize_t)ZBEE_SEC_CONST_BLOCKSIZE);
 } /* zbee_sec_key_hash */
 
 

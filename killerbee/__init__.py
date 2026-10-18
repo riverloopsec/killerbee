@@ -116,7 +116,7 @@ class KillerBee:
                     if result is not None:
                         self.dev = result
                 elif ":" in device:
-                    result = search_usb(None)
+                    result = search_usb(device)
                     if result is not None:
                         self.dev = result
                     else:

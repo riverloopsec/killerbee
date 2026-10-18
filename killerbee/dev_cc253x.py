@@ -114,11 +114,14 @@ class CC253x:
 
         # Enable power in 802.15.4 radio
         self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_POWER_ON, wIndex = 4)
+        deadline = time.monotonic() + 2.0
         while True:
             # check if powered up
             power_status = self.dev.ctrl_transfer(CC253x.USB_DIR_IN, CC253x.USB_POWER_STATUS, data_or_wLength = 1)
             if power_status[0] == 4:
                 break
+            if time.monotonic() >= deadline:
+                raise TimeoutError('CC253x radio did not power up within 2 seconds')
             time.sleep(0.1)
 
         # Set the channel in the hardware now the radio is powered up
@@ -159,7 +162,7 @@ class CC253x:
         """
         self.capabilities.require(KBCapabilities.SETCHAN)
 
-        if channel >= 11 or channel <= 26:
+        if 11 <= channel <= 26:
             self._channel = channel
             if self.__stream_open == True:
                 self.dev.ctrl_transfer(CC253x.USB_DIR_OUT, CC253x.USB_XFER_STOP)
@@ -208,7 +211,7 @@ class CC253x:
             try:
                 pdata = self.dev.read(self._data_ep, self._maxPacketSize, timeout=timeout)
             except usb.core.USBError as e:
-                if e.errno is not 110 and e.errno is not 60: #Operation timed out
+                if e.errno not in (110, 60): # Operation timed out
                     print("Error args: {}".format(e.args))
                     raise e
                     #TODO error handling enhancements for USB 1.0
