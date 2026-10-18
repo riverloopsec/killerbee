@@ -80,7 +80,14 @@ class KillerBee:
                 self.driver = CC253x(device, self.__bus, CC253x.VARIANT_CC2531)
             elif hardware == "bumblebee":
                 from .dev_bumblebee import Bumblebee
-                self.driver = Bumblebee(device, self.__bus)
+                # resolve "BUS:DEV" to a usb.core.Device
+                if isinstance(device, str):
+                    self.dev = search_usb(device)
+                    if self.dev is None:
+                        raise KBInterfaceError("Did not find a USB device matching %s." % device)
+                else:
+                    self.dev = device
+                self.driver = Bumblebee(self.dev, self.__bus)
             elif hardware == "sl_nodetest":
                 from .dev_sl_nodetest import SL_NODETEST
                 self.driver = SL_NODETEST(device)
