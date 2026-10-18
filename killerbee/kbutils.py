@@ -283,7 +283,13 @@ def devlist(vendor: Optional[Any]=None, product: Optional[Any]=None, gps: Option
             #TODO maybe move support for freakduino into goodfetccspi subtype==?
             devlist.append([serialdev, "Dartmouth Freakduino", ""])
         else:
-            gfccspi,subtype = isgoodfetccspi(serialdev)
+            try:
+                gfccspi,subtype = isgoodfetccspi(serialdev)
+            except Exception:
+                # A non-GoodFET serial port (CP210x, J-Link, VCOM, ...) can raise while
+                # probing; skip it instead of aborting the whole enumeration, so
+                # zbid/zbdump still find the other devices, USB sniffers included.
+                gfccspi,subtype = (False, None)
             if gfccspi and subtype == 0:
                 devlist.append([serialdev, "GoodFET TelosB/Tmote", ""])
             elif gfccspi and subtype == 1:
